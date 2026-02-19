@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Check, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Camera, Check, Loader2, ChevronDown, ChevronUp, ShieldCheck, Crown } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { PremiumBadge } from "@/components/PremiumGate";
 
 const alimentariRestrictions = [
   "Celiachia",
