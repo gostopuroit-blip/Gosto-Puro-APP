@@ -16,10 +16,12 @@ export default function RecipeCard({ recipe, variant = "default" }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
-            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-            <span className="text-[11px] font-semibold">{recipe.media_rating || "4.5"}</span>
-          </div>
+          {recipe.media_rating > 0 && recipe.rating_count > 0 && (
+            <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+              <span className="text-[11px] font-semibold">{recipe.media_rating.toFixed(1)}</span>
+            </div>
+          )}
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <h3 className="text-white font-semibold text-sm leading-tight">{recipe.title}</h3>
             <div className="flex items-center gap-2 mt-1.5">
