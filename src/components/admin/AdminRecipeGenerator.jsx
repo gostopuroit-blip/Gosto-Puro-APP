@@ -10,6 +10,7 @@ export default function AdminRecipeGenerator() {
   const [occasions, setOccasions] = useState([]);
   const [loadingOcc, setLoadingOcc] = useState(true);
   const [selectedOcc, setSelectedOcc] = useState(null);
+  const [existingTitles, setExistingTitles] = useState([]);
 
   // params
   const [difficulty, setDifficulty] = useState("Facile");
@@ -27,6 +28,9 @@ export default function AdminRecipeGenerator() {
   useEffect(() => {
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 50)
       .then(setOccasions).finally(() => setLoadingOcc(false));
+    // Load all existing recipe titles to avoid duplicates
+    base44.entities.Recipe.list("-created_date", 500)
+      .then(recipes => setExistingTitles(recipes.map(r => r.title)));
   }, []);
 
   const grouped = {
