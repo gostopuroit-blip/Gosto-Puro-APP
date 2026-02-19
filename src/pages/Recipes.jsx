@@ -84,6 +84,18 @@ export default function Recipes() {
     setActiveTags((prev) => ({ ...prev, [type]: null }));
   };
 
+  const toggleFilter = (filterKey) => {
+    setActiveFilters((prev) => {
+      const newFilters = new Set(prev);
+      if (newFilters.has(filterKey)) {
+        newFilters.delete(filterKey);
+      } else {
+        newFilters.add(filterKey);
+      }
+      return newFilters;
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
