@@ -54,6 +54,7 @@ import Profile from './pages/Profile';
 import RecipeDetail from './pages/RecipeDetail';
 import Recipes from './pages/Recipes';
 import ShoppingList from './pages/ShoppingList';
+import Admin from './pages/Admin';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "RecipeDetail": RecipeDetail,
     "Recipes": Recipes,
     "ShoppingList": ShoppingList,
+    "Admin": Admin,
 }
 
 export const pagesConfig = {
