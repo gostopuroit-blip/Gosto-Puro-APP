@@ -139,7 +139,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     };
     await base44.entities.Recipe.create(data);
     setSaving(false);
-    toast.success("Ricetta salvata come bozza!");
+    toast.success("Ricetta pubblicata!");
     setRecipe(null);
     setImageUrl("");
     setExtraNote("");
