@@ -34,7 +34,7 @@ export default function Planner() {
 
   const getRecipeById = (id) => recipes.find((r) => r.id === id);
 
-  const createPlan = async ({ days, focus, maxTime }) => {
+  const createPlan = async ({ days, focus, maxTime, servings }) => {
     setCreating(true);
     setShowModal(false);
 
