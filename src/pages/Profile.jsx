@@ -2,51 +2,11 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Check, Loader2, ChevronDown, ChevronUp, ShieldCheck, Crown, Moon, Sun } from "lucide-react";
+import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
-
-const alimentariRestrictions = [
-  "Celiachia",
-  "Senza Glutine",
-  "Senza Lattosio",
-  "Allergia alle Proteine del Latte",
-  "Allergia all'Uovo",
-  "Allergia alle Arachidi",
-  "Allergia alla Frutta a Guscio",
-  "Allergia alla Soia",
-  "Vegetariano",
-  "Vegano",
-  "Halal",
-  "Kosher",
-];
-
-const healthConditions = [
-  "Diabete Tipo 1",
-  "Diabete Tipo 2",
-  "Pre-diabete",
-  "Ipoglicemia",
-  "Sindrome dell'Intestino Irritabile",
-  "Morbo di Crohn",
-  "Colite Ulcerosa",
-  "Steatosi Epatica",
-  "Epatite",
-  "Cirrosi",
-  "Colesterolo Alto",
-  "Trigliceridi Alti",
-  "Ipertensione",
-  "Gastrite",
-  "Reflusso Gastroesofageo",
-  "Ulcera Gastrica",
-  "Dispepsia",
-  "Disturbo da Alimentazione Incontrollata",
-  "Anoressia / Bulimia",
-  "Neonati (sotto 1 anno)",
-  "Anziani",
-  "Gravidanza",
-];
 
 function TagToggle({ label, selected, onToggle }) {
   return (
