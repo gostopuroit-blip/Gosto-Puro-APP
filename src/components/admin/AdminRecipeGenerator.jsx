@@ -132,7 +132,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     const data = {
       ...recipe,
       image_url: imageUrl || "",
-      status: "bozza",
+      status: "pubblicata",
       gen_prompt: buildRecipePrompt(selectedOcc),
       numero_salvate: 0,
       numero_preparate: 0,
