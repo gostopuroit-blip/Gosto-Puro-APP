@@ -64,7 +64,7 @@ export default function Home() {
 
   const loadData = async () => {
     const [recipes, user] = await Promise.all([
-      base44.entities.Recipe.list("-numero_preparate", 10),
+      base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
       base44.auth.me().catch(() => null),
     ]);
     setTopRecipes(recipes);
