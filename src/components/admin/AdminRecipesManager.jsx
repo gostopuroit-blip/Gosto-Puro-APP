@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Search, Loader2, X, Check, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, X, Check, Upload, Sparkles, Image } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
