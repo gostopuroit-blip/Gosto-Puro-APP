@@ -25,7 +25,7 @@ const dailyOccasions = [
     img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=120&h=120&fit=crop&crop=center",
   },
   {
-    label: "Dolce sano",
+    label: "Dessert",
     img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=120&h=120&fit=crop&crop=center",
   },
 ];
