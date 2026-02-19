@@ -175,7 +175,10 @@ export default function RecipeDetail() {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h1 className="text-xl font-bold text-gray-900 tracking-tight">{recipe.title}</h1>
-              <p className="text-xs text-gray-400 mt-1">{recipe.category} • {recipe.difficulty || "Facile"}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                {recipe.category} • {recipe.difficulty || "Facile"}
+                {recipe.paese && ` • ${recipe.paese}`}
+              </p>
             </div>
             <div className="flex items-center gap-1 bg-amber-50 rounded-full px-2.5 py-1">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
