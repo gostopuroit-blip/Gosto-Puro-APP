@@ -53,6 +53,7 @@ import RecipeDetail from './pages/RecipeDetail';
 import Folders from './pages/Folders';
 import Planner from './pages/Planner';
 import ShoppingList from './pages/ShoppingList';
+import Profile from './pages/Profile';
 import __Layout from './Layout.jsx';
 
 
@@ -63,6 +64,7 @@ export const PAGES = {
     "Folders": Folders,
     "Planner": Planner,
     "ShoppingList": ShoppingList,
+    "Profile": Profile,
 }
 
 export const pagesConfig = {
