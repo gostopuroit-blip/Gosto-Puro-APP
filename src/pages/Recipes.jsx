@@ -140,17 +140,18 @@ export default function Recipes() {
       </div>
 
       {/* Active Tags */}
-      {(activeTags.occasion || activeTags.lifestyle) && (
-        <div className="px-5 mb-3 flex gap-2">
-          {activeTags.occasion && (
+      {(activeTags.occasions.length > 0 || activeTags.lifestyle) && (
+        <div className="px-5 mb-3 flex gap-2 flex-wrap">
+          {activeTags.occasions.map((occ) => (
             <button
-              onClick={() => clearTag("occasion")}
+              key={occ}
+              onClick={() => toggleOccasion(occ)}
               className="flex items-center gap-1.5 bg-[#2D6A4F]/10 text-[#2D6A4F] px-3 py-1.5 rounded-full text-xs font-semibold"
             >
-              {activeTags.occasion}
+              {occ}
               <X className="w-3 h-3" />
             </button>
-          )}
+          ))}
           {activeTags.lifestyle && (
             <button
               onClick={() => clearTag("lifestyle")}
