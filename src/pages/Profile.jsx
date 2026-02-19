@@ -8,21 +8,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 
-function TagToggle({ label, selected, onToggle }) {
-  return (
-    <button
-      onClick={() => onToggle(label)}
-      className={`px-3.5 py-2 rounded-full text-xs font-semibold border-2 transition-all active:scale-95 ${
-        selected
-          ? "bg-[#2D6A4F] text-white border-[#2D6A4F] shadow-md shadow-[#2D6A4F]/20"
-          : "bg-white text-gray-500 border-gray-100 hover:border-gray-200"
-      }`}
-    >
-      {selected && <span className="mr-1">✓</span>}
-      {label}
-    </button>
-  );
-}
+
 
 export default function Profile() {
   const [user, setUser] = useState(null);
