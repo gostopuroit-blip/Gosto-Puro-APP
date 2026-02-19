@@ -38,6 +38,8 @@ export default function AdminRecipeGenerator() {
   const buildRecipePrompt = (occ) => {
     const guidelines = occ.linee_guida?.join("\n- ") || "";
     const isPranzo = occ.categoria_principale === "pranzo" || occ.label?.toLowerCase().includes("pranzo");
+    const isCena = occ.categoria_principale === "cena" || occ.label?.toLowerCase().includes("cena");
+
     const pranzoExtra = isPranzo ? `
 REGOLE SPECIFICHE PER PRANZO ITALIANO:
 - La ricetta deve essere riconoscibile e tradizionale (es: pasta al pomodoro, lasagne, risotto, pollo al forno, parmigiana, brasato)
@@ -48,6 +50,19 @@ REGOLE SPECIFICHE PER PRANZO ITALIANO:
 - Ingredienti realistici e stagionali, facilmente reperibili in un supermercato italiano
 - Porzione adeguata al pranzo italiano (non microscopica)
 - Presentazione semplice e autentica, piatto pieno ma ordinato
+` : "";
+
+    const cenaExtra = isCena ? `
+REGOLE SPECIFICHE PER CENA ITALIANA:
+- La cena deve essere più leggera rispetto al pranzo: NO lasagne pesanti, NO fritti, NO piatti eccessivamente grassi
+- Preferire: verdure, proteine leggere (pesce, uova, pollo), zuppe, minestre, frittate
+- Preparazione semplice e veloce: idealmente 20–30 minuti, al massimo ${maxTime} minuti
+- Porzione moderata: l'italiano non vuole appesantirsi la sera
+- Piatto digeribile: cultura italiana di "non appesantirsi la sera" è fondamentale
+- Ingredienti stagionali e facilmente reperibili in un supermercato italiano
+- Presentazione elegante ma naturale, non esagerata
+- Atmosfera: rilassante, serale, intima
+- Esempi validi: frittata con verdure, pesce al forno, insalata con tonno, minestrone, zuppa leggera, pollo al limone
 ` : "";
 
     return `Sei un cuoco italiano esperto.
