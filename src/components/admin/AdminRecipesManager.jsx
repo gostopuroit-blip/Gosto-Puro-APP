@@ -72,6 +72,52 @@ export default function AdminRecipesManager() {
     setUploading(false);
   };
 
+  const handleGenerateRecipe = async () => {
+    if (!form.gen_prompt.trim()) return toast.error("Inserisci un prompt prima di generare");
+    setGenerating(true);
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Sei un cuoco italiano esperto. Crea una ricetta italiana autentica basata su questo contesto:\n\n${form.gen_prompt}\n\nRispondi SOLO in formato JSON con questa struttura esatta:\n{\n  "title": "...",\n  "description": "Una frase breve e invitante (max 20 parole)",\n  "prep_time": 25,\n  "servings": 4,\n  "calories": 320,\n  "difficulty": "Facile",\n  "ingredients": [\n    { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }\n  ],\n  "instructions": [\n    "Primo passo...",\n    "Secondo passo..."\n  ]\n}\n\nCategorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.\nDifficoltà valide: Facile, Media, Difficile.\nUsa ingredienti tipici italiani. Le istruzioni siano chiare e dettagliate.`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          prep_time: { type: "number" },
+          servings: { type: "number" },
+          calories: { type: "number" },
+          difficulty: { type: "string" },
+          ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
+          instructions: { type: "array", items: { type: "string" } },
+        },
+      },
+    });
+    setForm((f) => ({
+      ...f,
+      title: result.title || f.title,
+      description: result.description || f.description,
+      prep_time: result.prep_time || f.prep_time,
+      servings: result.servings || f.servings,
+      calories: result.calories || f.calories,
+      difficulty: result.difficulty || f.difficulty,
+      ingredients: result.ingredients?.length ? result.ingredients : f.ingredients,
+      instructions: result.instructions?.length ? result.instructions : f.instructions,
+    }));
+    setGenerating(false);
+    toast.success("Ricetta generata! Controlla e modifica se necessario.");
+  };
+
+  const handleGenerateImage = async () => {
+    if (!form.gen_prompt.trim() && !form.title.trim()) return toast.error("Inserisci un prompt o un titolo");
+    setGeneratingImage(true);
+    const imagePrompt = form.gen_prompt.trim()
+      ? `Professional food photography: ${form.gen_prompt}. Italian cuisine, ${form.category || "food"}, restaurant quality, natural light, high resolution, beautiful plating.`
+      : `Professional food photography of "${form.title}", Italian ${form.category} recipe, restaurant quality, natural soft light, beautiful plating, high resolution.`;
+    const result = await base44.integrations.Core.GenerateImage({ prompt: imagePrompt });
+    setForm((f) => ({ ...f, image_url: result.url }));
+    setGeneratingImage(false);
+    toast.success("Immagine generata!");
+  };
+
   const handleSave = async () => {
     if (!form.title.trim()) return toast.error("Inserisci un titolo");
     setSaving(true);
