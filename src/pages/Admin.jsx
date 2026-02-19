@@ -59,7 +59,7 @@ function AdminContent() {
 
       {/* Content */}
       <div className="px-5 mt-4">
-        {activeTab === "dashboard" && <AdminDashboard />}
+        {activeTab === "dashboard" && <AdminDashboard onNavigate={setActiveTab} />}
         {activeTab === "utenti" && <AdminUsers />}
         {activeTab === "ricette" && <AdminRecipesManager />}
         {activeTab === "permessi" && <AdminPermissions />}
