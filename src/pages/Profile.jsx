@@ -236,53 +236,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Dietary Restrictions */}
-      <div className="px-5 mt-6">
-        <div className="mb-3">
-          <h2 className="text-base font-bold text-gray-900">Restrizioni Alimentari</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Seleziona le tue intolleranze o preferenze</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {alimentariRestrictions.map((label) => (
-            <TagToggle
-              key={label}
-              label={label}
-              selected={selectedAlimentari.includes(label)}
-              onToggle={toggleAlimentari}
-            />
-          ))}
-        </div>
-      </div>
 
-      {/* Health Conditions */}
-      <div className="px-5 mt-6">
-        <div className="mb-3">
-          <h2 className="text-base font-bold text-gray-900">Condizioni di Salute</h2>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Seleziona le tue condizioni per ricevere ricette adatte e sicure
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {visibleHealth.map((label) => (
-            <TagToggle
-              key={label}
-              label={label}
-              selected={selectedHealth.includes(label)}
-              onToggle={toggleHealth}
-            />
-          ))}
-        </div>
-        <button
-          onClick={() => setShowAllHealth(!showAllHealth)}
-          className="mt-3 flex items-center gap-1.5 text-[#2D6A4F] text-xs font-semibold"
-        >
-          {showAllHealth ? (
-            <>Mostra meno <ChevronUp className="w-3.5 h-3.5" /></>
-          ) : (
-            <>Vedi tutte ({healthConditions.length}) <ChevronDown className="w-3.5 h-3.5" /></>
-          )}
-        </button>
-      </div>
 
       {/* Save Button */}
       <div className="px-5 mt-8">
