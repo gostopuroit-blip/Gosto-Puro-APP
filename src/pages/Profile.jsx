@@ -252,6 +252,58 @@ export default function Profile() {
           Salva profilo
         </Button>
       </div>
+
+      {/* Abbonamento */}
+      <div className="px-5 mt-4">
+        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 border border-amber-100 flex items-center gap-3">
+          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Crown className="w-5 h-5 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-gray-800">
+              {user?.plan === "premium" || user?.role === "admin" ? "Piano Premium attivo ✨" : "Piano Free"}
+            </p>
+            <p className="text-[10px] text-gray-500 mt-0.5">
+              {user?.plan === "premium" || user?.role === "admin"
+                ? "Hai accesso completo a tutte le funzionalità"
+                : "Sblocca Planner, Occasioni Speciali e molto altro"}
+            </p>
+          </div>
+          {(!user?.plan || user?.plan === "free") && user?.role !== "admin" && (
+            <button className="bg-amber-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0">
+              Upgrade
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Admin Panel Button */}
+      {user?.role === "admin" && (
+        <div className="px-5 mt-4">
+          <Link to={createPageUrl("Admin")}>
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-4 flex items-center gap-3 shadow-lg shadow-purple-200 active:scale-[0.98] transition-transform">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-white">Pannello Admin</p>
+                <p className="text-[10px] text-white/70">Gestisci utenti, ricette e impostazioni</p>
+              </div>
+              <span className="text-white/60 text-lg">→</span>
+            </div>
+          </Link>
+        </div>
+      )}
+
+      {/* Logout */}
+      <div className="px-5 mt-4">
+        <button
+          onClick={() => base44.auth.logout()}
+          className="w-full py-3 rounded-2xl border border-gray-100 text-sm font-semibold text-gray-400 hover:text-red-500 hover:border-red-100 transition-colors"
+        >
+          Esci dall'account
+        </button>
+      </div>
     </div>
   );
 }
