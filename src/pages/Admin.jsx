@@ -64,6 +64,7 @@ function AdminContent() {
         {activeTab === "dashboard" && <AdminDashboard onNavigate={setActiveTab} />}
         {activeTab === "utenti" && <AdminUsers />}
         {activeTab === "ricette" && <AdminRecipesManager />}
+        {activeTab === "genera" && <AdminRecipeGenerator />}
         {activeTab === "permessi" && <AdminPermissions />}
         {activeTab === "webhooks" && <AdminWebhooks />}
         {activeTab === "impostazioni" && <AdminSettings />}
