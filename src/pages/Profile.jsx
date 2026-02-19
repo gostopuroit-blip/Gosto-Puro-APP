@@ -75,6 +75,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showAllHealth, setShowAllHealth] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains("dark"));
 
   useEffect(() => {
     loadUser();
