@@ -37,6 +37,19 @@ export default function AdminRecipeGenerator() {
 
   const buildRecipePrompt = (occ) => {
     const guidelines = occ.linee_guida?.join("\n- ") || "";
+    const isPranzo = occ.categoria_principale === "pranzo" || occ.label?.toLowerCase().includes("pranzo");
+    const pranzoExtra = isPranzo ? `
+REGOLE SPECIFICHE PER PRANZO ITALIANO:
+- La ricetta deve essere riconoscibile e tradizionale (es: pasta al pomodoro, lasagne, risotto, pollo al forno, parmigiana, brasato)
+- NO combinazioni fusion, NO ingredienti esotici, NO reinterpretazioni moderne inutili
+- Rispettare la stagionalità: inverno = piatti caldi, forno, zuppe; estate = pasta fredda, insalate, verdure grigliate
+- Struttura equilibrata: Primo (carboidrato) + Secondo (proteina) + Contorno (verdura)
+- L'italiano vuole sentire "Che buono" non "Che creativo"
+- Ingredienti realistici e stagionali, facilmente reperibili in un supermercato italiano
+- Porzione adeguata al pranzo italiano (non microscopica)
+- Presentazione semplice e autentica, piatto pieno ma ordinato
+` : "";
+
     return `Sei un cuoco italiano esperto.
 
 Crea una ricetta autentica italiana per questa occasione.
@@ -51,7 +64,7 @@ Porzioni: ${servings}
 
 Linee guida:
 - ${guidelines}
-${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${pranzoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 
 Usa ingredienti tipici italiani facilmente reperibili.
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
