@@ -41,6 +41,8 @@ export default function AdminRecipesManager() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [generating, setGenerating] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
 
   useEffect(() => { load(); }, []);
 
