@@ -66,7 +66,10 @@ export default function RecipeDetail() {
       base44.entities.Recipe.filter({ id: recipeId }),
       base44.entities.UserRecipe.filter({ recipe_id: recipeId }),
     ]);
-    if (recipes.length > 0) setRecipe(recipes[0]);
+    if (recipes.length > 0) {
+      setRecipe(recipes[0]);
+      setServings(recipes[0].servings || 4);
+    }
     if (userRecipes.length > 0) setUserRecipe(userRecipes[0]);
     setLoading(false);
   };
