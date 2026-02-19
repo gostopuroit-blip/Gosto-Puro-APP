@@ -47,9 +47,8 @@ export default function Home() {
       base44.auth.me().catch(() => null),
     ]);
     setTopRecipes(recipes);
-    if (user?.full_name) {
-      setUserName(user.full_name.split(" ")[0]);
-    }
+    if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
+    if (user?.avatar_url) setUserAvatar(user.avatar_url);
     setLoading(false);
   };
 
