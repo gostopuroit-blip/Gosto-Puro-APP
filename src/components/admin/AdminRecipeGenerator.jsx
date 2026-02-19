@@ -79,7 +79,7 @@ Porzioni: ${servings}
 
 Linee guida:
 - ${guidelines}
-${pranzoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${pranzoExtra}${cenaExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 
 Usa ingredienti tipici italiani facilmente reperibili.
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
