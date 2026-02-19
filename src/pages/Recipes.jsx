@@ -63,27 +63,22 @@ export default function Recipes() {
       );
     }
 
-    // Sort
-    switch (activeFilter) {
-      case "salvate":
-        result.sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0));
-        break;
-      case "preparate":
-        result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
-        break;
-      case "veloci":
-        result = result.filter((r) => r.prep_time <= 15);
-        result.sort((a, b) => a.prep_time - b.prep_time);
-        break;
-      case "valutate":
-        result.sort((a, b) => (b.media_rating || 0) - (a.media_rating || 0));
-        break;
-      default:
-        break;
+    // Apply all active filters
+    if (activeFilters.has("salvate")) {
+      result.sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0));
+    }
+    if (activeFilters.has("preparate")) {
+      result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
+    }
+    if (activeFilters.has("veloci")) {
+      result = result.filter((r) => r.prep_time <= 15);
+    }
+    if (activeFilters.has("valutate")) {
+      result.sort((a, b) => (b.media_rating || 0) - (a.media_rating || 0));
     }
 
     return result;
-  }, [recipes, search, activeFilter, activeTags]);
+  }, [recipes, search, activeFilters, activeTags]);
 
   const clearTag = (type) => {
     setActiveTags((prev) => ({ ...prev, [type]: null }));
