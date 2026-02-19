@@ -112,8 +112,34 @@ export default function PlannerModal({ open, onClose, onCreate }) {
             </div>
           </div>
 
+          {/* Servings */}
+          <div className="mb-6">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2.5 block">
+              Per quante persone?
+            </label>
+            <div className="flex items-center gap-4 justify-center bg-white border border-gray-100 rounded-xl py-3">
+              <button
+                onClick={() => setServings((s) => Math.max(1, s - 1))}
+                className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+              >
+                <Minus className="w-4 h-4 text-gray-600" />
+              </button>
+              <div className="text-center">
+                <span className="text-2xl font-bold text-gray-900">{servings}</span>
+                <p className="text-[10px] text-gray-400">{servings === 1 ? "persona" : "persone"}</p>
+              </div>
+              <button
+                onClick={() => setServings((s) => Math.min(12, s + 1))}
+                className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+              >
+                <Plus className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+            <p className="text-[10px] text-gray-400 text-center mt-1.5">Le quantità di ingredienti si adatteranno automaticamente</p>
+          </div>
+
           <Button
-            onClick={() => onCreate({ days, focus, maxTime })}
+            onClick={() => onCreate({ days, focus, maxTime, servings })}
             className="w-full py-6 rounded-2xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold text-sm shadow-lg shadow-[#2D6A4F]/20"
           >
             ✨ Crea il mio piano
