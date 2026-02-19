@@ -15,6 +15,7 @@ const tabs = [
   { key: "dashboard", label: "Dashboard", icon: "📊" },
   { key: "utenti", label: "Utenti", icon: "👥" },
   { key: "ricette", label: "Ricette", icon: "🍽️" },
+  { key: "genera", label: "Genera AI", icon: "✨" },
   { key: "permessi", label: "Permessi", icon: "🔐" },
   { key: "webhooks", label: "Webhooks", icon: "📡" },
   { key: "impostazioni", label: "Impostazioni", icon: "⚙️" },
