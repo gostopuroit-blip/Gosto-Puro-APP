@@ -259,6 +259,9 @@ Difficoltà valide: Facile, Media, Difficile.`;
 
   const handleSave = async () => {
     if (!recipe) return;
+    if (isInternational && !selectedCountry) {
+      return toast.error("Seleziona il paese per Cucina Internazionale");
+    }
     setSaving(true);
     const data = {
       ...recipe,
@@ -267,6 +270,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
       gen_prompt: buildRecipePrompt(selectedOcc),
       numero_salvate: 0,
       numero_preparate: 0,
+      ...(isInternational && { paese: selectedCountry }),
     };
     await base44.entities.Recipe.create(data);
     setSaving(false);
@@ -274,6 +278,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     setRecipe(null);
     setImageUrl("");
     setExtraNote("");
+    setSelectedCountry(null);
   };
 
   if (loadingOcc) return <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 text-[#2D6A4F] animate-spin" /></div>;
