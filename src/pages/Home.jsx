@@ -35,7 +35,6 @@ export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
-  const [userAvatar, setUserAvatar] = useState("");
 
   useEffect(() => {
     loadData();
@@ -47,8 +46,9 @@ export default function Home() {
       base44.auth.me().catch(() => null),
     ]);
     setTopRecipes(recipes);
-    if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
-    if (user?.avatar_url) setUserAvatar(user.avatar_url);
+    if (user?.full_name) {
+      setUserName(user.full_name.split(" ")[0]);
+    }
     setLoading(false);
   };
 
@@ -71,32 +71,12 @@ export default function Home() {
     <div className="pb-4">
       {/* Header */}
       <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[13px] text-[#2D6A4F] font-semibold tracking-wide uppercase">
-              {getGreeting()}{userName ? `, ${userName}` : ""}
-            </p>
-            <h1 className="text-[22px] font-bold text-gray-900 mt-0.5 tracking-tight leading-snug">
-              Cosa prepariamo oggi?
-            </h1>
-            <p className="text-[12px] text-gray-400 mt-1.5 leading-relaxed">
-              Ricette organizzate per decidere<br />senza perdere tempo
-            </p>
-          </div>
-          {userAvatar ? (
-            <img
-              src={userAvatar}
-              alt={userName}
-              className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm flex-shrink-0"
-            />
-          ) : (
-            <div className="w-11 h-11 rounded-full bg-[#2D6A4F]/10 flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
-              <span className="text-[#2D6A4F] font-bold text-base">
-                {userName ? userName[0].toUpperCase() : "G"}
-              </span>
-            </div>
-          )}
-        </div>
+        <p className="text-sm text-[#2D6A4F] font-medium tracking-wide">
+          {getGreeting()}{userName ? `, ${userName}` : ""} 👋
+        </p>
+        <h1 className="text-2xl font-bold text-gray-900 mt-1 tracking-tight">
+          Cosa prepariamo oggi?
+        </h1>
       </div>
 
       {/* Daily Occasions */}
