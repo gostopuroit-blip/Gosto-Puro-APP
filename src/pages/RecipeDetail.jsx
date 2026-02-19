@@ -52,6 +52,7 @@ export default function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [servings, setServings] = useState(null);
 
   const params = new URLSearchParams(window.location.search);
   const recipeId = params.get("id");
