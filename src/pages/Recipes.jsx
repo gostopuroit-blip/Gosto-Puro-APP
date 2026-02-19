@@ -92,8 +92,21 @@ export default function Recipes() {
     return result;
   }, [recipes, search, activeFilter, activeTags]);
 
+  const toggleOccasion = (label) => {
+    setActiveTags((prev) => {
+      const occasions = prev.occasions.includes(label)
+        ? prev.occasions.filter((o) => o !== label)
+        : [...prev.occasions, label];
+      return { ...prev, occasions };
+    });
+  };
+
   const clearTag = (type) => {
-    setActiveTags((prev) => ({ ...prev, [type]: null }));
+    if (type === "occasion") {
+      setActiveTags((prev) => ({ ...prev, occasions: [] }));
+    } else {
+      setActiveTags((prev) => ({ ...prev, [type]: null }));
+    }
   };
 
   if (loading) {
