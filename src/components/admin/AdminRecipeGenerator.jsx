@@ -112,11 +112,12 @@ REGOLE PER CUCINA INTERNAZIONALE - PAESE: ${country}:
       ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
       : "";
 
-    return `Sei un cuoco italiano esperto.
+    return `${isCucinaInternazionale && country ? `Sei un esperto cuoco di cucina ${country}.` : `Sei un cuoco italiano esperto.`}
 
-Crea una ricetta autentica italiana per questa occasione.
+Crea una ricetta ${isCucinaInternazionale ? "autentica" : "autentica italiana"} per questa occasione.
 ${titlesBlock}
 Occasione: ${occ.label}
+${country ? `Paese: ${country}` : ""}
 Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
 Stagione: ${occ.stagione || "all"}
@@ -126,10 +127,10 @@ Porzioni: ${servings}
 
 Linee guida:
 - ${guidelines}
-${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${internationaleExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
-Usa ingredienti tipici italiani facilmente reperibili.
+${isCucinaInternazionale ? `Usa ingredienti del ${country} facilmente reperibili in Italia.` : `Usa ingredienti tipici italiani facilmente reperibili.`}
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
 IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
 
