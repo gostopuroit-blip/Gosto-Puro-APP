@@ -110,13 +110,25 @@ Difficoltà valide: Facile, Media, Difficile.`;
 
   const buildImagePrompt = (occ, title) => {
     const isPranzo = occ.categoria_principale === "pranzo" || occ.label?.toLowerCase().includes("pranzo");
+    const isCena = occ.categoria_principale === "cena" || occ.label?.toLowerCase().includes("cena");
+    const isSpecialeCena = isCena && (occ.tipo === "speciale" || occ.mood?.toLowerCase().includes("elegant") || occ.mood?.toLowerCase().includes("roman"));
+
     const pranzoVisual = isPranzo
       ? `rustic wooden table, white ceramic plate, natural daylight from window, simple napkin beside plate, authentic Italian home lunch setting, warm natural colors, slightly blurred background, realistic and inviting,`
       : ``;
-    const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "cuisine"},`;
+
+    const cenaVisual = isCena && !isSpecialeCena
+      ? `simple wooden table, white ceramic plate, warm indoor evening light, cozy home atmosphere softly blurred, relaxing dinner setting, natural authentic presentation,`
+      : ``;
+
+    const cenaSpecialeVisual = isSpecialeCena
+      ? `elegant table setting, warm soft candlelight, wine glass nearby discretely, intimate evening atmosphere, refined but natural Italian presentation, softly blurred background,`
+      : ``;
+
+    const base = `Professional realistic food photography of ${title}, Italian dinner,`;
     const modifiers = occ.image_modifiers?.join(", ") || "";
-    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, warm neutral colors, high resolution`;
-    return `${base} ${pranzoVisual} ${modifiers}, ${fixed}.`;
+    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, warm tones, high resolution`;
+    return `${base} ${pranzoVisual}${cenaVisual}${cenaSpecialeVisual} ${modifiers}, ${fixed}.`;
   };
 
   const handleGenerate = async () => {
