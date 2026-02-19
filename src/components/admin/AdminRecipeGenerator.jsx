@@ -264,6 +264,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
       image_url: imageUrl || "",
       status: "pubblicata",
       gen_prompt: buildRecipePrompt(selectedOcc),
+      country: country || undefined,
       numero_salvate: 0,
       numero_preparate: 0,
     };
