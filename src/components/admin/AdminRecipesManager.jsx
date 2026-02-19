@@ -206,7 +206,7 @@ export default function AdminRecipesManager() {
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Visibilità</label>
               <div className="flex gap-2 mt-1">
                 {visibilities.map((v) => (
-                  <button key={v} onClick={() => setForm({ ...form, visibility: v )}
+                  <button key={v} onClick={() => setForm({ ...form, visibility: v })}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${form.visibility === v ? "bg-[#2D6A4F] text-white border-[#2D6A4F]" : "border-gray-100 text-gray-500"}`}>
                     {v}
                   </button>
