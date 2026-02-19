@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Users, BookOpen, Heart, ChefHat, AlertCircle, Plus, Loader2 } from "lucide-react";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onNavigate }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
