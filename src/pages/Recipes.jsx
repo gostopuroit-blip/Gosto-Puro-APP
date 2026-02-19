@@ -15,7 +15,7 @@ export default function Recipes() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
 
   useEffect(() => {
