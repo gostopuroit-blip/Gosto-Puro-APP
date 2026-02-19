@@ -17,6 +17,7 @@ export default function AdminRecipeGenerator() {
   const [maxTime, setMaxTime] = useState(30);
   const [servings, setServings] = useState(4);
   const [extraNote, setExtraNote] = useState("");
+  const [country, setCountry] = useState("");
 
   // generated
   const [recipe, setRecipe] = useState(null);
