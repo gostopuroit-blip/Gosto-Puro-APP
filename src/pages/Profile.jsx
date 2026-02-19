@@ -86,10 +86,16 @@ export default function Profile() {
     if (u) {
       setUser(u);
       setName(u.full_name || "");
-      setAge(u.age || "");
+      setAge(u.age != null ? String(u.age) : "");
       setPhotoUrl(u.photo_url || "");
       setSelectedAlimentari(u.dietary_restrictions || []);
       setSelectedHealth(u.health_conditions || []);
+      // Restore theme preference saved on user
+      if (u.dark_mode) {
+        setDarkMode(true);
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      }
     }
     setLoading(false);
   };
