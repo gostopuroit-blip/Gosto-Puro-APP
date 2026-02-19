@@ -155,9 +155,9 @@ export default function Recipes() {
         {filters.map((f) => (
           <button
             key={f.key}
-            onClick={() => setActiveFilter(f.key)}
+            onClick={() => toggleFilter(f.key)}
             className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ${
-              activeFilter === f.key
+              activeFilters.has(f.key)
                 ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
                 : "bg-white text-gray-500 border border-gray-100 hover:border-gray-200"
             }`}
