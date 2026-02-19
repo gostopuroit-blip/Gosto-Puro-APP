@@ -31,8 +31,6 @@ export default function Profile() {
       setName(u.full_name || "");
       setAge(u.age != null ? String(u.age) : "");
       setPhotoUrl(u.photo_url || "");
-      setSelectedAlimentari(u.dietary_restrictions || []);
-      setSelectedHealth(u.health_conditions || []);
       // Restore theme preference saved on user
       if (u.dark_mode) {
         setDarkMode(true);
