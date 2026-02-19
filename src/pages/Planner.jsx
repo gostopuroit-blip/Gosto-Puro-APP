@@ -212,6 +212,7 @@ export default function Planner() {
               <p className="text-xs text-gray-400">
                 {plan.focus === "pratico" ? "⚡ Pratico" : plan.focus === "leggero" ? "🥗 Leggero" : "👨‍👩‍👧 Famiglia"}
                 {" • ≤"}{plan.max_time} min
+                {plan.servings && <span> • 👥 {plan.servings} {plan.servings === 1 ? "persona" : "persone"}</span>}
               </p>
             </div>
           </div>
