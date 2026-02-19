@@ -16,27 +16,20 @@ export default function Recipes() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [activeTags, setActiveTags] = useState({ occasions: [], lifestyle: null });
-  const [occasions, setOccasions] = useState([]);
+  const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const occ = params.get("occasion");
     const life = params.get("lifestyle");
     if (occ || life) {
-      setActiveTags({ occasions: occ ? [occ] : [], lifestyle: life });
+      setActiveTags({ occasion: occ, lifestyle: life });
     }
   }, []);
 
   useEffect(() => {
     loadRecipes();
-    loadOccasions();
   }, []);
-
-  const loadOccasions = async () => {
-    const data = await base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 50);
-    setOccasions(data);
-  };
 
   const loadRecipes = async () => {
     const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 50);
@@ -58,10 +51,10 @@ export default function Recipes() {
       );
     }
 
-    // Tags - Multiple occasions (AND logic)
-    if (activeTags.occasions.length > 0) {
+    // Tags
+    if (activeTags.occasion) {
       result = result.filter(
-        (r) => activeTags.occasions.some(occ => r.occasions && r.occasions.includes(occ))
+        (r) => r.occasions && r.occasions.includes(activeTags.occasion)
       );
     }
     if (activeTags.lifestyle) {
@@ -92,21 +85,8 @@ export default function Recipes() {
     return result;
   }, [recipes, search, activeFilter, activeTags]);
 
-  const toggleOccasion = (label) => {
-    setActiveTags((prev) => {
-      const occasions = prev.occasions.includes(label)
-        ? prev.occasions.filter((o) => o !== label)
-        : [...prev.occasions, label];
-      return { ...prev, occasions };
-    });
-  };
-
   const clearTag = (type) => {
-    if (type === "occasion") {
-      setActiveTags((prev) => ({ ...prev, occasions: [] }));
-    } else {
-      setActiveTags((prev) => ({ ...prev, [type]: null }));
-    }
+    setActiveTags((prev) => ({ ...prev, [type]: null }));
   };
 
   if (loading) {
@@ -140,18 +120,17 @@ export default function Recipes() {
       </div>
 
       {/* Active Tags */}
-      {(activeTags.occasions.length > 0 || activeTags.lifestyle) && (
-        <div className="px-5 mb-3 flex gap-2 flex-wrap">
-          {activeTags.occasions.map((occ) => (
+      {(activeTags.occasion || activeTags.lifestyle) && (
+        <div className="px-5 mb-3 flex gap-2">
+          {activeTags.occasion && (
             <button
-              key={occ}
-              onClick={() => toggleOccasion(occ)}
+              onClick={() => clearTag("occasion")}
               className="flex items-center gap-1.5 bg-[#2D6A4F]/10 text-[#2D6A4F] px-3 py-1.5 rounded-full text-xs font-semibold"
             >
-              {occ}
+              {activeTags.occasion}
               <X className="w-3 h-3" />
             </button>
-          ))}
+          )}
           {activeTags.lifestyle && (
             <button
               onClick={() => clearTag("lifestyle")}
@@ -179,26 +158,6 @@ export default function Recipes() {
             {f.label}
           </button>
         ))}
-      </div>
-
-      {/* Occasion Filter */}
-      <div className="px-5 pb-4">
-        <p className="text-xs text-gray-400 font-semibold uppercase mb-2">Occasioni</p>
-        <div className="flex gap-2 overflow-x-auto hide-scrollbar">
-          {occasions.map((occ) => (
-            <button
-              key={occ.id}
-              onClick={() => toggleOccasion(occ.label)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
-                activeTags.occasions.includes(occ.label)
-                  ? "bg-[#2D6A4F]/20 text-[#2D6A4F] border border-[#2D6A4F]/30"
-                  : "bg-white text-gray-500 border border-gray-100 hover:border-gray-200"
-              }`}
-            >
-              {occ.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Recipe List */}

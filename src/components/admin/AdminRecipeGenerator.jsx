@@ -17,7 +17,6 @@ export default function AdminRecipeGenerator() {
   const [maxTime, setMaxTime] = useState(30);
   const [servings, setServings] = useState(4);
   const [extraNote, setExtraNote] = useState("");
-  const [country, setCountry] = useState("");
 
   // generated
   const [recipe, setRecipe] = useState(null);
@@ -47,7 +46,6 @@ export default function AdminRecipeGenerator() {
     const isCena = occ.categoria_principale === "cena" || label.includes("cena");
     const isNatale = label.includes("natale");
     const isCapodanno = label.includes("capodanno");
-    const isCucinaInternazionale = label.includes("cucina internazionale");
 
     const pranzoExtra = isPranzo && !isNatale ? `
 REGOLE SPECIFICHE PER PRANZO ITALIANO:
@@ -99,25 +97,15 @@ REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
 - Ingredienti: facili da reperire in Italia, di qualità
 ` : "";
 
-    const internationaleExtra = isCucinaInternazionale && country ? `
-REGOLE PER CUCINA INTERNAZIONALE - PAESE: ${country}:
-- Ricetta FEDELE alla tradizione del paese
-- Ingredienti reperibili in Italia
-- NO reinterpretazioni italiane inutili
-- Mantieni autenticità culturale
-- Presentazione realistica, non fantasiosa
-` : "";
-
     const titlesBlock = existingTitles.length > 0
       ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
       : "";
 
-    return `${isCucinaInternazionale && country ? `Sei un esperto cuoco di cucina ${country}.` : `Sei un cuoco italiano esperto.`}
+    return `Sei un cuoco italiano esperto.
 
-Crea una ricetta ${isCucinaInternazionale ? "autentica" : "autentica italiana"} per questa occasione.
+Crea una ricetta autentica italiana per questa occasione.
 ${titlesBlock}
 Occasione: ${occ.label}
-${country ? `Paese: ${country}` : ""}
 Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
 Stagione: ${occ.stagione || "all"}
@@ -127,10 +115,10 @@ Porzioni: ${servings}
 
 Linee guida:
 - ${guidelines}
-${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${internationaleExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
-${isCucinaInternazionale ? `Usa ingredienti del ${country} facilmente reperibili in Italia.` : `Usa ingredienti tipici italiani facilmente reperibili.`}
+Usa ingredienti tipici italiani facilmente reperibili.
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
 IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
 
@@ -264,7 +252,6 @@ Difficoltà valide: Facile, Media, Difficile.`;
       image_url: imageUrl || "",
       status: "pubblicata",
       gen_prompt: buildRecipePrompt(selectedOcc),
-      country: country || undefined,
       numero_salvate: 0,
       numero_preparate: 0,
     };
