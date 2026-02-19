@@ -220,7 +220,12 @@ export default function RecipeDetail() {
           {recipe.calories && (
             <div className="flex items-center gap-2 mt-3 bg-orange-50 rounded-xl px-3 py-2 w-fit">
               <span className="text-base">🔥</span>
-              <span className="text-xs font-bold text-orange-600">{recipe.calories} kcal per porzione</span>
+              <span className="text-xs font-bold text-orange-600">
+                {Math.round(recipe.calories * (servings / (recipe.servings || 4)))} kcal totali
+                {servings !== (recipe.servings || 4) && (
+                  <span className="text-orange-400 font-normal ml-1">({recipe.calories} kcal/porzione)</span>
+                )}
+              </span>
             </div>
           )}
         </div>
