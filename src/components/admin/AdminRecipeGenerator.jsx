@@ -41,10 +41,13 @@ export default function AdminRecipeGenerator() {
 
   const buildRecipePrompt = (occ) => {
     const guidelines = occ.linee_guida?.join("\n- ") || "";
-    const isPranzo = occ.categoria_principale === "pranzo" || occ.label?.toLowerCase().includes("pranzo");
-    const isCena = occ.categoria_principale === "cena" || occ.label?.toLowerCase().includes("cena");
+    const label = occ.label?.toLowerCase() || "";
+    const isPranzo = occ.categoria_principale === "pranzo" || label.includes("pranzo");
+    const isCena = occ.categoria_principale === "cena" || label.includes("cena");
+    const isNatale = label.includes("natale");
+    const isCapodanno = label.includes("capodanno");
 
-    const pranzoExtra = isPranzo ? `
+    const pranzoExtra = isPranzo && !isNatale ? `
 REGOLE SPECIFICHE PER PRANZO ITALIANO:
 - La ricetta deve essere riconoscibile e tradizionale (es: pasta al pomodoro, lasagne, risotto, pollo al forno, parmigiana, brasato)
 - NO combinazioni fusion, NO ingredienti esotici, NO reinterpretazioni moderne inutili
@@ -56,7 +59,7 @@ REGOLE SPECIFICHE PER PRANZO ITALIANO:
 - Presentazione semplice e autentica, piatto pieno ma ordinato
 ` : "";
 
-    const cenaExtra = isCena ? `
+    const cenaExtra = isCena && !isCapodanno ? `
 REGOLE SPECIFICHE PER CENA ITALIANA:
 - La cena deve essere più leggera rispetto al pranzo: NO lasagne pesanti, NO fritti, NO piatti eccessivamente grassi
 - Preferire: verdure, proteine leggere (pesce, uova, pollo), zuppe, minestre, frittate
@@ -67,6 +70,31 @@ REGOLE SPECIFICHE PER CENA ITALIANA:
 - Presentazione elegante ma naturale, non esagerata
 - Atmosfera: rilassante, serale, intima
 - Esempi validi: frittata con verdure, pesce al forno, insalata con tonno, minestrone, zuppa leggera, pollo al limone
+` : "";
+
+    const nataleExtra = isNatale ? `
+REGOLE CRITICHE PER NATALE - PRANZO TRADIZIONALE:
+- Ricetta DEVE ESSERE tradizionale italiana, riconoscibile e autentica
+- Niente reinterpretazioni moderne, niente fusion, niente esperimenti creativi
+- Piatti tipici di Natale: tortellini in brodo, lasagne, arrosto, capone ripieno, panettone, pandoro
+- Porzione generosa: è il pranzo di festa per la famiglia
+- Struttura: Antipasti → Primo → Secondo → Contorni → Dolce
+- Ingredienti classici e facilmente reperibili in Italia
+- Presentazione rustica elegante, piatto generoso ma ordinato
+- L'obiettivo: "Voglio ricordare il Natale di mia nonna"
+- Difficoltà media-alta: la ricetta può richiedere tempo e abilità
+` : "";
+
+    const capodannoExtra = isCapodanno ? `
+REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
+- Ricetta deve celebrare l'inizio di un nuovo anno con eleganza e tradizione
+- Preferibilmente includi LENTICCHIE (simbolo di prosperità e soldi per l'anno nuovo)
+- O cotechino con lenticchie (piatto classico di Capodanno italiano)
+- Ingredienti eleganti e di qualità: spumante, ingredienti premium quando possibile
+- Presentazione raffinata ma autentica: NON eccessivamente moderna
+- Atmosfera: festiva, elegante, celebratoria
+- Piatto che dice "Auguriamo prosperità e felicità nel nuovo anno"
+- Ingredienti: facili da reperire in Italia, di qualità
 ` : "";
 
     const titlesBlock = existingTitles.length > 0
