@@ -115,7 +115,8 @@ Porzioni: ${servings}
 
 Linee guida:
 - ${guidelines}
-${pranzoExtra}${cenaExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
 Usa ingredienti tipici italiani facilmente reperibili.
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
