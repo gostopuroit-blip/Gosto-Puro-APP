@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Home, BookOpen, FolderHeart, CalendarDays, ShoppingCart } from "lucide-react";
+import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 
 const navItems = [
   { name: "Home", icon: Home, page: "Home" },
   { name: "Ricette", icon: BookOpen, page: "Recipes" },
   { name: "Cartelle", icon: FolderHeart, page: "Folders" },
   { name: "Planner", icon: CalendarDays, page: "Planner" },
-  { name: "Spesa", icon: ShoppingCart, page: "ShoppingList" },
+  { name: "Profilo", icon: UserCircle2, page: "Profile" },
 ];
 
 export default function Layout({ children, currentPageName }) {
