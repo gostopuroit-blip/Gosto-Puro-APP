@@ -324,6 +324,28 @@ Difficoltà valide: Facile, Media, Difficile.`;
         </div>
       )}
 
+      {/* Country selector for Cucina Internazionale */}
+      {isInternational && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
+          <p className="text-sm font-bold text-gray-800">Seleziona il paese</p>
+          <div className="grid grid-cols-2 gap-2">
+            {countries.map(country => (
+              <button
+                key={country.label}
+                onClick={() => setSelectedCountry(country.label)}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  selectedCountry === country.label
+                    ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                    : "bg-gray-50 text-gray-600 border-gray-100 hover:border-[#2D6A4F]/30"
+                }`}
+              >
+                {country.flag} {country.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Params */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
         <p className="text-sm font-bold text-gray-800">2. Parametri</p>
