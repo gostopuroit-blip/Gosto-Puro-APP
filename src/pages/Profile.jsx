@@ -15,12 +15,9 @@ export default function Profile() {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
-  const [selectedAlimentari, setSelectedAlimentari] = useState([]);
-  const [selectedHealth, setSelectedHealth] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showAllHealth, setShowAllHealth] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
 
   useEffect(() => {
