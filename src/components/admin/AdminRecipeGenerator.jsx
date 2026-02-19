@@ -99,6 +99,15 @@ REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
 - Ingredienti: facili da reperire in Italia, di qualità
 ` : "";
 
+    const internationaleExtra = isCucinaInternazionale && country ? `
+REGOLE PER CUCINA INTERNAZIONALE - PAESE: ${country}:
+- Ricetta FEDELE alla tradizione del paese
+- Ingredienti reperibili in Italia
+- NO reinterpretazioni italiane inutili
+- Mantieni autenticità culturale
+- Presentazione realistica, non fantasiosa
+` : "";
+
     const titlesBlock = existingTitles.length > 0
       ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
       : "";
