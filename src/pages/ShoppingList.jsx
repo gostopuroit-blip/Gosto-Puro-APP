@@ -55,18 +55,36 @@ export default function ShoppingList() {
     const recipes = await base44.entities.Recipe.list("-created_date", 100);
     const planRecipes = recipes.filter((r) => recipeIds.includes(r.id));
 
-    // Merge ingredients
+    // Merge ingredients — sum numeric quantities, deduplicate by normalized name
     const merged = {};
+    const parseQty = (str) => {
+      if (!str) return { num: 0, unit: "" };
+      const match = String(str).match(/^([\d.,]+)\s*(.*)/);
+      if (match) return { num: parseFloat(match[1].replace(",", ".")), unit: match[2].trim() };
+      return { num: 0, unit: str.trim() };
+    };
+
     for (const recipe of planRecipes) {
       for (const ing of (recipe.ingredients || [])) {
-        const key = ing.name.toLowerCase().trim();
+        const key = ing.name.toLowerCase().trim().replace(/[aeiou]$/, ""); // naive stem for it
         if (merged[key]) {
-          merged[key].quantity += `, ${ing.quantity}`;
+          const existing = parseQty(merged[key].rawQty);
+          const incoming = parseQty(ing.quantity);
+          if (existing.num > 0 && incoming.num > 0 && existing.unit === incoming.unit) {
+            const total = existing.num + incoming.num;
+            merged[key].rawQty = `${Number.isInteger(total) ? total : total.toFixed(1)} ${existing.unit}`.trim();
+          } else if (existing.num > 0 && incoming.num > 0) {
+            merged[key].rawQty = `${existing.num} ${existing.unit} + ${incoming.num} ${incoming.unit}`.trim();
+          } else {
+            merged[key].rawQty = [merged[key].rawQty, ing.quantity].filter(Boolean).join(" + ");
+          }
+          merged[key].count = (merged[key].count || 1) + 1;
         } else {
           merged[key] = {
             name: ing.name,
-            quantity: ing.quantity || "",
+            rawQty: ing.quantity || "",
             category: ing.category || "Altro",
+            count: 1,
           };
         }
       }
@@ -81,7 +99,7 @@ export default function ShoppingList() {
     // Create new items
     const newItems = Object.values(merged).map((ing) => ({
       name: ing.name,
-      quantity: ing.quantity,
+      quantity: ing.rawQty,
       category: categoryOrder.includes(ing.category) ? ing.category : "Altro",
       is_checked: false,
       meal_plan_id: plan.id,
