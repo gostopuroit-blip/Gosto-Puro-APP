@@ -89,6 +89,18 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Top Prepared - between daily and special */}
+      <div className="mt-8">
+        <div className="px-5">
+          <SectionHeader title="Le più preparate" linkPage="Recipes" />
+        </div>
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
+          {topRecipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />
+          ))}
+        </div>
+      </div>
+
       {/* Special Occasions */}
       <div className="px-5 mt-8">
         <SectionHeader title="Occasioni Speciali" />
@@ -104,18 +116,6 @@ export default function Home() {
               </div>
               <span className="text-[12px] font-semibold text-gray-800 leading-tight">{occ.label}</span>
             </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Top Prepared */}
-      <div className="mt-8">
-        <div className="px-5">
-          <SectionHeader title="Le più preparate" linkPage="Recipes" />
-        </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {topRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />
           ))}
         </div>
       </div>
