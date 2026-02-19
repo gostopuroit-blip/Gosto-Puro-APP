@@ -35,6 +35,7 @@ export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [userPhoto, setUserPhoto] = useState("");
 
   useEffect(() => {
     loadData();
@@ -48,6 +49,9 @@ export default function Home() {
     setTopRecipes(recipes);
     if (user?.full_name) {
       setUserName(user.full_name.split(" ")[0]);
+    }
+    if (user?.photo_url) {
+      setUserPhoto(user.photo_url);
     }
     setLoading(false);
   };
@@ -71,12 +75,28 @@ export default function Home() {
     <div className="pb-4">
       {/* Header */}
       <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
-        <p className="text-sm text-[#2D6A4F] font-medium tracking-wide">
-          {getGreeting()}{userName ? `, ${userName}` : ""} 👋
+        <div className="flex items-center gap-3.5">
+          {/* Avatar */}
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-[#D8EDD8] flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
+            {userPhoto ? (
+              <img src={userPhoto} alt="Foto profilo" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-lg">👤</span>
+            )}
+          </div>
+          {/* Text */}
+          <div>
+            <p className="text-[13px] text-[#2D6A4F] font-semibold leading-tight">
+              {getGreeting()}{userName ? `, ${userName}` : ""}
+            </p>
+            <h1 className="text-xl font-bold text-gray-900 leading-tight tracking-tight">
+              Cosa prepariamo oggi?
+            </h1>
+          </div>
+        </div>
+        <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+          Ricette organizzate per decidere senza perdere tempo
         </p>
-        <h1 className="text-2xl font-bold text-gray-900 mt-1 tracking-tight">
-          Cosa prepariamo oggi?
-        </h1>
       </div>
 
       {/* Daily Occasions */}
