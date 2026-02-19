@@ -140,8 +140,13 @@ export default function Profile() {
     <div className="pb-10">
       {/* Header */}
       <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Il mio Profilo</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Personalizza la tua esperienza</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Il mio Profilo</h1>
+            <p className="text-sm text-gray-400 mt-0.5">Personalizza la tua esperienza</p>
+          </div>
+          {user && <PremiumBadge user={user} />}
+        </div>
       </div>
 
       {/* Avatar + Name */}
