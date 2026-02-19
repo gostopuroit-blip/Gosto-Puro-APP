@@ -163,18 +163,24 @@ export default function RecipeDetail() {
           </div>
 
           <p className="text-sm text-gray-600 mt-4 leading-relaxed">{recipe.description}</p>
+          {recipe.calories && (
+            <div className="flex items-center gap-2 mt-3 bg-orange-50 rounded-xl px-3 py-2 w-fit">
+              <span className="text-base">🔥</span>
+              <span className="text-xs font-bold text-orange-600">{recipe.calories} kcal per porzione</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Ingredients */}
       <div className="px-5 mt-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">Ingredienti</h2>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-gray-900">Ingredienti</h2>
+          <span className="text-xs text-gray-400">Segna ciò che hai già</span>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
           {(recipe.ingredients || []).map((ing, i) => (
-            <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-              <span className="text-sm text-gray-700">{ing.name}</span>
-              <span className="text-sm text-gray-400 font-medium">{ing.quantity}</span>
-            </div>
+            <IngredientRow key={i} ing={ing} index={i} total={(recipe.ingredients || []).length} />
           ))}
         </div>
       </div>
