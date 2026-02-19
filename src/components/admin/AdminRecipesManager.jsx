@@ -220,6 +220,37 @@ export default function AdminRecipesManager() {
             <DialogTitle>{editId ? "Modifica Ricetta" : "Nuova Ricetta"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {/* Prompt AI */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Prompt di generazione AI</label>
+              <textarea
+                placeholder="Descrivi la ricetta: atmosfera, occasione, ingredienti chiave, stile visivo per l'immagine..."
+                value={form.gen_prompt}
+                onChange={(e) => setForm({ ...form, gen_prompt: e.target.value })}
+                className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2.5 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
+              />
+              <div className="flex gap-2 mt-1.5">
+                <button
+                  type="button"
+                  onClick={handleGenerateRecipe}
+                  disabled={generating}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#2D6A4F] text-white text-xs font-bold transition-all hover:bg-[#235c43] disabled:opacity-60"
+                >
+                  {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {generating ? "Genero..." : "Genera ricetta"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGenerateImage}
+                  disabled={generatingImage}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#E07A3A] text-white text-xs font-bold transition-all hover:bg-[#c86a2e] disabled:opacity-60"
+                >
+                  {generatingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Image className="w-3.5 h-3.5" />}
+                  {generatingImage ? "Genero..." : "Genera immagine"}
+                </button>
+              </div>
+            </div>
+
             {/* Image */}
             <div className="relative w-full h-32 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border border-gray-100">
               {form.image_url ? <img src={form.image_url} className="w-full h-full object-cover" /> : <span className="text-4xl">🍽️</span>}
