@@ -101,10 +101,10 @@ export default function Home() {
             )}
           </div>
           <div>
-            <p className="text-[13px] text-[#2D6A4F] font-semibold leading-tight">
+            <p className="text-base text-[#2D6A4F] font-semibold leading-tight">
               {getGreeting()}{userName ? `, ${userName}` : ""}
             </p>
-            <h1 className="text-xl font-bold text-gray-900 leading-tight tracking-tight">
+            <h1 className="text-lg font-bold text-gray-900 leading-tight tracking-tight">
               Cosa prepariamo oggi?
             </h1>
           </div>
