@@ -50,12 +50,6 @@ export default function Profile() {
     setUploading(false);
   };
 
-  const toggleAlimentari = (label) => {
-    setSelectedAlimentari((prev) =>
-      prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label]
-    );
-  };
-
   const toggleDarkMode = () => {
     const next = !darkMode;
     setDarkMode(next);
@@ -68,12 +62,6 @@ export default function Profile() {
     }
     // Save only the dark_mode preference, not touching other fields
     base44.auth.updateMe({ dark_mode: next });
-  };
-
-  const toggleHealth = (label) => {
-    setSelectedHealth((prev) =>
-      prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label]
-    );
   };
 
   const handleSave = async () => {
