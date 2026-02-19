@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
-import { Clock, Star, Heart, ChefHat } from "lucide-react";
+import { Clock, Star, Heart, ChefHat, Flame } from "lucide-react";
 
 export default function RecipeCard({ recipe, variant = "default" }) {
   if (variant === "compact") {
@@ -27,6 +27,12 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                 <Clock className="w-3 h-3" />
                 <span className="text-[10px]">{recipe.prep_time} min</span>
               </div>
+              {recipe.calories && (
+                <div className="flex items-center gap-1 text-white/80">
+                  <Flame className="w-3 h-3" />
+                  <span className="text-[10px]">{recipe.calories} kcal</span>
+                </div>
+              )}
               <div className="flex items-center gap-1 text-white/80">
                 <Heart className="w-3 h-3" />
                 <span className="text-[10px]">{recipe.numero_salvate || 0}</span>
@@ -64,7 +70,13 @@ export default function RecipeCard({ recipe, variant = "default" }) {
           <h3 className="font-bold text-[15px] text-gray-900 leading-tight">{recipe.title}</h3>
           <p className="text-xs text-gray-400 mt-1">{recipe.category} • {recipe.prep_time} min</p>
           <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">{recipe.description}</p>
-          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-50">
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-50 flex-wrap">
+            {recipe.calories && (
+              <div className="flex items-center gap-1.5 text-gray-400">
+                <Flame className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-[11px] font-medium">{recipe.calories} kcal</span>
+              </div>
+            )}
             <div className="flex items-center gap-1.5 text-gray-400">
               <Heart className="w-3.5 h-3.5 text-rose-400" />
               <span className="text-[11px] font-medium">{recipe.numero_salvate || 0} salvate</span>
