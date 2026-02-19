@@ -69,10 +69,14 @@ REGOLE SPECIFICHE PER CENA ITALIANA:
 - Esempi validi: frittata con verdure, pesce al forno, insalata con tonno, minestrone, zuppa leggera, pollo al limone
 ` : "";
 
+    const titlesBlock = existingTitles.length > 0
+      ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
+      : "";
+
     return `Sei un cuoco italiano esperto.
 
 Crea una ricetta autentica italiana per questa occasione.
-
+${titlesBlock}
 Occasione: ${occ.label}
 Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
@@ -87,6 +91,7 @@ ${pranzoExtra}${cenaExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 
 Usa ingredienti tipici italiani facilmente reperibili.
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
+IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
 
 Rispondi SOLO in formato JSON con questa struttura:
 {
