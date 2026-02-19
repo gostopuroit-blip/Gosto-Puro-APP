@@ -47,6 +47,7 @@ export default function AdminRecipeGenerator() {
     const isCena = occ.categoria_principale === "cena" || label.includes("cena");
     const isNatale = label.includes("natale");
     const isCapodanno = label.includes("capodanno");
+    const isCucinaInternazionale = label.includes("cucina internazionale");
 
     const pranzoExtra = isPranzo && !isNatale ? `
 REGOLE SPECIFICHE PER PRANZO ITALIANO:
