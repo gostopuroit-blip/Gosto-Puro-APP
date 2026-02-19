@@ -58,10 +58,10 @@ export default function Recipes() {
       );
     }
 
-    // Tags
-    if (activeTags.occasion) {
+    // Tags - Multiple occasions (AND logic)
+    if (activeTags.occasions.length > 0) {
       result = result.filter(
-        (r) => r.occasions && r.occasions.includes(activeTags.occasion)
+        (r) => activeTags.occasions.some(occ => r.occasions && r.occasions.includes(occ))
       );
     }
     if (activeTags.lifestyle) {
