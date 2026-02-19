@@ -94,10 +94,14 @@ Difficoltà valide: Facile, Media, Difficile.`;
   };
 
   const buildImagePrompt = (occ, title) => {
+    const isPranzo = occ.categoria_principale === "pranzo" || occ.label?.toLowerCase().includes("pranzo");
+    const pranzoVisual = isPranzo
+      ? `rustic wooden table, white ceramic plate, natural daylight from window, simple napkin beside plate, authentic Italian home lunch setting, warm natural colors, slightly blurred background, realistic and inviting,`
+      : ``;
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "cuisine"},`;
     const modifiers = occ.image_modifiers?.join(", ") || "";
-    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean composition, warm neutral colors, high resolution, restaurant quality`;
-    return `${base} ${modifiers}, ${fixed}.`;
+    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, warm neutral colors, high resolution`;
+    return `${base} ${pranzoVisual} ${modifiers}, ${fixed}.`;
   };
 
   const handleGenerate = async () => {
