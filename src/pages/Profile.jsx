@@ -69,8 +69,6 @@ export default function Profile() {
     await base44.auth.updateMe({
       age: age ? parseInt(age) : null,
       photo_url: photoUrl,
-      dietary_restrictions: selectedAlimentari,
-      health_conditions: selectedHealth,
       dark_mode: darkMode,
     });
     setSaving(false);
