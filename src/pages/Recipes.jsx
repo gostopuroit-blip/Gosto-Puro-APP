@@ -16,7 +16,8 @@ export default function Recipes() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
+  const [activeTags, setActiveTags] = useState({ occasions: [], lifestyle: null });
+  const [occasions, setOccasions] = useState([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
