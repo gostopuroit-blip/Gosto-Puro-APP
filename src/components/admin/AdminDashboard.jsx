@@ -75,6 +75,7 @@ export default function AdminDashboard({ onNavigate }) {
       </button>
 
       {/* Top saved */}
+
       <div>
         <p className="text-sm font-bold text-gray-700 mb-2">🏆 Più salvate</p>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
