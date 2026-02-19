@@ -115,7 +115,7 @@ export default function Profile() {
     );
   };
 
-  const toggleDarkMode = async () => {
+  const toggleDarkMode = () => {
     const next = !darkMode;
     setDarkMode(next);
     if (next) {
@@ -125,7 +125,8 @@ export default function Profile() {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
-    await base44.auth.updateMe({ dark_mode: next });
+    // Save only the dark_mode preference, not touching other fields
+    base44.auth.updateMe({ dark_mode: next });
   };
 
   const toggleHealth = (label) => {
