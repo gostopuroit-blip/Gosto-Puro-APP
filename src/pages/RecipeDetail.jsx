@@ -235,11 +235,17 @@ export default function RecipeDetail() {
       <div className="px-5 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-900">Ingredienti</h2>
-          <span className="text-xs text-gray-400">Segna ciò che hai già</span>
+          <span className="text-xs text-gray-400">per {servings} {servings === 1 ? "persona" : "persone"}</span>
         </div>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
           {(recipe.ingredients || []).map((ing, i) => (
-            <IngredientRow key={i} ing={ing} index={i} total={(recipe.ingredients || []).length} />
+            <IngredientRow
+              key={i}
+              ing={ing}
+              index={i}
+              total={(recipe.ingredients || []).length}
+              ratio={servings / (recipe.servings || 4)}
+            />
           ))}
         </div>
       </div>
