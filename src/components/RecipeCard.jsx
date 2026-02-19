@@ -72,7 +72,11 @@ export default function RecipeCard({ recipe, variant = "default" }) {
         </div>
         <div className="p-4">
           <h3 className="font-bold text-[15px] text-gray-900 leading-tight">{recipe.title}</h3>
-          <p className="text-xs text-gray-400 mt-1">{recipe.category} • {recipe.prep_time} min</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {recipe.category}
+            {recipe.country && <span> • 🌍 {recipe.country}</span>}
+            • {recipe.prep_time} min
+          </p>
           <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">{recipe.description}</p>
           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-50 flex-wrap">
             {recipe.calories && (
