@@ -64,7 +64,7 @@ export default function AdminDashboard() {
 
       {/* Quick action */}
       <Link
-        to={createPageUrl("Admin")}
+        to={createPageUrl("Admin?tab=ricette")}
         className="flex items-center gap-3 bg-[#2D6A4F] text-white rounded-2xl p-4 shadow-lg shadow-[#2D6A4F]/20 active:scale-[0.98] transition-transform"
       >
         <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
