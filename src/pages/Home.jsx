@@ -35,6 +35,7 @@ export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [userAvatar, setUserAvatar] = useState("");
 
   useEffect(() => {
     loadData();
