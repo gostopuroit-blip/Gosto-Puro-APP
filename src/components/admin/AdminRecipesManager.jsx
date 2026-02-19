@@ -213,6 +213,40 @@ export default function AdminRecipesManager() {
               </div>
             </div>
 
+            {/* Occasions */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Occasioni</label>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {allOccasions.map((o) => {
+                  const selected = form.occasions?.includes(o);
+                  return (
+                    <button key={o} type="button"
+                      onClick={() => setForm((f) => ({ ...f, occasions: selected ? f.occasions.filter((x) => x !== o) : [...(f.occasions || []), o] }))}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${selected ? "bg-[#2D6A4F] text-white border-[#2D6A4F]" : "border-gray-100 text-gray-500 bg-white"}`}>
+                      {o}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Lifestyle */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Stile di vita</label>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {allLifestyle.map((l) => {
+                  const selected = form.lifestyle?.includes(l);
+                  return (
+                    <button key={l} type="button"
+                      onClick={() => setForm((f) => ({ ...f, lifestyle: selected ? f.lifestyle.filter((x) => x !== l) : [...(f.lifestyle || []), l] }))}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${selected ? "bg-[#E07A3A] text-white border-[#E07A3A]" : "border-gray-100 text-gray-500 bg-white"}`}>
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Visibilità</label>
               <div className="flex gap-2 mt-1">
