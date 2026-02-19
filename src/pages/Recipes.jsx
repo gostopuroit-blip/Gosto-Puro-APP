@@ -32,7 +32,7 @@ export default function Recipes() {
   }, []);
 
   const loadRecipes = async () => {
-    const data = await base44.entities.Recipe.list("-numero_preparate", 50);
+    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 50);
     setRecipes(data);
     setLoading(false);
   };
