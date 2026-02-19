@@ -9,8 +9,21 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
 
-function IngredientRow({ ing, index, total }) {
+// Scale a quantity string by a ratio
+function scaleQty(qtyStr, ratio) {
+  if (!qtyStr || ratio === 1) return qtyStr;
+  const match = String(qtyStr).match(/^([\d.,]+)\s*(.*)/);
+  if (!match) return qtyStr;
+  const num = parseFloat(match[1].replace(",", "."));
+  const unit = match[2].trim();
+  const scaled = num * ratio;
+  const formatted = Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1));
+  return unit ? `${formatted} ${unit}` : `${formatted}`;
+}
+
+function IngredientRow({ ing, index, total, ratio }) {
   const [checked, setChecked] = useState(false);
+  const displayQty = scaleQty(ing.quantity, ratio);
   return (
     <button
       onClick={() => setChecked(!checked)}
@@ -27,7 +40,7 @@ function IngredientRow({ ing, index, total }) {
         {ing.name}
       </span>
       <span className={`text-sm font-medium flex-shrink-0 ${checked ? "text-gray-200" : "text-gray-400"}`}>
-        {ing.quantity}
+        {displayQty}
       </span>
     </button>
   );
