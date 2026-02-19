@@ -117,10 +117,38 @@ Categorie valide per la ricetta: Colazione, Pranzo, Cena, Dolce, Snack, Bevanda.
 Difficoltà valide: Facile, Media, Difficile.`;
   };
 
-  const buildImagePrompt = (occ, title) => {
+  const buildImagePrompt = (occ, recipe) => {
+    if (!recipe) return "";
+    
+    const title = recipe.title;
     const isPranzo = occ.categoria_principale === "pranzo" || occ.label?.toLowerCase().includes("pranzo");
     const isCena = occ.categoria_principale === "cena" || occ.label?.toLowerCase().includes("cena");
     const isSpecialeCena = isCena && (occ.tipo === "speciale" || occ.mood?.toLowerCase().includes("elegant") || occ.mood?.toLowerCase().includes("roman"));
+
+    // Extract main ingredients for visual hints
+    const mainIngredients = recipe.ingredients?.slice(0, 4).map(i => i.name).join(", ") || "";
+
+    // Infer visual characteristics from description and ingredients
+    const descLower = recipe.description?.toLowerCase() || "";
+    const ingredLower = mainIngredients.toLowerCase();
+    
+    let colorHints = "";
+    let textureHints = "";
+    
+    // Color detection
+    if (ingredLower.includes("pomodoro") || ingredLower.includes("rosso")) colorHints = "vibrant red tones,";
+    else if (ingredLower.includes("verdura") || ingredLower.includes("verde")) colorHints = "fresh green hues,";
+    else if (ingredLower.includes("burro") || ingredLower.includes("panna")) colorHints = "creamy beige and golden tones,";
+    else if (ingredLower.includes("olio") || ingredLower.includes("olive")) colorHints = "golden olive green accents,";
+    else if (ingredLower.includes("carne")) colorHints = "warm brown and caramel tones,";
+    else colorHints = "warm natural Italian colors,";
+
+    // Texture detection
+    if (descLower.includes("cremoso") || ingredLower.includes("panna")) textureHints = "creamy smooth texture,";
+    else if (descLower.includes("croccante") || descLower.includes("fritta")) textureHints = "crispy golden exterior,";
+    else if (descLower.includes("morbido") || descLower.includes("soffice")) textureHints = "soft fluffy texture,";
+    else if (descLower.includes("al dente") || ingredLower.includes("pasta")) textureHints = "perfectly cooked pasta with defined edges,";
+    else textureHints = "inviting appetizing texture,";
 
     const pranzoVisual = isPranzo
       ? `rustic wooden table, white ceramic plate, natural daylight from window, simple napkin beside plate, authentic Italian home lunch setting, warm natural colors, slightly blurred background, realistic and inviting,`
@@ -134,10 +162,12 @@ Difficoltà valide: Facile, Media, Difficile.`;
       ? `elegant table setting, warm soft candlelight, wine glass nearby discretely, intimate evening atmosphere, refined but natural Italian presentation, softly blurred background,`
       : ``;
 
-    const base = `Professional realistic food photography of ${title}, Italian dinner,`;
+    const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
+    const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
-    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, warm tones, high resolution`;
-    return `${base} ${pranzoVisual}${cenaVisual}${cenaSpecialeVisual} ${modifiers}, ${fixed}.`;
+    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution`;
+    
+    return `${base} ${ingredients} ${colorHints} ${textureHints} ${pranzoVisual}${cenaVisual}${cenaSpecialeVisual} ${modifiers}, ${fixed}.`;
   };
 
   const handleGenerate = async () => {
