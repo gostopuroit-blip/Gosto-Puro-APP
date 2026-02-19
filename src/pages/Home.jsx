@@ -1,13 +1,34 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
-import OccasionChip from "@/components/OccasionChip";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Loader2 } from "lucide-react";
 
-const dailyOccasions = ["Colazione", "Pranzo", "Cena", "Leggera", "Dolce sano"];
+// Daily occasions with image-style food icons (SVG inline or Unicode with styling)
+const dailyOccasions = [
+  {
+    label: "Colazione",
+    img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=120&h=120&fit=crop&crop=center",
+  },
+  {
+    label: "Pranzo",
+    img: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=120&h=120&fit=crop&crop=center",
+  },
+  {
+    label: "Cena",
+    img: "https://images.unsplash.com/photo-1559847844-5315695dadae?w=120&h=120&fit=crop&crop=center",
+  },
+  {
+    label: "Leggera",
+    img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=120&h=120&fit=crop&crop=center",
+  },
+  {
+    label: "Dolce sano",
+    img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=120&h=120&fit=crop&crop=center",
+  },
+];
 
 const specialOccasions = [
   { label: "Pranzo in famiglia", icon: "👨‍👩‍👧‍👦" },
@@ -47,12 +68,8 @@ export default function Home() {
       base44.auth.me().catch(() => null),
     ]);
     setTopRecipes(recipes);
-    if (user?.full_name) {
-      setUserName(user.full_name.split(" ")[0]);
-    }
-    if (user?.photo_url) {
-      setUserPhoto(user.photo_url);
-    }
+    if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
+    if (user?.photo_url) setUserPhoto(user.photo_url);
     setLoading(false);
   };
 
@@ -76,7 +93,6 @@ export default function Home() {
       {/* Header */}
       <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
         <div className="flex items-center gap-3.5">
-          {/* Avatar */}
           <div className="w-11 h-11 rounded-full overflow-hidden bg-[#D8EDD8] flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
             {userPhoto ? (
               <img src={userPhoto} alt="Foto profilo" className="w-full h-full object-cover" />
@@ -84,7 +100,6 @@ export default function Home() {
               <span className="text-lg">👤</span>
             )}
           </div>
-          {/* Text */}
           <div>
             <p className="text-[13px] text-[#2D6A4F] font-semibold leading-tight">
               {getGreeting()}{userName ? `, ${userName}` : ""}
@@ -99,17 +114,30 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Daily Occasions */}
+      {/* Daily Occasions — card style like image */}
       <div className="px-5 mt-2">
         <SectionHeader title="Occasioni del giorno" />
-        <div className="flex gap-2.5 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
           {dailyOccasions.map((occ) => (
-            <OccasionChip key={occ} label={occ} isDaily />
+            <Link
+              key={occ.label}
+              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150"
+            >
+              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white shadow-md border border-gray-100">
+                <img
+                  src={occ.img}
+                  alt={occ.label}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-[11px] font-semibold text-gray-700 text-center">{occ.label}</span>
+            </Link>
           ))}
         </div>
       </div>
 
-      {/* Top Prepared - between daily and special */}
+      {/* Top Prepared */}
       <div className="mt-8">
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
@@ -121,39 +149,39 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Special Occasions */}
-      <div className="px-5 mt-8">
-        <SectionHeader title="Occasioni Speciali" />
-        <div className="grid grid-cols-2 gap-2.5">
+      {/* Special Occasions — carousel */}
+      <div className="mt-8">
+        <div className="px-5">
+          <SectionHeader title="Occasioni Speciali" />
+        </div>
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {specialOccasions.map((occ) => (
             <Link
               key={occ.label}
               to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
-              className="flex items-center gap-3 bg-white rounded-2xl p-3.5 shadow-sm border border-gray-50 hover:border-[#2D6A4F]/20 hover:shadow-md transition-all duration-200 active:scale-[0.98]"
+              className="flex-shrink-0 flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-sm border border-gray-50 w-[110px] hover:border-[#2D6A4F]/20 hover:shadow-md transition-all duration-200 active:scale-[0.97]"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#F0F7F4] flex items-center justify-center text-base flex-shrink-0">
-                {occ.icon}
-              </div>
-              <span className="text-[12px] font-semibold text-gray-800 leading-tight">{occ.label}</span>
+              <span className="text-2xl">{occ.icon}</span>
+              <span className="text-[11px] font-semibold text-gray-700 text-center leading-tight">{occ.label}</span>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Lifestyle */}
-      <div className="px-5 mt-8">
-        <SectionHeader title="Stile di Vita e Salute" />
-        <div className="grid grid-cols-2 gap-2.5">
+      {/* Lifestyle — carousel */}
+      <div className="mt-8">
+        <div className="px-5">
+          <SectionHeader title="Stile di Vita e Salute" />
+        </div>
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {lifestyleTags.map((tag) => (
             <Link
               key={tag.label}
               to={createPageUrl(`Recipes?lifestyle=${encodeURIComponent(tag.label)}`)}
-              className="flex items-center gap-3 bg-white rounded-2xl p-3.5 shadow-sm border border-gray-50 hover:border-[#2D6A4F]/20 hover:shadow-md transition-all duration-200 active:scale-[0.98]"
+              className="flex-shrink-0 flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-sm border border-gray-50 w-[100px] hover:border-[#2D6A4F]/20 hover:shadow-md transition-all duration-200 active:scale-[0.97]"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#F0F7F4] flex items-center justify-center text-base flex-shrink-0">
-                {tag.icon}
-              </div>
-              <span className="text-[12px] font-semibold text-gray-800 leading-tight">{tag.label}</span>
+              <span className="text-2xl">{tag.icon}</span>
+              <span className="text-[11px] font-semibold text-gray-700 text-center leading-tight">{tag.label}</span>
             </Link>
           ))}
         </div>
