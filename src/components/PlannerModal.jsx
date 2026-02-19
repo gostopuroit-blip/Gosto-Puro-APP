@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Zap, Salad, Users, Clock } from "lucide-react";
+import { Zap, Salad, Users, Clock, Minus, Plus } from "lucide-react";
 
 const dayOptions = [
   { value: 3, label: "3 giorni" },
