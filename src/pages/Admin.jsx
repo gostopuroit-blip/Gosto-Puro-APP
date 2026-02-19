@@ -20,7 +20,9 @@ const tabs = [
 ];
 
 function AdminContent() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTab = urlParams.get("tab") || "dashboard";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
     <div className="pb-10">
