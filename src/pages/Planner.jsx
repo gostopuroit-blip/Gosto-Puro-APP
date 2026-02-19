@@ -90,6 +90,7 @@ export default function Planner() {
       days,
       focus,
       max_time: maxTime,
+      servings: servings || 2,
       plan_data: planData,
       is_active: true,
     });
