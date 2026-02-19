@@ -206,6 +206,27 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Appearance */}
+      <div className="px-5 mt-4">
+        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center">
+              {darkMode ? <Moon className="w-5 h-5 text-gray-700" /> : <Sun className="w-5 h-5 text-yellow-500" />}
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900">Modalità Scura</p>
+              <p className="text-xs text-gray-400">Cambia l'aspetto dell'app</p>
+            </div>
+          </div>
+          <button
+            onClick={toggleDarkMode}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${darkMode ? "bg-[#2D6A4F]" : "bg-gray-200"}`}
+          >
+            <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${darkMode ? "translate-x-6" : "translate-x-0.5"}`} />
+          </button>
+        </div>
+      </div>
+
       {/* Dietary Restrictions */}
       <div className="px-5 mt-6">
         <div className="mb-3">
