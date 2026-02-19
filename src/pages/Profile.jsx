@@ -67,6 +67,7 @@ export default function Profile() {
   const handleSave = async () => {
     setSaving(true);
     await base44.auth.updateMe({
+      full_name: name,
       age: age ? parseInt(age) : null,
       photo_url: photoUrl,
       dark_mode: darkMode,
