@@ -64,25 +64,40 @@ export default function ShoppingList() {
       return { num: 0, unit: str.trim() };
     };
 
+    // Scale ratio: plan.servings / recipe.servings
+    const planServings = plan.servings || 2;
+    const scaleQty = (qtyStr, ratio) => {
+      if (!qtyStr || ratio === 1) return qtyStr || "";
+      const match = String(qtyStr).match(/^([\d.,]+)\s*(.*)/);
+      if (!match) return qtyStr || "";
+      const num = parseFloat(match[1].replace(",", "."));
+      const unit = match[2].trim();
+      const scaled = num * ratio;
+      const formatted = Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1));
+      return unit ? `${formatted} ${unit}` : `${formatted}`;
+    };
+
     for (const recipe of planRecipes) {
+      const ratio = planServings / (recipe.servings || 4);
       for (const ing of (recipe.ingredients || [])) {
-        const key = ing.name.toLowerCase().trim().replace(/[aeiou]$/, ""); // naive stem for it
+        const scaledQty = scaleQty(ing.quantity, ratio);
+        const key = ing.name.toLowerCase().trim().replace(/[aeiou]$/, "");
         if (merged[key]) {
           const existing = parseQty(merged[key].rawQty);
-          const incoming = parseQty(ing.quantity);
+          const incoming = parseQty(scaledQty);
           if (existing.num > 0 && incoming.num > 0 && existing.unit === incoming.unit) {
             const total = existing.num + incoming.num;
             merged[key].rawQty = `${Number.isInteger(total) ? total : total.toFixed(1)} ${existing.unit}`.trim();
           } else if (existing.num > 0 && incoming.num > 0) {
             merged[key].rawQty = `${existing.num} ${existing.unit} + ${incoming.num} ${incoming.unit}`.trim();
           } else {
-            merged[key].rawQty = [merged[key].rawQty, ing.quantity].filter(Boolean).join(" + ");
+            merged[key].rawQty = [merged[key].rawQty, scaledQty].filter(Boolean).join(" + ");
           }
           merged[key].count = (merged[key].count || 1) + 1;
         } else {
           merged[key] = {
             name: ing.name,
-            rawQty: ing.quantity || "",
+            rawQty: scaledQty,
             category: ing.category || "Altro",
             count: 1,
           };
