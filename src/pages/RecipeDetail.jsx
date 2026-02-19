@@ -3,11 +3,35 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2
+  ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Flame, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
+
+function IngredientRow({ ing, index, total }) {
+  const [checked, setChecked] = useState(false);
+  return (
+    <button
+      onClick={() => setChecked(!checked)}
+      className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all ${
+        index < total - 1 ? "border-b border-gray-50" : ""
+      } ${checked ? "bg-green-50/40" : "hover:bg-gray-50/30"}`}
+    >
+      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+        checked ? "bg-[#2D6A4F] border-[#2D6A4F]" : "border-gray-200"
+      }`}>
+        {checked && <Check className="w-3 h-3 text-white" />}
+      </div>
+      <span className={`text-sm flex-1 transition-all ${checked ? "line-through text-gray-300" : "text-gray-700"}`}>
+        {ing.name}
+      </span>
+      <span className={`text-sm font-medium flex-shrink-0 ${checked ? "text-gray-200" : "text-gray-400"}`}>
+        {ing.quantity}
+      </span>
+    </button>
+  );
+}
 
 export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
