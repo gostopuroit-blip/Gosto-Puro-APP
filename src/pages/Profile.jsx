@@ -83,7 +83,7 @@ export default function Profile() {
     );
   }
 
-  const visibleHealth = showAllHealth ? healthConditions : healthConditions.slice(0, 8);
+
 
   return (
     <div className="pb-10">
