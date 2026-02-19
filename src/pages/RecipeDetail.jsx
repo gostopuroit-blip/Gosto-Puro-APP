@@ -3,16 +3,18 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, CheckCircle2, Loader2
+  ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import SaveToFolderModal from "@/components/SaveToFolderModal";
 
 export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
   const [userRecipe, setUserRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   const params = new URLSearchParams(window.location.search);
   const recipeId = params.get("id");
@@ -31,26 +33,8 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    if (userRecipe) {
-      await base44.entities.UserRecipe.update(userRecipe.id, {
-        is_saved: !userRecipe.is_saved,
-        status: !userRecipe.is_saved ? "per_fare" : userRecipe.status,
-      });
-    } else {
-      await base44.entities.UserRecipe.create({
-        recipe_id: recipeId,
-        is_saved: true,
-        status: "per_fare",
-      });
-    }
-    // Update save count
-    const newCount = (recipe.numero_salvate || 0) + (userRecipe?.is_saved ? -1 : 1);
-    await base44.entities.Recipe.update(recipeId, { numero_salvate: Math.max(0, newCount) });
-    await loadRecipe();
-    toast.success(userRecipe?.is_saved ? "Rimossa dai salvati" : "Salvata! 💚");
-    setSaving(false);
+  const handleSaveClick = () => {
+    setShowSaveModal(true);
   };
 
   const handlePrepare = async () => {
@@ -133,8 +117,7 @@ export default function RecipeDetail() {
           <ArrowLeft className="w-5 h-5 text-gray-800" />
         </Link>
         <button
-          onClick={handleSave}
-          disabled={saving}
+          onClick={handleSaveClick}
           className="absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
         >
           <Heart
@@ -244,15 +227,21 @@ export default function RecipeDetail() {
           {userRecipe?.is_prepared ? "Preparata di nuovo!" : "Preparare ricetta"}
         </Button>
         <Button
-          onClick={handleSave}
-          disabled={saving}
+          onClick={handleSaveClick}
           variant="outline"
           className="w-full py-6 rounded-2xl border-2 font-bold text-sm"
         >
           <Bookmark className="w-5 h-5 mr-2" />
-          {userRecipe?.is_saved ? "Rimuovi dai salvati" : "Salvare"}
+          {userRecipe?.is_saved ? "Salvata ✓" : "Salvare"}
         </Button>
       </div>
+
+      <SaveToFolderModal
+        open={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        recipeId={recipeId}
+        onSaved={loadRecipe}
+      />
     </div>
   );
 }
