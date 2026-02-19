@@ -74,7 +74,7 @@ export default function AdminDashboard({ onNavigate }) {
           <p className="font-bold text-sm">Crea nuova ricetta</p>
           <p className="text-xs text-white/70">Aggiungi al catalogo</p>
         </div>
-      </Link>
+      </button>
 
       {/* Top saved */}
       <div>
