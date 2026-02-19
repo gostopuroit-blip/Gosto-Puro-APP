@@ -24,13 +24,19 @@ export default function Recipes() {
     const occ = params.get("occasion");
     const life = params.get("lifestyle");
     if (occ || life) {
-      setActiveTags({ occasion: occ, lifestyle: life });
+      setActiveTags({ occasions: occ ? [occ] : [], lifestyle: life });
     }
   }, []);
 
   useEffect(() => {
     loadRecipes();
+    loadOccasions();
   }, []);
+
+  const loadOccasions = async () => {
+    const data = await base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 50);
+    setOccasions(data);
+  };
 
   const loadRecipes = async () => {
     const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 50);
