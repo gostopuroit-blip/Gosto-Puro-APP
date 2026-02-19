@@ -58,11 +58,13 @@ export default function RecipeCard({ recipe, variant = "default" }) {
             alt={recipe.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
-          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 shadow-sm">
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span className="text-xs font-bold">{recipe.media_rating || "4.5"}</span>
-            <span className="text-[10px] text-gray-400">({recipe.rating_count || 0})</span>
-          </div>
+          {recipe.media_rating > 0 && recipe.rating_count > 0 && (
+            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 shadow-sm">
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <span className="text-xs font-bold">{recipe.media_rating.toFixed(1)}</span>
+              <span className="text-[10px] text-gray-400">({recipe.rating_count})</span>
+            </div>
+          )}
           <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-white" />
             <span className="text-xs text-white font-medium">{recipe.prep_time} min</span>
