@@ -9,6 +9,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Snack", "Bevanda"];
 const difficulties = ["Facile", "Media", "Difficile"];
 const visibilities = ["all", "free", "premium"];
+const allOccasions = [
+  "Colazione", "Pranzo", "Cena", "Brunch", "Aperitivo",
+  "Natale", "Capodanno", "Pasqua", "San Valentino", "Compleanno",
+  "Cena romantica", "Festa in casa", "Picnic", "BBQ", "Estate",
+  "Autunno", "Inverno", "Primavera"
+];
+const allLifestyle = [
+  "Fitness", "Detox", "Vegano", "Vegetariano", "Senza glutine",
+  "Senza lattosio", "Low Carb", "Keto", "Alto proteico", "Light",
+  "Integrale", "Bambini", "Veloce", "Economico"
+];
 
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
