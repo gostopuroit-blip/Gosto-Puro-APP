@@ -6,10 +6,21 @@ import { toast } from "sonner";
 const difficulties = ["Facile", "Media", "Difficile"];
 const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Snack", "Bevanda"];
 
+const countries = [
+  { label: "Giappone", flag: "🇯🇵" },
+  { label: "Messico", flag: "🇲🇽" },
+  { label: "India", flag: "🇮🇳" },
+  { label: "Thailandia", flag: "🇹🇭" },
+  { label: "Spagna", flag: "🇪🇸" },
+  { label: "Grecia", flag: "🇬🇷" },
+  { label: "Stati Uniti", flag: "🇺🇸" },
+];
+
 export default function AdminRecipeGenerator() {
   const [occasions, setOccasions] = useState([]);
   const [loadingOcc, setLoadingOcc] = useState(true);
   const [selectedOcc, setSelectedOcc] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const [existingTitles, setExistingTitles] = useState([]);
 
   // params
@@ -17,6 +28,8 @@ export default function AdminRecipeGenerator() {
   const [maxTime, setMaxTime] = useState(30);
   const [servings, setServings] = useState(4);
   const [extraNote, setExtraNote] = useState("");
+
+  const isInternational = selectedOcc?.label?.toLowerCase().includes("cucina internazionale");
 
   // generated
   const [recipe, setRecipe] = useState(null);
