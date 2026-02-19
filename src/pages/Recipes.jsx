@@ -181,6 +181,26 @@ export default function Recipes() {
         ))}
       </div>
 
+      {/* Occasion Filter */}
+      <div className="px-5 pb-4">
+        <p className="text-xs text-gray-400 font-semibold uppercase mb-2">Occasioni</p>
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar">
+          {occasions.map((occ) => (
+            <button
+              key={occ.id}
+              onClick={() => toggleOccasion(occ.label)}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
+                activeTags.occasions.includes(occ.label)
+                  ? "bg-[#2D6A4F]/20 text-[#2D6A4F] border border-[#2D6A4F]/30"
+                  : "bg-white text-gray-500 border border-gray-100 hover:border-gray-200"
+              }`}
+            >
+              {occ.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Recipe List */}
       <div className="px-5 space-y-4">
         {filteredRecipes.length === 0 ? (
