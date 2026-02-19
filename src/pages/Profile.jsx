@@ -109,6 +109,18 @@ export default function Profile() {
     );
   };
 
+  const toggleDarkMode = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    if (next) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
   const toggleHealth = (label) => {
     setSelectedHealth((prev) =>
       prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label]
