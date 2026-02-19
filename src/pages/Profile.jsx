@@ -125,7 +125,13 @@ export default function Profile() {
             <div className="flex-1 space-y-2">
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
-                <p className="text-sm font-bold text-gray-800 mt-0.5">{name || "—"}</p>
+                <Input
+                  type="text"
+                  placeholder="Es. Brandom"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-1 h-8 text-sm rounded-xl border-gray-100"
+                />
                 <p className="text-[10px] text-gray-300">{user?.email}</p>
               </div>
               <div>
@@ -212,23 +218,12 @@ export default function Profile() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-bold text-white">Pannello Admin</p>
-                <p className="text-[10px] text-white/70">Gestisci utenti, ricette e impostazioni</p>
+                <p className="text-xs text-white/80">Gestisci ricette, utenti e generazioni</p>
               </div>
-              <span className="text-white/60 text-lg">→</span>
             </div>
           </Link>
         </div>
       )}
-
-      {/* Logout */}
-      <div className="px-5 mt-4">
-        <button
-          onClick={() => base44.auth.logout()}
-          className="w-full py-3 rounded-2xl border border-gray-100 text-sm font-semibold text-gray-400 hover:text-red-500 hover:border-red-100 transition-colors"
-        >
-          Esci dall'account
-        </button>
-      </div>
     </div>
   );
 }
