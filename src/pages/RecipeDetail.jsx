@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Flame, Check, Minus, Plus
+  Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus
 } from "lucide-react";
+import ScreenHeader from "@/components/ScreenHeader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
