@@ -43,27 +43,25 @@ Deno.serve(async (req) => {
           },
         });
 
-        if (recipeResult && recipeResult.title) {
-          // Generate image
-          let imageUrl = "";
-          const imagePrompt = buildImagePrompt(occ, recipeResult);
-          const imgResult = await base44.integrations.Core.GenerateImage({ prompt: imagePrompt });
-          if (imgResult?.url) imageUrl = imgResult.url;
+      if (recipeResult && recipeResult.title) {
+        // Generate image
+        let imageUrl = "";
+        const imagePrompt = buildImagePrompt(occ, recipeResult);
+        const imgResult = await base44.integrations.Core.GenerateImage({ prompt: imagePrompt });
+        if (imgResult?.url) imageUrl = imgResult.url;
 
-          // Save recipe
-          const recipeData = {
-            ...recipeResult,
-            image_url: imageUrl || "",
-            status: "pubblicata",
-            gen_prompt: prompt,
-            numero_salvate: 0,
-            numero_preparate: 0,
-          };
+        // Save recipe
+        const recipeData = {
+          ...recipeResult,
+          image_url: imageUrl || "",
+          status: "pubblicata",
+          gen_prompt: prompt,
+          numero_salvate: 0,
+          numero_preparate: 0,
+        };
 
-          await base44.asServiceRole.entities.Recipe.create(recipeData);
-          results[group.name].push({ title: recipeResult.title, image: imageUrl ? "✓" : "✗" });
-          totalGenerated++;
-        }
+        await base44.asServiceRole.entities.Recipe.create(recipeData);
+        totalGenerated++;
       }
     }
 
