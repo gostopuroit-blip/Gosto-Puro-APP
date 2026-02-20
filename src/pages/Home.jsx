@@ -52,6 +52,8 @@ const lifestyleTags = [
 { label: "Low carb", icon: "🥬" }];
 
 
+const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
+
 export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,20 +61,24 @@ export default function Home() {
   const [userPhoto, setUserPhoto] = useState("");
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef(null);
-  const cardWidth = 176 + 12; // w-44 = 176px + gap-3 = 12px
+  const cardWidth = 176 + 12;
+  const [dailyNotif, setDailyNotif] = useState(null);
 
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
-    const [recipes, user] = await Promise.all([
-    base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
-    base44.auth.me().catch(() => null)]
-    );
+    const today = new Date().toISOString().split("T")[0];
+    const [recipes, user, notifs] = await Promise.all([
+      base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
+      base44.auth.me().catch(() => null),
+      base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
+    ]);
     setTopRecipes(recipes);
     if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
+    if (notifs?.length > 0) setDailyNotif(notifs[0]);
     setLoading(false);
   };
 
