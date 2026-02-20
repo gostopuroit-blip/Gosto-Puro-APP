@@ -14,11 +14,14 @@ const dayNames = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "
 export default function Planner() {
   const [plan, setPlan] = useState(null);
   const [recipes, setRecipes] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [userRecipes, setUserRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [replaceTarget, setReplaceTarget] = useState(null); // { dayIndex, meal }
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFolder, setSelectedFolder] = useState(null);
 
   useEffect(() => {
     loadData();
