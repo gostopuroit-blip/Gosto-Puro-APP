@@ -131,9 +131,8 @@ export default function Planner() {
 
   const swapRecipe = async (dayIndex, meal) => {
     if (!plan) return;
-    const currentId = meal === "pranzo" ? plan.plan_data[dayIndex].pranzo_id : plan.plan_data[dayIndex].cena_id;
-    const usedIds = plan.plan_data.flatMap((d) => [d.pranzo_id, d.cena_id]);
-    const available = recipes.filter((r) => !usedIds.includes(r.id) && r.prep_time <= (plan.max_time || 30));
+    const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
+    const available = recipes.filter((r) => !usedIds.includes(r.id) && r.prep_time <= (plan.max_time || 60));
     
     if (available.length === 0) {
       toast.error("Nessuna ricetta disponibile");
@@ -143,7 +142,9 @@ export default function Planner() {
     const newRecipe = available[Math.floor(Math.random() * available.length)];
     const newPlanData = [...plan.plan_data];
     
-    if (meal === "pranzo") {
+    if (meal === "colazione") {
+      newPlanData[dayIndex] = { ...newPlanData[dayIndex], colazione_id: newRecipe.id, colazione_title: newRecipe.title };
+    } else if (meal === "pranzo") {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], pranzo_id: newRecipe.id, pranzo_title: newRecipe.title };
     } else {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: newRecipe.id, cena_title: newRecipe.title };
