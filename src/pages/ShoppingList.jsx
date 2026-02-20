@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Check, Loader2, ShoppingCart, RefreshCw, Trash2 } from "lucide-react";
 import ScreenHeader from "@/components/ScreenHeader";
+import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
