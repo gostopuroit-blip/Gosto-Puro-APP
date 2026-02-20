@@ -251,7 +251,9 @@ export default function Home() {
             to={createPageUrl(`Recipes?lifestyle=${encodeURIComponent(tag.label)}`)}
             className="flex-shrink-0 flex flex-col items-center gap-2 bg-white dark:bg-[#1A2B20] rounded-2xl p-4 shadow-sm border border-gray-50 dark:border-[#2D4A38] w-[100px] hover:border-[#2D6A4F]/20 dark:hover:border-[#40916C]/30 hover:shadow-md transition-all duration-200 active:scale-[0.97]">
 
-              <span className="text-2xl">{tag.icon}</span>
+              <div className="w-[48px] h-[48px] rounded-xl overflow-hidden">
+                <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" />
+              </div>
               <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center leading-tight">{tag.label}</span>
             </Link>
           )}
