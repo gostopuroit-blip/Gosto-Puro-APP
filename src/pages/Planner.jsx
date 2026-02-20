@@ -171,6 +171,30 @@ export default function Planner() {
     setPlan({ ...plan, plan_data: newPlanData });
   };
 
+   const clearAllRecipes = async () => {
+     if (!plan) return;
+     const newPlanData = plan.plan_data.map((day) => ({
+       ...day,
+       colazione_id: "",
+       colazione_title: "",
+       pranzo_id: "",
+       pranzo_title: "",
+       cena_id: "",
+       cena_title: "",
+     }));
+     await base44.entities.MealPlan.update(plan.id, { plan_data: newPlanData });
+     setPlan({ ...plan, plan_data: newPlanData });
+     toast.success("Tutte le ricette rimosse!");
+   };
+
+   const deletePlan = async () => {
+     if (!plan) return;
+     await base44.entities.MealPlan.delete(plan.id);
+     setPlan(null);
+     toast.success("Piano eliminato!");
+   };
+
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
