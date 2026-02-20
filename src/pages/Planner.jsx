@@ -410,7 +410,7 @@ export default function Planner() {
                       </div>
                       <div className="flex gap-1">
                         <button
-                          onClick={() => swapRecipe(dayIndex, "cena")}
+                          onClick={() => setReplaceTarget({ dayIndex, meal: "cena" })}
                           className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
                         >
                           <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
