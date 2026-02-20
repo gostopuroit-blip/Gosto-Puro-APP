@@ -63,9 +63,16 @@ export default function Planner() {
     const used = new Set();
 
     for (let i = 0; i < days; i++) {
-      const pranzo = eligible.find(
-        (r) => !used.has(r.id) && (r.category === "Pranzo" || r.category === "Colazione" || r.category === "Snack" || true)
-      );
+      const colazionePool = eligible.filter((r) => !used.has(r.id) && r.category === "Colazione");
+      const colazione = colazionePool.length > 0
+        ? colazionePool[Math.floor(Math.random() * colazionePool.length)]
+        : eligible.find((r) => !used.has(r.id));
+      if (colazione) used.add(colazione.id);
+
+      const pranzoPool = eligible.filter((r) => !used.has(r.id) && (r.category === "Pranzo" || r.category === "Snack"));
+      const pranzo = pranzoPool.length > 0
+        ? pranzoPool[0]
+        : eligible.find((r) => !used.has(r.id));
       if (pranzo) used.add(pranzo.id);
 
       const cena = eligible.find((r) => !used.has(r.id));
@@ -74,6 +81,8 @@ export default function Planner() {
       planData.push({
         day: i + 1,
         day_name: dayNames[i % 7],
+        colazione_id: colazione?.id || "",
+        colazione_title: colazione?.title || "",
         pranzo_id: pranzo?.id || "",
         pranzo_title: pranzo?.title || "",
         cena_id: cena?.id || "",
