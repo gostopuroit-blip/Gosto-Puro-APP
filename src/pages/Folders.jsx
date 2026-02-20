@@ -16,7 +16,7 @@ const systemFolders = [
 ];
 
 export default function Folders() {
-  const [expandedFolder, setExpandedFolder] = useState(null);
+  const [expandedFolder, setExpandedFolder] = useState(null); // Track expanded folder
   const [userRecipes, setUserRecipes] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [customFolders, setCustomFolders] = useState([]);
