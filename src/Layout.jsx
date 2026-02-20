@@ -14,8 +14,15 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
 
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F1A14] flex flex-col">
       <style>{`
         :root {
           --gusto-green: #2D6A4F;
