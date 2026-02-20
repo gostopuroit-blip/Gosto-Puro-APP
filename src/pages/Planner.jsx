@@ -102,28 +102,30 @@ export default function Planner() {
     toast.success("Piano creato! 🎉");
   };
 
+  const openReplacePicker = (dayIndex, meal) => {
+    setSearchQuery("");
+    setReplacePicker({ dayIndex, meal });
+  };
+
   const swapRecipe = async (dayIndex, meal) => {
     if (!plan) return;
-    const currentId = meal === "pranzo" ? plan.plan_data[dayIndex].pranzo_id : plan.plan_data[dayIndex].cena_id;
     const usedIds = plan.plan_data.flatMap((d) => [d.pranzo_id, d.cena_id]);
     const available = recipes.filter((r) => !usedIds.includes(r.id) && r.prep_time <= (plan.max_time || 30));
-    
-    if (available.length === 0) {
-      toast.error("Nessuna ricetta disponibile");
-      return;
-    }
-
+    if (available.length === 0) { toast.error("Nessuna ricetta disponibile"); return; }
     const newRecipe = available[Math.floor(Math.random() * available.length)];
+    await applyRecipeSwap(dayIndex, meal, newRecipe);
+  };
+
+  const applyRecipeSwap = async (dayIndex, meal, newRecipe) => {
     const newPlanData = [...plan.plan_data];
-    
     if (meal === "pranzo") {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], pranzo_id: newRecipe.id, pranzo_title: newRecipe.title };
     } else {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: newRecipe.id, cena_title: newRecipe.title };
     }
-
     await base44.entities.MealPlan.update(plan.id, { plan_data: newPlanData });
     setPlan({ ...plan, plan_data: newPlanData });
+    setReplacePicker(null);
     toast.success("Ricetta sostituita!");
   };
 
