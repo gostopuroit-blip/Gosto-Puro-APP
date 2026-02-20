@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import RecipeCard from "@/components/RecipeCard";
 
 const systemFolders = [
   { key: "per_fare", label: "Per fare", icon: "📋" },
