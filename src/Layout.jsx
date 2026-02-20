@@ -13,6 +13,7 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
