@@ -270,11 +270,11 @@ export default function Profile() {
               <AlertDialogCancel className="rounded-xl">Annulla</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-red-500 hover:bg-red-600 rounded-xl"
-                onClick={() => {
-                  toast.error("Per eliminare l'account contatta il supporto.");
-                }}
+                onClick={handleDeleteAccount}
+                disabled={deletingAccount}
               >
-                Elimina
+                {deletingAccount ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <AlertTriangle className="w-4 h-4 mr-2" />}
+                Elimina definitivamente
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
