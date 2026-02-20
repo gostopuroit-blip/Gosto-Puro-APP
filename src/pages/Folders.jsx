@@ -242,23 +242,38 @@ export default function Folders() {
           const isExpanded = expandedFolder === f.id;
           return (
             <div key={f.id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-              <button
-                onClick={() => setExpandedFolder(isExpanded ? null : f.id)}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{f.icon || "📁"}</span>
+              <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                <button
+                  onClick={() => setExpandedFolder(isExpanded ? null : f.id)}
+                  className="flex-1 flex items-center gap-3"
+                >
+                  <span 
+                    className="text-2xl cursor-pointer hover:opacity-80" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingFolderId(f.id);
+                      setShowIconPicker(true);
+                    }}
+                  >{f.icon || "📁"}</span>
                   <div className="text-left">
                     <p className="font-semibold text-gray-900 text-sm">{f.name}</p>
                     <p className="text-xs text-gray-500">{folderRecipes.length} ricette</p>
                   </div>
+                </button>
+                <div className="flex items-center gap-2">
+                  <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
+                  <button
+                    onClick={() => deleteFolder(f.id)}
+                    className="text-gray-400 hover:text-red-500 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
-              </button>
+              </div>
               {isExpanded && (
                 <div className="px-4 pb-4 border-t border-gray-100 grid grid-cols-2 gap-3">
                   {folderRecipes.map(({ ur, recipe }) => (
