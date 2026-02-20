@@ -78,55 +78,48 @@ export default function Planner() {
     const usedCene = new Set();
 
     for (let i = 0; i < days; i++) {
-      const availColazioni = colazioniPool.filter((r) => !usedColazioni.has(r.id));
-      const colazione = availColazioni.length > 0
-        ? availColazioni[Math.floor(Math.random() * availColazioni.length)]
-        : null;
-      if (colazione) usedColazioni.add(colazione.id);
+      const colazioneRecipe = colazioniPool.find((r) => !usedColazioni.has(r.id));
+      const pranzoRecipe = pranziPool.find((r) => !usedPranzi.has(r.id));
+      const cenaRecipe = cenePool.find((r) => !usedCene.has(r.id));
 
-      const availPranzi = pranziPool.filter((r) => !usedPranzi.has(r.id));
-      const pranzo = availPranzi.length > 0
-        ? availPranzi[Math.floor(Math.random() * availPranzi.length)]
-        : null;
-      if (pranzo) usedPranzi.add(pranzo.id);
+      if (colazioneRecipe) usedColazioni.add(colazioneRecipe.id);
+      if (pranzoRecipe) usedPranzi.add(pranzoRecipe.id);
+      if (cenaRecipe) usedCene.add(cenaRecipe.id);
 
-      const availCene = cenePool.filter((r) => !usedCene.has(r.id));
-      const cena = availCene.length > 0
-        ? availCene[Math.floor(Math.random() * availCene.length)]
-        : null;
-      if (cena) usedCene.add(cena.id);
-
+      const dayOfWeek = (new Date().getDay() + i) % 7;
       planData.push({
         day: i + 1,
-        day_name: dayNames[i % 7],
-        colazione_id: colazione?.id || "",
-        colazione_title: colazione?.title || "",
-        pranzo_id: pranzo?.id || "",
-        pranzo_title: pranzo?.title || "",
-        cena_id: cena?.id || "",
-        cena_title: cena?.title || "",
+        day_name: dayNames[dayOfWeek],
+        colazione_id: colazioneRecipe?.id || "",
+        colazione_title: colazioneRecipe?.title || "",
+        pranzo_id: pranzoRecipe?.id || "",
+        pranzo_title: pranzoRecipe?.title || "",
+        pranzo_servings: servings,
+        cena_id: cenaRecipe?.id || "",
+        cena_title: cenaRecipe?.title || "",
+        cena_servings: servings,
       });
     }
 
-    // Deactivate old plans
-    const oldPlans = await base44.entities.MealPlan.filter({ is_active: true });
-    for (const old of oldPlans) {
-      await base44.entities.MealPlan.update(old.id, { is_active: false });
-    }
-
-    const newPlan = await base44.entities.MealPlan.create({
-      name: `Piano ${days} giorni`,
+    const newPlan = {
+      name: `Piano ${focus}`,
       days,
       focus,
       max_time: maxTime,
-      servings: servings || 2,
+      servings,
       plan_data: planData,
       is_active: true,
-    });
+    };
 
-    setPlan(newPlan);
+    // Deactivate old plans
+    if (plan) {
+      await base44.entities.MealPlan.update(plan.id, { is_active: false });
+    }
+
+    const created = await base44.entities.MealPlan.create(newPlan);
+    setPlan(created);
     setCreating(false);
-    toast.success("Piano creato! 🎉");
+    toast.success("Piano creato!");
   };
 
   const replaceWithRecipe = async (recipe) => {
@@ -160,28 +153,23 @@ export default function Planner() {
     } else {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: "", cena_title: "" };
     }
-
     await base44.entities.MealPlan.update(plan.id, { plan_data: newPlanData });
     setPlan({ ...plan, plan_data: newPlanData });
-  };
-
-  const deletePlan = async () => {
-    if (!plan || !window.confirm("Elimina questo piano?")) return;
-    await base44.entities.MealPlan.delete(plan.id);
-    setPlan(null);
-    toast.success("Piano eliminato");
+    toast.success("Ricetta rimossa!");
   };
 
   const clearAllMeals = async () => {
-    if (!plan || !window.confirm("Eliminare tutte le ricette dal piano?")) return;
-    const newPlanData = plan.plan_data.map((d) => ({
-      ...d,
+    if (!plan) return;
+    const newPlanData = plan.plan_data.map((day) => ({
+      ...day,
       colazione_id: "",
       colazione_title: "",
       pranzo_id: "",
       pranzo_title: "",
+      pranzo_servings: day.pranzo_servings,
       cena_id: "",
       cena_title: "",
+      cena_servings: day.cena_servings,
     }));
     await base44.entities.MealPlan.update(plan.id, { plan_data: newPlanData });
     setPlan({ ...plan, plan_data: newPlanData });
@@ -198,17 +186,17 @@ export default function Planner() {
 
   return (
     <div className="pb-4">
-      <div className="px-5 pt-14 pb-4">
+      <div className="px-5 pt-14 pb-4 bg-gradient-to-b from-[#F0F7F4] dark:from-[#1A2B20] to-[#FAFAF8] dark:to-[#0F1A14]">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Il mio Piano</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Pianifica i tuoi pasti</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Il mio Piano</h1>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Pianifica i tuoi pasti</p>
           </div>
           <div className="flex gap-2">
             {plan && (
               <>
                 <Link to={createPageUrl("ShoppingList")}>
-                  <Button size="sm" variant="outline" className="rounded-xl">
+                  <Button size="sm" variant="outline" className="rounded-xl dark:bg-[#2D3F35] dark:border-[#3D5246]">
                     <ShoppingCart className="w-4 h-4" />
                   </Button>
                 </Link>
@@ -216,7 +204,7 @@ export default function Planner() {
                   size="sm"
                   variant="outline"
                   onClick={clearAllMeals}
-                  className="rounded-xl text-red-500 border-red-200 hover:bg-red-50"
+                  className="rounded-xl text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/20 dark:text-red-400"
                   title="Elimina tutte le ricette"
                 >
                   <Trash className="w-4 h-4" />
@@ -224,8 +212,12 @@ export default function Planner() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={deletePlan}
-                  className="rounded-xl text-red-600 border-red-300 hover:bg-red-50"
+                  onClick={() => {
+                    base44.entities.MealPlan.delete(plan.id);
+                    setPlan(null);
+                    toast.success("Piano eliminato");
+                  }}
+                  className="rounded-xl text-red-600 border-red-300 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/20 dark:text-red-400"
                   title="Elimina piano"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -234,314 +226,146 @@ export default function Planner() {
             )}
             <Button
               size="sm"
-              onClick={() => setShowModal(true)}
               className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
+              onClick={() => setShowModal(true)}
             >
-              <Plus className="w-4 h-4 mr-1" />
+              <Plus className="w-4 h-4" />
               {plan ? "Nuovo" : "Crea"}
             </Button>
           </div>
         </div>
       </div>
 
-      {creating && (
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 text-[#2D6A4F] animate-spin mb-4" />
-          <p className="text-sm text-gray-400">Creo il tuo piano perfetto...</p>
-        </div>
-      )}
-
-      {!creating && !plan && (
-        <div className="px-5 text-center py-20">
-          <div className="w-20 h-20 bg-[#F0F7F4] rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <CalendarDays className="w-10 h-10 text-[#2D6A4F]" />
-          </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">Crea il tuo primo piano</h2>
-          <p className="text-sm text-gray-400 max-w-xs mx-auto mb-6">
-            Pianifica i tuoi pasti per la settimana in 2 secondi
-          </p>
-          <Button
-            onClick={() => setShowModal(true)}
-            className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Crea Piano
-          </Button>
-        </div>
-      )}
-
-      {!creating && plan && (
-        <div className="px-5 space-y-6">
-          {plan.plan_data.map((dayPlan, dayIndex) => {
-            const colazione = getRecipeById(dayPlan.colazione_id);
-            const pranzo = getRecipeById(dayPlan.pranzo_id);
-            const cena = getRecipeById(dayPlan.cena_id);
-
-            return (
-              <div key={dayIndex} className="border border-gray-100 rounded-2xl p-4 bg-white">
-                <h3 className="font-bold text-gray-900 mb-3">{dayPlan.day_name}</h3>
-
-                {/* Colazione */}
-                <div className="mb-4 pb-4 border-b border-gray-100">
-                  <p className="text-xs font-semibold text-[#2D6A4F] mb-2">☀️ Colazione</p>
-                  {colazione ? (
-                    <>
-                      <Link to={createPageUrl(`RecipeDetail?id=${colazione.id}`)}>
-                        <div className="mb-2 rounded-lg overflow-hidden bg-gray-100 h-32 cursor-pointer hover:opacity-90 transition">
-                          {colazione.image_url && (
-                            <img
-                              src={colazione.image_url}
-                              alt={colazione.title}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                      </Link>
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{colazione.title}</p>
-                          {colazione.prep_time && (
-                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                              <Clock className="w-3 h-3" /> {colazione.prep_time} min
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setReplaceTarget({ dayIndex, meal: "colazione" })}
-                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
-                        </button>
-                        <button
-                          onClick={() => removeMeal(dayIndex, "colazione")}
-                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
-                        >
-                          <X className="w-3.5 h-3.5 inline mr-1" /> Rimuovi
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => setReplaceTarget({ dayIndex, meal: "colazione" })}
-                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition w-full text-left"
-                    >
-                      + Aggiungi ricetta
-                    </button>
-                  )}
-                </div>
-
-                {/* Pranzo */}
-                <div className="mb-4 pb-4 border-b border-gray-100">
-                  <p className="text-xs font-semibold text-[#2D6A4F] mb-2">🍽️ Pranzo</p>
-                  {pranzo ? (
-                    <>
-                      <Link to={createPageUrl(`RecipeDetail?id=${pranzo.id}`)}>
-                        <div className="mb-2 rounded-lg overflow-hidden bg-gray-100 h-32 cursor-pointer hover:opacity-90 transition">
-                          {pranzo.image_url && (
-                            <img
-                              src={pranzo.image_url}
-                              alt={pranzo.title}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                      </Link>
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{pranzo.title}</p>
-                          <div className="flex gap-3 text-xs text-gray-400 mt-0.5">
-                            {pranzo.prep_time && (
-                              <p className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> {pranzo.prep_time} min
-                              </p>
-                            )}
-                            {pranzo.calories && <p>{pranzo.calories} kcal</p>}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setReplaceTarget({ dayIndex, meal: "pranzo" })}
-                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
-                        </button>
-                        <button
-                          onClick={() => removeMeal(dayIndex, "pranzo")}
-                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
-                        >
-                          <X className="w-3.5 h-3.5 inline mr-1" /> Rimuovi
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => setReplaceTarget({ dayIndex, meal: "pranzo" })}
-                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition w-full text-left"
-                    >
-                      + Aggiungi ricetta
-                    </button>
-                  )}
-                </div>
-
-                {/* Cena */}
+      {/* Plan Grid */}
+      <div className="px-5 space-y-4 mt-4">
+        {plan ? (
+          plan.plan_data.map((day, dayIndex) => (
+            <div key={dayIndex} className="bg-white dark:bg-[#2D3F35] border border-gray-100 dark:border-[#3D5246] rounded-3xl p-4">
+              {/* Day Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <CalendarDays className="w-5 h-5 text-[#2D6A4F]" />
                 <div>
-                  <p className="text-xs font-semibold text-[#2D6A4F] mb-2">🌙 Cena</p>
-                  {cena ? (
-                    <>
-                      <Link to={createPageUrl(`RecipeDetail?id=${cena.id}`)}>
-                        <div className="mb-2 rounded-lg overflow-hidden bg-gray-100 h-32 cursor-pointer hover:opacity-90 transition">
-                          {cena.image_url && (
-                            <img
-                              src={cena.image_url}
-                              alt={cena.title}
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                      </Link>
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{cena.title}</p>
-                          <div className="flex gap-3 text-xs text-gray-400 mt-0.5">
-                            {cena.prep_time && (
-                              <p className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> {cena.prep_time} min
-                              </p>
-                            )}
-                            {cena.calories && <p>{cena.calories} kcal</p>}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setReplaceTarget({ dayIndex, meal: "cena" })}
-                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
-                        </button>
-                        <button
-                          onClick={() => removeMeal(dayIndex, "cena")}
-                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
-                        >
-                          <X className="w-3.5 h-3.5 inline mr-1" /> Rimuovi
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => setReplaceTarget({ dayIndex, meal: "cena" })}
-                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition w-full text-left"
-                    >
-                      + Aggiungi ricetta
-                    </button>
-                  )}
+                  <p className="font-bold text-gray-900 dark:text-white">{day.day_name}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">Giorno {day.day}</p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
 
+              {/* Meals Grid */}
+              <div className="space-y-3">
+                {["colazione", "pranzo", "cena"].map((meal) => {
+                  const recipeId = day[`${meal}_id`];
+                  const title = day[`${meal}_title`];
+                  const recipe = recipeId ? getRecipeById(recipeId) : null;
+                  const mealLabels = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
+
+                  return (
+                    <div
+                      key={meal}
+                      onClick={() => setReplaceTarget({ dayIndex, meal })}
+                      className={`p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                        replaceTarget?.meal === meal && replaceTarget?.dayIndex === dayIndex
+                          ? "border-[#2D6A4F] bg-[#F0F7F4] dark:bg-[#1A2B20]"
+                          : "border-gray-100 dark:border-[#3D5246] bg-gray-50 dark:bg-[#1A2B20] hover:border-[#2D6A4F]/30"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <ChefHat className="w-4 h-4 text-[#2D6A4F]" />
+                          <div>
+                            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">{mealLabels[meal]}</p>
+                            <p className={`text-sm font-semibold ${title ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500"}`}>
+                              {title || "Nessuna ricetta"}
+                            </p>
+                          </div>
+                        </div>
+                        {recipe && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeMeal(dayIndex, meal);
+                            }}
+                            className="text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-5xl mb-4">📅</p>
+            <p className="text-gray-500 dark:text-gray-400 font-semibold mb-4">Nessun piano attivo</p>
+            <Button
+              size="sm"
+              onClick={() => setShowModal(true)}
+              className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl"
+            >
+              Crea il tuo primo piano
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Planner Modal */}
+      {showModal && <PlannerModal onCreate={createPlan} onClose={() => setShowModal(false)} isLoading={creating} />}
+
+      {/* Replace Recipe Search */}
       {replaceTarget && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex flex-col">
-          <div className="bg-white mt-0 rounded-t-3xl pt-6 max-h-[95vh] flex flex-col">
-            <div className="flex items-center justify-between mb-4 px-5">
-              <h3 className="font-bold text-gray-900">Scegli ricetta</h3>
-              <button onClick={() => { setReplaceTarget(null); setSelectedFolder(null); }} className="text-gray-400">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-end z-50">
+          <div className="w-full bg-white dark:bg-[#2D3F35] rounded-t-3xl p-4 max-h-96 flex flex-col border-t border-gray-100 dark:border-[#3D5246]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-900 dark:text-white">Scegli ricetta</h3>
+              <button onClick={() => setReplaceTarget(null)} className="text-gray-400 dark:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mb-4 px-5">
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600" />
               <input
-                autoFocus
                 type="text"
-                placeholder="Cerca ricette..."
+                placeholder="Cerca..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-[#3D5246] dark:bg-[#1A2B20] dark:text-white text-sm"
               />
             </div>
 
-            {/* Folder Tabs */}
-            <div className="flex gap-2 px-5 mb-4 overflow-x-auto pb-2 -mx-5 px-5">
-              <button
-                onClick={() => setSelectedFolder(null)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-                  selectedFolder === null
-                    ? "bg-[#2D6A4F] text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                Tutte
-              </button>
-              {folders.map((folder) => (
-                <button
-                  key={folder.id}
-                  onClick={() => setSelectedFolder(folder.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
-                    selectedFolder === folder.id
-                      ? "bg-[#2D6A4F] text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {folder.icon} {folder.name}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-5 pb-6">
-              <div className="grid grid-cols-2 gap-3">
-                {recipes
-                  .filter((r) => {
-                    const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
-                    const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
-                    const notUsed = !usedIds.includes(r.id);
-                    
-                    if (selectedFolder === null) {
-                      return matchesSearch && notUsed;
-                    }
-                    
-                    const recipeInFolder = userRecipes.some(
-                      (ur) => ur.recipe_id === r.id && ur.folder_ids && ur.folder_ids.includes(selectedFolder)
-                    );
-                    return matchesSearch && notUsed && recipeInFolder;
-                  })
-                  .map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() => replaceWithRecipe(r)}
-                      className="rounded-xl overflow-hidden hover:opacity-80 transition flex flex-col"
-                    >
-                      <div className="bg-gray-100 h-24 overflow-hidden">
-                        {r.image_url && (
-                          <img
-                            src={r.image_url}
-                            alt={r.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
+            {/* Recipes List */}
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {recipes
+                .filter((r) => {
+                  const meal = replaceTarget.meal;
+                  return r.title.toLowerCase().includes(searchQuery.toLowerCase()) && r.category === "Colazione" ||
+                    r.category === "Pranzo" ||
+                    r.category === "Cena";
+                })
+                .map((recipe) => (
+                  <button
+                    key={recipe.id}
+                    onClick={() => replaceWithRecipe(recipe)}
+                    className="w-full flex items-center gap-3 p-2 rounded-xl bg-gray-50 dark:bg-[#1A2B20] hover:bg-gray-100 dark:hover:bg-[#2D3F35] text-left transition border border-gray-100 dark:border-[#3D5246]"
+                  >
+                    <img src={recipe.image_url} alt="" className="w-10 h-10 rounded object-cover" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{recipe.title}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <Clock className="w-3 h-3" />
+                        {recipe.prep_time}min
                       </div>
-                      <div className="bg-white p-2 border border-t-0 border-gray-100 flex-1 flex items-center">
-                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{r.title}</p>
-                      </div>
-                    </button>
-                  ))}
-              </div>
+                    </div>
+                  </button>
+                ))}
             </div>
           </div>
         </div>
       )}
-
-      <PlannerModal
-        open={showModal}
-        onOpenChange={setShowModal}
-        onCreatePlan={createPlan}
-        loading={creating}
-      />
     </div>
   );
 }
