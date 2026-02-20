@@ -395,7 +395,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
       ...recipe,
       image_url: imageUrl || "",
       status: "pubblicata",
-      gen_prompt: buildRecipePrompt(selectedOcc),
+      gen_prompt: buildRecipePrompt(selectedOcc, selectedCountry),
       numero_salvate: 0,
       numero_preparate: 0,
       ...(isInternational && { paese: selectedCountry }),
