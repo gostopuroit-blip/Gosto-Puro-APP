@@ -218,6 +218,18 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Admin Button */}
+      {user?.role === "admin" && (
+        <div className="px-5 mt-4">
+          <Link to={createPageUrl("Admin")} className="w-full block">
+            <Button className="w-full rounded-2xl bg-purple-600 hover:bg-purple-700 text-white">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              Pannello Admin
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Logout Button */}
       <div className="px-5 mt-4">
         <AlertDialog>
