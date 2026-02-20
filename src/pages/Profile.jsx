@@ -109,12 +109,12 @@ export default function Profile() {
       </div>
 
       {/* Avatar + Name */}
-      <div className="px-5">
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-50">
+      <div className="px-5 mt-4">
+        <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246]">
           <div className="flex items-center gap-4">
             {/* Photo */}
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F0F7F4] flex items-center justify-center">
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F0F7F4] dark:bg-[#1A2B20] flex items-center justify-center">
                 {photoUrl ? (
                   <img src={photoUrl} alt="Foto profilo" className="w-full h-full object-cover" />
                 ) : (
@@ -133,24 +133,24 @@ export default function Profile() {
             {/* Name + Age */}
             <div className="flex-1 space-y-2">
               <div>
-                <label className="text-[13px] text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
+                <label className="text-[13px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">Nome</label>
                 <Input
                   type="text"
                   placeholder="Es. Brandom"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1 h-8 text-sm rounded-xl border-gray-100"
+                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white"
                 />
-                <p className="text-[13px] text-gray-300">{user?.email}</p>
+                <p className="text-[13px] text-gray-600 dark:text-gray-400">{user?.email}</p>
               </div>
               <div>
-                <label className="text-[13px] text-gray-400 font-semibold uppercase tracking-wider">Età</label>
+                <label className="text-[13px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">Età</label>
                 <Input
                   type="number"
                   placeholder="Es. 28"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 w-24"
+                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white w-24"
                 />
               </div>
             </div>
@@ -160,14 +160,14 @@ export default function Profile() {
 
       {/* Appearance */}
       <div className="px-5 mt-4">
-        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-50 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gray-100 flex items-center justify-center">
-              {darkMode ? <Moon className="w-5 h-5 text-gray-700" /> : <Sun className="w-5 h-5 text-yellow-500" />}
+            <div className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-[#1A2B20] flex items-center justify-center">
+              {darkMode ? <Moon className="w-5 h-5 text-gray-700 dark:text-gray-400" /> : <Sun className="w-5 h-5 text-yellow-500" />}
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900">Modalità Scura</p>
-              <p className="text-xs text-gray-400">Cambia l'aspetto dell'app</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">Modalità Scura</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Cambia l'aspetto dell'app</p>
             </div>
           </div>
           <button
@@ -195,15 +195,15 @@ export default function Profile() {
 
       {/* Abbonamento */}
       <div className="px-5 mt-4">
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-4 border border-amber-100 flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Crown className="w-5 h-5 text-amber-500" />
+        <div className="bg-gradient-to-r from-amber-50 dark:from-amber-950/20 to-yellow-50 dark:to-yellow-950/20 rounded-2xl p-4 border border-amber-100 dark:border-amber-900/40 flex items-center gap-3">
+          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Crown className="w-5 h-5 text-amber-500 dark:text-amber-400" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-gray-800">
+            <p className="text-sm font-bold text-gray-800 dark:text-white">
               {user?.plan === "premium" || user?.role === "admin" ? "Piano Premium attivo ✨" : "Piano Free"}
             </p>
-            <p className="text-[10px] text-gray-500 mt-0.5">
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
               {user?.plan === "premium" || user?.role === "admin"
                 ? "Hai accesso completo a tutte le funzionalità"
                 : "Sblocca Planner, Occasioni Speciali e molto altro"}
@@ -211,55 +211,37 @@ export default function Profile() {
 
           </div>
           {(!user?.plan || user?.plan === "free") && user?.role !== "admin" && (
-            <button className="bg-amber-500 text-white text-[13px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0">
+            <button className="bg-amber-500 dark:bg-amber-600 text-white text-[13px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0">
               Upgrade
             </button>
           )}
         </div>
       </div>
 
-      {/* Admin Panel Button */}
-      {user?.role === "admin" && (
-        <div className="px-5 mt-4">
-          <Link to={createPageUrl("Admin")}>
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-4 flex items-center gap-3 shadow-lg shadow-purple-200 active:scale-[0.98] transition-transform">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-white">Pannello Admin</p>
-                <p className="text-[13px] text-white/80">Gestisci ricette, utenti e generazioni</p>
-              </div>
-            </div>
-          </Link>
-        </div>
-      )}
-
-      {/* Delete Account */}
-      <div className="px-5 mt-4 mb-4">
+      {/* Logout Button */}
+      <div className="px-5 mt-4">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <button className="w-full flex items-center justify-center gap-2 py-3 text-[13px] font-medium text-red-400 border border-red-100 rounded-2xl active:bg-red-50 transition-colors">
-              <Trash2 className="w-4 h-4" />
-              Elimina account
-            </button>
+            <Button variant="outline" className="w-full rounded-2xl border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Esci da profilo
+            </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="rounded-2xl mx-4">
+          <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Eliminare l'account?</AlertDialogTitle>
+              <AlertDialogTitle>Conferma logout</AlertDialogTitle>
               <AlertDialogDescription>
-                Questa azione è irreversibile. Tutti i tuoi dati, ricette salvate e piani verranno eliminati definitivamente.
+                Sei sicuro di voler uscire? Dovrai accedere nuovamente per usare l'app.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="rounded-xl">Annulla</AlertDialogCancel>
+              <AlertDialogCancel>Annulla</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-red-500 hover:bg-red-600 rounded-xl"
                 onClick={() => {
-                  toast.error("Per eliminare l'account contatta il supporto.");
+                  base44.auth.logout();
                 }}
               >
-                Elimina
+                Esci
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
