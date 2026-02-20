@@ -4,7 +4,7 @@ import PlannerModal from "@/components/PlannerModal";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  CalendarDays, Plus, RefreshCw, Trash2, Clock, ShoppingCart, Loader2, Search, X
+  CalendarDays, Plus, RefreshCw, Trash2, Clock, ChefHat, ShoppingCart, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -17,8 +17,6 @@ export default function Planner() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [replacePicker, setReplacePicker] = useState(null); // { dayIndex, meal }
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     loadData();
@@ -102,30 +100,28 @@ export default function Planner() {
     toast.success("Piano creato! 🎉");
   };
 
-  const openReplacePicker = (dayIndex, meal) => {
-    setSearchQuery("");
-    setReplacePicker({ dayIndex, meal });
-  };
-
   const swapRecipe = async (dayIndex, meal) => {
     if (!plan) return;
+    const currentId = meal === "pranzo" ? plan.plan_data[dayIndex].pranzo_id : plan.plan_data[dayIndex].cena_id;
     const usedIds = plan.plan_data.flatMap((d) => [d.pranzo_id, d.cena_id]);
     const available = recipes.filter((r) => !usedIds.includes(r.id) && r.prep_time <= (plan.max_time || 30));
-    if (available.length === 0) { toast.error("Nessuna ricetta disponibile"); return; }
-    const newRecipe = available[Math.floor(Math.random() * available.length)];
-    await applyRecipeSwap(dayIndex, meal, newRecipe);
-  };
+    
+    if (available.length === 0) {
+      toast.error("Nessuna ricetta disponibile");
+      return;
+    }
 
-  const applyRecipeSwap = async (dayIndex, meal, newRecipe) => {
+    const newRecipe = available[Math.floor(Math.random() * available.length)];
     const newPlanData = [...plan.plan_data];
+    
     if (meal === "pranzo") {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], pranzo_id: newRecipe.id, pranzo_title: newRecipe.title };
     } else {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: newRecipe.id, cena_title: newRecipe.title };
     }
+
     await base44.entities.MealPlan.update(plan.id, { plan_data: newPlanData });
     setPlan({ ...plan, plan_data: newPlanData });
-    setReplacePicker(null);
     toast.success("Ricetta sostituita!");
   };
 
@@ -239,7 +235,6 @@ export default function Planner() {
                 recipeTitle={day.pranzo_title}
                 recipe={getRecipeById(day.pranzo_id)}
                 onSwap={() => swapRecipe(idx, "pranzo")}
-                onPick={() => openReplacePicker(idx, "pranzo")}
                 onRemove={() => removeMeal(idx, "pranzo")}
               />
 
@@ -251,7 +246,6 @@ export default function Planner() {
                 recipeTitle={day.cena_title}
                 recipe={getRecipeById(day.cena_id)}
                 onSwap={() => swapRecipe(idx, "cena")}
-                onPick={() => openReplacePicker(idx, "cena")}
                 onRemove={() => removeMeal(idx, "cena")}
               />
             </div>
@@ -268,60 +262,11 @@ export default function Planner() {
       )}
 
       <PlannerModal open={showModal} onClose={() => setShowModal(false)} onCreate={createPlan} />
-
-      {/* Recipe Picker Modal */}
-      {replacePicker && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setReplacePicker(null)} />
-          <div className="relative bg-white w-full max-w-lg rounded-t-3xl shadow-2xl z-10 max-h-[75vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 pt-5 pb-3">
-              <h3 className="text-base font-bold text-gray-900">Scegli una ricetta</h3>
-              <button onClick={() => setReplacePicker(null)} className="p-1.5 rounded-xl hover:bg-gray-100">
-                <X className="w-4 h-4 text-gray-500" />
-              </button>
-            </div>
-            <div className="px-5 pb-3">
-              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
-                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Cerca ricetta..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent text-sm flex-1 outline-none text-gray-700 placeholder-gray-400"
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="overflow-y-auto flex-1 px-5 pb-6 space-y-2">
-              {recipes
-                .filter((r) => r.title?.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => applyRecipeSwap(replacePicker.dayIndex, replacePicker.meal, r)}
-                    className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-[#F0F7F4] active:scale-[0.98] transition-all text-left border border-transparent hover:border-[#2D6A4F]/10"
-                  >
-                    {r.image_url ? (
-                      <img src={r.image_url} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex-shrink-0" />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{r.title}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">{r.category} • {r.prep_time} min</p>
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onPick, onRemove }) {
+function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onRemove }) {
   if (!recipeId) {
     return (
       <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
@@ -358,11 +303,8 @@ function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onPick,
         </div>
       </Link>
       <div className="flex gap-1 flex-shrink-0">
-        <button onClick={onSwap} title="Sostituisci casuale" className="p-2 rounded-lg hover:bg-gray-50 transition-colors">
+        <button onClick={onSwap} className="p-2 rounded-lg hover:bg-gray-50 transition-colors">
           <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
-        </button>
-        <button onClick={onPick} title="Scegli ricetta" className="p-2 rounded-lg hover:bg-[#F0F7F4] transition-colors">
-          <Search className="w-3.5 h-3.5 text-[#2D6A4F]" />
         </button>
         <button onClick={onRemove} className="p-2 rounded-lg hover:bg-red-50 transition-colors">
           <Trash2 className="w-3.5 h-3.5 text-gray-300 hover:text-red-400" />

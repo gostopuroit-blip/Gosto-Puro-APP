@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
-import PullToRefresh from "@/components/PullToRefresh";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Loader2 } from "lucide-react";
@@ -93,7 +92,6 @@ export default function Home() {
   }
 
   return (
-    <PullToRefresh onRefresh={loadData}>
     <div className="pb-4">
       {/* Header */}
       <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
