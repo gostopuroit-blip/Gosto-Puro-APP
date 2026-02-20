@@ -249,10 +249,10 @@ export default function Home() {
           <Link
             key={tag.label}
             to={createPageUrl(`Recipes?lifestyle=${encodeURIComponent(tag.label)}`)}
-            className="flex-shrink-0 flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-sm border border-gray-50 w-[100px] hover:border-[#2D6A4F]/20 hover:shadow-md transition-all duration-200 active:scale-[0.97]">
+            className="flex-shrink-0 flex flex-col items-center gap-2 bg-white dark:bg-[#1A2B20] rounded-2xl p-4 shadow-sm border border-gray-50 dark:border-[#2D4A38] w-[100px] hover:border-[#2D6A4F]/20 dark:hover:border-[#40916C]/30 hover:shadow-md transition-all duration-200 active:scale-[0.97]">
 
               <span className="text-2xl">{tag.icon}</span>
-              <span className="text-[13px] font-semibold text-gray-700 text-center leading-tight">{tag.label}</span>
+              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center leading-tight">{tag.label}</span>
             </Link>
           )}
         </div>
