@@ -106,11 +106,12 @@ export default function Recipes() {
   }
 
   return (
+    <PullToRefresh onRefresh={loadRecipes}>
     <div className="pb-4">
       {/* Header */}
       <div className="px-5 pt-14 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Ricette</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Sane, facili e deliziose</p>
+        <p className="text-[13px] text-gray-400 mt-0.5">Sane, facili e deliziose</p>
       </div>
 
       {/* Search */}
