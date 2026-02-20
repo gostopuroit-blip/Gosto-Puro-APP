@@ -140,14 +140,42 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Top Prepared */}
+      {/* Top Prepared — carousel with dots */}
       <div className="mt-8">
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {topRecipes.map((recipe) =>
-          <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />
+        <div className="relative">
+          <div
+            ref={carouselRef}
+            className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth"
+            onScroll={(e) => {
+              const idx = Math.round(e.target.scrollLeft / cardWidth);
+              setCarouselIndex(idx);
+            }}
+          >
+            {topRecipes.map((recipe) =>
+              <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />
+            )}
+          </div>
+          {/* Dots */}
+          {topRecipes.length > 0 && (
+            <div className="flex justify-center gap-1.5 mt-3">
+              {topRecipes.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    carouselRef.current?.scrollTo({ left: i * cardWidth, behavior: "smooth" });
+                    setCarouselIndex(i);
+                  }}
+                  className={`rounded-full transition-all duration-200 ${
+                    i === carouselIndex
+                      ? "w-4 h-1.5 bg-[#2D6A4F]"
+                      : "w-1.5 h-1.5 bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>
