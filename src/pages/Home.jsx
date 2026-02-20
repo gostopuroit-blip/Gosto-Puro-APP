@@ -121,7 +121,7 @@ export default function Home() {
             </h1>
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+        <p className="text-[13px] text-gray-400 mt-3 leading-relaxed">
           Ricette organizzate per decidere senza perdere tempo
         </p>
       </div>
