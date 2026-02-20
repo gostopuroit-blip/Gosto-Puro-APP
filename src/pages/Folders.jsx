@@ -164,7 +164,7 @@ export default function Folders() {
 
   return (
     <div className="pb-4">
-      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] dark:from-[#1A2B20] to-[#FAFAF8] dark:to-[#0F1A14]">
+      <div className="px-5 pt-14 pb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Le mie cartelle</h1>
