@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import RecipeCard from "@/components/RecipeCard";
-import { Loader2, Plus, FolderHeart, CheckCircle2, Clock, Star, Heart, X } from "lucide-react";
+import { Loader2, Plus, FolderHeart, Search, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const systemFolders = [
-  { key: "per_fare", label: "Per fare", icon: "📋", color: "bg-blue-50 text-blue-600" },
-  { key: "fatte", label: "Fatte", icon: "✅", color: "bg-green-50 text-green-600" },
-  { key: "preferite", label: "Preferite", icon: "❤️", color: "bg-rose-50 text-rose-600" },
-  { key: "valutate", label: "Più valutate", icon: "⭐", color: "bg-amber-50 text-amber-600" },
+  { key: "per_fare", label: "Per fare", icon: "📋" },
+  { key: "fatte", label: "Fatte", icon: "✅" },
+  { key: "preferite", label: "Preferite", icon: "❤️" },
+  { key: "valutate", label: "Più valutate", icon: "⭐" },
 ];
 
 export default function Folders() {
@@ -22,15 +23,15 @@ export default function Folders() {
   const [loading, setLoading] = useState(true);
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     const [ur, r, f] = await Promise.all([
-      base44.entities.UserRecipe.list("-created_date", 100),
-      base44.entities.Recipe.list("-created_date", 100),
+      base44.entities.UserRecipe.list("-created_date", 200),
+      base44.entities.Recipe.list("-numero_preparate", 200),
       base44.entities.Folder.filter({ is_system: false }),
     ]);
     setUserRecipes(ur);
@@ -41,9 +42,8 @@ export default function Folders() {
 
   const getRecipeById = (id) => recipes.find((r) => r.id === id);
 
-  const getFilteredRecipes = () => {
+  const getRecipesInFolder = () => {
     let filtered = [];
-    
     switch (activeFolder) {
       case "per_fare":
         filtered = userRecipes.filter((ur) => ur.is_saved && ur.status === "per_fare");
@@ -59,30 +59,96 @@ export default function Folders() {
         filtered.sort((a, b) => (b.user_rating || 0) - (a.user_rating || 0));
         break;
       default:
-        // Custom folder
         filtered = userRecipes.filter(
           (ur) => ur.folder_ids && ur.folder_ids.includes(activeFolder)
         );
         break;
     }
-    
-    return filtered.map((ur) => getRecipeById(ur.recipe_id)).filter(Boolean);
+    return filtered.map((ur) => ({ ur, recipe: getRecipeById(ur.recipe_id) })).filter((x) => x.recipe);
+  };
+
+  const isInCurrentFolder = (recipeId) => {
+    const ur = userRecipes.find((u) => u.recipe_id === recipeId);
+    if (!ur) return false;
+    switch (activeFolder) {
+      case "per_fare": return ur.is_saved && ur.status === "per_fare";
+      case "fatte": return ur.is_prepared || ur.status === "fatta";
+      case "preferite": return ur.is_favorite;
+      case "valutate": return (ur.user_rating || 0) >= 4;
+      default: return ur.folder_ids && ur.folder_ids.includes(activeFolder);
+    }
+  };
+
+  const addRecipeToFolder = async (recipe) => {
+    const existing = userRecipes.find((u) => u.recipe_id === recipe.id);
+    if (activeFolder === "per_fare") {
+      if (existing) {
+        await base44.entities.UserRecipe.update(existing.id, { is_saved: true, status: "per_fare" });
+      } else {
+        await base44.entities.UserRecipe.create({ recipe_id: recipe.id, is_saved: true, status: "per_fare" });
+      }
+    } else if (activeFolder === "fatte") {
+      if (existing) {
+        await base44.entities.UserRecipe.update(existing.id, { is_prepared: true, status: "fatta" });
+      } else {
+        await base44.entities.UserRecipe.create({ recipe_id: recipe.id, is_prepared: true, status: "fatta" });
+      }
+    } else if (activeFolder === "preferite") {
+      if (existing) {
+        await base44.entities.UserRecipe.update(existing.id, { is_favorite: true });
+      } else {
+        await base44.entities.UserRecipe.create({ recipe_id: recipe.id, is_favorite: true });
+      }
+    } else {
+      // custom folder
+      const currentFolderIds = existing?.folder_ids || [];
+      if (!currentFolderIds.includes(activeFolder)) {
+        const newFolderIds = [...currentFolderIds, activeFolder];
+        if (existing) {
+          await base44.entities.UserRecipe.update(existing.id, { folder_ids: newFolderIds });
+        } else {
+          await base44.entities.UserRecipe.create({ recipe_id: recipe.id, folder_ids: newFolderIds });
+        }
+      }
+    }
+    toast.success("Ricetta aggiunta!");
+    await loadData();
+  };
+
+  const removeRecipeFromFolder = async (recipeId) => {
+    const ur = userRecipes.find((u) => u.recipe_id === recipeId);
+    if (!ur) return;
+    if (activeFolder === "per_fare") {
+      await base44.entities.UserRecipe.update(ur.id, { is_saved: false });
+    } else if (activeFolder === "fatte") {
+      await base44.entities.UserRecipe.update(ur.id, { is_prepared: false, status: "per_fare" });
+    } else if (activeFolder === "preferite") {
+      await base44.entities.UserRecipe.update(ur.id, { is_favorite: false });
+    } else {
+      const newFolderIds = (ur.folder_ids || []).filter((id) => id !== activeFolder);
+      await base44.entities.UserRecipe.update(ur.id, { folder_ids: newFolderIds });
+    }
+    toast.success("Ricetta rimossa");
+    await loadData();
   };
 
   const createFolder = async () => {
     if (!newFolderName.trim()) return;
-    await base44.entities.Folder.create({
-      name: newFolderName.trim(),
-      icon: "📁",
-      is_system: false,
-    });
+    await base44.entities.Folder.create({ name: newFolderName.trim(), icon: "📁", is_system: false });
     setNewFolderName("");
     setShowNewFolder(false);
     toast.success("Cartella creata!");
     loadData();
   };
 
-  const filteredRecipes = getFilteredRecipes();
+  const folderRecipes = getRecipesInFolder();
+  const filteredSearch = recipes.filter((r) =>
+    r.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const activeFolderLabel =
+    systemFolders.find((f) => f.key === activeFolder)?.label ||
+    customFolders.find((f) => f.id === activeFolder)?.name ||
+    "";
 
   if (loading) {
     return (
@@ -100,14 +166,24 @@ export default function Folders() {
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Le mie cartelle</h1>
             <p className="text-sm text-gray-400 mt-0.5">Organizza le tue ricette</p>
           </div>
-          <Button
-            onClick={() => setShowNewFolder(true)}
-            size="sm"
-            className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Nuova
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => { setShowAddRecipe(true); setSearchQuery(""); }}
+              size="sm"
+              variant="outline"
+              className="rounded-xl"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={() => setShowNewFolder(true)}
+              size="sm"
+              className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
+            >
+              <FolderHeart className="w-4 h-4 mr-1" />
+              Nuova
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -144,19 +220,93 @@ export default function Folders() {
       </div>
 
       {/* Recipe List */}
-      <div className="px-5 space-y-4">
-        {filteredRecipes.length === 0 ? (
+      <div className="px-5 space-y-3">
+        {folderRecipes.length === 0 ? (
           <div className="text-center py-16">
             <FolderHeart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
             <p className="text-gray-400 text-sm">Nessuna ricetta in questa cartella</p>
-            <p className="text-gray-300 text-xs mt-1">Salva ricette per trovarle qui</p>
+            <button
+              onClick={() => { setShowAddRecipe(true); setSearchQuery(""); }}
+              className="mt-3 text-[#2D6A4F] text-sm font-semibold"
+            >
+              + Aggiungi ricetta
+            </button>
           </div>
         ) : (
-          filteredRecipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+          folderRecipes.map(({ recipe }) => (
+            <div key={recipe.id} className="flex items-center gap-3 bg-white rounded-2xl p-3 shadow-sm border border-gray-50">
+              {recipe.image_url && (
+                <img src={recipe.image_url} alt={recipe.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <Link to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}>
+                  <p className="font-semibold text-gray-900 text-sm truncate">{recipe.title}</p>
+                </Link>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-400">{recipe.category}</span>
+                  {recipe.prep_time && (
+                    <span className="text-xs text-gray-300">· {recipe.prep_time} min</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => removeRecipeFromFolder(recipe.id)}
+                className="p-2 rounded-xl text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors flex-shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           ))
         )}
       </div>
+
+      {/* Add Recipe Modal */}
+      <Dialog open={showAddRecipe} onOpenChange={setShowAddRecipe}>
+        <DialogContent className="rounded-3xl max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle>Aggiungi a "{activeFolderLabel}"</DialogTitle>
+          </DialogHeader>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+            <Input
+              placeholder="Cerca ricetta..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="rounded-xl pl-9"
+              autoFocus
+            />
+          </div>
+          <div className="max-h-72 overflow-y-auto space-y-2">
+            {filteredSearch.length === 0 ? (
+              <p className="text-center text-gray-400 text-sm py-6">Nessuna ricetta trovata</p>
+            ) : (
+              filteredSearch.map((recipe) => {
+                const already = isInCurrentFolder(recipe.id);
+                return (
+                  <button
+                    key={recipe.id}
+                    onClick={() => { if (!already) addRecipeToFolder(recipe); }}
+                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all ${
+                      already
+                        ? "bg-[#F0F7F4] opacity-60 cursor-default"
+                        : "hover:bg-gray-50 cursor-pointer"
+                    }`}
+                  >
+                    {recipe.image_url && (
+                      <img src={recipe.image_url} alt={recipe.title} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">{recipe.title}</p>
+                      <p className="text-xs text-gray-400">{recipe.category}</p>
+                    </div>
+                    {already && <span className="text-xs text-[#2D6A4F] font-semibold">✓</span>}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* New Folder Dialog */}
       <Dialog open={showNewFolder} onOpenChange={setShowNewFolder}>
