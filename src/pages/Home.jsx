@@ -213,11 +213,11 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Occasioni Speciali" />
         </div>
-        <div className="px-10 flex gap-3 overflow-x-auto hide-scrollbar -mx-5">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5">
           {specialOccasions.map((occ) =>
             <Link
               key={occ.label}
-              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)} className="px-1 flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
 
 
               <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
