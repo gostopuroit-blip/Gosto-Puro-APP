@@ -332,7 +332,7 @@ export default function Planner() {
   );
 }
 
-function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onRemove }) {
+function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onReplace, onRemove }) {
   if (!recipeId) {
     return (
       <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
@@ -343,6 +343,9 @@ function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onRemov
             <p className="text-xs text-gray-300 italic">Nessuna ricetta</p>
           </div>
         </div>
+        <button onClick={onReplace} className="p-2 rounded-lg hover:bg-[#F0F7F4] transition-colors">
+          <Search className="w-3.5 h-3.5 text-[#2D6A4F]" />
+        </button>
       </div>
     );
   }
@@ -369,7 +372,10 @@ function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onRemov
         </div>
       </Link>
       <div className="flex gap-1 flex-shrink-0">
-        <button onClick={onSwap} className="p-2 rounded-lg hover:bg-gray-50 transition-colors">
+        <button onClick={onReplace} title="Scegli ricetta" className="p-2 rounded-lg hover:bg-[#F0F7F4] transition-colors">
+          <Search className="w-3.5 h-3.5 text-[#2D6A4F]" />
+        </button>
+        <button onClick={onSwap} title="Casuale" className="p-2 rounded-lg hover:bg-gray-50 transition-colors">
           <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
         </button>
         <button onClick={onRemove} className="p-2 rounded-lg hover:bg-red-50 transition-colors">
