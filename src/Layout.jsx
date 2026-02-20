@@ -91,7 +91,7 @@ export default function Layout({ children, currentPageName }) {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-[#1A2B20]/95 backdrop-blur-xl border-t border-gray-100 dark:border-[#2D4A38] z-50">
         <div className="max-w-lg mx-auto flex justify-around items-center py-2 px-2">
           {navItems.map((item) => {
             const isActive = currentPageName === item.page;
