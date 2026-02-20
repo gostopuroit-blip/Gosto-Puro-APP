@@ -144,13 +144,13 @@ export default function Profile() {
                 <p className="text-[13px] text-gray-600 dark:text-gray-400">{user?.email}</p>
               </div>
               <div>
-                <label className="text-[13px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">Età</label>
+                <label className="text-[13px] text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wider">Età</label>
                 <Input
                   type="number"
                   placeholder="Es. 28"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white w-24"
+                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white w-24 text-gray-900"
                 />
               </div>
             </div>
