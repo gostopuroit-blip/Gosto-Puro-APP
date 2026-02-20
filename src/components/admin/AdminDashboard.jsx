@@ -37,6 +37,18 @@ export default function AdminDashboard({ onNavigate }) {
     setLoading(false);
   };
 
+  const handleGenerateBulkRecipes = async () => {
+    setGeneratingBulk(true);
+    try {
+      const result = await base44.functions.invoke('generateBulkRecipes');
+      toast.success(`✓ ${result.data.totalGenerated} ricette generate con successo!`);
+      load(); // Reload stats
+    } catch (error) {
+      toast.error("Errore nella generazione delle ricette");
+    }
+    setGeneratingBulk(false);
+  };
+
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
 
   const cards = [
