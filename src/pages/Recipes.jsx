@@ -189,7 +189,7 @@ export default function Recipes() {
             <p className="text-gray-400 text-sm">Nessuna ricetta trovata</p>
           </div>
         ) : (
-          filteredRecipes.map((recipe) => (
+          paginatedRecipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         )}
