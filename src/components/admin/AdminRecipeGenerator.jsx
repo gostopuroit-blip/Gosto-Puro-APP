@@ -486,10 +486,14 @@ Difficoltà valide: Facile, Media, Difficile.`;
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="text-xs text-gray-400 font-semibold block mb-1">Difficoltà</label>
-            <select value={difficulty} onChange={e => setDifficulty(e.target.value)}
-              className="w-full text-xs px-2 py-2 rounded-xl border border-gray-100 bg-gray-50 focus:outline-none">
-              {difficulties.map(d => <option key={d}>{d}</option>)}
-            </select>
+            <Select value={difficulty} onValueChange={setDifficulty}>
+              <SelectTrigger className="w-full text-xs h-8 rounded-xl border-gray-100 bg-gray-50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {difficulties.map(d => <SelectItem key={d} value={d} className="text-xs">{d}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="text-xs text-gray-400 font-semibold block mb-1">Tempo (min)</label>
