@@ -17,6 +17,8 @@ export default function Planner() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [replacePicker, setReplacePicker] = useState(null); // { dayIndex, meal }
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     loadData();
