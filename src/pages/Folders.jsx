@@ -220,7 +220,7 @@ export default function Folders() {
                       <RecipeCard recipe={recipe} />
                       <button
                         onClick={() => removeRecipeFromFolder(recipe.id, f.key)}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors z-10"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
