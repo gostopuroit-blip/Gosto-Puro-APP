@@ -143,8 +143,8 @@ export default function AdminRecipeGenerator() {
 
   const grouped = {
     giorno: occasions.filter(o => o.tipo === "giorno"),
-    speciale: occasions.filter(o => o.tipo === "speciale"),
-    stile_vita: occasions.filter(o => o.tipo === "stile_vita"),
+    speciale: occasions.filter((o, i, arr) => o.tipo === "speciale" && arr.findIndex(x => x.label === o.label && x.tipo === "speciale") === i),
+    stile_vita: occasions.filter((o, i, arr) => o.tipo === "stile_vita" && arr.findIndex(x => x.label === o.label && x.tipo === "stile_vita") === i),
   };
 
   const buildRecipePrompt = (occ, country = null) => {
