@@ -12,23 +12,23 @@ import PullToRefresh from "@/components/PullToRefresh";
 const dailyOccasions = [
 {
   label: "Colazione",
-  img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=120&h=120&fit=crop&crop=center"
+  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/187a4172e_Colazione.png"
 },
 {
   label: "Pranzo",
-  img: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=120&h=120&fit=crop&crop=center"
+  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/f3bc57429_Pranzo.png"
 },
 {
   label: "Cena",
-  img: "https://images.unsplash.com/photo-1559847844-5315695dadae?w=120&h=120&fit=crop&crop=center"
+  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d7674cdee_Cena.png"
 },
 {
   label: "Leggera",
-  img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=120&h=120&fit=crop&crop=center"
+  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/380a7e11c_Detox.png"
 },
 {
   label: "Dolci",
-  img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=120&h=120&fit=crop&crop=center"
+  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/b1d974f23_Dolci.png"
 }];
 
 
