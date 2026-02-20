@@ -210,8 +210,8 @@ export default function Home() {
                   }}
                   className={`rounded-full transition-all duration-200 ${
                     i === carouselIndex
-                      ? "w-4 h-1.5 bg-[#2D6A4F]"
-                      : "w-1.5 h-1.5 bg-gray-300"
+                      ? "w-4 h-1.5 bg-[#2D6A4F] dark:bg-[#40916C]"
+                      : "w-1.5 h-1.5 bg-gray-300 dark:bg-[#2D4A38]"
                   }`}
                 />
               ))}
