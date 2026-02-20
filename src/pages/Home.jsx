@@ -146,8 +146,8 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm">{occIcons[dailyNotif.occasions?.[i]] || "🍽️"}</span>
                   <div>
-                    <p className="text-[11px] text-white/70 font-medium">{dailyNotif.occasions?.[i]}</p>
-                    <p className="text-xs font-semibold text-white leading-tight">{dailyNotif.recipe_titles?.[i]}</p>
+                    <p className="text-[13px] text-white/70 font-medium">{dailyNotif.occasions?.[i]}</p>
+                    <p className="text-[13px] font-semibold text-white leading-tight">{dailyNotif.recipe_titles?.[i]}</p>
                   </div>
                 </div>
                 <ChevronRight className="w-3.5 h-3.5 text-white/60 flex-shrink-0" />
