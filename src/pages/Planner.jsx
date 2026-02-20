@@ -253,6 +253,7 @@ export default function Planner() {
                 recipeTitle={day.pranzo_title}
                 recipe={getRecipeById(day.pranzo_id)}
                 onSwap={() => swapRecipe(idx, "pranzo")}
+                onReplace={() => { setReplaceTarget({ dayIndex: idx, meal: "pranzo" }); setSearchQuery(""); }}
                 onRemove={() => removeMeal(idx, "pranzo")}
               />
 
@@ -264,6 +265,7 @@ export default function Planner() {
                 recipeTitle={day.cena_title}
                 recipe={getRecipeById(day.cena_id)}
                 onSwap={() => swapRecipe(idx, "cena")}
+                onReplace={() => { setReplaceTarget({ dayIndex: idx, meal: "cena" }); setSearchQuery(""); }}
                 onRemove={() => removeMeal(idx, "cena")}
               />
             </div>
