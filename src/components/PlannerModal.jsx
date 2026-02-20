@@ -30,7 +30,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="rounded-3xl max-w-sm mx-auto p-0 overflow-hidden">
-        <div className="bg-gradient-to-b from-[#F0F7F4] to-white p-6">
+        <div className="bg-gradient-to-b from-[#F0F7F4] dark:from-[#2D3F35] to-white dark:to-[#2D3F35] p-6">
           <div className="text-center mb-6">
             <div className="w-14 h-14 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mx-auto mb-3">
               <span className="text-2xl">📅</span>
