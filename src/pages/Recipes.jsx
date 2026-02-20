@@ -121,7 +121,7 @@ export default function Recipes() {
     <PullToRefresh onRefresh={loadRecipes}>
       <div className="pb-4">
       {/* Header */}
-      <div className="px-5 pt-14 pb-4 bg-gradient-to-b from-[#F0F7F4] dark:from-[#1A2B20] to-[#FAFAF8] dark:to-[#0F1A14]">
+      <div className="px-5 pt-14 pb-4">
          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Ricette</h1>
          <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-0.5">Sane, facili e deliziose</p>
        </div>
