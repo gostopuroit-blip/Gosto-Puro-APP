@@ -28,12 +28,16 @@ export default function Planner() {
   }, []);
 
   const loadData = async () => {
-    const [plans, allRecipes] = await Promise.all([
+    const [plans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
       base44.entities.MealPlan.filter({ is_active: true }),
       base44.entities.Recipe.list("-numero_preparate", 100),
+      base44.entities.Folder.list(),
+      base44.entities.UserRecipe.list(),
     ]);
     if (plans.length > 0) setPlan(plans[0]);
     setRecipes(allRecipes);
+    setFolders(allFolders);
+    setUserRecipes(allUserRecipes);
     setLoading(false);
   };
 
