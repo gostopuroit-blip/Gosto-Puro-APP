@@ -40,43 +40,54 @@ export default function Planner() {
     setCreating(true);
     setShowModal(false);
 
-    // Filter eligible recipes
-    let eligible = recipes.filter((r) => r.prep_time <= maxTime);
+    // Filter recipes by category and time
+    const filterByCategory = (category) => {
+      let eligible = recipes.filter((r) => r.category === category && r.prep_time <= maxTime);
 
-    if (focus === "leggero") {
-      const lightFirst = eligible.filter(
-        (r) => r.lifestyle && (r.lifestyle.includes("Low carb") || r.lifestyle.includes("Detox") || r.lifestyle.includes("Fitness"))
-      );
-      if (lightFirst.length >= days * 2) eligible = lightFirst;
-    } else if (focus === "famiglia") {
-      const familyFirst = eligible.filter(
-        (r) => r.servings >= 4 || (r.occasions && r.occasions.includes("Pranzo in famiglia"))
-      );
-      if (familyFirst.length >= days * 2) eligible = familyFirst;
-    }
+      if (focus === "leggero") {
+        const lightFirst = eligible.filter(
+          (r) => r.lifestyle && (r.lifestyle.includes("Low carb") || r.lifestyle.includes("Detox") || r.lifestyle.includes("Fitness"))
+        );
+        if (lightFirst.length > 0) eligible = lightFirst;
+      } else if (focus === "famiglia") {
+        const familyFirst = eligible.filter(
+          (r) => r.servings >= 4 || (r.occasions && r.occasions.includes("Pranzo in famiglia"))
+        );
+        if (familyFirst.length > 0) eligible = familyFirst;
+      }
 
-    // Sort by preparate for social proof
-    eligible.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
+      eligible.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
+      return eligible;
+    };
+
+    const colazioniPool = filterByCategory("Colazione");
+    const pranziPool = filterByCategory("Pranzo");
+    const cenePool = filterByCategory("Cena");
 
     // Distribute
     const planData = [];
-    const used = new Set();
+    const usedColazioni = new Set();
+    const usedPranzi = new Set();
+    const usedCene = new Set();
 
     for (let i = 0; i < days; i++) {
-      const colazionePool = eligible.filter((r) => !used.has(r.id) && r.category === "Colazione");
-      const colazione = colazionePool.length > 0
-        ? colazionePool[Math.floor(Math.random() * colazionePool.length)]
-        : eligible.find((r) => !used.has(r.id));
-      if (colazione) used.add(colazione.id);
+      const availColazioni = colazioniPool.filter((r) => !usedColazioni.has(r.id));
+      const colazione = availColazioni.length > 0
+        ? availColazioni[Math.floor(Math.random() * availColazioni.length)]
+        : null;
+      if (colazione) usedColazioni.add(colazione.id);
 
-      const pranzoPool = eligible.filter((r) => !used.has(r.id) && (r.category === "Pranzo" || r.category === "Snack"));
-      const pranzo = pranzoPool.length > 0
-        ? pranzoPool[0]
-        : eligible.find((r) => !used.has(r.id));
-      if (pranzo) used.add(pranzo.id);
+      const availPranzi = pranziPool.filter((r) => !usedPranzi.has(r.id));
+      const pranzo = availPranzi.length > 0
+        ? availPranzi[Math.floor(Math.random() * availPranzi.length)]
+        : null;
+      if (pranzo) usedPranzi.add(pranzo.id);
 
-      const cena = eligible.find((r) => !used.has(r.id));
-      if (cena) used.add(cena.id);
+      const availCene = cenePool.filter((r) => !usedCene.has(r.id));
+      const cena = availCene.length > 0
+        ? availCene[Math.floor(Math.random() * availCene.length)]
+        : null;
+      if (cena) usedCene.add(cena.id);
 
       planData.push({
         day: i + 1,
