@@ -288,103 +288,160 @@ export default function Planner() {
                 <h3 className="font-bold text-gray-900 mb-3">{dayPlan.day_name}</h3>
 
                 {/* Colazione */}
-                <div className="mb-3 pb-3 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
-                  <p className="text-xs font-semibold text-[#2D6A4F] mb-1">☀️ Colazione</p>
+                <div className="mb-4 pb-4 border-b border-gray-100">
+                  <p className="text-xs font-semibold text-[#2D6A4F] mb-2">☀️ Colazione</p>
                   {colazione ? (
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm text-gray-700">{colazione.title}</p>
+                    <>
+                      <Link to={createPageUrl(`RecipeDetail?id=${colazione.id}`)}>
+                        <div className="mb-2 rounded-lg overflow-hidden bg-gray-100 h-32 cursor-pointer hover:opacity-90 transition">
+                          {colazione.image_url && (
+                            <img
+                              src={colazione.image_url}
+                              alt={colazione.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      </Link>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{colazione.title}</p>
+                          {colazione.prep_time && (
+                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                              <Clock className="w-3 h-3" /> {colazione.prep_time} min
+                            </p>
+                          )}
+                        </div>
+                      </div>
                       <div className="flex gap-1">
                         <button
-                          onClick={() => setReplaceTarget({ dayIndex, meal: "colazione" })}
-                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] p-1 rounded-lg transition"
-                          title="Sostituisci"
+                          onClick={() => swapRecipe(dayIndex, "colazione")}
+                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
                         >
-                          <RefreshCw className="w-3.5 h-3.5" />
+                          <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
                         </button>
                         <button
                           onClick={() => removeMeal(dayIndex, "colazione")}
-                          className="text-xs text-red-500 hover:bg-red-50 p-1 rounded-lg transition"
-                          title="Rimuovi"
+                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X className="w-3.5 h-3.5 inline mr-1" /> Rimuovi
                         </button>
                       </div>
-                    </div>
+                    </>
                   ) : (
                     <button
                       onClick={() => setReplaceTarget({ dayIndex, meal: "colazione" })}
-                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition"
+                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition w-full text-left"
                     >
-                      + Aggiungi
+                      + Aggiungi ricetta
                     </button>
                   )}
                 </div>
 
                 {/* Pranzo */}
-                <div className="mb-3 pb-3 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
-                  <p className="text-xs font-semibold text-[#2D6A4F] mb-1">🍽️ Pranzo</p>
+                <div className="mb-4 pb-4 border-b border-gray-100">
+                  <p className="text-xs font-semibold text-[#2D6A4F] mb-2">🍽️ Pranzo</p>
                   {pranzo ? (
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-700 truncate">{pranzo.title}</p>
-                        {dayPlan.pranzo_servings && <p className="text-xs text-gray-400">{dayPlan.pranzo_servings} porzioni</p>}
+                    <>
+                      <Link to={createPageUrl(`RecipeDetail?id=${pranzo.id}`)}>
+                        <div className="mb-2 rounded-lg overflow-hidden bg-gray-100 h-32 cursor-pointer hover:opacity-90 transition">
+                          {pranzo.image_url && (
+                            <img
+                              src={pranzo.image_url}
+                              alt={pranzo.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      </Link>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{pranzo.title}</p>
+                          <div className="flex gap-3 text-xs text-gray-400 mt-0.5">
+                            {pranzo.prep_time && (
+                              <p className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" /> {pranzo.prep_time} min
+                              </p>
+                            )}
+                            {pranzo.calories && <p>{pranzo.calories} kcal</p>}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-1 flex-shrink-0">
+                      <div className="flex gap-1">
                         <button
-                          onClick={() => setReplaceTarget({ dayIndex, meal: "pranzo" })}
-                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] p-1 rounded-lg transition"
-                          title="Sostituisci"
+                          onClick={() => swapRecipe(dayIndex, "pranzo")}
+                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
                         >
-                          <RefreshCw className="w-3.5 h-3.5" />
+                          <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
                         </button>
                         <button
                           onClick={() => removeMeal(dayIndex, "pranzo")}
-                          className="text-xs text-red-500 hover:bg-red-50 p-1 rounded-lg transition"
-                          title="Rimuovi"
+                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X className="w-3.5 h-3.5 inline mr-1" /> Rimuovi
                         </button>
                       </div>
-                    </div>
+                    </>
                   ) : (
                     <button
                       onClick={() => setReplaceTarget({ dayIndex, meal: "pranzo" })}
-                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition"
+                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition w-full text-left"
                     >
-                      + Aggiungi
+                      + Aggiungi ricetta
                     </button>
                   )}
                 </div>
 
                 {/* Cena */}
                 <div>
-                  <p className="text-xs font-semibold text-[#2D6A4F] mb-1">🌙 Cena</p>
+                  <p className="text-xs font-semibold text-[#2D6A4F] mb-2">🌙 Cena</p>
                   {cena ? (
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm text-gray-700">{cena.title}</p>
+                    <>
+                      <Link to={createPageUrl(`RecipeDetail?id=${cena.id}`)}>
+                        <div className="mb-2 rounded-lg overflow-hidden bg-gray-100 h-32 cursor-pointer hover:opacity-90 transition">
+                          {cena.image_url && (
+                            <img
+                              src={cena.image_url}
+                              alt={cena.title}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      </Link>
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{cena.title}</p>
+                          <div className="flex gap-3 text-xs text-gray-400 mt-0.5">
+                            {cena.prep_time && (
+                              <p className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" /> {cena.prep_time} min
+                              </p>
+                            )}
+                            {cena.calories && <p>{cena.calories} kcal</p>}
+                          </div>
+                        </div>
+                      </div>
                       <div className="flex gap-1">
                         <button
-                          onClick={() => setReplaceTarget({ dayIndex, meal: "cena" })}
-                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] p-1 rounded-lg transition"
-                          title="Sostituisci"
+                          onClick={() => swapRecipe(dayIndex, "cena")}
+                          className="text-xs text-[#2D6A4F] hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition font-medium"
                         >
-                          <RefreshCw className="w-3.5 h-3.5" />
+                          <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Sostituisci
                         </button>
                         <button
                           onClick={() => removeMeal(dayIndex, "cena")}
-                          className="text-xs text-red-500 hover:bg-red-50 p-1 rounded-lg transition"
-                          title="Rimuovi"
+                          className="text-xs text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X className="w-3.5 h-3.5 inline mr-1" /> Rimuovi
                         </button>
                       </div>
-                    </div>
+                    </>
                   ) : (
                     <button
                       onClick={() => setReplaceTarget({ dayIndex, meal: "cena" })}
-                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition"
+                      className="text-xs text-[#2D6A4F] font-semibold hover:bg-[#F0F7F4] px-2 py-1 rounded-lg transition w-full text-left"
                     >
-                      + Aggiungi
+                      + Aggiungi ricetta
                     </button>
                   )}
                 </div>
