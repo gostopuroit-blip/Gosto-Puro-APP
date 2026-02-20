@@ -20,6 +20,7 @@ export default function Recipes() {
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
   const [currentPage, setCurrentPage] = useState(1);
+  const [user, setUser] = useState(null);
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
