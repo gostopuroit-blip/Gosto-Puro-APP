@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import {
   CalendarDays, Plus, RefreshCw, Trash2, Clock, ChefHat, ShoppingCart, Loader2, Search, X
 } from "lucide-react";
+import ScreenHeader from "@/components/ScreenHeader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 

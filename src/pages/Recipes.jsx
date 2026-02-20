@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
+import ScreenHeader from "@/components/ScreenHeader";
 
 const filters = [
   { key: "all", label: "Tutte" },
