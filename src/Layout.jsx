@@ -105,14 +105,12 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      <div className="relative">
-        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/e235954e8_1200x801000x80px1.png" alt="Gosto Puro" className="w-full object-contain" />
-        <div className="absolute top-2 right-4">
-          <PremiumBadge user={user} />
-        </div>
-      </div>
+      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/e235954e8_1200x801000x80px1.png" alt="Gosto Puro" className="w-full object-contain" />
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
+        <div className="flex justify-end px-4 pt-2">
+          <PremiumBadge user={user} />
+        </div>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname + location.search}
