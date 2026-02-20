@@ -42,9 +42,9 @@ export default function Folders() {
 
   const getRecipeById = (id) => recipes.find((r) => r.id === id);
 
-  const getRecipesInFolder = () => {
+  const getRecipesInFolder = (folderId) => {
     let filtered = [];
-    switch (activeFolder) {
+    switch (folderId) {
       case "per_fare":
         filtered = userRecipes.filter((ur) => ur.is_saved && ur.status === "per_fare");
         break;
@@ -60,22 +60,22 @@ export default function Folders() {
         break;
       default:
         filtered = userRecipes.filter(
-          (ur) => ur.folder_ids && ur.folder_ids.includes(activeFolder)
+          (ur) => ur.folder_ids && ur.folder_ids.includes(folderId)
         );
         break;
     }
     return filtered.map((ur) => ({ ur, recipe: getRecipeById(ur.recipe_id) })).filter((x) => x.recipe);
   };
 
-  const isInCurrentFolder = (recipeId) => {
+  const isInFolder = (recipeId, folderId) => {
     const ur = userRecipes.find((u) => u.recipe_id === recipeId);
     if (!ur) return false;
-    switch (activeFolder) {
+    switch (folderId) {
       case "per_fare": return ur.is_saved && ur.status === "per_fare";
       case "fatte": return ur.is_prepared || ur.status === "fatta";
       case "preferite": return ur.is_favorite;
       case "valutate": return (ur.user_rating || 0) >= 4;
-      default: return ur.folder_ids && ur.folder_ids.includes(activeFolder);
+      default: return ur.folder_ids && ur.folder_ids.includes(folderId);
     }
   };
 
