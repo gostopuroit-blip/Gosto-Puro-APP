@@ -461,11 +461,15 @@ export default function Planner() {
 
             <div className="flex-1 overflow-y-auto space-y-2">
               {recipes
-                .filter(
-                  (r) =>
+                .filter((r) => {
+                  const mealCategory = replaceTarget.meal === "colazione" ? "Colazione" : replaceTarget.meal === "pranzo" ? "Pranzo" : "Cena";
+                  const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
+                  return (
                     r.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                    !plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]).includes(r.id)
-                )
+                    r.category === mealCategory &&
+                    !usedIds.includes(r.id)
+                  );
+                })
                 .map((r) => (
                   <button
                     key={r.id}
