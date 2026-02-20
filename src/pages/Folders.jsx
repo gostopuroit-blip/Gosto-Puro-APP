@@ -16,7 +16,7 @@ const systemFolders = [
 ];
 
 export default function Folders() {
-  const [activeFolder, setActiveFolder] = useState("per_fare");
+  const [expandedFolder, setExpandedFolder] = useState(null);
   const [userRecipes, setUserRecipes] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [customFolders, setCustomFolders] = useState([]);
