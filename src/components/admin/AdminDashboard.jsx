@@ -6,6 +6,7 @@ import { toast } from "sonner";
 export default function AdminDashboard({ onNavigate }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [generatingBulk, setGeneratingBulk] = useState(false);
 
   useEffect(() => {
     load();
