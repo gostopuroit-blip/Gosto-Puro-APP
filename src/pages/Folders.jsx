@@ -276,46 +276,7 @@ export default function Folders() {
         })}
       </div>
 
-      {/* Recipe List */}
-      <div className="px-5 space-y-3">
-        {folderRecipes.length === 0 ? (
-          <div className="text-center py-16">
-            <FolderHeart className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-            <p className="text-gray-400 text-sm">Nessuna ricetta in questa cartella</p>
-            <button
-              onClick={() => { setShowAddRecipe(true); setSearchQuery(""); }}
-              className="mt-3 text-[#2D6A4F] text-sm font-semibold"
-            >
-              + Aggiungi ricetta
-            </button>
-          </div>
-        ) : (
-          folderRecipes.map(({ recipe }) => (
-            <div key={recipe.id} className="flex items-center gap-3 bg-white rounded-2xl p-3 shadow-sm border border-gray-50">
-              {recipe.image_url && (
-                <img src={recipe.image_url} alt={recipe.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <Link to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}>
-                  <p className="font-semibold text-gray-900 text-sm truncate">{recipe.title}</p>
-                </Link>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-400">{recipe.category}</span>
-                  {recipe.prep_time && (
-                    <span className="text-xs text-gray-300">· {recipe.prep_time} min</span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => removeRecipeFromFolder(recipe.id)}
-                className="p-2 rounded-xl text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors flex-shrink-0"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))
-        )}
-      </div>
+
 
       {/* Add Recipe Modal */}
       <Dialog open={showAddRecipe} onOpenChange={setShowAddRecipe}>
