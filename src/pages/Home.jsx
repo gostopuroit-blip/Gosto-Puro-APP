@@ -57,6 +57,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const carouselRef = useRef(null);
+  const cardWidth = 176 + 12; // w-44 = 176px + gap-3 = 12px
 
   useEffect(() => {
     loadData();
