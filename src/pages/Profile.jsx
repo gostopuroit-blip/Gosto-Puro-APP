@@ -125,7 +125,7 @@ export default function Profile() {
             {/* Name + Age */}
             <div className="flex-1 space-y-2">
               <div>
-                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
+                <label className="text-[13px] text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
                 <Input
                   type="text"
                   placeholder="Es. Brandom"
