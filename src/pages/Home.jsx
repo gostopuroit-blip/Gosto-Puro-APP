@@ -252,7 +252,7 @@ export default function Home() {
             className="flex-shrink-0 flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-sm border border-gray-50 w-[100px] hover:border-[#2D6A4F]/20 hover:shadow-md transition-all duration-200 active:scale-[0.97]">
 
               <span className="text-2xl">{tag.icon}</span>
-              <span className="text-[11px] font-semibold text-gray-700 text-center leading-tight">{tag.label}</span>
+              <span className="text-[13px] font-semibold text-gray-700 text-center leading-tight">{tag.label}</span>
             </Link>
           )}
         </div>
