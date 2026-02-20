@@ -259,6 +259,18 @@ export default function Planner() {
                 <span className="text-sm font-bold text-gray-900">{day.day_name}</span>
               </div>
 
+              {/* Colazione */}
+              <MealSlot
+                label="Colazione"
+                emoji="☕"
+                recipeId={day.colazione_id}
+                recipeTitle={day.colazione_title}
+                recipe={getRecipeById(day.colazione_id)}
+                onSwap={() => swapRecipe(idx, "colazione")}
+                onReplace={() => { setReplaceTarget({ dayIndex: idx, meal: "colazione" }); setSearchQuery(""); }}
+                onRemove={() => removeMeal(idx, "colazione")}
+              />
+
               {/* Pranzo */}
               <MealSlot
                 label="Pranzo"
