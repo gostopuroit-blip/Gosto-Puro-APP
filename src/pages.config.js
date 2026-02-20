@@ -48,25 +48,25 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Admin from './pages/Admin';
+import Folders from './pages/Folders';
 import Home from './pages/Home';
+import Planner from './pages/Planner';
 import Profile from './pages/Profile';
 import RecipeDetail from './pages/RecipeDetail';
-import ShoppingList from './pages/ShoppingList';
 import Recipes from './pages/Recipes';
-import Planner from './pages/Planner';
-import Folders from './pages/Folders';
+import ShoppingList from './pages/ShoppingList';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Admin": Admin,
+    "Folders": Folders,
     "Home": Home,
+    "Planner": Planner,
     "Profile": Profile,
     "RecipeDetail": RecipeDetail,
-    "ShoppingList": ShoppingList,
     "Recipes": Recipes,
-    "Planner": Planner,
-    "Folders": Folders,
+    "ShoppingList": ShoppingList,
 }
 
 export const pagesConfig = {
