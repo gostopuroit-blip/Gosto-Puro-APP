@@ -124,6 +124,9 @@ export default function Home() {
         </p>
       </div>
 
+      {/* PWA Install Banner */}
+      <InstallPWABanner />
+
       {/* Daily Notification Banner */}
       {dailyNotif && (
         <div className="mx-5 mb-4 mt-2 bg-gradient-to-r from-[#2D6A4F] to-[#40916C] rounded-2xl p-4 text-white">
