@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
-import { Search, SlidersHorizontal, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
 
 const filters = [
   { key: "all", label: "Tutte" },
@@ -12,15 +12,12 @@ const filters = [
   { key: "valutate", label: "Meglio valutate" },
 ];
 
-const RECIPES_PER_PAGE = 6;
-
 export default function Recipes() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -98,16 +95,7 @@ export default function Recipes() {
       }
       return newFilters;
     });
-    setCurrentPage(1);
   };
-
-  const paginatedRecipes = useMemo(() => {
-    const start = (currentPage - 1) * RECIPES_PER_PAGE;
-    const end = start + RECIPES_PER_PAGE;
-    return filteredRecipes.slice(start, end);
-  }, [filteredRecipes, currentPage]);
-
-  const totalPages = Math.ceil(filteredRecipes.length / RECIPES_PER_PAGE);
 
   if (loading) {
     return (
@@ -189,37 +177,11 @@ export default function Recipes() {
             <p className="text-gray-400 text-sm">Nessuna ricetta trovata</p>
           </div>
         ) : (
-          paginatedRecipes.map((recipe) => (
+          filteredRecipes.map((recipe) => (
             <RecipeCard key={recipe.id} recipe={recipe} />
           ))
         )}
       </div>
-
-       {/* Pagination */}
-       {filteredRecipes.length > 0 && (
-         <div className="px-5 mt-8 mb-4 flex items-center justify-between">
-           <button
-             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-             disabled={currentPage === 1}
-             className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-           >
-             <ChevronLeft className="w-4 h-4" />
-             Precedente
-           </button>
-           <span className="text-sm text-gray-500">
-             Pagina {currentPage} di {totalPages}
-           </span>
-           <button
-             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-             disabled={currentPage === totalPages}
-             className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-           >
-             Prossima
-             <ChevronRight className="w-4 h-4" />
-           </button>
-         </div>
-       )}
-
       </div>
     </PullToRefresh>
   );
