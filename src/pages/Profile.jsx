@@ -219,12 +219,43 @@ export default function Profile() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-bold text-white">Pannello Admin</p>
-                <p className="text-xs text-white/80">Gestisci ricette, utenti e generazioni</p>
+                <p className="text-[13px] text-white/80">Gestisci ricette, utenti e generazioni</p>
               </div>
             </div>
           </Link>
         </div>
       )}
+
+      {/* Delete Account */}
+      <div className="px-5 mt-4 mb-4">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="w-full flex items-center justify-center gap-2 py-3 text-[13px] font-medium text-red-400 border border-red-100 rounded-2xl active:bg-red-50 transition-colors">
+              <Trash2 className="w-4 h-4" />
+              Elimina account
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="rounded-2xl mx-4">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Eliminare l'account?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Questa azione è irreversibile. Tutti i tuoi dati, ricette salvate e piani verranno eliminati definitivamente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="rounded-xl">Annulla</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-500 hover:bg-red-600 rounded-xl"
+                onClick={() => {
+                  toast.error("Per eliminare l'account contatta il supporto.");
+                }}
+              >
+                Elimina
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }
