@@ -321,7 +321,7 @@ export default function Planner() {
   );
 }
 
-function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onRemove }) {
+function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onPick, onRemove }) {
   if (!recipeId) {
     return (
       <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
