@@ -35,6 +35,8 @@ const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
 
 export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
+  const [specialOccasions, setSpecialOccasions] = useState([]);
+  const [lifestyleTags, setLifestyleTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
@@ -49,15 +51,24 @@ export default function Home() {
 
   const loadData = async () => {
     const today = new Date().toISOString().split("T")[0];
-    const [recipes, user, notifs] = await Promise.all([
+    const [recipes, user, notifs, occasions] = await Promise.all([
       base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
       base44.auth.me().catch(() => null),
       base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
+      base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
     ]);
+    
     setTopRecipes(recipes);
     if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
     if (notifs?.length > 0) setDailyNotif(notifs[0]);
+    
+    // Separate occasions by type
+    const special = occasions.filter(o => o.tipo === "speciale").map(o => ({ label: o.label, icon: o.icon }));
+    const lifestyle = occasions.filter(o => o.tipo === "stile_vita").map(o => ({ label: o.label, icon: o.icon }));
+    
+    setSpecialOccasions(special);
+    setLifestyleTags(lifestyle);
     setLoading(false);
   };
 
