@@ -48,7 +48,7 @@ export default function ShoppingList() {
 
     const plan = plans[0];
     const recipeIds = plan.plan_data
-      .flatMap((d) => [d.pranzo_id, d.cena_id])
+      .flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id])
       .filter(Boolean);
 
     // Get recipes
