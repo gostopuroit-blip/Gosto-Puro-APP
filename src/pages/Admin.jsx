@@ -10,6 +10,7 @@ import AdminSettings from "@/components/admin/AdminSettings";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft } from "lucide-react";
+import ScreenHeader from "@/components/ScreenHeader";
 
 const tabs = [
   { key: "dashboard", label: "Dashboard", icon: "📊" },
