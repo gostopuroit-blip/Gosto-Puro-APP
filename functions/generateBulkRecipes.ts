@@ -21,8 +21,7 @@ Deno.serve(async (req) => {
 
     let totalGenerated = 0;
     const results = {};
-      
-      for (const occ of selected) {
+    for (const occ of dailyOccasions) {
         const prompt = buildRecipePrompt(occ);
         
         const recipeResult = await base44.integrations.Core.InvokeLLM({
