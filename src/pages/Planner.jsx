@@ -256,27 +256,39 @@ export default function Planner() {
                   const recipeId = day[`${meal}_id`];
                   const title = day[`${meal}_title`];
                   const recipe = recipeId ? getRecipeById(recipeId) : null;
-                  const mealLabels = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
+                  const mealLabels = { colazione: "🥐 Colazione", pranzo: "🍽️ Pranzo", cena: "🍴 Cena" };
 
                   return (
                     <div
                       key={meal}
                       onClick={() => setReplaceTarget({ dayIndex, meal })}
-                      className={`p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                      className={`rounded-2xl border-2 cursor-pointer transition-all overflow-hidden ${
                         replaceTarget?.meal === meal && replaceTarget?.dayIndex === dayIndex
                           ? "border-[#2D6A4F] bg-[#F0F7F4] dark:bg-[#1A2B20]"
                           : "border-gray-100 dark:border-[#3D5246] bg-gray-50 dark:bg-[#1A2B20] hover:border-[#2D6A4F]/30"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <ChefHat className="w-4 h-4 text-[#2D6A4F]" />
-                          <div>
-                            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">{mealLabels[meal]}</p>
-                            <p className={`text-sm font-semibold ${title ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500"}`}>
-                              {title || "Nessuna ricetta"}
-                            </p>
-                          </div>
+                      {recipe && recipe.image_url && (
+                        <div className="relative h-32 bg-gradient-to-t from-black/40 to-transparent overflow-hidden group">
+                          <img 
+                            src={recipe.image_url} 
+                            alt={title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        </div>
+                      )}
+                      <div className="p-3 flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{mealLabels[meal]}</p>
+                          <p className={`text-sm font-semibold ${title ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500"}`}>
+                            {title || "Nessuna ricetta"}
+                          </p>
+                          {recipe && recipe.prep_time && (
+                            <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              <Clock className="w-3 h-3" />
+                              {recipe.prep_time}min
+                            </div>
+                          )}
                         </div>
                         {recipe && (
                           <button
@@ -284,7 +296,7 @@ export default function Planner() {
                               e.stopPropagation();
                               removeMeal(dayIndex, meal);
                             }}
-                            className="text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition"
+                            className="text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition ml-2 flex-shrink-0"
                           >
                             <X className="w-4 h-4" />
                           </button>
