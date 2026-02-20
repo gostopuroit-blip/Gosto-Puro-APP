@@ -104,6 +104,10 @@ export default function Layout({ children, currentPageName }) {
           scrollbar-width: none;
         }
       `}</style>
+
+      <div className="fixed top-4 right-4 z-40">
+        <PremiumBadge user={user} />
+      </div>
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full pt-[env(safe-area-inset-top)]">
         <AnimatePresence mode="wait">
