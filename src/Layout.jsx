@@ -134,8 +134,8 @@ export default function Layout({ children, currentPageName }) {
                 to={createPageUrl(item.page)}
                 className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
                   isActive 
-                    ? "text-[#2D6A4F]" 
-                    : "text-gray-400 hover:text-gray-600"
+                    ? "text-[#2D6A4F] dark:text-[#888888]" 
+                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 }`}
               >
                 <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5px]" : "stroke-[1.5px]"}`} />
