@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Check, Loader2, ShoppingCart, RefreshCw, Trash2 } from "lucide-react";
-import ScreenHeader from "@/components/ScreenHeader";
-import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -168,8 +166,7 @@ export default function ShoppingList() {
 
   return (
     <div className="pb-4">
-      <ScreenHeader title="Lista della Spesa" backTo={createPageUrl("Planner")} />
-      <div className="px-5 pb-4">
+      <div className="px-5 pt-14 pb-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Lista della Spesa</h1>

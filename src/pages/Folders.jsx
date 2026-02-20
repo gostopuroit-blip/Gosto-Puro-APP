@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, Plus, FolderHeart, Search, X, Trash2 } from "lucide-react";
-import ScreenHeader from "@/components/ScreenHeader";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -161,8 +160,7 @@ export default function Folders() {
 
   return (
     <div className="pb-4">
-      <ScreenHeader />
-      <div className="px-5 pb-4">
+      <div className="px-5 pt-14 pb-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Le mie cartelle</h1>

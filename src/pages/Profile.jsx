@@ -3,8 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, AlertTriangle } from "lucide-react";
-import ScreenHeader from "@/components/ScreenHeader";
+import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -21,7 +20,6 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
-  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -67,26 +65,6 @@ export default function Profile() {
     base44.auth.updateMe({ dark_mode: next });
   };
 
-  const handleDeleteAccount = async () => {
-    setDeletingAccount(true);
-    // Delete all user data in parallel
-    const [userRecipes, folders, plans, shoppingItems] = await Promise.all([
-      base44.entities.UserRecipe.list("-created_date", 500),
-      base44.entities.Folder.filter({ is_system: false }),
-      base44.entities.MealPlan.list("-created_date", 50),
-      base44.entities.ShoppingItem.list("-created_date", 500),
-    ]);
-    await Promise.all([
-      ...userRecipes.map((r) => base44.entities.UserRecipe.delete(r.id)),
-      ...folders.map((f) => base44.entities.Folder.delete(f.id)),
-      ...plans.map((p) => base44.entities.MealPlan.delete(p.id)),
-      ...shoppingItems.map((s) => base44.entities.ShoppingItem.delete(s.id)),
-    ]);
-    setDeletingAccount(false);
-    toast.success("Tutti i tuoi dati sono stati eliminati.");
-    setTimeout(() => base44.auth.logout("/"), 1500);
-  };
-
   const handleSave = async () => {
     setSaving(true);
     await base44.auth.updateMe({
@@ -112,8 +90,7 @@ export default function Profile() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <ScreenHeader />
-      <div className="px-5 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
+      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Il mio Profilo</h1>
@@ -270,11 +247,11 @@ export default function Profile() {
               <AlertDialogCancel className="rounded-xl">Annulla</AlertDialogCancel>
               <AlertDialogAction
                 className="bg-red-500 hover:bg-red-600 rounded-xl"
-                onClick={handleDeleteAccount}
-                disabled={deletingAccount}
+                onClick={() => {
+                  toast.error("Per eliminare l'account contatta il supporto.");
+                }}
               >
-                {deletingAccount ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <AlertTriangle className="w-4 h-4 mr-2" />}
-                Elimina definitivamente
+                Elimina
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

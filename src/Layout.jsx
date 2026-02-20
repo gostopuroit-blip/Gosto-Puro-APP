@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,7 +13,6 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
@@ -92,13 +91,6 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.page}
                 to={createPageUrl(item.page)}
-                onClick={(e) => {
-                  if (isActive) {
-                    e.preventDefault();
-                    navigate(createPageUrl(item.page), { replace: true });
-                    window.dispatchEvent(new CustomEvent("navTabReset", { detail: { page: item.page } }));
-                  }
-                }}
                 className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
                   isActive 
                     ? "text-[#2D6A4F]" 

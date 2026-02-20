@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
-import ScreenHeader from "@/components/ScreenHeader";
 
 const filters = [
   { key: "all", label: "Tutte" },
@@ -31,19 +30,6 @@ export default function Recipes() {
 
   useEffect(() => {
     loadRecipes();
-  }, []);
-
-  // Reset filters when nav tab is tapped while already on Recipes
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.detail?.page === "Recipes") {
-        setSearch("");
-        setActiveFilters(new Set());
-        setActiveTags({ occasion: null, lifestyle: null });
-      }
-    };
-    window.addEventListener("navTabReset", handler);
-    return () => window.removeEventListener("navTabReset", handler);
   }, []);
 
   const loadRecipes = async () => {
@@ -123,8 +109,7 @@ export default function Recipes() {
     <PullToRefresh onRefresh={loadRecipes}>
       <div className="pb-4">
       {/* Header */}
-      <ScreenHeader />
-      <div className="px-5 pb-4">
+      <div className="px-5 pt-14 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Ricette</h1>
         <p className="text-[13px] text-gray-400 mt-0.5">Sane, facili e deliziose</p>
       </div>

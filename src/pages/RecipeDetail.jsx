@@ -3,9 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus
+  ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Flame, Check, Minus, Plus
 } from "lucide-react";
-import ScreenHeader from "@/components/ScreenHeader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
@@ -144,27 +143,30 @@ export default function RecipeDetail() {
 
   return (
     <div className="pb-8">
-      {/* Back button overlaid on hero */}
+      {/* Hero Image */}
       <div className="relative">
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-12 pb-2">
-          <ScreenHeader backTo={createPageUrl("Recipes")} title={recipe.title} />
-          <button
-            onClick={handleSaveClick}
-            className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg flex-shrink-0"
-          >
-            <Heart
-              className={`w-5 h-5 transition-colors ${
-                userRecipe?.is_saved ? "text-rose-500 fill-rose-500" : "text-gray-600"
-              }`}
-            />
-          </button>
-        </div>
         <img
           src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800"}
           alt={recipe.title}
           className="w-full aspect-[4/3] object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
+        <Link
+          to={createPageUrl("Recipes")}
+          className="absolute top-12 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-800" />
+        </Link>
+        <button
+          onClick={handleSaveClick}
+          className="absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
+        >
+          <Heart
+            className={`w-5 h-5 transition-colors ${
+              userRecipe?.is_saved ? "text-rose-500 fill-rose-500" : "text-gray-600"
+            }`}
+          />
+        </button>
       </div>
 
       {/* Content */}

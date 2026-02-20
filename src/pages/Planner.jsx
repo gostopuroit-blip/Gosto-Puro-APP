@@ -6,7 +6,6 @@ import { createPageUrl } from "@/utils";
 import {
   CalendarDays, Plus, RefreshCw, Trash2, Clock, ChefHat, ShoppingCart, Loader2, Search, X
 } from "lucide-react";
-import ScreenHeader from "@/components/ScreenHeader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -182,8 +181,7 @@ export default function Planner() {
 
   return (
     <div className="pb-4">
-      <ScreenHeader />
-      <div className="px-5 pb-4">
+      <div className="px-5 pt-14 pb-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Il mio Piano</h1>
