@@ -109,9 +109,7 @@ export default function Layout({ children, currentPageName }) {
         <PremiumBadge user={user} />
       </div>
 
-      <div className="w-full py-4 flex justify-center items-center">
-        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/e235954e8_1200x801000x80px1.png" alt="Gosto Puro" className="h-10 object-contain" />
-      </div>
+      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/e235954e8_1200x801000x80px1.png" alt="Gosto Puro" className="w-full object-contain" />
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full pt-[env(safe-area-inset-top)]">
         <AnimatePresence mode="wait">
