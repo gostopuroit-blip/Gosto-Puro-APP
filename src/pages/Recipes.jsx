@@ -28,6 +28,7 @@ export default function Recipes() {
     if (occ || life) {
       setActiveTags({ occasion: occ, lifestyle: life });
     }
+    setCurrentPage(1);
   }, []);
 
   useEffect(() => {
