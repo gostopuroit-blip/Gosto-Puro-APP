@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
-import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const filters = [
   { key: "all", label: "Tutte" },
