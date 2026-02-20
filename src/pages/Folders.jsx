@@ -141,14 +141,9 @@ export default function Folders() {
     loadData();
   };
 
-  const folderRecipes = getRecipesInFolder();
   const filteredSearch = recipes.filter((r) =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const activeFolderLabel =
-    systemFolders.find((f) => f.key === activeFolder)?.label ||
-    customFolders.find((f) => f.id === activeFolder)?.name ||
-    "";
 
   if (loading) {
     return (
