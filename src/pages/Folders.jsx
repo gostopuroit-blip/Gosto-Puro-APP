@@ -375,6 +375,27 @@ export default function Folders() {
           </Button>
         </DialogContent>
       </Dialog>
+
+       {/* Icon Picker Dialog */}
+       <Dialog open={showIconPicker} onOpenChange={setShowIconPicker}>
+         <DialogContent className="rounded-3xl max-w-sm mx-auto">
+           <DialogHeader>
+             <DialogTitle>Scegli icona</DialogTitle>
+           </DialogHeader>
+           <div className="grid grid-cols-5 gap-2">
+             {iconOptions.map((icon) => (
+               <button
+                 key={icon}
+                 onClick={() => updateFolderIcon(editingFolderId, icon)}
+                 className="text-3xl hover:scale-110 transition p-2 rounded-lg hover:bg-gray-100"
+               >
+                 {icon}
+               </button>
+             ))}
+           </div>
+         </DialogContent>
+       </Dialog>
+
     </div>
   );
 }
