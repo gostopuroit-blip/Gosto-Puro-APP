@@ -133,13 +133,13 @@ export default function Profile() {
             {/* Name + Age */}
             <div className="flex-1 space-y-2">
               <div>
-                <label className="text-[13px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider">Nome</label>
+                <label className="text-[13px] text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
                 <Input
                   type="text"
                   placeholder="Es. Brandom"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white"
+                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white text-gray-900"
                 />
                 <p className="text-[13px] text-gray-600 dark:text-gray-400">{user?.email}</p>
               </div>
