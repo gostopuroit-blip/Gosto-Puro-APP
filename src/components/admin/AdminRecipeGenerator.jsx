@@ -351,7 +351,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     setGenerating(true);
     setRecipe(null);
     setImageUrl("");
-    const prompt = buildRecipePrompt(selectedOcc);
+    const prompt = buildRecipePrompt(selectedOcc, selectedCountry);
     const result = await base44.integrations.Core.InvokeLLM({
       prompt,
       response_json_schema: {
