@@ -45,13 +45,41 @@ export default function Layout({ children, currentPageName }) {
         }
         @media (prefers-color-scheme: dark) {
           :root {
-            --gusto-cream: #1A2B20;
-            --gusto-bg: #1A2B20;
-            --gusto-surface: #2D3F35;
-            --gusto-border: #3D5246;
-            --gusto-text-primary: #E8F0EB;
-            --gusto-text-muted: #A8BDB5;
-            --gusto-warm: #2D3F35;
+            --gusto-cream: #0F0F0F;
+            --gusto-bg: #0F0F0F;
+            --gusto-surface: #1A1A1A;
+            --gusto-border: #333333;
+            --gusto-text-primary: #E5E5E5;
+            --gusto-text-muted: #9CA3AF;
+            --gusto-warm: #1A1A1A;
+          }
+        }
+        input:focus, textarea:focus, select:focus {
+          background-color: inherit !important;
+          color: inherit !important;
+        }
+        input::placeholder, textarea::placeholder {
+          color: var(--gusto-text-muted) !important;
+          opacity: 1;
+        }
+        @media (prefers-color-scheme: dark) {
+          input, textarea, select {
+            background-color: #1A1A1A !important;
+            color: #E5E5E5 !important;
+            border-color: #333333 !important;
+          }
+          input::placeholder, textarea::placeholder {
+            color: #6B7280 !important;
+          }
+        }
+        @media (prefers-color-scheme: light) {
+          input, textarea, select {
+            background-color: #FFFFFF !important;
+            color: #1A1A1A !important;
+            border-color: #E5E7EB !important;
+          }
+          input::placeholder, textarea::placeholder {
+            color: #9CA3AF !important;
           }
         }
         * {
