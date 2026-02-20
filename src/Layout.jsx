@@ -92,6 +92,13 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.page}
                 to={createPageUrl(item.page)}
+                onClick={(e) => {
+                  if (isActive) {
+                    e.preventDefault();
+                    navigate(createPageUrl(item.page), { replace: true });
+                    window.dispatchEvent(new CustomEvent("navTabReset", { detail: { page: item.page } }));
+                  }
+                }}
                 className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
                   isActive 
                     ? "text-[#2D6A4F]" 
