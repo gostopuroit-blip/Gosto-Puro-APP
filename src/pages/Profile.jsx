@@ -67,6 +67,26 @@ export default function Profile() {
     base44.auth.updateMe({ dark_mode: next });
   };
 
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    // Delete all user data in parallel
+    const [userRecipes, folders, plans, shoppingItems] = await Promise.all([
+      base44.entities.UserRecipe.list("-created_date", 500),
+      base44.entities.Folder.filter({ is_system: false }),
+      base44.entities.MealPlan.list("-created_date", 50),
+      base44.entities.ShoppingItem.list("-created_date", 500),
+    ]);
+    await Promise.all([
+      ...userRecipes.map((r) => base44.entities.UserRecipe.delete(r.id)),
+      ...folders.map((f) => base44.entities.Folder.delete(f.id)),
+      ...plans.map((p) => base44.entities.MealPlan.delete(p.id)),
+      ...shoppingItems.map((s) => base44.entities.ShoppingItem.delete(s.id)),
+    ]);
+    setDeletingAccount(false);
+    toast.success("Tutti i tuoi dati sono stati eliminati.");
+    setTimeout(() => base44.auth.logout("/"), 1500);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     await base44.auth.updateMe({
