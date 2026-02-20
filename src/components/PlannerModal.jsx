@@ -35,8 +35,8 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
             <div className="w-14 h-14 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mx-auto mb-3">
               <span className="text-2xl">📅</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Configura il tuo Piano</h2>
-            <p className="text-xs text-gray-400 mt-1">Personalizza il piano settimanale</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Configura il tuo Piano</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Personalizza il piano settimanale</p>
           </div>
 
           {/* Days */}
