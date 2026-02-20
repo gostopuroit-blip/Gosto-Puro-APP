@@ -218,6 +218,16 @@ export default function Planner() {
                   <ShoppingCart className="w-4 h-4" />
                 </Button>
               </Link>
+                 <Button
+                   size="sm"
+                   variant="outline"
+                   onClick={clearAllRecipes}
+                   title="Rimuovi tutte le ricette"
+                   className="rounded-xl"
+                 >
+                   <Trash2 className="w-4 h-4" />
+                 </Button>
+
             )}
             <Button
               size="sm"
