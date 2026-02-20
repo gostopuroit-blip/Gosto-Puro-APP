@@ -282,7 +282,7 @@ export default function Folders() {
       <Dialog open={showAddRecipe} onOpenChange={setShowAddRecipe}>
         <DialogContent className="rounded-3xl max-w-sm mx-auto">
           <DialogHeader>
-            <DialogTitle>Aggiungi a "{activeFolderLabel}"</DialogTitle>
+            <DialogTitle>Aggiungi ricetta</DialogTitle>
           </DialogHeader>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
@@ -299,16 +299,32 @@ export default function Folders() {
               <p className="text-center text-gray-400 text-sm py-6">Nessuna ricetta trovata</p>
             ) : (
               filteredSearch.map((recipe) => {
-                const already = isInCurrentFolder(recipe.id);
                 return (
-                  <button
-                    key={recipe.id}
-                    onClick={() => { if (!already) addRecipeToFolder(recipe); }}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all ${
-                      already
-                        ? "bg-[#F0F7F4] opacity-60 cursor-default"
-                        : "hover:bg-gray-50 cursor-pointer"
-                    }`}
+                  <div key={recipe.id}>
+                    <p className="text-xs font-semibold text-gray-500 px-3 pt-2 pb-1">Seleziona cartella</p>
+                    <div className="flex flex-wrap gap-2 px-3 pb-3">
+                      {systemFolders.map((f) => (
+                        <button
+                          key={f.key}
+                          onClick={() => { addRecipeToFolder(recipe, f.key); setShowAddRecipe(false); }}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-[#2D6A4F] hover:text-white transition"
+                        >
+                          {f.icon} {f.label}
+                        </button>
+                      ))}
+                      {customFolders.map((f) => (
+                        <button
+                          key={f.id}
+                          onClick={() => { addRecipeToFolder(recipe, f.id); setShowAddRecipe(false); }}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-[#2D6A4F] hover:text-white transition"
+                        >
+                          {f.icon || "📁"} {f.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })
                   >
                     {recipe.image_url && (
                       <img src={recipe.image_url} alt={recipe.title} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
