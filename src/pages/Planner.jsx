@@ -358,8 +358,11 @@ function MealSlot({ label, emoji, recipeId, recipeTitle, recipe, onSwap, onPick,
         </div>
       </Link>
       <div className="flex gap-1 flex-shrink-0">
-        <button onClick={onSwap} className="p-2 rounded-lg hover:bg-gray-50 transition-colors">
+        <button onClick={onSwap} title="Sostituisci casuale" className="p-2 rounded-lg hover:bg-gray-50 transition-colors">
           <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
+        </button>
+        <button onClick={onPick} title="Scegli ricetta" className="p-2 rounded-lg hover:bg-[#F0F7F4] transition-colors">
+          <Search className="w-3.5 h-3.5 text-[#2D6A4F]" />
         </button>
         <button onClick={onRemove} className="p-2 rounded-lg hover:bg-red-50 transition-colors">
           <Trash2 className="w-3.5 h-3.5 text-gray-300 hover:text-red-400" />
