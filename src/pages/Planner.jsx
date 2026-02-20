@@ -440,15 +440,15 @@ export default function Planner() {
 
       {replaceTarget && (
         <div className="fixed inset-0 bg-black/50 z-50 flex flex-col">
-          <div className="bg-white mt-auto rounded-t-3xl p-5 max-h-[70vh] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white mt-0 rounded-t-3xl pt-6 max-h-[95vh] flex flex-col">
+            <div className="flex items-center justify-between mb-4 px-5">
               <h3 className="font-bold text-gray-900">Scegli ricetta</h3>
               <button onClick={() => setReplaceTarget(null)} className="text-gray-400">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="mb-3">
+            <div className="mb-4 px-5">
               <input
                 autoFocus
                 type="text"
@@ -459,26 +459,39 @@ export default function Planner() {
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2">
-              {recipes
-                .filter((r) => {
-                  const mealCategory = replaceTarget.meal === "colazione" ? "Colazione" : replaceTarget.meal === "pranzo" ? "Pranzo" : "Cena";
-                  const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
-                  return (
-                    r.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                    r.category === mealCategory &&
-                    !usedIds.includes(r.id)
-                  );
-                })
-                .map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => replaceWithRecipe(r)}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 font-medium transition border border-gray-100"
-                  >
-                    {r.title}
-                  </button>
-                ))}
+            <div className="flex-1 overflow-y-auto px-5 pb-6">
+              <div className="grid grid-cols-2 gap-3">
+                {recipes
+                  .filter((r) => {
+                    const mealCategory = replaceTarget.meal === "colazione" ? "Colazione" : replaceTarget.meal === "pranzo" ? "Pranzo" : "Cena";
+                    const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
+                    return (
+                      r.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                      r.category === mealCategory &&
+                      !usedIds.includes(r.id)
+                    );
+                  })
+                  .map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => replaceWithRecipe(r)}
+                      className="rounded-xl overflow-hidden hover:opacity-80 transition flex flex-col"
+                    >
+                      <div className="bg-gray-100 h-24 overflow-hidden">
+                        {r.image_url && (
+                          <img
+                            src={r.image_url}
+                            alt={r.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="bg-white p-2 border border-t-0 border-gray-100 flex-1 flex items-center">
+                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{r.title}</p>
+                      </div>
+                    </button>
+                  ))}
+              </div>
             </div>
           </div>
         </div>
