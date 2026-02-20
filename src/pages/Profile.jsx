@@ -51,7 +51,7 @@ export default function Profile() {
     setUploading(false);
   };
 
-  const toggleDarkMode = () => {
+  const toggleDarkMode = async () => {
     const next = !darkMode;
     setDarkMode(next);
     if (next) {
@@ -61,8 +61,11 @@ export default function Profile() {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
-    // Save only the dark_mode preference, not touching other fields
-    base44.auth.updateMe({ dark_mode: next });
+    try {
+      await base44.auth.updateMe({ dark_mode: next });
+    } catch (error) {
+      toast.error("Errore nel salvataggio della modalità scura");
+    }
   };
 
   const handleSave = async () => {
