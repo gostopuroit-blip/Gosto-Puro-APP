@@ -103,9 +103,9 @@ export default function Home() {
     <PullToRefresh onRefresh={loadData}>
       <div className="pb-4">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
+      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] dark:from-[#1A2B20] to-[#FAFAF8] dark:to-[#0F1A14]">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-full overflow-hidden bg-[#D8EDD8] flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-[#D8EDD8] dark:bg-[#2D4A38] flex items-center justify-center flex-shrink-0 border-2 border-white dark:border-[#1A2B20] shadow-sm">
             {userPhoto ?
             <img src={userPhoto} alt="Foto profilo" className="w-full h-full object-cover" /> :
 
@@ -113,15 +113,15 @@ export default function Home() {
             }
           </div>
           <div>
-            <p className="text-[#2D6A4F] text-lg font-semibold leading-tight">
+            <p className="text-[#2D6A4F] dark:text-[#40916C] text-lg font-semibold leading-tight">
               {getGreeting()}{userName ? `, ${userName}` : ""}
             </p>
-            <h1 className="text-gray-900 text-sm font-bold tracking-tight leading-tight">Cosa prepariamo oggi?
+            <h1 className="text-gray-900 dark:text-gray-100 text-sm font-bold tracking-tight leading-tight">Cosa prepariamo oggi?
 
             </h1>
           </div>
         </div>
-        <p className="text-[13px] text-gray-400 mt-3 leading-relaxed">
+        <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-3 leading-relaxed">
           Ricette organizzate per decidere senza perdere tempo
         </p>
       </div>
