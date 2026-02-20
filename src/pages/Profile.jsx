@@ -67,14 +67,19 @@ export default function Profile() {
 
   const handleSave = async () => {
     setSaving(true);
-    await base44.auth.updateMe({
-      full_name: name,
-      age: age ? parseInt(age) : null,
-      photo_url: photoUrl,
-      dark_mode: darkMode,
-    });
-    setSaving(false);
-    toast.success("Profilo aggiornato! ✅");
+    try {
+      await base44.auth.updateMe({
+        full_name: name,
+        age: age ? parseInt(age) : null,
+        photo_url: photoUrl,
+        dark_mode: darkMode,
+      });
+      toast.success("Profilo aggiornato! ✅");
+    } catch (error) {
+      toast.error("Errore nel salvataggio del profilo");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
