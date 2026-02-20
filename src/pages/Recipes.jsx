@@ -129,6 +129,11 @@ export default function Recipes() {
          <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-0.5">Sane, facili e deliziose</p>
        </div>
 
+       {/* Daily Recipes Section */}
+       {activeTags.occasion && ["Colazione", "Pranzo", "Cena"].includes(activeTags.occasion) && user && (
+         <DailyRecipesSection occasion={activeTags.occasion} user={user} />
+       )}
+
        {/* Search */}
        <div className="px-5 mb-4">
          <div className="relative">
