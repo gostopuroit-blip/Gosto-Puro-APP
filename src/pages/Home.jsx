@@ -174,7 +174,7 @@ export default function Home() {
                 className="w-full h-full object-cover" />
 
               </div>
-              <span className="text-[13px] font-semibold text-gray-700 text-center">{occ.label}</span>
+              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
             </Link>
           )}
         </div>
