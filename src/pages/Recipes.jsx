@@ -35,6 +35,7 @@ export default function Recipes() {
 
   useEffect(() => {
     loadRecipes();
+    base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
   const loadRecipes = async () => {
