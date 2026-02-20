@@ -159,7 +159,9 @@ export default function Planner() {
     if (!plan) return;
     const newPlanData = [...plan.plan_data];
     
-    if (meal === "pranzo") {
+    if (meal === "colazione") {
+      newPlanData[dayIndex] = { ...newPlanData[dayIndex], colazione_id: "", colazione_title: "" };
+    } else if (meal === "pranzo") {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], pranzo_id: "", pranzo_title: "" };
     } else {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: "", cena_title: "" };
