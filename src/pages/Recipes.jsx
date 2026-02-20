@@ -12,12 +12,15 @@ const filters = [
   { key: "valutate", label: "Meglio valutate" },
 ];
 
+const RECIPES_PER_PAGE = 6;
+
 export default function Recipes() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
