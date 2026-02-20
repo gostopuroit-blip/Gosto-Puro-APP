@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { name: "Home", icon: Home, page: "Home" },
@@ -11,6 +12,8 @@ const navItems = [
 ];
 
 export default function Layout({ children, currentPageName }) {
+  const location = useLocation();
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex flex-col">
       <style>{`
@@ -23,13 +26,38 @@ export default function Layout({ children, currentPageName }) {
           --gusto-text-secondary: #6B6B6B;
           --gusto-orange: #E07A3A;
           --gusto-gold: #D4A846;
+          --gusto-bg: #FAFAF8;
+          --gusto-surface: #FFFFFF;
+          --gusto-border: #F3F4F6;
+          --gusto-text-primary: #111827;
+          --gusto-text-muted: #6B7280;
+        }
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --gusto-cream: #0F1A14;
+            --gusto-bg: #0F1A14;
+            --gusto-surface: #1A2B20;
+            --gusto-border: #2D4A38;
+            --gusto-text-primary: #F1F5F2;
+            --gusto-text-muted: #8FA896;
+            --gusto-warm: #1A2B20;
+          }
         }
         * {
           -webkit-tap-highlight-color: transparent;
         }
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-          background: var(--gusto-cream);
+          background: var(--gusto-bg);
+          overscroll-behavior: none;
+        }
+        button, a {
+          user-select: none;
+          -webkit-user-select: none;
+        }
+        svg {
+          user-select: none;
+          -webkit-user-select: none;
         }
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
@@ -40,8 +68,18 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
       
-      <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
-        {children}
+      <main className="flex-1 pb-24 max-w-lg mx-auto w-full pt-[env(safe-area-inset-top)]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname + location.search}
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -30, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Bottom Navigation */}
@@ -60,7 +98,7 @@ export default function Layout({ children, currentPageName }) {
                 }`}
               >
                 <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5px]" : "stroke-[1.5px]"}`} />
-                <span className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}>
+                <span className={`text-[13px] font-medium ${isActive ? "font-semibold" : ""}`}>
                   {item.name}
                 </span>
                 {isActive && (
