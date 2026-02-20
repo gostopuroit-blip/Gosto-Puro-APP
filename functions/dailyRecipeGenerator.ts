@@ -144,58 +144,55 @@ Deno.serve(async (req) => {
     const results = [];
     const today = new Date().toISOString().split("T")[0];
 
-    // Generate 3 recipes for each occasion
     for (const occ of giornoOccasions) {
-      for (let i = 0; i < 3; i++) {
-        // 1. Generate recipe
-        const recipePrompt = buildRecipePrompt(occ, existingTitles);
-        const recipeData = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: recipePrompt,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              title: { type: "string" },
-              description: { type: "string" },
-              category: { type: "string" },
-              prep_time: { type: "number" },
-              servings: { type: "number" },
-              calories: { type: "number" },
-              difficulty: { type: "string" },
-              occasions: { type: "array", items: { type: "string" } },
-              ingredients: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string" },
-                    quantity: { type: "string" },
-                    category: { type: "string" },
-                  },
+      // 1. Generate recipe
+      const recipePrompt = buildRecipePrompt(occ, existingTitles);
+      const recipeData = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: recipePrompt,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            description: { type: "string" },
+            category: { type: "string" },
+            prep_time: { type: "number" },
+            servings: { type: "number" },
+            calories: { type: "number" },
+            difficulty: { type: "string" },
+            occasions: { type: "array", items: { type: "string" } },
+            ingredients: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  quantity: { type: "string" },
+                  category: { type: "string" },
                 },
               },
-              instructions: { type: "array", items: { type: "string" } },
             },
+            instructions: { type: "array", items: { type: "string" } },
           },
-        });
+        },
+      });
 
-        // 2. Generate image
-        const imgPrompt = buildImagePrompt(occ, recipeData);
-        const imgResult = await base44.asServiceRole.integrations.Core.GenerateImage({
-          prompt: imgPrompt,
-        });
+      // 2. Generate image
+      const imgPrompt = buildImagePrompt(occ, recipeData);
+      const imgResult = await base44.asServiceRole.integrations.Core.GenerateImage({
+        prompt: imgPrompt,
+      });
 
-        // 3. Save recipe
-        const saved = await base44.asServiceRole.entities.Recipe.create({
-          ...recipeData,
-          image_url: imgResult?.url || "",
-          status: "pubblicata",
-          numero_salvate: 0,
-          numero_preparate: 0,
-        });
+      // 3. Save recipe
+      const saved = await base44.asServiceRole.entities.Recipe.create({
+        ...recipeData,
+        image_url: imgResult?.url || "",
+        status: "pubblicata",
+        numero_salvate: 0,
+        numero_preparate: 0,
+      });
 
-        existingTitles.push(recipeData.title);
-        results.push({ occasion: occ.label, title: recipeData.title, id: saved.id });
-      }
+      existingTitles.push(recipeData.title);
+      results.push({ occasion: occ.label, title: recipeData.title, id: saved.id });
     }
 
     // 4. Save DailyNotification record
