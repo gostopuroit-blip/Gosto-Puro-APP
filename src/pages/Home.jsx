@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
