@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
+import DailyRecipesSection from "@/components/DailyRecipesSection";
 import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
 
 const filters = [
