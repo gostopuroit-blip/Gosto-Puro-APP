@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
