@@ -12,25 +12,15 @@ Deno.serve(async (req) => {
     // Get all active occasions
     const occasions = await base44.asServiceRole.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 100);
     
-    // Group by type
-    const giorno = occasions.filter(o => o.tipo === "giorno");
-    const speciale = occasions.filter((o, i, arr) => o.tipo === "speciale" && arr.findIndex(x => x.label === o.label) === i);
-    const stile_vita = occasions.filter((o, i, arr) => o.tipo === "stile_vita" && arr.findIndex(x => x.label === o.label) === i);
-
-    const groups = [
-      { name: "giorno", occasions: giorno },
-      { name: "speciale", occasions: speciale },
-      { name: "stile_vita", occasions: stile_vita }
-    ];
+    // Filter only daily occasions: Colazione, Pranzo, Cena
+    const dailyOccasions = occasions.filter(o => 
+      o.categoria_principale === "colazione" || 
+      o.categoria_principale === "pranzo" || 
+      o.categoria_principale === "cena"
+    ).slice(0, 3);
 
     let totalGenerated = 0;
     const results = {};
-
-    for (const group of groups) {
-      results[group.name] = [];
-      
-      // Pick max 3 occasions from each group
-      const selected = group.occasions.slice(0, 3);
       
       for (const occ of selected) {
         const prompt = buildRecipePrompt(occ);
