@@ -15,6 +15,8 @@ const systemFolders = [
   { key: "valutate", label: "Più valutate", icon: "⭐" },
 ];
 
+const iconOptions = ["📁", "📂", "❤️", "⭐", "📋", "🍴", "📸", "🎯", "🔥", "💚", "🎨", "📚", "🛒", "⚡", "🌟"];
+
 export default function Folders() {
   const [expandedFolder, setExpandedFolder] = useState(null); // Track expanded folder
   const [userRecipes, setUserRecipes] = useState([]);
@@ -25,6 +27,8 @@ export default function Folders() {
   const [newFolderName, setNewFolderName] = useState("");
   const [showAddRecipe, setShowAddRecipe] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingFolderId, setEditingFolderId] = useState(null);
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
