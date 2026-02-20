@@ -277,7 +277,7 @@ Categorie valide per la ricetta: Colazione, Pranzo, Cena, Dolce, Snack, Bevanda.
 Difficoltà valide: Facile, Media, Difficile.`;
   };
 
-  const buildImagePrompt = (occ, recipe) => {
+  const buildImagePrompt = (occ, recipe, country = null) => {
     if (!recipe) return "";
     
     const title = recipe.title;
@@ -286,6 +286,8 @@ Difficoltà valide: Facile, Media, Difficile.`;
     const isCena = occ.categoria_principale === "cena" || label.includes("cena");
     const isNatale = label.includes("natale");
     const isCapodanno = label.includes("capodanno");
+    const isIntl = label.includes("cucina internazionale");
+    const countryProfile = country ? countryProfiles[country] : null;
 
     // Extract main ingredients for visual hints
     const mainIngredients = recipe.ingredients?.slice(0, 4).map(i => i.name).join(", ") || "";
