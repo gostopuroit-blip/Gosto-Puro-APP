@@ -200,6 +200,7 @@ export default function Profile() {
                 ? "Hai accesso completo a tutte le funzionalità"
                 : "Sblocca Planner, Occasioni Speciali e molto altro"}
             </p>
+
           </div>
           {(!user?.plan || user?.plan === "free") && user?.role !== "admin" && (
             <button className="bg-amber-500 text-white text-[13px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0">
