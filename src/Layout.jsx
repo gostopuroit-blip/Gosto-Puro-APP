@@ -143,7 +143,7 @@ export default function Layout({ children, currentPageName }) {
                   {item.name}
                 </span>
                 {isActive && (
-                  <div className="w-1 h-1 rounded-full bg-[#2D6A4F] mt-0.5" />
+                  <div className="w-1 h-1 rounded-full bg-[#2D6A4F] dark:bg-[#888888] mt-0.5" />
                 )}
               </Link>
             );
