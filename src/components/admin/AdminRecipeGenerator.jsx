@@ -231,11 +231,13 @@ REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
       ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
       : "";
 
-    return `Sei un cuoco italiano esperto.
+    const isIntl = label.includes("cucina internazionale");
 
-Crea una ricetta autentica italiana per questa occasione.
+    return `Sei uno chef esperto di cucina ${isIntl && profile ? profile.identity.split(":")[0] : "italiana"}.
+
+Crea una ricetta ${isIntl && country ? `autentica di cucina ${country}` : "autentica italiana"} per questa occasione.
 ${titlesBlock}
-Occasione: ${occ.label}
+Occasione: ${occ.label}${country ? ` — Paese: ${country}` : ""}
 Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
 Stagione: ${occ.stagione || "all"}
@@ -243,12 +245,11 @@ Difficoltà: ${difficulty}
 Tempo massimo: ${maxTime} minuti
 Porzioni: ${servings}
 
-Linee guida:
-- ${guidelines}
+${countryBlock}
+${!isIntl ? `Linee guida:\n- ${guidelines}` : ""}
 ${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
-Usa ingredienti tipici italiani facilmente reperibili.
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
 IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
 
