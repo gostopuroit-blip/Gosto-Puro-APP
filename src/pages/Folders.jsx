@@ -155,7 +155,7 @@ export default function Folders() {
 
   return (
     <div className="pb-4">
-      <div className="px-5 pt-14 pb-4">
+      <div className="px-5 pt-14 pb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Le mie cartelle</h1>
@@ -182,36 +182,98 @@ export default function Folders() {
         </div>
       </div>
 
-      {/* Folder Tabs */}
-      <div className="flex gap-2 overflow-x-auto hide-scrollbar px-5 pb-4">
-        {systemFolders.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setActiveFolder(f.key)}
-            className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-              activeFolder === f.key
-                ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                : "bg-white text-gray-500 border border-gray-100"
-            }`}
-          >
-            <span>{f.icon}</span>
-            {f.label}
-          </button>
-        ))}
-        {customFolders.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setActiveFolder(f.id)}
-            className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-              activeFolder === f.id
-                ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                : "bg-white text-gray-500 border border-gray-100"
-            }`}
-          >
-            <span>{f.icon || "📁"}</span>
-            {f.name}
-          </button>
-        ))}
+      {/* Folder Grid */}
+      <div className="px-5 space-y-3">
+        {systemFolders.map((f) => {
+          const folderRecipes = getRecipesInFolder(f.key);
+          const isExpanded = expandedFolder === f.key;
+          return (
+            <div key={f.key} className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => setExpandedFolder(isExpanded ? null : f.key)}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{f.icon}</span>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900 text-sm">{f.label}</p>
+                    <p className="text-xs text-gray-500">{folderRecipes.length} ricette</p>
+                  </div>
+                </div>
+                <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </div>
+              </button>
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-gray-100 grid grid-cols-2 gap-3">
+                  {folderRecipes.map(({ ur, recipe }) => (
+                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100">
+                      {recipe.image_url && (
+                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-20 object-cover" />
+                      )}
+                      <div className="p-2">
+                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{recipe.title}</p>
+                        <button
+                          onClick={() => removeRecipeFromFolder(recipe.id, f.key)}
+                          className="text-xs text-red-500 mt-1 hover:text-red-700"
+                        >
+                          <Trash2 className="w-3 h-3 inline mr-1" /> Rimuovi
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {customFolders.map((f) => {
+          const folderRecipes = getRecipesInFolder(f.id);
+          const isExpanded = expandedFolder === f.id;
+          return (
+            <div key={f.id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => setExpandedFolder(isExpanded ? null : f.id)}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{f.icon || "📁"}</span>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900 text-sm">{f.name}</p>
+                    <p className="text-xs text-gray-500">{folderRecipes.length} ricette</p>
+                  </div>
+                </div>
+                <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </div>
+              </button>
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-gray-100 grid grid-cols-2 gap-3">
+                  {folderRecipes.map(({ ur, recipe }) => (
+                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100">
+                      {recipe.image_url && (
+                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-20 object-cover" />
+                      )}
+                      <div className="p-2">
+                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{recipe.title}</p>
+                        <button
+                          onClick={() => removeRecipeFromFolder(recipe.id, f.id)}
+                          className="text-xs text-red-500 mt-1 hover:text-red-700"
+                        >
+                          <Trash2 className="w-3 h-3 inline mr-1" /> Rimuovi
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Recipe List */}
