@@ -4,7 +4,7 @@ import PlannerModal from "@/components/PlannerModal";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  CalendarDays, Plus, RefreshCw, Trash2, Clock, ChefHat, ShoppingCart, Loader2
+  CalendarDays, Plus, RefreshCw, Trash2, Clock, ShoppingCart, Loader2, Search, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
