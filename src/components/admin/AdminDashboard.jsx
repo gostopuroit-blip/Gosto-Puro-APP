@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, BookOpen, Heart, ChefHat, AlertCircle, Plus, Loader2 } from "lucide-react";
+import { Users, BookOpen, Heart, ChefHat, AlertCircle, Plus, Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminDashboard({ onNavigate }) {
   const [stats, setStats] = useState(null);
