@@ -71,13 +71,13 @@ export default function Layout({ children, currentPageName }) {
         }
         @media (prefers-color-scheme: dark) {
           :root {
-            --gusto-cream: #0F1A14;
-            --gusto-bg: #0F1A14;
-            --gusto-surface: #1A2B20;
-            --gusto-border: #2D4A38;
-            --gusto-text-primary: #F1F5F2;
-            --gusto-text-muted: #8FA896;
-            --gusto-warm: #1A2B20;
+            --gusto-cream: #1A2B20;
+            --gusto-bg: #1A2B20;
+            --gusto-surface: #2D3F35;
+            --gusto-border: #3D5246;
+            --gusto-text-primary: #E8F0EB;
+            --gusto-text-muted: #A8BDB5;
+            --gusto-warm: #2D3F35;
           }
         }
         * {
