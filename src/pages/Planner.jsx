@@ -450,7 +450,7 @@ export default function Planner() {
           <div className="bg-white mt-0 rounded-t-3xl pt-6 max-h-[95vh] flex flex-col">
             <div className="flex items-center justify-between mb-4 px-5">
               <h3 className="font-bold text-gray-900">Scegli ricetta</h3>
-              <button onClick={() => setReplaceTarget(null)} className="text-gray-400">
+              <button onClick={() => { setReplaceTarget(null); setSelectedFolder(null); }} className="text-gray-400">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -466,15 +466,49 @@ export default function Planner() {
               />
             </div>
 
+            {/* Folder Tabs */}
+            <div className="flex gap-2 px-5 mb-4 overflow-x-auto pb-2 -mx-5 px-5">
+              <button
+                onClick={() => setSelectedFolder(null)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
+                  selectedFolder === null
+                    ? "bg-[#2D6A4F] text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Tutte
+              </button>
+              {folders.map((folder) => (
+                <button
+                  key={folder.id}
+                  onClick={() => setSelectedFolder(folder.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
+                    selectedFolder === folder.id
+                      ? "bg-[#2D6A4F] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {folder.icon} {folder.name}
+                </button>
+              ))}
+            </div>
+
             <div className="flex-1 overflow-y-auto px-5 pb-6">
               <div className="grid grid-cols-2 gap-3">
                 {recipes
                   .filter((r) => {
                     const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
-                    return (
-                      r.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                      !usedIds.includes(r.id)
+                    const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
+                    const notUsed = !usedIds.includes(r.id);
+                    
+                    if (selectedFolder === null) {
+                      return matchesSearch && notUsed;
+                    }
+                    
+                    const recipeInFolder = userRecipes.some(
+                      (ur) => ur.recipe_id === r.id && ur.folder_ids && ur.folder_ids.includes(selectedFolder)
                     );
+                    return matchesSearch && notUsed && recipeInFolder;
                   })
                   .map((r) => (
                     <button
