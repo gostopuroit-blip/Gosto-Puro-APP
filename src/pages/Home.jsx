@@ -209,11 +209,9 @@ export default function Home() {
       </div>
 
       {/* Special Occasions — carousel */}
-      <div className="mt-8">
-        <div className="px-5">
-          <SectionHeader title="Occasioni Speciali" />
-        </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+      <div className="mt-8 px-5">
+        <SectionHeader title="Occasioni Speciali" />
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
           {specialOccasions.map((occ) =>
             <Link
               key={occ.label}
