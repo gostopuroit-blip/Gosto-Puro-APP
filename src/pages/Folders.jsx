@@ -133,6 +133,22 @@ export default function Folders() {
     loadData();
   };
 
+   const updateFolderIcon = async (folderId, newIcon) => {
+     await base44.entities.Folder.update(folderId, { icon: newIcon });
+     setEditingFolderId(null);
+     setShowIconPicker(false);
+     toast.success("Icona aggiornata!");
+     loadData();
+   };
+
+   const deleteFolder = async (folderId) => {
+     if (!confirm("Sei sicuro di voler eliminare questa cartella?")) return;
+     await base44.entities.Folder.delete(folderId);
+     toast.success("Cartella eliminata!");
+     loadData();
+   };
+
+
   const filteredSearch = recipes.filter((r) =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
