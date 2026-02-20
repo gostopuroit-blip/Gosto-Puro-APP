@@ -107,7 +107,7 @@ export default function Recipes() {
 
   return (
     <PullToRefresh onRefresh={loadRecipes}>
-    <div className="pb-4">
+      <div className="pb-4">
       {/* Header */}
       <div className="px-5 pt-14 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Ricette</h1>
