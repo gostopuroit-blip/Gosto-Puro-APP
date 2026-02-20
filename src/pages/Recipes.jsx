@@ -194,6 +194,32 @@ export default function Recipes() {
           ))
         )}
       </div>
+
+       {/* Pagination */}
+       {filteredRecipes.length > 0 && (
+         <div className="px-5 mt-8 mb-4 flex items-center justify-between">
+           <button
+             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+             disabled={currentPage === 1}
+             className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+           >
+             <ChevronLeft className="w-4 h-4" />
+             Precedente
+           </button>
+           <span className="text-sm text-gray-500">
+             Pagina {currentPage} di {totalPages}
+           </span>
+           <button
+             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+             disabled={currentPage === totalPages}
+             className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+           >
+             Prossima
+             <ChevronRight className="w-4 h-4" />
+           </button>
+         </div>
+       )}
+
       </div>
     </PullToRefresh>
   );
