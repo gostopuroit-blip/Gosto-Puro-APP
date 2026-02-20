@@ -133,7 +133,7 @@ export default function Profile() {
                   onChange={(e) => setName(e.target.value)}
                   className="mt-1 h-8 text-sm rounded-xl border-gray-100"
                 />
-                <p className="text-[10px] text-gray-300">{user?.email}</p>
+                <p className="text-[13px] text-gray-300">{user?.email}</p>
               </div>
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Età</label>
