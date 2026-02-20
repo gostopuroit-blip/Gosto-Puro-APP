@@ -21,6 +21,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     loadUser();
