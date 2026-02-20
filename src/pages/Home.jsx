@@ -5,6 +5,7 @@ import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Loader2, Sparkles, ChevronRight } from "lucide-react";
+import InstallPWABanner from "@/components/InstallPWABanner";
 
 // Daily occasions with image-style food icons (SVG inline or Unicode with styling)
 const dailyOccasions = [
