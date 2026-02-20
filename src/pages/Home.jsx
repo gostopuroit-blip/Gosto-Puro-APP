@@ -213,7 +213,7 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Occasioni Speciali" />
         </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
           {specialOccasions.map((occ) =>
             <Link
               key={occ.label}
