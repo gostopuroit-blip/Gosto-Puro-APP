@@ -79,21 +79,21 @@ export default function Folders() {
     }
   };
 
-  const addRecipeToFolder = async (recipe) => {
+  const addRecipeToFolder = async (recipe, folderId) => {
     const existing = userRecipes.find((u) => u.recipe_id === recipe.id);
-    if (activeFolder === "per_fare") {
+    if (folderId === "per_fare") {
       if (existing) {
         await base44.entities.UserRecipe.update(existing.id, { is_saved: true, status: "per_fare" });
       } else {
         await base44.entities.UserRecipe.create({ recipe_id: recipe.id, is_saved: true, status: "per_fare" });
       }
-    } else if (activeFolder === "fatte") {
+    } else if (folderId === "fatte") {
       if (existing) {
         await base44.entities.UserRecipe.update(existing.id, { is_prepared: true, status: "fatta" });
       } else {
         await base44.entities.UserRecipe.create({ recipe_id: recipe.id, is_prepared: true, status: "fatta" });
       }
-    } else if (activeFolder === "preferite") {
+    } else if (folderId === "preferite") {
       if (existing) {
         await base44.entities.UserRecipe.update(existing.id, { is_favorite: true });
       } else {
@@ -102,8 +102,8 @@ export default function Folders() {
     } else {
       // custom folder
       const currentFolderIds = existing?.folder_ids || [];
-      if (!currentFolderIds.includes(activeFolder)) {
-        const newFolderIds = [...currentFolderIds, activeFolder];
+      if (!currentFolderIds.includes(folderId)) {
+        const newFolderIds = [...currentFolderIds, folderId];
         if (existing) {
           await base44.entities.UserRecipe.update(existing.id, { folder_ids: newFolderIds });
         } else {
@@ -115,17 +115,17 @@ export default function Folders() {
     await loadData();
   };
 
-  const removeRecipeFromFolder = async (recipeId) => {
+  const removeRecipeFromFolder = async (recipeId, folderId) => {
     const ur = userRecipes.find((u) => u.recipe_id === recipeId);
     if (!ur) return;
-    if (activeFolder === "per_fare") {
+    if (folderId === "per_fare") {
       await base44.entities.UserRecipe.update(ur.id, { is_saved: false });
-    } else if (activeFolder === "fatte") {
+    } else if (folderId === "fatte") {
       await base44.entities.UserRecipe.update(ur.id, { is_prepared: false, status: "per_fare" });
-    } else if (activeFolder === "preferite") {
+    } else if (folderId === "preferite") {
       await base44.entities.UserRecipe.update(ur.id, { is_favorite: false });
     } else {
-      const newFolderIds = (ur.folder_ids || []).filter((id) => id !== activeFolder);
+      const newFolderIds = (ur.folder_ids || []).filter((id) => id !== folderId);
       await base44.entities.UserRecipe.update(ur.id, { folder_ids: newFolderIds });
     }
     toast.success("Ricetta rimossa");
