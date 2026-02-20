@@ -102,6 +102,22 @@ export default function Planner() {
     toast.success("Piano creato! 🎉");
   };
 
+  const replaceWithRecipe = async (recipe) => {
+    if (!replaceTarget || !plan) return;
+    const { dayIndex, meal } = replaceTarget;
+    const newPlanData = [...plan.plan_data];
+    if (meal === "pranzo") {
+      newPlanData[dayIndex] = { ...newPlanData[dayIndex], pranzo_id: recipe.id, pranzo_title: recipe.title };
+    } else {
+      newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: recipe.id, cena_title: recipe.title };
+    }
+    await base44.entities.MealPlan.update(plan.id, { plan_data: newPlanData });
+    setPlan({ ...plan, plan_data: newPlanData });
+    setReplaceTarget(null);
+    setSearchQuery("");
+    toast.success("Ricetta sostituita!");
+  };
+
   const swapRecipe = async (dayIndex, meal) => {
     if (!plan) return;
     const currentId = meal === "pranzo" ? plan.plan_data[dayIndex].pranzo_id : plan.plan_data[dayIndex].cena_id;
