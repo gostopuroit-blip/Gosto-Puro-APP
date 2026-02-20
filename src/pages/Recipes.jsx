@@ -33,6 +33,19 @@ export default function Recipes() {
     loadRecipes();
   }, []);
 
+  // Reset filters when nav tab is tapped while already on Recipes
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.page === "Recipes") {
+        setSearch("");
+        setActiveFilters(new Set());
+        setActiveTags({ occasion: null, lifestyle: null });
+      }
+    };
+    window.addEventListener("navTabReset", handler);
+    return () => window.removeEventListener("navTabReset", handler);
+  }, []);
+
   const loadRecipes = async () => {
     const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 200);
     setRecipes(data);
