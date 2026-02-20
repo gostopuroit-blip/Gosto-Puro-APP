@@ -21,14 +21,14 @@ const timeOptions = [
   { value: 30, label: "30 min" },
 ];
 
-export default function PlannerModal({ open, onClose, onCreate }) {
+export default function PlannerModal({ onCreate, onClose, isLoading }) {
   const [days, setDays] = useState(5);
   const [focus, setFocus] = useState("pratico");
   const [maxTime, setMaxTime] = useState(20);
   const [servings, setServings] = useState(2);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="rounded-3xl max-w-sm mx-auto p-0 overflow-hidden">
         <div className="bg-gradient-to-b from-[#F0F7F4] to-white p-6">
           <div className="text-center mb-6">
