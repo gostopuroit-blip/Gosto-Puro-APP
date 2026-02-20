@@ -239,6 +239,7 @@ export default function Planner() {
                 recipeTitle={day.pranzo_title}
                 recipe={getRecipeById(day.pranzo_id)}
                 onSwap={() => swapRecipe(idx, "pranzo")}
+                onPick={() => openReplacePicker(idx, "pranzo")}
                 onRemove={() => removeMeal(idx, "pranzo")}
               />
 
@@ -250,6 +251,7 @@ export default function Planner() {
                 recipeTitle={day.cena_title}
                 recipe={getRecipeById(day.cena_id)}
                 onSwap={() => swapRecipe(idx, "cena")}
+                onPick={() => openReplacePicker(idx, "cena")}
                 onRemove={() => removeMeal(idx, "cena")}
               />
             </div>
