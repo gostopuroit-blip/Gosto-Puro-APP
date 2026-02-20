@@ -74,19 +74,35 @@ export default function AdminDashboard({ onNavigate }) {
         ))}
       </div>
 
-      {/* Quick action */}
-      <button
-        onClick={() => onNavigate && onNavigate("ricette")}
-        className="w-full flex items-center gap-3 bg-[#2D6A4F] text-white rounded-2xl p-4 shadow-lg shadow-[#2D6A4F]/20 active:scale-[0.98] transition-transform"
-      >
-        <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-          <Plus className="w-5 h-5" />
-        </div>
-        <div>
-          <p className="font-bold text-sm">Crea nuova ricetta</p>
-          <p className="text-xs text-white/70">Aggiungi al catalogo</p>
-        </div>
-      </button>
+      {/* Quick actions */}
+      <div className="space-y-2">
+        <button
+          onClick={() => onNavigate && onNavigate("ricette")}
+          className="w-full flex items-center gap-3 bg-[#2D6A4F] text-white rounded-2xl p-4 shadow-lg shadow-[#2D6A4F]/20 active:scale-[0.98] transition-transform"
+        >
+          <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+            <Plus className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="font-bold text-sm">Crea nuova ricetta</p>
+            <p className="text-xs text-white/70">Aggiungi al catalogo</p>
+          </div>
+        </button>
+
+        <button
+          onClick={handleGenerateBulkRecipes}
+          disabled={generatingBulk}
+          className="w-full flex items-center gap-3 bg-purple-600 text-white rounded-2xl p-4 shadow-lg shadow-purple-600/20 active:scale-[0.98] transition-transform disabled:opacity-50"
+        >
+          <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+            {generatingBulk ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+          </div>
+          <div>
+            <p className="font-bold text-sm">{generatingBulk ? "Generando..." : "Genera 3 ricette per tipo"}</p>
+            <p className="text-xs text-white/70">AI per giorno, speciali e lifestyle</p>
+          </div>
+        </button>
+      </div>
 
       {/* Top saved */}
 
