@@ -142,6 +142,7 @@ Deno.serve(async (req) => {
     const existingTitles = existingRecipes.map(r => r.title);
 
     const results = [];
+    const today = new Date().toISOString().split("T")[0];
 
     for (const occ of giornoOccasions) {
       // 1. Generate recipe
@@ -190,9 +191,17 @@ Deno.serve(async (req) => {
         numero_preparate: 0,
       });
 
-      existingTitles.push(recipeData.title); // avoid duplicate within same run
+      existingTitles.push(recipeData.title);
       results.push({ occasion: occ.label, title: recipeData.title, id: saved.id });
     }
+
+    // 4. Save DailyNotification record
+    await base44.asServiceRole.entities.DailyNotification.create({
+      date: today,
+      recipe_ids: results.map(r => r.id),
+      recipe_titles: results.map(r => r.title),
+      occasions: results.map(r => r.occasion),
+    });
 
     return Response.json({ success: true, generated: results });
   } catch (error) {
