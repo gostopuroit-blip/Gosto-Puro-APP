@@ -277,26 +277,24 @@ export default function Folders() {
               </button>
 
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] grid grid-cols-2 gap-3">
+                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
+                  <Button
+                    onClick={() => setShowAddRecipe(true)}
+                    size="sm"
+                    className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Aggiungi ricetta
+                  </Button>
                   {folderRecipes.map(({ ur, recipe }) => (
-                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100 dark:border-[#3D5246] bg-white dark:bg-[#1A2B20]">
-                      <Link
-                        to={`/recipe/${recipe.id}`}
-                        className="aspect-square w-full bg-gray-200 dark:bg-[#0F1A14] overflow-hidden relative group"
+                    <div key={recipe.id} className="relative group">
+                      <RecipeCard recipe={recipe} />
+                      <button
+                        onClick={() => removeRecipeFromFolder(recipe.id, folder.id)}
+                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
                       >
-                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                      </Link>
-                      <div className="p-2">
-                        <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{recipe.title}</p>
-                        <div className="flex gap-1 mt-1">
-                          <button
-                            onClick={() => removeRecipeFromFolder(recipe.id, folder.id)}
-                            className="flex-1 text-xs py-1 rounded bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 font-semibold transition"
-                          >
-                            Rimuovi
-                          </button>
-                        </div>
-                      </div>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
