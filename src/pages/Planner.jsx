@@ -115,7 +115,9 @@ export default function Planner() {
     if (!replaceTarget || !plan) return;
     const { dayIndex, meal } = replaceTarget;
     const newPlanData = [...plan.plan_data];
-    if (meal === "pranzo") {
+    if (meal === "colazione") {
+      newPlanData[dayIndex] = { ...newPlanData[dayIndex], colazione_id: recipe.id, colazione_title: recipe.title };
+    } else if (meal === "pranzo") {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], pranzo_id: recipe.id, pranzo_title: recipe.title };
     } else {
       newPlanData[dayIndex] = { ...newPlanData[dayIndex], cena_id: recipe.id, cena_title: recipe.title };
