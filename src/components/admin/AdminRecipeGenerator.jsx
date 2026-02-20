@@ -330,6 +330,14 @@ Difficoltà valide: Facile, Media, Difficile.`;
       ? `simple wooden table, white ceramic plate, warm indoor evening light, cozy home atmosphere softly blurred, relaxing dinner setting, natural authentic presentation,`
       : ``;
 
+    // Use country-specific image style if international
+    if (isIntl && countryProfile) {
+      const base = `Professional realistic food photography of ${title},`;
+      const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
+      const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution`;
+      return `${base} ${ingredients} ${colorHints} ${textureHints} ${countryProfile.imageStyle}, ${fixed}.`;
+    }
+
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
     const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
