@@ -280,6 +280,52 @@ export default function Planner() {
       )}
 
       <PlannerModal open={showModal} onClose={() => setShowModal(false)} onCreate={createPlan} />
+
+      {/* Replace Recipe Modal */}
+      {replaceTarget && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end" onClick={() => { setReplaceTarget(null); setSearchQuery(""); }}>
+          <div className="bg-white w-full max-w-lg mx-auto rounded-t-3xl p-5 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-gray-900">Scegli una ricetta</h3>
+              <button onClick={() => { setReplaceTarget(null); setSearchQuery(""); }} className="p-1.5 rounded-lg hover:bg-gray-100">
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Cerca ricetta..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 bg-gray-50"
+                autoFocus
+              />
+            </div>
+            <div className="overflow-y-auto flex-1 space-y-2">
+              {recipes
+                .filter((r) => r.status === "pubblicata" && r.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => replaceWithRecipe(r)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#F0F7F4] transition-colors text-left"
+                  >
+                    {r.image_url ? (
+                      <img src={r.image_url} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex-shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{r.title}</p>
+                      <p className="text-[11px] text-gray-400">{r.category} • {r.prep_time} min</p>
+                    </div>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
