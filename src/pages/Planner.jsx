@@ -463,11 +463,9 @@ export default function Planner() {
               <div className="grid grid-cols-2 gap-3">
                 {recipes
                   .filter((r) => {
-                    const mealCategory = replaceTarget.meal === "colazione" ? "Colazione" : replaceTarget.meal === "pranzo" ? "Pranzo" : "Cena";
                     const usedIds = plan.plan_data.flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id]);
                     return (
                       r.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                      r.category === mealCategory &&
                       !usedIds.includes(r.id)
                     );
                   })
