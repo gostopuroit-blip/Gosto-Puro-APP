@@ -378,7 +378,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
   const handleGenerateImage = async () => {
     if (!recipe) return;
     setGeneratingImage(true);
-    const imgPrompt = buildImagePrompt(selectedOcc, recipe);
+    const imgPrompt = buildImagePrompt(selectedOcc, recipe, selectedCountry);
     const result = await base44.integrations.Core.GenerateImage({ prompt: imgPrompt });
     setImageUrl(result.url);
     setGeneratingImage(false);
