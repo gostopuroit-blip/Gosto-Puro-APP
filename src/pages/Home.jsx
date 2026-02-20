@@ -91,25 +91,24 @@ export default function Home() {
     <PullToRefresh onRefresh={loadData}>
       <div className="pb-4 overflow-x-hidden">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-full overflow-hidden bg-[#D8EDD8] dark:bg-[#2D4A38] flex items-center justify-center flex-shrink-0 border-2 border-white dark:border-[#1A2B20] shadow-sm">
+      <div className="px-5 pt-6 pb-6">
+        <div className="flex items-center gap-3.5 mb-6">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-[#2D6A4F] dark:bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 border-2 border-white dark:border-[#1A1A1A] shadow-md">
             {userPhoto ?
               <img src={userPhoto} alt="Foto profilo" className="w-full h-full object-cover" /> :
-
-              <span className="text-lg">👤</span>
+              <span className="text-white font-bold text-sm">{userName ? userName.substring(0, 2).toUpperCase() : "👤"}</span>
               }
           </div>
           <div>
-            <p className="text-[#2D6A4F] dark:text-[#40916C] text-lg font-semibold leading-tight">
+            <p className="text-[#2D6A4F] dark:text-[#888888] text-base font-bold leading-tight">
               {getGreeting()}{userName ? `, ${userName}` : ""}
             </p>
-            <h1 className="text-gray-900 dark:text-gray-100 text-sm font-bold tracking-tight leading-tight">Cosa prepariamo oggi?
-
+            <h1 className="text-gray-600 dark:text-gray-400 text-xs font-semibold tracking-tight leading-tight">
+              Cosa prepariamo oggi?
             </h1>
           </div>
         </div>
-        <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-3 leading-relaxed">
+        <p className="text-[12px] text-gray-400 dark:text-gray-500 leading-relaxed">
           Ricette organizzate per decidere senza perdere tempo
         </p>
       </div>
