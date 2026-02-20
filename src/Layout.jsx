@@ -105,15 +105,11 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Header */}
-      <header className="bg-[#1A4D38] py-6 border-b border-[#2D6A4F] sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
-        <div className="max-w-lg mx-auto px-4 flex items-center justify-between">
-          <h1 className="text-3xl font-light text-amber-400 tracking-wide">Gosto Puro</h1>
-          <PremiumBadge user={user} />
-        </div>
-      </header>
+      <div className="fixed top-4 right-4 z-40">
+        <PremiumBadge user={user} />
+      </div>
       
-      <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
+      <main className="flex-1 pb-24 max-w-lg mx-auto w-full pt-[env(safe-area-inset-top)]">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname + location.search}
