@@ -100,6 +100,7 @@ export default function Home() {
   }
 
   return (
+    <PullToRefresh onRefresh={loadData}>
     <div className="pb-4">
       {/* Header */}
       <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
