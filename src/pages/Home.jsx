@@ -246,7 +246,7 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Stile di Vita e Salute" />
         </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
           {lifestyleTags.map((tag) =>
           <Link
             key={tag.label}
