@@ -163,18 +163,18 @@ export default function Folders() {
 
   return (
     <div className="pb-4">
-      <div className="px-5 pt-14 pb-6">
+      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] dark:from-[#1A2B20] to-[#FAFAF8] dark:to-[#0F1A14]">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Le mie cartelle</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Organizza le tue ricette</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Le mie cartelle</h1>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Organizza le tue ricette</p>
           </div>
           <div className="flex gap-2">
             <Button
               onClick={() => { setShowAddRecipe(true); setSearchQuery(""); }}
               size="sm"
               variant="outline"
-              className="rounded-xl"
+              className="rounded-xl dark:bg-[#2D3F35] dark:border-[#3D5246] dark:text-white"
             >
               <Plus className="w-4 h-4" />
             </Button>
@@ -196,39 +196,44 @@ export default function Folders() {
           const folderRecipes = getRecipesInFolder(f.key);
           const isExpanded = expandedFolder === f.key;
           return (
-            <div key={f.key} className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+            <div key={f.key} className="bg-white dark:bg-[#2D3F35] border border-gray-100 dark:border-[#3D5246] rounded-2xl overflow-hidden">
               <button
                 onClick={() => setExpandedFolder(isExpanded ? null : f.key)}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition"
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[#1A2B20] transition"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{f.icon}</span>
                   <div className="text-left">
-                    <p className="font-semibold text-gray-900 text-sm">{f.label}</p>
-                    <p className="text-xs text-gray-500">{folderRecipes.length} ricette</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{f.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{folderRecipes.length} ricette</p>
                   </div>
                 </div>
                 <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                   </svg>
                 </div>
               </button>
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-gray-100 grid grid-cols-2 gap-3">
+                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] grid grid-cols-2 gap-3">
                   {folderRecipes.map(({ ur, recipe }) => (
-                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100">
-                      {recipe.image_url && (
-                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-20 object-cover" />
-                      )}
+                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100 dark:border-[#3D5246] bg-white dark:bg-[#1A2B20]">
+                      <Link
+                        to={`/recipe/${recipe.id}`}
+                        className="aspect-square w-full bg-gray-200 dark:bg-[#0F1A14] overflow-hidden relative group"
+                      >
+                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      </Link>
                       <div className="p-2">
-                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{recipe.title}</p>
-                        <button
-                          onClick={() => removeRecipeFromFolder(recipe.id, f.key)}
-                          className="text-xs text-red-500 mt-1 hover:text-red-700"
-                        >
-                          <Trash2 className="w-3 h-3 inline mr-1" /> Rimuovi
-                        </button>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{recipe.title}</p>
+                        <div className="flex gap-1 mt-1">
+                          <button
+                            onClick={() => removeRecipeFromFolder(recipe.id, f.key)}
+                            className="flex-1 text-xs py-1 rounded bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 font-semibold transition"
+                          >
+                            Rimuovi
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -237,58 +242,71 @@ export default function Folders() {
             </div>
           );
         })}
-        {customFolders.map((f) => {
-          const folderRecipes = getRecipesInFolder(f.id);
-          const isExpanded = expandedFolder === f.id;
+
+        {/* Custom Folders */}
+        {customFolders.map((folder) => {
+          const folderRecipes = getRecipesInFolder(folder.id);
+          const isExpanded = expandedFolder === folder.id;
           return (
-            <div key={f.id} className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition">
-                <button
-                  onClick={() => setExpandedFolder(isExpanded ? null : f.id)}
-                  className="flex-1 flex items-center gap-3"
-                >
-                  <span 
-                    className="text-2xl cursor-pointer hover:opacity-80" 
+            <div key={folder.id} className="bg-white dark:bg-[#2D3F35] border border-gray-100 dark:border-[#3D5246] rounded-2xl overflow-hidden">
+              <button
+                onClick={() => setExpandedFolder(isExpanded ? null : folder.id)}
+                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[#1A2B20] transition"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="text-2xl cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEditingFolderId(f.id);
+                      setEditingFolderId(folder.id);
                       setShowIconPicker(true);
                     }}
-                  >{f.icon || "📁"}</span>
+                  >
+                    {folder.icon}
+                  </span>
                   <div className="text-left">
-                    <p className="font-semibold text-gray-900 text-sm">{f.name}</p>
-                    <p className="text-xs text-gray-500">{folderRecipes.length} ricette</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{folder.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{folderRecipes.length} ricette</p>
                   </div>
-                </button>
-                <div className="flex items-center gap-2">
-                  <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
-                  </div>
+                </div>
+                <div className="flex gap-2">
                   <button
-                    onClick={() => deleteFolder(f.id)}
-                    className="text-gray-400 hover:text-red-500 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteFolder(folder.id);
+                    }}
+                    className="text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 p-1 rounded"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
+                  <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                    <svg className="w-5 h-5 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              </button>
+
               {isExpanded && (
-                <div className="px-4 pb-4 border-t border-gray-100 grid grid-cols-2 gap-3">
+                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] grid grid-cols-2 gap-3">
                   {folderRecipes.map(({ ur, recipe }) => (
-                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100">
-                      {recipe.image_url && (
-                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-20 object-cover" />
-                      )}
+                    <div key={recipe.id} className="rounded-xl overflow-hidden border border-gray-100 dark:border-[#3D5246] bg-white dark:bg-[#1A2B20]">
+                      <Link
+                        to={`/recipe/${recipe.id}`}
+                        className="aspect-square w-full bg-gray-200 dark:bg-[#0F1A14] overflow-hidden relative group"
+                      >
+                        <img src={recipe.image_url} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      </Link>
                       <div className="p-2">
-                        <p className="text-xs font-medium text-gray-700 line-clamp-2">{recipe.title}</p>
-                        <button
-                          onClick={() => removeRecipeFromFolder(recipe.id, f.id)}
-                          className="text-xs text-red-500 mt-1 hover:text-red-700"
-                        >
-                          <Trash2 className="w-3 h-3 inline mr-1" /> Rimuovi
-                        </button>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{recipe.title}</p>
+                        <div className="flex gap-1 mt-1">
+                          <button
+                            onClick={() => removeRecipeFromFolder(recipe.id, folder.id)}
+                            className="flex-1 text-xs py-1 rounded bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 font-semibold transition"
+                          >
+                            Rimuovi
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -299,103 +317,96 @@ export default function Folders() {
         })}
       </div>
 
-      {/* Add Recipe Modal */}
+      {/* Add Recipe Dialog */}
       <Dialog open={showAddRecipe} onOpenChange={setShowAddRecipe}>
-        <DialogContent className="rounded-3xl max-w-sm mx-auto">
+        <DialogContent className="dark:bg-[#2D3F35] dark:border-[#3D5246]">
           <DialogHeader>
-            <DialogTitle>Aggiungi ricetta</DialogTitle>
+            <DialogTitle className="dark:text-white">Aggiungi ricetta a cartella</DialogTitle>
           </DialogHeader>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-            <Input
-              placeholder="Cerca ricetta..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-xl pl-9"
-              autoFocus
-            />
-          </div>
-          <div className="max-h-96 overflow-y-auto space-y-3">
-            {filteredSearch.length === 0 ? (
-              <p className="text-center text-gray-400 text-sm py-6">Nessuna ricetta trovata</p>
-            ) : (
-              filteredSearch.map((recipe) => (
-                <div key={recipe.id} className="space-y-2">
-                  <div className="flex items-center gap-2 px-1">
-                    {recipe.image_url && (
-                      <img src={recipe.image_url} alt={recipe.title} className="w-12 h-12 rounded-lg object-cover" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{recipe.title}</p>
-                      <p className="text-xs text-gray-400">{recipe.category}</p>
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-600" />
+              <Input
+                placeholder="Cerca ricetta..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white"
+              />
+            </div>
+            <div className="max-h-72 overflow-y-auto space-y-2">
+              {filteredSearch.map((recipe) => (
+                <div key={recipe.id} className="p-3 border border-gray-200 dark:border-[#3D5246] rounded-lg flex items-start gap-3 bg-gray-50 dark:bg-[#1A2B20]">
+                  <img src={recipe.image_url} alt="" className="w-12 h-12 rounded object-cover" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{recipe.title}</p>
+                    <div className="flex gap-2 mt-2">
+                      {systemFolders.map((f) => (
+                        <button
+                          key={f.key}
+                          onClick={() => { addRecipeToFolder(recipe, f.key); setShowAddRecipe(false); }}
+                          className="text-xs px-2 py-1 rounded bg-white dark:bg-[#2D3F35] border border-gray-200 dark:border-[#3D5246] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3D5246] transition"
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                      {customFolders.map((cf) => (
+                        <button
+                          key={cf.id}
+                          onClick={() => { addRecipeToFolder(recipe, cf.id); setShowAddRecipe(false); }}
+                          className="text-xs px-2 py-1 rounded bg-white dark:bg-[#2D3F35] border border-gray-200 dark:border-[#3D5246] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3D5246] transition"
+                        >
+                          {cf.name}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {systemFolders.map((f) => (
-                      <button
-                        key={f.key}
-                        onClick={() => { addRecipeToFolder(recipe, f.key); setShowAddRecipe(false); }}
-                        className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-[#2D6A4F] hover:text-white transition"
-                      >
-                        {f.icon} {f.label}
-                      </button>
-                    ))}
-                    {customFolders.map((f) => (
-                      <button
-                        key={f.id}
-                        onClick={() => { addRecipeToFolder(recipe, f.id); setShowAddRecipe(false); }}
-                        className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-[#2D6A4F] hover:text-white transition"
-                      >
-                        {f.icon || "📁"} {f.name}
-                      </button>
-                    ))}
-                  </div>
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* New Folder Dialog */}
       <Dialog open={showNewFolder} onOpenChange={setShowNewFolder}>
-        <DialogContent className="rounded-3xl max-w-sm mx-auto">
+        <DialogContent className="dark:bg-[#2D3F35] dark:border-[#3D5246]">
           <DialogHeader>
-            <DialogTitle>Nuova cartella</DialogTitle>
+            <DialogTitle className="dark:text-white">Crea nuova cartella</DialogTitle>
           </DialogHeader>
           <Input
-            placeholder="Nome della cartella"
+            placeholder="Nome cartella..."
             value={newFolderName}
             onChange={(e) => setNewFolderName(e.target.value)}
-            className="rounded-xl"
-            onKeyDown={(e) => e.key === "Enter" && createFolder()}
+            className="dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white"
           />
-          <Button onClick={createFolder} className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]">
-            Crea cartella
+          <Button
+            onClick={createFolder}
+            className="w-full bg-[#2D6A4F] hover:bg-[#235c43] rounded-lg"
+          >
+            Crea
           </Button>
         </DialogContent>
       </Dialog>
 
-       {/* Icon Picker Dialog */}
-       <Dialog open={showIconPicker} onOpenChange={setShowIconPicker}>
-         <DialogContent className="rounded-3xl max-w-sm mx-auto">
-           <DialogHeader>
-             <DialogTitle>Scegli icona</DialogTitle>
-           </DialogHeader>
-           <div className="grid grid-cols-5 gap-2">
-             {iconOptions.map((icon) => (
-               <button
-                 key={icon}
-                 onClick={() => updateFolderIcon(editingFolderId, icon)}
-                 className="text-3xl hover:scale-110 transition p-2 rounded-lg hover:bg-gray-100"
-               >
-                 {icon}
-               </button>
-             ))}
-           </div>
-         </DialogContent>
-       </Dialog>
-
+      {/* Icon Picker Dialog */}
+      <Dialog open={showIconPicker} onOpenChange={setShowIconPicker}>
+        <DialogContent className="dark:bg-[#2D3F35] dark:border-[#3D5246]">
+          <DialogHeader>
+            <DialogTitle className="dark:text-white">Scegli icona</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-6 gap-2">
+            {iconOptions.map((icon) => (
+              <button
+                key={icon}
+                onClick={() => updateFolderIcon(editingFolderId, icon)}
+                className="text-3xl p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1A2B20] transition"
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
