@@ -91,7 +91,8 @@ export default function Profile() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
+      <ScreenHeader />
+      <div className="px-5 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Il mio Profilo</h1>

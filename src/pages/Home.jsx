@@ -104,7 +104,8 @@ export default function Home() {
     <PullToRefresh onRefresh={loadData}>
       <div className="pb-4">
       {/* Header */}
-      <div className="px-5 pt-14 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
+      <ScreenHeader />
+      <div className="px-5 pb-6 bg-gradient-to-b from-[#F0F7F4] to-[#FAFAF8]">
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-full overflow-hidden bg-[#D8EDD8] flex items-center justify-center flex-shrink-0 border-2 border-white shadow-sm">
             {userPhoto ?
