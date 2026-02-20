@@ -24,7 +24,7 @@ const dailyOccasions = [
 },
 {
   label: "Leggera",
-  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/380a7e11c_Detox.png"
+  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/8ea268711_Insalata.png"
 },
 {
   label: "Dolci",
