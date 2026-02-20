@@ -98,7 +98,16 @@ export default function Recipes() {
       }
       return newFilters;
     });
+    setCurrentPage(1);
   };
+
+  const paginatedRecipes = useMemo(() => {
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    return filteredRecipes.slice(startIdx, endIdx);
+  }, [filteredRecipes, currentPage]);
+
+  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
