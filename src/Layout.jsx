@@ -13,32 +13,6 @@ const navItems = [
   { name: "Profilo", icon: UserCircle2, page: "Profile" },
 ];
 
-function PremiumBadge({ user }) {
-  if (!user) return null;
-
-  const roleConfig = {
-    admin: { label: "👑 Admin", color: "bg-purple-500" },
-    premium: { label: "⭐ Premium", color: "bg-amber-500" },
-  };
-
-  const hasRole = user.role === "admin" || user.role === "premium";
-  const config = roleConfig[user.role];
-
-  if (!hasRole) {
-    return (
-      <div className="px-3 py-1.5 rounded-full text-xs font-semibold text-gray-600 dark:text-gray-400">
-        Free
-      </div>
-    );
-  }
-
-  return (
-    <div className={`${config.color} px-3 py-1.5 rounded-full text-xs font-semibold text-white`}>
-      {config.label}
-    </div>
-  );
-}
-
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
