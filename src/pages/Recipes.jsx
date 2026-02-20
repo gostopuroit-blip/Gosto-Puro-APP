@@ -32,7 +32,7 @@ export default function Recipes() {
   }, []);
 
   const loadRecipes = async () => {
-    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 50);
+    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 200);
     setRecipes(data);
     setLoading(false);
   };
@@ -46,8 +46,8 @@ export default function Recipes() {
       result = result.filter(
         (r) =>
           r.title.toLowerCase().includes(q) ||
-          r.description.toLowerCase().includes(q) ||
-          r.category.toLowerCase().includes(q)
+          (r.description || "").toLowerCase().includes(q) ||
+          (r.category || "").toLowerCase().includes(q)
       );
     }
 
@@ -63,18 +63,18 @@ export default function Recipes() {
       );
     }
 
-    // Apply all active filters
-    if (activeFilters.has("salvate")) {
-      result.sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0));
-    }
-    if (activeFilters.has("preparate")) {
-      result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
-    }
-    if (activeFilters.has("veloci")) {
-      result = result.filter((r) => r.prep_time <= 15);
-    }
+    // Apply sort filters (only one at a time — last active wins)
+    const hasSort = activeFilters.has("salvate") || activeFilters.has("preparate") || activeFilters.has("valutate");
     if (activeFilters.has("valutate")) {
       result.sort((a, b) => (b.media_rating || 0) - (a.media_rating || 0));
+    } else if (activeFilters.has("preparate")) {
+      result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
+    } else if (activeFilters.has("salvate")) {
+      result.sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0));
+    }
+
+    if (activeFilters.has("veloci")) {
+      result = result.filter((r) => r.prep_time <= 15);
     }
 
     return result;
