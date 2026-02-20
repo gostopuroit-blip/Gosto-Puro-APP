@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 
 const navItems = [
   { name: "Home", icon: Home, page: "Home" },
