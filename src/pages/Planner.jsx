@@ -268,6 +268,55 @@ export default function Planner() {
       )}
 
       <PlannerModal open={showModal} onClose={() => setShowModal(false)} onCreate={createPlan} />
+
+      {/* Recipe Picker Modal */}
+      {replacePicker && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setReplacePicker(null)} />
+          <div className="relative bg-white w-full max-w-lg rounded-t-3xl shadow-2xl z-10 max-h-[75vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+              <h3 className="text-base font-bold text-gray-900">Scegli una ricetta</h3>
+              <button onClick={() => setReplacePicker(null)} className="p-1.5 rounded-xl hover:bg-gray-100">
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+            <div className="px-5 pb-3">
+              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
+                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Cerca ricetta..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-transparent text-sm flex-1 outline-none text-gray-700 placeholder-gray-400"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1 px-5 pb-6 space-y-2">
+              {recipes
+                .filter((r) => r.title?.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((r) => (
+                  <button
+                    key={r.id}
+                    onClick={() => applyRecipeSwap(replacePicker.dayIndex, replacePicker.meal, r)}
+                    className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-[#F0F7F4] active:scale-[0.98] transition-all text-left border border-transparent hover:border-[#2D6A4F]/10"
+                  >
+                    {r.image_url ? (
+                      <img src={r.image_url} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex-shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{r.title}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{r.category} • {r.prep_time} min</p>
+                    </div>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
