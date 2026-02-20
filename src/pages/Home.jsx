@@ -4,7 +4,7 @@ import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles, ChevronRight } from "lucide-react";
 
 // Daily occasions with image-style food icons (SVG inline or Unicode with styling)
 const dailyOccasions = [
