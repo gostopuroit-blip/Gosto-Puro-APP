@@ -16,6 +16,101 @@ const countries = [
   { label: "Stati Uniti", flag: "🇺🇸" },
 ];
 
+const countryProfiles = {
+  "Giappone": {
+    identity: "Cucina giapponese minimalista: equilibrio tra sapore, estetica e leggerezza. Ingredienti semplici ma di qualità, tagli precisi, presentazione ordinata.",
+    dishes: "Ramen, Sushi, Udon, Gyoza, Donburi, Tempura, Onigiri, Miso soup",
+    rules: [
+      "Ricetta fedele alla tradizione giapponese",
+      "Ingredienti reperibili in Italia (supermercati forniti o negozi asiatici)",
+      "Nessuna reinterpretazione italiana inutile",
+      "Porzioni equilibrate e bilanciate",
+      "Non esagerare con fusion o contaminazioni",
+      "Rispettare la filosofia giapponese: semplicità, precisione, rispetto dell'ingrediente",
+    ],
+    imageStyle: "minimal Japanese presentation, clean white ceramic plate or wooden tray, neutral background, natural soft light, no steam, no dramatic effects, no hands, precise clean plating, authentic Japanese aesthetic",
+    promptExtra: "IMPORTANTE: Questa è autentica cucina giapponese. NON italianizzare. NON fare fusion. Il piatto deve sembrare uscito da un ristorante giapponese vero. Mantieni i nomi originali giapponesi. Ingredienti: se non reperibili facilmente, suggerisci alternative (es: brodo dashi → brodo con kombu e katsuobushi o sostituto).",
+  },
+  "Messico": {
+    identity: "Cucina messicana autentica: sapore deciso, spezie equilibrate, colori vivi, cucina conviviale. NON tex-mex americano.",
+    dishes: "Tacos, Quesadillas, Guacamole, Fajitas, Chili, Enchiladas, Pozole, Tamales",
+    rules: [
+      "Preferire versione autentica messicana, NON tex-mex americana",
+      "Evitare eccesso di formaggi industriali",
+      "Ingredienti freschi: coriandolo, lime, peperoncini, avocado, mais",
+      "Piccante equilibrato e adatto al gusto europeo",
+      "Sapori decisi ma non violenti",
+    ],
+    imageStyle: "rustic Mexican table, warm earthy tones, terracotta or colorful ceramic plates, vibrant fresh ingredients, natural light, no hands, authentic Mexican presentation, no Tex-Mex fast food aesthetic",
+    promptExtra: "IMPORTANTE: Cucina messicana autentica, NON tex-mex da fast food americano. Usa ingredienti freschi, coriandolo vero, lime, peperoncini autentici. Il piatto deve sembrare cibo di strada messicano autentico o cucina casalinga messicana — non un Taco Bell.",
+  },
+  "India": {
+    identity: "Cucina indiana: spezie protagoniste, piatti cremosi o speziati, profumi intensi, contrasto dolce-speziato.",
+    dishes: "Curry, Tikka Masala, Dal, Riso Basmati, Naan, Biryani, Samosa, Chutney",
+    rules: [
+      "Uso corretto delle spezie: garam masala, curcuma, cumino, coriandolo, cardamomo",
+      "Adattare la piccantezza al gusto europeo (non eccessivamente piccante)",
+      "Ingredienti reperibili in Italia",
+      "Non semplificare troppo il profilo aromatico",
+      "Rispettare l'identità regionale quando possibile (Nord/Sud India)",
+    ],
+    imageStyle: "warm golden Indian tones, traditional bowl or serving dish, rich colorful spices visible, natural warm light, no hands, authentic Indian presentation, no explosion of spices, inviting and rich",
+    promptExtra: "IMPORTANTE: Cucina indiana autentica con le spezie corrette. NON semplificare in un 'curry generico'. Usa le spezie in modo stratificato come si fa davvero. Il piatto deve sembrare uscito da una cucina indiana vera, non da un ristorante indiano 'alla europea'.",
+  },
+  "Thailandia": {
+    identity: "Cucina tailandese: equilibrio perfetto tra dolce, salato, acido e piccante. Piatti freschi ma aromatici, profumati.",
+    dishes: "Pad Thai, Curry tailandese (green/red/massaman), Tom Yum, Som Tam, Larb, Khao Pad",
+    rules: [
+      "Mantenere l'equilibrio fondamentale dolce-salato-acido-piccante",
+      "Non italianizzare",
+      "Evitare ingredienti impossibili da trovare (suggerire alternative)",
+      "Piccante controllato ma presente",
+      "Salsa di pesce, lemongrass, galangal, foglie di lime kaffir sono fondamentali",
+    ],
+    imageStyle: "fresh vibrant Thai presentation, clean white or dark ceramic plate, bright natural daylight, visible fresh herbs and lime, authentic Thai colors, no hands, no artificial effects, clean composition",
+    promptExtra: "IMPORTANTE: Cucina tailandese autentica. L'equilibrio dei 4 sapori (dolce-salato-acido-piccante) è FONDAMENTALE e non può mancare. Non fare fusion. Se un ingrediente non è reperibile, suggerisci un sostituto pratico tra parentesi.",
+  },
+  "Spagna": {
+    identity: "Cucina spagnola: conviviale, ingredienti mediterranei, piatti da condividere. Autentica iberica, non italiana.",
+    dishes: "Paella, Tortilla española, Tapas, Gazpacho, Patatas bravas, Croquetas, Pan con tomate, Albóndigas",
+    rules: [
+      "Ricetta fedele alla tradizione spagnola",
+      "Ingredienti mediterranei: paprika, zafferano, chorizo, manchego, olive spagnole",
+      "Non trasformare in cucina italiana — sono cucine diverse",
+      "Porzioni generose, spirito conviviale",
+      "Differenziare per regione quando rilevante (Catalogna, Andalusia, Paesi Baschi)",
+    ],
+    imageStyle: "rustic Spanish table, warm Mediterranean light, terracotta or traditional Spanish ceramic, communal serving dish, warm amber tones, no hands, authentic Spanish home cooking aesthetic",
+    promptExtra: "IMPORTANTE: Cucina spagnola autentica. NON è cucina italiana. La paella ha lo zafferano vero. La tortilla è con patate e uova, non una frittata italiana. Rispetta le differenze culturali.",
+  },
+  "Grecia": {
+    identity: "Cucina greca: mediterranea, yogurt, olio extravergine, erbe aromatiche, piatti dal forno o freschi.",
+    dishes: "Moussaka, Tzatziki, Souvlaki, Insalata greca, Spanakopita, Fasolada, Dolmades, Taramasalata",
+    rules: [
+      "Ingredienti semplici e genuini",
+      "Molto olio extravergine greco",
+      "Presentazione autentica e rustica",
+      "Non italianizzare: origano greco, feta vera, olive kalamata",
+      "Cucina mediterranea semplice e saporita",
+    ],
+    imageStyle: "white and blue Mediterranean tones, bright natural daylight, simple ceramic plate on white or wooden table, fresh herbs visible, clean airy atmosphere, no hands, authentic Greek presentation",
+    promptExtra: "IMPORTANTE: Cucina greca autentica. Usa origano greco, feta, olive kalamata, olio extravergine greco. Il piatto deve sembrare uscito da una taverna greca o da una cucina casalinga greca — non da un ristorante 'mediterraneo generico'.",
+  },
+  "Stati Uniti": {
+    identity: "Comfort food americano: versione casalinga e autentica. Porzioni generose, ricette iconiche. NON fast food industriale.",
+    dishes: "Cheesecake New York, Pancakes, BBQ Ribs, Burger, Mac & Cheese, Brownies, Clam Chowder, Apple Pie",
+    rules: [
+      "Versione casalinga autentica, NON fast food industriale",
+      "Ridurre eccessi di grassi inutili rispetto alla versione commerciale",
+      "Ingredienti reperibili in Italia (con sostituzioni quando necessario)",
+      "Evitare estetica da fast food",
+      "Rispettare l'identità di comfort food americano vero",
+    ],
+    imageStyle: "warm cozy American kitchen atmosphere, rustic wooden table, simple honest plating, warm natural light, no hands, no fast food advertising aesthetic, no Instagram-filter excess, authentic homemade American feel",
+    promptExtra: "IMPORTANTE: Comfort food americano casalingo autentico. NON è fast food. È la cucina della nonna americana: honest, generous, real. Adatta gli ingredienti quando necessario per l'Italia (es: heavy cream → panna fresca, buttermilk → latte con limone).",
+  },
+};
+
 export default function AdminRecipeGenerator() {
   const [occasions, setOccasions] = useState([]);
   const [loadingOcc, setLoadingOcc] = useState(true);
