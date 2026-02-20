@@ -46,12 +46,12 @@ const specialOccasions = [
 
 
 const lifestyleTags = [
-{ label: "Fitness", icon: "💪" },
-{ label: "Dolci zero zucchero", icon: "🍫" },
-{ label: "Detox", icon: "🌿" },
-{ label: "Ricette per diabetici", icon: "💚" },
-{ label: "Alta proteica", icon: "🥩" },
-{ label: "Low carb", icon: "🥬" }];
+{ label: "Fitness", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d92fc2f9_Fitness.png" },
+{ label: "Dolci zero zucchero", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/99832cb38_Dolcizerozucchero.png" },
+{ label: "Detox", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/380a7e11c_Detox.png" },
+{ label: "Ricette per diabetici", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/4714ef33b_Ricetteperdiabetici.png" },
+{ label: "Alta proteica", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/b1d974f23_Dolci.png" },
+{ label: "Low carb", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/5a62d4880_Insalata.png" }];
 
 
 const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
