@@ -136,7 +136,7 @@ export default function Profile() {
                 <p className="text-[13px] text-gray-300">{user?.email}</p>
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Età</label>
+                <label className="text-[13px] text-gray-400 font-semibold uppercase tracking-wider">Età</label>
                 <Input
                   type="number"
                   placeholder="Es. 28"
