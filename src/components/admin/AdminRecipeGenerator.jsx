@@ -147,13 +147,35 @@ export default function AdminRecipeGenerator() {
     stile_vita: occasions.filter(o => o.tipo === "stile_vita"),
   };
 
-  const buildRecipePrompt = (occ) => {
+  const buildRecipePrompt = (occ, country = null) => {
     const guidelines = occ.linee_guida?.join("\n- ") || "";
     const label = occ.label?.toLowerCase() || "";
     const isPranzo = occ.categoria_principale === "pranzo" || label.includes("pranzo");
     const isCena = occ.categoria_principale === "cena" || label.includes("cena");
     const isNatale = label.includes("natale");
     const isCapodanno = label.includes("capodanno");
+
+    // Country-specific block for Cucina Internazionale
+    const profile = country ? countryProfiles[country] : null;
+    const countryBlock = profile ? `
+=== CUCINA INTERNAZIONALE: ${country.toUpperCase()} ===
+Identità culinaria: ${profile.identity}
+
+Piatti tipici da cui ispirarsi: ${profile.dishes}
+
+Regole specifiche:
+- ${profile.rules.join("\n- ")}
+
+${profile.promptExtra}
+
+REGOLE UNIVERSALI CUCINA INTERNAZIONALE:
+- Ricetta autentica del paese indicato — NON una reinterpretazione italiana
+- Ingredienti reperibili in Italia (con alternative pratiche se necessario)
+- Nessuna contaminazione o fusion non richiesta
+- Presentazione realistica e autentica
+- No estetica influencer, no effetti artificiali, no mani, no ingredienti sospesi
+=== FINE SEZIONE PAESE ===
+` : "";
 
     const pranzoExtra = isPranzo && !isNatale ? `
 REGOLE SPECIFICHE PER PRANZO ITALIANO:
