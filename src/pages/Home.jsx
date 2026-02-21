@@ -63,6 +63,8 @@ export default function Home() {
     setTopRecipes(recipes);
     if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
+    setUserPlan(user?.plan || "free");
+    setUserRole(user?.role || null);
     if (notifs?.length > 0) setDailyNotif(notifs[0]);
 
     // Separate occasions by type
