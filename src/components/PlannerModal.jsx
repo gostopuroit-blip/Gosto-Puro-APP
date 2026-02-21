@@ -29,7 +29,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={onClose}>
       <div
-        className="w-full max-w-lg bg-white dark:bg-[#2D3F35] rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto pb-10"
+        className="w-full max-w-lg bg-white dark:bg-[#2D3F35] rounded-t-3xl p-6 overflow-y-auto pb-24" style={{ maxHeight: "85vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
