@@ -153,8 +153,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
           >
             {isLoading ? "Criando..." : "✨ Crea il mio piano"}
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
