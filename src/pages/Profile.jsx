@@ -29,7 +29,7 @@ export default function Profile() {
     const u = await base44.auth.me().catch(() => null);
     if (u) {
       setUser(u);
-      setName(u.full_name || "");
+      setName(u.display_name || u.full_name || "");
       setAge(u.age != null ? String(u.age) : "");
       setPhotoUrl(u.photo_url || "");
       // Restore theme preference saved on user
@@ -72,7 +72,7 @@ export default function Profile() {
     setSaving(true);
     try {
       await base44.auth.updateMe({
-        full_name: name,
+        display_name: name,
         age: age ? parseInt(age) : null,
         photo_url: photoUrl,
         dark_mode: darkMode,
