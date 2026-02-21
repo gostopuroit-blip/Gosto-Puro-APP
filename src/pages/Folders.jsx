@@ -311,6 +311,7 @@ export default function Folders() {
             </div>
           );
         })}
+          </div>
         </PremiumGate>
       </div>
 
