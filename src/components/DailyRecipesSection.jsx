@@ -89,7 +89,7 @@ export default function DailyRecipesSection({ occasion, user }) {
         </div>
         <p className="text-[13px] text-gray-700 dark:text-gray-300 leading-relaxed">
           <span className="font-bold text-[#2D6A4F] dark:text-[#40916C]">
-            {user?.full_name?.split(" ")[0] || "Ciao"}
+            {(user?.display_name || user?.full_name)?.split(" ")[0] || "Ciao"}
           </span>
           , qui le ricette suggerite per {occasion.toLowerCase()} di oggi. Buon appetito! 🍽️
         </p>
