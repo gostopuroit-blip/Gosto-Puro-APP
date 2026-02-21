@@ -331,6 +331,7 @@ export default function Planner() {
 
       {/* Planner Modal */}
       {showModal && <PlannerModal onCreate={createPlan} onClose={() => setShowModal(false)} isLoading={creating} />}
+        </div>
       </PremiumGate>
 
       {/* Replace Recipe Search */}
