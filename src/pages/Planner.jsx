@@ -13,6 +13,7 @@ import { toast } from "sonner";
 const dayNames = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
 
 export default function Planner() {
+  const [user, setUser] = useState(null);
   const [plan, setPlan] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [folders, setFolders] = useState([]);
