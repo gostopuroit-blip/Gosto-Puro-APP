@@ -67,9 +67,28 @@ export default function Home() {
     setUserRole(user?.role || null);
     if (notifs?.length > 0) setDailyNotif(notifs[0]);
 
+    const occasionImages = {
+      "Autunno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png",
+      "Con amici": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/2e95bf4e4_Conamici.png",
+      "Dal mondo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/99343c725_Dalmondo.png",
+      "Detox": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7ac46318c_Detox.png",
+      "Diabete": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/63205d254_Diabete.png",
+      "Estate": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/029f21cd5_Estate.png",
+      "Fit": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d632e27da_Fit.png",
+      "In famiglia": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/78bec7c3b_Infamiglia.png",
+      "Inverno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d0924a4a2_Inverno.png",
+      "Low carb": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/a31291345_Lowcarb.png",
+      "Natale e Capodanno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/057feccab_NataleeCapodanno.png",
+      "Per due": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/90f0dad01_Perdue.png",
+      "Primavera": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/42185c523_Primavera.png",
+      "Proteiche": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/9f81f5cc8_Proteiche.png",
+      "Senza zucchero": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6c462ddda_Senzazucchero.png",
+      "Veloci": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/de87766a6_Veloci.png",
+    };
+
     // Separate occasions by type
-    const special = occasions.filter((o) => o.tipo === "speciale").map((o) => ({ label: o.label, icon: o.icon }));
-    const lifestyle = occasions.filter((o) => o.tipo === "stile_vita").map((o) => ({ label: o.label, icon: o.icon }));
+    const special = occasions.filter((o) => o.tipo === "speciale").map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
+    const lifestyle = occasions.filter((o) => o.tipo === "stile_vita").map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
 
     setSpecialOccasions(special);
     setLifestyleTags(lifestyle);
