@@ -30,6 +30,8 @@ export default function Planner() {
   }, []);
 
   const loadData = async () => {
+    const currentUser = await base44.auth.me().catch(() => null);
+    setUser(currentUser);
     const [plans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
       base44.entities.MealPlan.filter({ is_active: true }),
       base44.entities.Recipe.list("-numero_preparate", 100),
