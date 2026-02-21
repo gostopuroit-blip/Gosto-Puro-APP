@@ -343,7 +343,6 @@ export default function Planner() {
       {/* Planner Modal */}
       {showModal && <PlannerModal onCreate={createPlan} onClose={() => setShowModal(false)} isLoading={creating} />}
       </div>
-    </div>
 
       {/* Replace Recipe Search */}
       {replaceTarget && (
@@ -355,8 +354,6 @@ export default function Planner() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-
-            {/* Search */}
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 dark:text-gray-600" />
               <input
@@ -367,16 +364,12 @@ export default function Planner() {
                 className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-[#3D5246] dark:bg-[#1A2B20] dark:text-white text-sm"
               />
             </div>
-
-            {/* Recipes List */}
             <div className="flex-1 overflow-y-auto space-y-2">
               {recipes
-                .filter((r) => {
-                  const meal = replaceTarget.meal;
-                  return r.title.toLowerCase().includes(searchQuery.toLowerCase()) && r.category === "Colazione" ||
-                    r.category === "Pranzo" ||
-                    r.category === "Cena";
-                })
+                .filter((r) =>
+                  r.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                  (r.category === "Colazione" || r.category === "Pranzo" || r.category === "Cena")
+                )
                 .map((recipe) => (
                   <button
                     key={recipe.id}
