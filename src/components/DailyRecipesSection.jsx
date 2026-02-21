@@ -141,16 +141,7 @@ export default function DailyRecipesSection({ occasion, user }) {
         )}
       </div>
 
-      {/* Greeting Message */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-[#F0F7F4] dark:from-[#1A2B20] to-[#E8F2E9] dark:to-[#2D3F35] rounded-2xl border border-[#D8EDD8] dark:border-[#3D5246]">
-        <p className="text-[13px] text-gray-700 dark:text-gray-300">
-          <span className="font-bold text-[#2D6A4F] dark:text-[#40916C]">
-            {user?.full_name?.split(" ")[0] || "Ciao"}
-          </span>
-          , qui le ricette suggerite per {occasion.toLowerCase()} di oggi. 
-          Buon appetito! 🍽️
-        </p>
-      </div>
+
     </div>
   );
 }
