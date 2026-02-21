@@ -81,7 +81,13 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
+  const isPremium = user?.plan === "premium" || user?.role === "admin";
+
   const handleSaveClick = () => {
+    if (!isPremium && !userRecipe?.is_saved && savedCount >= FREE_SAVE_LIMIT) {
+      toast.error(`Piano Free: puoi salvare solo ${FREE_SAVE_LIMIT} ricette. Passa a Premium per salvarne di più! ✨`);
+      return;
+    }
     setShowSaveModal(true);
   };
 
