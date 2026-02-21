@@ -310,6 +310,7 @@ export default function Folders() {
             </div>
           );
         })}
+        </PremiumGate>
       </div>
 
       {/* Add Recipe Dialog */}
