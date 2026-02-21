@@ -185,6 +185,7 @@ export default function Folders() {
         </div>
       </div>
 
+      {/* Custom Folders - Premium Gate */}
       {/* Folder Grid */}
       <div className="px-5 space-y-3">
         {systemFolders.map((f) => {
