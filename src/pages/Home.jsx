@@ -87,8 +87,15 @@ export default function Home() {
     };
 
     // Separate occasions by type
-    const special = occasions.filter((o) => o.tipo === "speciale").map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
-    const lifestyle = occasions.filter((o) => o.tipo === "stile_vita").map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
+    const seenLabels = new Set();
+    const deduped = (arr) => arr.filter((o) => {
+      if (seenLabels.has(o.label)) return false;
+      seenLabels.add(o.label);
+      return true;
+    });
+
+    const special = deduped(occasions.filter((o) => o.tipo === "speciale")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
+    const lifestyle = deduped(occasions.filter((o) => o.tipo === "stile_vita")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
 
     setSpecialOccasions(special);
     setLifestyleTags(lifestyle);
