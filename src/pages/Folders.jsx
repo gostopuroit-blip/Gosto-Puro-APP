@@ -190,59 +190,60 @@ export default function Folders() {
       {/* Custom Folders - Premium Gate */}
       {/* Folder Grid */}
       <div className="px-5 space-y-3">
-        {systemFolders.map((f) => {
-          const folderRecipes = getRecipesInFolder(f.key);
-          const isExpanded = expandedFolder === f.key;
-          return (
-            <div key={f.key} className="bg-white dark:bg-[#2D3F35] border border-gray-100 dark:border-[#3D5246] rounded-2xl overflow-hidden">
-              <button
-                onClick={() => setExpandedFolder(isExpanded ? null : f.key)}
-                className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[#1A2B20] transition"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{f.icon}</span>
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{f.label}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{folderRecipes.length} ricette</p>
-                  </div>
-                </div>
-                <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                  <svg className="w-5 h-5 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
-              </button>
-              {isExpanded && (
-                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
-                  <Button
-                    onClick={() => setShowAddRecipe(true)}
-                    size="sm"
-                    className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Aggiungi ricetta
-                  </Button>
-                  {folderRecipes.map(({ ur, recipe }) => (
-                    <div key={recipe.id} className="relative group">
-                      <RecipeCard recipe={recipe} />
-                      <button
-                        onClick={() => removeRecipeFromFolder(recipe.id, f.key)}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors z-10"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+       {systemFolders.map((f) => {
+         const folderRecipes = getRecipesInFolder(f.key);
+         const isExpanded = expandedFolder === f.key;
+         return (
+           <div key={f.key} className="bg-white dark:bg-[#2D3F35] border border-gray-100 dark:border-[#3D5246] rounded-2xl overflow-hidden">
+             <button
+               onClick={() => setExpandedFolder(isExpanded ? null : f.key)}
+               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[#1A2B20] transition"
+             >
+               <div className="flex items-center gap-3">
+                 <span className="text-2xl">{f.icon}</span>
+                 <div className="text-left">
+                   <p className="font-semibold text-gray-900 dark:text-white text-sm">{f.label}</p>
+                   <p className="text-xs text-gray-500 dark:text-gray-400">{folderRecipes.length} ricette</p>
+                 </div>
+               </div>
+               <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                 <svg className="w-5 h-5 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                 </svg>
+               </div>
+             </button>
+             {isExpanded && (
+               <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
+                 <Button
+                   onClick={() => setShowAddRecipe(true)}
+                   size="sm"
+                   className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
+                 >
+                   <Plus className="w-4 h-4 mr-1" />
+                   Aggiungi ricetta
+                 </Button>
+                 {folderRecipes.map(({ ur, recipe }) => (
+                   <div key={recipe.id} className="relative group">
+                     <RecipeCard recipe={recipe} />
+                     <button
+                       onClick={() => removeRecipeFromFolder(recipe.id, f.key)}
+                       className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors z-10"
+                     >
+                       <Trash2 className="w-4 h-4" />
+                     </button>
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
+         );
+       })}
 
-        {/* Custom Folders - Premium Only */}
-        <PremiumGate user={currentUser} feature="le cartelle personalizzate">
-          <div>
-        {customFolders.map((folder) => {
+       {/* Custom Folders - Premium Only */}
+       <div className="relative min-h-[200px]">
+         <PremiumGate user={currentUser} feature="le cartelle personalizzate">
+           <div>
+       {customFolders.map((folder) => {
           const folderRecipes = getRecipesInFolder(folder.id);
           const isExpanded = expandedFolder === folder.id;
           return (
