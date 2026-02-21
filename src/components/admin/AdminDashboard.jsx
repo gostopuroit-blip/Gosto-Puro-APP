@@ -105,6 +105,9 @@ export default function AdminDashboard({ onNavigate }) {
         </button>
       </div>
 
+      {/* Premium Conversions Chart */}
+      <PremiumConversionsChart />
+
       {/* Top saved */}
 
       <div>
