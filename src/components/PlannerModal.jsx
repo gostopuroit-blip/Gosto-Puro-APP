@@ -27,7 +27,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
   const [servings, setServings] = useState(2);
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" style={{ paddingBottom: "72px" }} onClick={onClose}>
       <div
         className="w-full max-w-lg bg-white dark:bg-[#2D3F35] rounded-t-3xl p-6 overflow-y-auto pb-24" style={{ maxHeight: "85vh" }}
         onClick={(e) => e.stopPropagation()}
