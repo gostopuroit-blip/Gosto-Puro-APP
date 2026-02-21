@@ -12,12 +12,12 @@ export default function PremiumGate({ children, user, feature = "questa funziona
       <div className="pointer-events-none opacity-30 select-none blur-sm">
         {children}
       </div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm rounded-2xl z-10 p-6 text-center">
-        <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-3">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/30 backdrop-blur-sm rounded-2xl z-10 px-4 py-8 text-center">
+        <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4">
           <Crown className="w-7 h-7 text-amber-500" />
         </div>
-        <p className="text-sm font-bold text-gray-900 mb-1">Funzionalità Premium</p>
-        <p className="text-gray-500 mb-4 text-sm font-normal text-center normal-case leading-snug">
+        <p className="text-sm font-bold text-gray-900 mb-2">Funzionalità Premium</p>
+        <p className="text-gray-600 mb-6 text-xs font-normal text-center leading-relaxed">
           Sblocca {feature} con il piano Premium
         </p>
         <Link
