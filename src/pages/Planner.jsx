@@ -202,8 +202,9 @@ export default function Planner() {
             {plan && (
               <>
                 <Link to={createPageUrl("ShoppingList")}>
-                  <Button size="sm" variant="outline" className="rounded-xl dark:bg-[#2D3F35] dark:border-[#3D5246]">
+                  <Button size="sm" variant="outline" className="rounded-xl dark:bg-[#2D3F35] dark:border-[#3D5246] gap-1.5">
                     <ShoppingCart className="w-4 h-4" />
+                    Lista della Spesa
                   </Button>
                 </Link>
                 <Button
