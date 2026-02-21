@@ -108,8 +108,8 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       <div className="flex justify-center w-full flex-shrink-0">
-        <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/c0529d754_headerapp.png" alt="Gosto Puro" style={{ width: '120px', height: 'auto', display: 'block' }} />
-      </div>
+          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/9b8fdd3a5_image.png" alt="Gosto Puro" style={{ width: '100%', height: 'auto', display: 'block' }} />
+        </div>
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
         <AnimatePresence mode="wait">
