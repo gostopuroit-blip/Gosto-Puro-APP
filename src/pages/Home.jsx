@@ -261,17 +261,17 @@ export default function Home() {
         <SectionHeader title="Stile di Vita e Salute" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
           {lifestyleTags.map((tag) =>
-            <Link
-              key={tag.label}
-              to={createPageUrl(`Recipes?lifestyle=${encodeURIComponent(tag.label)}`)}
-              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+              <Link
+                key={tag.label}
+                to={createPageUrl(`Recipes?lifestyle=${encodeURIComponent(tag.label)}`)}
+                className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
 
-              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
-                <span className="text-3xl">{tag.icon}</span>
-              </div>
-              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{tag.label}</span>
-            </Link>
-            )}
+                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
+                  {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
+                </div>
+                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{tag.label}</span>
+              </Link>
+              )}
         </div>
       </div>
       </div>
