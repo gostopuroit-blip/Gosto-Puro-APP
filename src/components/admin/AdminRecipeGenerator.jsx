@@ -261,7 +261,7 @@ Porzioni: ${servings}
 
 ${countryBlock}
 ${!isIntl ? `Linee guida:\n- ${guidelines}` : ""}
-${pranzoExtra}${cenaExtra}${nataleExtra}${capodannoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
+${pranzoExtra}${cenaExtra}${velociExtra}${nataleExtra}${capodannoExtra}${extraNote ? `\nNote aggiuntive: ${extraNote}` : ""}
 ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
