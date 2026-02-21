@@ -27,16 +27,25 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
   const [servings, setServings] = useState(2);
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="rounded-3xl max-w-sm mx-auto p-0 overflow-hidden">
-        <div className="bg-gradient-to-b from-[#F0F7F4] dark:from-[#2D3F35] to-white dark:to-[#2D3F35] p-6">
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <span className="text-2xl">📅</span>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={onClose}>
+      <div
+        className="w-full max-w-lg bg-white dark:bg-[#2D3F35] rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#2D6A4F] rounded-xl flex items-center justify-center">
+              <span className="text-lg">📅</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Configura il tuo Piano</h2>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Personalizza il piano settimanale</p>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Configura il tuo Piano</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Personalizza il piano settimanale</p>
+            </div>
           </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1A2B20]">
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
 
           {/* Days */}
           <div className="mb-5">
