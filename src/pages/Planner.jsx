@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PlannerModal from "@/components/PlannerModal";
+import PremiumGate from "@/components/PremiumGate";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
