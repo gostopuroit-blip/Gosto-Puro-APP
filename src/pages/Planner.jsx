@@ -193,13 +193,13 @@ export default function Planner() {
   return (
     <div className="pb-4">
       {!isPremium && (
-        <div className="px-5 pt-6 pb-2">
+        <div className="fixed inset-0 flex items-center justify-center z-20 bg-white/60 backdrop-blur-sm">
           <PremiumGate user={user} feature="il Pianificatore Pasti">
             <div />
           </PremiumGate>
         </div>
       )}
-      <div className={!isPremium ? "pointer-events-none opacity-30 select-none" : ""}>
+      <div className={!isPremium ? "pointer-events-none opacity-20 select-none" : ""}>
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
