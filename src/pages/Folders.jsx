@@ -314,8 +314,7 @@ export default function Folders() {
         })}
           </div>
             </PremiumGate>
-          </div>
-          </div>
+            </div>
 
       {/* Add Recipe Dialog */}
       <Dialog open={showAddRecipe} onOpenChange={setShowAddRecipe}>
