@@ -138,7 +138,7 @@ export default function Recipes() {
         }
 
        {/* Search */}
-       <div className="px-5 mb-4">
+       <div className="px-5 mb-4 mt-3">
          <div className="relative">
            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-300 dark:text-gray-600" />
            <input
