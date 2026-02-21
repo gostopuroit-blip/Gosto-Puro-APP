@@ -243,17 +243,16 @@ export default function Home() {
         <SectionHeader title="Occasioni Speciali" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
           {specialOccasions.map((occ) =>
-            <Link
-              key={occ.label}
-              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+              <Link
+                key={occ.label}
+                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
 
-
-              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
-                <span className="text-3xl">{occ.icon}</span>
-              </div>
-              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
-            </Link>
-            )}
+                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
+                  {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{occ.icon}</span>}
+                </div>
+                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
+              </Link>
+              )}
         </div>
       </div>
 
