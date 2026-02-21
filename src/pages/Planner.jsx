@@ -192,7 +192,7 @@ export default function Planner() {
     <div className="pb-4">
       <PremiumGate user={user} feature="il Pianificatore Pasti">
         <div>
-      <div className="px-5 pt-14 pb-4">
+      <div className="px-5 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Il mio Piano</h1>
