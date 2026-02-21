@@ -189,6 +189,20 @@ REGOLE SPECIFICHE PER PRANZO ITALIANO:
 - Presentazione semplice e autentica, piatto pieno ma ordinato
 ` : "";
 
+    const isVeloci = label.includes("veloci");
+    const velociExtra = isVeloci ? `
+REGOLE SPECIFICHE PER RICETTE VELOCI ITALIANE:
+- Può includere: pasta veloce, insalate, frittate, zuppe rapide, MA ANCHE:
+  * Panino italiano (ciabatta, rosetta, focaccia, baguette italiana) con massimo 4-5 ingredienti di qualità
+  * Tramezzino (pane morbido senza crosta, taglio triangolare, recheio clássico: tonno e maionese, prosciutto e formaggio, uova)
+  * Piadina (pane sottile della Romagna, recheio: prosciutto crudo + squacquerone + rúcula, oppure speck + stracchino)
+- Per panini e piadine: MASSIMO 4-5 ingredienti, qualità > quantità
+- Niente ingredienti industriali o ultra-processati
+- Visual italiano autentico: pulito, ordinato, artigianale
+- NON fare: panini americani stile fast food, burger eccessivi, wrap generici
+- I nomi devono essere italiani: "Panino Gourmet", "Piadina Rustica", "Tramezzino Classico", ecc.
+` : "";
+
     const cenaExtra = isCena && !isCapodanno ? `
 REGOLE SPECIFICHE PER CENA ITALIANA:
 - La cena deve essere più leggera rispetto al pranzo: NO lasagne pesanti, NO fritti, NO piatti eccessivamente grassi
