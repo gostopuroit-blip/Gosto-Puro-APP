@@ -30,14 +30,17 @@ export default function Folders() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingFolderId, setEditingFolderId] = useState(null);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
+    const user = await base44.auth.me().catch(() => null);
+    setCurrentUser(user);
     const [ur, r, f] = await Promise.all([
       base44.entities.UserRecipe.list("-created_date", 200),
       base44.entities.Recipe.list("-numero_preparate", 200),
-      base44.entities.Folder.filter({ is_system: false }),
+      user ? base44.entities.Folder.filter({ is_system: false, created_by: user.email }) : Promise.resolve([]),
     ]);
     setUserRecipes(ur);
     setRecipes(r);
