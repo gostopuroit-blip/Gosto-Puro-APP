@@ -26,7 +26,7 @@ export default function DailyRecipesSection({ occasion, user }) {
   const loadRecipes = async () => {
     const allRecipes = await base44.entities.Recipe.filter(
       { status: "pubblicata", category: occasion },
-      "-numero_preparate",
+      "-created_date",
       50
     );
     setRecipes(allRecipes);
