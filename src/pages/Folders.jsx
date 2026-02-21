@@ -241,6 +241,7 @@ export default function Folders() {
 
         {/* Custom Folders - Premium Only */}
         <PremiumGate user={currentUser} feature="le cartelle personalizzate">
+          <div>
         {customFolders.map((folder) => {
           const folderRecipes = getRecipesInFolder(folder.id);
           const isExpanded = expandedFolder === folder.id;
