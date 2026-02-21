@@ -116,7 +116,7 @@ export default function Recipes() {
     if (isPremium) return { freeRecipes: filteredRecipes, lockedRecipes: [] };
     return {
       freeRecipes: filteredRecipes.slice(0, FREE_LIMIT),
-      lockedRecipes: filteredRecipes.slice(FREE_LIMIT),
+      lockedRecipes: filteredRecipes.slice(FREE_LIMIT)
     };
   }, [filteredRecipes, isPremium]);
 
@@ -219,17 +219,17 @@ export default function Recipes() {
             <RecipeCard key={recipe.id} recipe={recipe} />
             )}
             {/* Locked recipes for free users */}
-            {!isPremium && lockedRecipes.length > 0 && currentPage === totalPages && (
-              <>
-                {lockedRecipes.slice(0, 3).map((recipe) => (
-                  <div key={recipe.id} className="relative rounded-3xl overflow-hidden">
+            {!isPremium && lockedRecipes.length > 0 && currentPage === totalPages &&
+            <>
+                {lockedRecipes.slice(0, 3).map((recipe) =>
+              <div key={recipe.id} className="relative rounded-3xl overflow-hidden">
                     <div className="pointer-events-none opacity-30 blur-sm select-none">
                       <RecipeCard recipe={recipe} />
                     </div>
                     <Link
-                      to={createPageUrl("Profile")}
-                      className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm"
-                    >
+                  to={createPageUrl("Profile")} className="bg-black/15 absolute inset-0 flex flex-col items-center justify-center">
+
+
                       <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-2">
                         <Lock className="w-5 h-5 text-amber-500" />
                       </div>
@@ -237,15 +237,15 @@ export default function Recipes() {
                       <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl">✨ Sblocca Premium</span>
                     </Link>
                   </div>
-                ))}
-                {lockedRecipes.length > 3 && (
-                  <div className="text-center py-4">
+              )}
+                {lockedRecipes.length > 3 &&
+              <div className="text-center py-4">
                     <p className="text-sm text-gray-400 mb-2">+{lockedRecipes.length - 3} ricette disponibili con Premium</p>
                     <Link to={createPageUrl("Profile")} className="text-amber-500 font-bold text-sm">✨ Sblocca tutto</Link>
                   </div>
-                )}
+              }
               </>
-            )}
+            }
            </>
           }
        </div>
