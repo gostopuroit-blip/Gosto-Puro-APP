@@ -313,8 +313,9 @@ export default function Folders() {
           })}
           </div>
           </PremiumGate>
+          </div>
 
-      {/* Add Recipe Dialog */}
+          {/* Add Recipe Dialog */}
       <Dialog open={showAddRecipe} onOpenChange={setShowAddRecipe}>
         <DialogContent className="dark:bg-[#2D3F35] dark:border-[#3D5246]">
           <DialogHeader>
