@@ -17,34 +17,34 @@ export default function PremiumGate({ children, user, feature = "questa funziona
           <Crown className="w-7 h-7 text-amber-500" />
         </div>
         <p className="text-sm font-bold text-gray-900 mb-1">Funzionalità Premium</p>
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-gray-500 mb-4 text-sm font-normal text-center normal-case">
           Sblocca {feature} con il piano Premium
         </p>
         <Link
-          to={createPageUrl("Profile")}
-          className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors"
-        >
+          to={createPageUrl("Profile")} className="bg-amber-400 text-neutral-950 px-5 py-2.5 text-xs font-bold rounded-xl hover:bg-amber-600 transition-colors">
+
+
           ✨ Sblocca Premium
         </Link>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function PremiumBadge({ user }) {
   if (user?.role === "admin") return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
       👑 Admin
-    </span>
-  );
+    </span>);
+
   if (user?.plan === "premium") return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
       ✨ Premium
-    </span>
-  );
+    </span>);
+
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">
       Free
-    </span>
-  );
+    </span>);
+
 }
