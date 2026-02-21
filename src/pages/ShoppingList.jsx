@@ -20,6 +20,7 @@ export default function ShoppingList() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     loadItems();
