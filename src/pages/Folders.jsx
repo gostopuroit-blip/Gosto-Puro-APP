@@ -174,14 +174,16 @@ export default function Folders() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Le mie cartelle</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Organizza le tue ricette</p>
           </div>
-          <Button
-            onClick={() => setShowNewFolder(true)}
-            size="sm"
-            className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-semibold"
-          >
-            <FolderHeart className="w-4 h-4 mr-2" />
-            Nuova
-          </Button>
+          {(currentUser?.plan === "premium" || currentUser?.role === "admin") && (
+            <Button
+              onClick={() => setShowNewFolder(true)}
+              size="sm"
+              className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-semibold"
+            >
+              <FolderHeart className="w-4 h-4 mr-2" />
+              Nuova
+            </Button>
+          )}
         </div>
       </div>
 
