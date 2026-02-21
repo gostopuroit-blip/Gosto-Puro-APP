@@ -26,7 +26,7 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex flex-col">
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex flex-col overflow-x-hidden">
       <style>{`
         :root {
           --gusto-green: #2D6A4F;
