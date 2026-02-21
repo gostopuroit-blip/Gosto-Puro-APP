@@ -105,13 +105,18 @@ export default function Home() {
               }
           </div>
           <div>
-            <p className="text-[#2D6A4F] dark:text-[#40916C] text-lg font-semibold leading-tight">
-              {getGreeting()}{userName ? `, ${userName}` : ""}
-            </p>
-            <h1 className="text-gray-900 dark:text-gray-100 text-sm font-bold tracking-tight leading-tight">Cosa prepariamo oggi?
-
-            </h1>
-          </div>
+              <p className="text-[#2D6A4F] dark:text-[#40916C] text-lg font-semibold leading-tight">
+                {getGreeting()}{userName ? `, ${userName}` : ""}
+              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <h1 className="text-gray-900 dark:text-gray-100 text-sm font-bold tracking-tight leading-tight">Cosa prepariamo oggi?</h1>
+                {(userPlan === "premium" || userRole === "admin") ? (
+                  <span className="text-[10px] font-bold bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded-lg">✨ Premium</span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-lg">Free</span>
+                )}
+              </div>
+            </div>
         </div>
         <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-3 leading-relaxed">
           Ricette organizzate per decidere senza perdere tempo
