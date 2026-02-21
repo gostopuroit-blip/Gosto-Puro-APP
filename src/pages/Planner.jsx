@@ -198,47 +198,49 @@ export default function Planner() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Il mio Piano</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Pianifica i tuoi pasti</p>
           </div>
-          <div className="flex gap-2">
-            {plan && (
-              <>
-                <Link to={createPageUrl("ShoppingList")}>
-                  <Button size="sm" variant="outline" className="rounded-xl dark:bg-[#2D3F35] dark:border-[#3D5246] gap-1.5">
-                    <ShoppingCart className="w-4 h-4" />
-                    Lista della Spesa
-                  </Button>
-                </Link>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={clearAllMeals}
-                  className="rounded-xl text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/20 dark:text-red-400"
-                  title="Elimina tutte le ricette"
-                >
-                  <Trash className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    base44.entities.MealPlan.delete(plan.id);
-                    setPlan(null);
-                    toast.success("Piano eliminato");
-                  }}
-                  className="rounded-xl text-red-600 border-red-300 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/20 dark:text-red-400"
-                  title="Elimina piano"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </>
-            )}
+          <div className="flex flex-col items-end gap-2">
             <Button
               size="sm"
               className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
               onClick={() => setShowModal(true)}
             >
               <Plus className="w-4 h-4" />
-              {plan ? "Nuovo" : "Crea"}
+              {plan ? "Nuovo piano" : "Crea piano"}
             </Button>
+            {plan && (
+              <>
+                <Link to={createPageUrl("ShoppingList")}>
+                  <Button size="sm" variant="outline" className="rounded-xl dark:bg-[#2D3F35] dark:border-[#3D5246] gap-1.5 w-full">
+                    <ShoppingCart className="w-4 h-4" />
+                    Lista della Spesa
+                  </Button>
+                </Link>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={clearAllMeals}
+                    className="rounded-xl text-red-500 border-red-200 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/20 dark:text-red-400"
+                    title="Elimina tutte le ricette"
+                  >
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      base44.entities.MealPlan.delete(plan.id);
+                      setPlan(null);
+                      toast.success("Piano eliminato");
+                    }}
+                    className="rounded-xl text-red-600 border-red-300 hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/20 dark:text-red-400"
+                    title="Elimina piano"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
