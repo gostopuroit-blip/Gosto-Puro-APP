@@ -76,8 +76,26 @@ export default function Folders() {
     return filtered.map((ur) => ({ ur, recipe: getRecipeById(ur.recipe_id) })).filter((x) => x.recipe);
   };
 
+  const getTotalSavedRecipes = () => {
+    return userRecipes.filter((ur) => ur.is_saved || ur.is_favorite || ur.is_prepared || (ur.folder_ids && ur.folder_ids.length > 0)).length;
+  };
+
   const addRecipeToFolder = async (recipe, folderId) => {
     const existing = userRecipes.find((u) => u.recipe_id === recipe.id);
+    const isFree = currentUser?.plan !== "premium" && currentUser?.role !== "admin";
+    
+    // Check if free user already has 4 saved recipes
+    if (isFree && existing?.recipe_id) {
+      // Recipe already exists, just updating
+    } else if (isFree && !existing?.recipe_id) {
+      // New recipe - check limit
+      const totalSaved = getTotalSavedRecipes();
+      if (totalSaved >= 4) {
+        toast.error("Limite di 4 ricette raggiunto per gli utenti gratuiti");
+        return;
+      }
+    }
+
     if (folderId === "per_fare") {
       if (existing) {
         await base44.entities.UserRecipe.update(existing.id, { is_saved: true, status: "per_fare" });
