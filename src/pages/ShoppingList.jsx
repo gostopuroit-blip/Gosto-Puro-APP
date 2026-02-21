@@ -272,6 +272,7 @@ export default function ShoppingList() {
           ))}
         </div>
       )}
+      </PremiumGate>
     </div>
   );
 }
