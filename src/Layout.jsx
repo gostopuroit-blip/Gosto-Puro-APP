@@ -6,12 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 
 const navItems = [
-  { name: "Home", icon: Home, page: "Home" },
-  { name: "Ricette", icon: BookOpen, page: "Recipes" },
-  { name: "Cartelle", icon: FolderHeart, page: "Folders" },
-  { name: "Planner", icon: CalendarDays, page: "Planner" },
-  { name: "Profilo", icon: UserCircle2, page: "Profile" },
-];
+{ name: "Home", icon: Home, page: "Home" },
+{ name: "Ricette", icon: BookOpen, page: "Recipes" },
+{ name: "Cartelle", icon: FolderHeart, page: "Folders" },
+{ name: "Planner", icon: CalendarDays, page: "Planner" },
+{ name: "Profilo", icon: UserCircle2, page: "Profile" }];
+
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -107,7 +107,7 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/c0529d754_headerapp.png" alt="Gosto Puro" className="w-full object-contain" />
+      <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/c0529d754_headerapp.png" alt="Gosto Puro" className="pr-32 pl-32 w-full object-contain" />
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
         <AnimatePresence mode="wait">
@@ -116,8 +116,8 @@ export default function Layout({ children, currentPageName }) {
             initial={{ x: 30, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -30, opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-          >
+            transition={{ duration: 0.18, ease: "easeOut" }}>
+
             {children}
           </motion.div>
         </AnimatePresence>
@@ -133,24 +133,24 @@ export default function Layout({ children, currentPageName }) {
                 key={item.page}
                 to={createPageUrl(item.page)}
                 className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
-                  isActive 
-                    ? "text-[#2D6A4F] dark:text-[#888888]" 
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                }`}
-              >
+                isActive ?
+                "text-[#2D6A4F] dark:text-[#888888]" :
+                "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"}`
+                }>
+
                 <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2.5px]" : "stroke-[1.5px]"}`} />
                 <span className={`text-[13px] font-medium ${isActive ? "font-semibold" : ""}`}>
                   {item.name}
                 </span>
-                {isActive && (
-                  <div className="w-1 h-1 rounded-full bg-[#2D6A4F] dark:bg-[#888888] mt-0.5" />
-                )}
-              </Link>
-            );
+                {isActive &&
+                <div className="w-1 h-1 rounded-full bg-[#2D6A4F] dark:bg-[#888888] mt-0.5" />
+                }
+              </Link>);
+
           })}
         </div>
         <div className="h-safe-area-inset-bottom" />
       </nav>
-    </div>
-  );
+    </div>);
+
 }
