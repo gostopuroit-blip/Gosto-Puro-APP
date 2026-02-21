@@ -12,7 +12,7 @@ export default function PremiumGate({ children, user, feature = "questa funziona
       <div className="pointer-events-none opacity-20 select-none">
         {children}
       </div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/2 rounded-2xl z-10 px-4 py-8 text-center pointer-events-auto">
+      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl z-10 px-4 py-8 text-center pointer-events-auto">
         <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4">
           <Crown className="w-7 h-7 text-amber-500" />
         </div>
