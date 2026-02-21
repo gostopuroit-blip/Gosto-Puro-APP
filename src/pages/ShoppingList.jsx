@@ -23,6 +23,7 @@ export default function ShoppingList() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
     loadItems();
   }, []);
 
