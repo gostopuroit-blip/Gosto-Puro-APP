@@ -240,10 +240,9 @@ export default function Folders() {
        })}
 
        {/* Custom Folders - Premium Only */}
-       <div className="relative min-h-[200px]">
-         <PremiumGate user={currentUser} feature="le cartelle personalizzate">
-           <div>
-       {customFolders.map((folder) => {
+       <PremiumGate user={currentUser} feature="le cartelle personalizzate">
+         <div className="relative min-h-[200px] space-y-3">
+           {customFolders.map((folder) => {
           const folderRecipes = getRecipesInFolder(folder.id);
           const isExpanded = expandedFolder === folder.id;
           return (
