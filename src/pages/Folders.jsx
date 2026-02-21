@@ -232,14 +232,16 @@ export default function Folders() {
              </button>
              {isExpanded && (
                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
-                 <Button
-                   onClick={() => setShowAddRecipe(true)}
-                   size="sm"
-                   className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
-                 >
-                   <Plus className="w-4 h-4 mr-1" />
-                   Aggiungi ricetta
-                 </Button>
+                 {(currentUser?.plan === "premium" || currentUser?.role === "admin") && (
+                   <Button
+                     onClick={() => setShowAddRecipe(true)}
+                     size="sm"
+                     className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
+                   >
+                     <Plus className="w-4 h-4 mr-1" />
+                     Aggiungi ricetta
+                   </Button>
+                 )}
                  {folderRecipes.map(({ ur, recipe }) => (
                    <div key={recipe.id} className="relative group">
                      <RecipeCard recipe={recipe} />
@@ -305,14 +307,16 @@ export default function Folders() {
 
               {isExpanded && (
                 <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
-                  <Button
-                    onClick={() => setShowAddRecipe(true)}
-                    size="sm"
-                    className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Aggiungi ricetta
-                  </Button>
+                  {(currentUser?.plan === "premium" || currentUser?.role === "admin") && (
+                    <Button
+                      onClick={() => setShowAddRecipe(true)}
+                      size="sm"
+                      className="w-full rounded-lg bg-[#2D6A4F] hover:bg-[#235c43] text-white text-xs font-semibold"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Aggiungi ricetta
+                    </Button>
+                  )}
                   {folderRecipes.map(({ ur, recipe }) => (
                     <div key={recipe.id} className="relative group">
                       <RecipeCard recipe={recipe} />
