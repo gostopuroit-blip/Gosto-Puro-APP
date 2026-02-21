@@ -352,6 +352,11 @@ Difficoltà valide: Facile, Media, Difficile.`;
       return `${base} ${ingredients} ${colorHints} ${textureHints} ${countryProfile.imageStyle}, ${fixed}.`;
     }
 
+    const isSandwich = title.toLowerCase().includes("panino") || title.toLowerCase().includes("piadina") || title.toLowerCase().includes("tramezzino");
+    const sandwichVisual = isSandwich
+      ? `All fillings must stay mostly INSIDE the bread. No oversized leaves sticking out. No ingredients falling or floating outside. No messy American fast food aesthetic. Clean Italian artisanal presentation. Compact structure, realistic proportions. Ingredients neatly layered and properly cut. No molten sauce dripping excessively.`
+      : ``;
+
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
     const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
