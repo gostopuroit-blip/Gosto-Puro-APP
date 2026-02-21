@@ -49,6 +49,8 @@ function IngredientRow({ ing, index, total, ratio }) {
 export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
   const [userRecipe, setUserRecipe] = useState(null);
+  const [user, setUser] = useState(null);
+  const [savedCount, setSavedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -57,20 +59,25 @@ export default function RecipeDetail() {
   const params = new URLSearchParams(window.location.search);
   const recipeId = params.get("id");
 
+  const FREE_SAVE_LIMIT = 4;
+
   useEffect(() => {
     if (recipeId) loadRecipe();
+    base44.auth.me().then(setUser).catch(() => setUser(null));
   }, [recipeId]);
 
   const loadRecipe = async () => {
-    const [recipes, userRecipes] = await Promise.all([
+    const [recipes, userRecipes, allSaved] = await Promise.all([
       base44.entities.Recipe.filter({ id: recipeId }),
       base44.entities.UserRecipe.filter({ recipe_id: recipeId }),
+      base44.entities.UserRecipe.filter({ is_saved: true }),
     ]);
     if (recipes.length > 0) {
       setRecipe(recipes[0]);
       setServings(recipes[0].servings || 4);
     }
     if (userRecipes.length > 0) setUserRecipe(userRecipes[0]);
+    setSavedCount(allSaved.length);
     setLoading(false);
   };
 
