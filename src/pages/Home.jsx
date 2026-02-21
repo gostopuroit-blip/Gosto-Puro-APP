@@ -61,7 +61,7 @@ export default function Home() {
     );
 
     setTopRecipes(recipes);
-    if (user?.full_name) setUserName(user.full_name.split(" ")[0]);
+    if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
     setUserPlan(user?.plan || "free");
     setUserRole(user?.role || null);
