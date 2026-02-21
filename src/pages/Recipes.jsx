@@ -15,6 +15,7 @@ const filters = [
 
 
 export default function Recipes() {
+  const location = useLocation();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -25,14 +26,12 @@ export default function Recipes() {
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const occ = params.get("occasion");
     const life = params.get("lifestyle");
-    if (occ || life) {
-      setActiveTags({ occasion: occ, lifestyle: life });
-    }
+    setActiveTags({ occasion: occ || null, lifestyle: life || null });
     setCurrentPage(1);
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     loadRecipes();
