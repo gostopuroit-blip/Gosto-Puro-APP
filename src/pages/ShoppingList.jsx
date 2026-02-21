@@ -169,6 +169,7 @@ export default function ShoppingList() {
 
   return (
     <div className="pb-4">
+      <PremiumGate user={user} feature="la Lista della Spesa">
       <div className="px-5 pt-14 pb-4">
         <div className="flex items-center justify-between">
           <div>
