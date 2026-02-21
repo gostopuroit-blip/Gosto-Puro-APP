@@ -4,6 +4,7 @@ import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import DailyRecipesSection from "@/components/DailyRecipesSection";
 import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const filters = [
 { key: "all", label: "Tutte" },
