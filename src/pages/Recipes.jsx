@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import DailyRecipesSection from "@/components/DailyRecipesSection";
-import { Search, SlidersHorizontal, Loader2, X } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Search, SlidersHorizontal, Loader2, X, Lock } from "lucide-react";
+import { useLocation, Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const filters = [
 { key: "all", label: "Tutte" },
