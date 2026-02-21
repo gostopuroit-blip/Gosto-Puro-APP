@@ -54,7 +54,10 @@ export default function Recipes() {
         (r) =>
           r.title.toLowerCase().includes(q) ||
           (r.description || "").toLowerCase().includes(q) ||
-          (r.category || "").toLowerCase().includes(q)
+          (r.category || "").toLowerCase().includes(q) ||
+          (r.occasions || []).some((o) => o.toLowerCase().includes(q)) ||
+          (r.lifestyle || []).some((l) => l.toLowerCase().includes(q)) ||
+          (r.ingredients || []).some((i) => (i.name || "").toLowerCase().includes(q))
       );
     }
 
