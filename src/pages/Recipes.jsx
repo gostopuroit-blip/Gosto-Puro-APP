@@ -107,13 +107,27 @@ export default function Recipes() {
     setCurrentPage(1);
   };
 
+  const isPremium = user?.plan === "premium" || user?.role === "admin";
+  const FREE_LIMIT = 4;
+
+  const visibleRecipes = useMemo(() => {
+    if (isPremium || !activeTags.occasion) return filteredRecipes;
+    // Group by category and limit to FREE_LIMIT per category for free users
+    const categoryCount = {};
+    return filteredRecipes.filter((r) => {
+      const cat = r.category || "other";
+      categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+      return categoryCount[cat] <= FREE_LIMIT;
+    });
+  }, [filteredRecipes, isPremium, activeTags.occasion]);
+
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIdx = startIdx + ITEMS_PER_PAGE;
-    return filteredRecipes.slice(startIdx, endIdx);
-  }, [filteredRecipes, currentPage]);
+    return visibleRecipes.slice(startIdx, endIdx);
+  }, [visibleRecipes, currentPage]);
 
-  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(visibleRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
