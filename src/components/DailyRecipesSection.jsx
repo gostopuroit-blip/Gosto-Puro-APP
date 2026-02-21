@@ -87,26 +87,12 @@ export default function DailyRecipesSection({ occasion, user }) {
             </h2>
           </div>
         </div>
-        <p className="text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed">
-          Ecco le 3 ricette suggerite per oggi
+        <p className="text-[13px] text-gray-700 dark:text-gray-300 leading-relaxed">
+          <span className="font-bold text-[#2D6A4F] dark:text-[#40916C]">
+            {user?.full_name?.split(" ")[0] || "Ciao"}
+          </span>
+          , qui le ricette suggerite per {occasion.toLowerCase()} di oggi. Buon appetito! 🍽️
         </p>
-      </div>
-
-      {/* Filters */}
-      <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
-        {filters.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setActiveFilter(f.key)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all duration-200 whitespace-nowrap ${
-              activeFilter === f.key
-                ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                : "bg-white dark:bg-[#2D3F35] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246] hover:border-gray-200"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
       </div>
 
       {/* Carousel */}
