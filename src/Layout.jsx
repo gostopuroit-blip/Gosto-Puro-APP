@@ -108,7 +108,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       <div className="flex justify-center w-full">
-  <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/c0529d754_headerapp.png" alt="Gosto Puro" className="w-1/2 sm:w-full max-w-lg object-contain" />
+  <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/c0529d754_headerapp.png" alt="Gosto Puro" className="w-1/3 sm:w-full max-w-lg object-contain" />
 </div>
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
