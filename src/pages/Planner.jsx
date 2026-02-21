@@ -188,10 +188,18 @@ export default function Planner() {
     );
   }
 
+  const isPremium = user?.plan === "premium" || user?.role === "admin";
+
   return (
     <div className="pb-4">
-      <PremiumGate user={user} feature="il Pianificatore Pasti">
-        <div>
+      {!isPremium && (
+        <div className="px-5 pt-6 pb-2">
+          <PremiumGate user={user} feature="il Pianificatore Pasti">
+            <div />
+          </PremiumGate>
+        </div>
+      )}
+      <div className={!isPremium ? "pointer-events-none opacity-30 select-none" : ""}>
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
