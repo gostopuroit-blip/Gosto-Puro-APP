@@ -9,7 +9,7 @@ export default function PremiumGate({ children, user, feature = "questa funziona
 
   return (
     <div className="relative">
-      <div className="pointer-events-none opacity-30 select-none blur-sm">
+      <div className="pointer-events-none opacity-60 select-none">
         {children}
       </div>
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/20 backdrop-blur-md rounded-2xl z-10 px-4 py-8 text-center pointer-events-auto">
