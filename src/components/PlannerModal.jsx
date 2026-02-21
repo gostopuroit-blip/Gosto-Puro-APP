@@ -47,112 +47,112 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
           </button>
         </div>
 
-          {/* Days */}
-          <div className="mb-5">
-            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
-              Quanti giorni?
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {dayOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setDays(opt.value)}
-                  className={`py-3 rounded-xl text-sm font-semibold transition-all ${
-                    days === opt.value
-                      ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                      : "bg-white dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+        {/* Days */}
+        <div className="mb-5">
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
+            Quanti giorni?
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {dayOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setDays(opt.value)}
+                className={`py-3 rounded-xl text-sm font-semibold transition-all ${
+                  days === opt.value
+                    ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
+                    : "bg-white dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Focus */}
-          <div className="mb-5">
-            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
-              Foco
-            </label>
-            <div className="space-y-2">
-              {focusOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setFocus(opt.value)}
-                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-left transition-all ${
-                    focus === opt.value
-                      ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                      : "bg-white dark:bg-[#1A2B20] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
-                  }`}
-                >
-                  <span className="text-xl">{opt.icon}</span>
-                  <div>
-                    <div className="text-sm font-semibold">{opt.label}</div>
-                    <div className={`text-[11px] ${focus === opt.value ? "text-white/70" : "text-gray-400 dark:text-gray-500"}`}>
-                      {opt.desc}
-                    </div>
+        {/* Focus */}
+        <div className="mb-5">
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
+            Foco
+          </label>
+          <div className="space-y-2">
+            {focusOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setFocus(opt.value)}
+                className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-left transition-all ${
+                  focus === opt.value
+                    ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
+                    : "bg-white dark:bg-[#1A2B20] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
+                }`}
+              >
+                <span className="text-xl">{opt.icon}</span>
+                <div>
+                  <div className="text-sm font-semibold">{opt.label}</div>
+                  <div className={`text-[11px] ${focus === opt.value ? "text-white/70" : "text-gray-400 dark:text-gray-500"}`}>
+                    {opt.desc}
                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Max Time */}
-          <div className="mb-6">
-            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
-              Tempo massimo per ricetta
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {timeOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setMaxTime(opt.value)}
-                  className={`py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
-                    maxTime === opt.value
-                      ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                      : "bg-white dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
-                  }`}
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Servings */}
-          <div className="mb-6">
-            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
-              Per quante persone?
-            </label>
-            <div className="flex items-center gap-4 justify-center bg-white dark:bg-[#1A2B20] border border-gray-100 dark:border-[#3D5246] rounded-xl py-3">
-              <button
-                onClick={() => setServings((s) => Math.max(1, s - 1))}
-                className="w-9 h-9 rounded-xl border border-gray-200 dark:border-[#3D5246] flex items-center justify-center hover:bg-gray-50 dark:hover:bg-[#2D3F35]"
-              >
-                <Minus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </div>
               </button>
-              <div className="text-center">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">{servings}</span>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500">{servings === 1 ? "persona" : "persone"}</p>
-              </div>
-              <button
-                onClick={() => setServings((s) => Math.min(12, s + 1))}
-                className="w-9 h-9 rounded-xl border border-gray-200 dark:border-[#3D5246] flex items-center justify-center hover:bg-gray-50 dark:hover:bg-[#2D3F35]"
-              >
-                <Plus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              </button>
-            </div>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1.5">Le quantità di ingredienti si adatteranno automaticamente</p>
+            ))}
           </div>
+        </div>
 
-          <Button
-            onClick={() => onCreate({ days, focus, maxTime, servings })}
-            disabled={isLoading}
-            className="w-full py-6 rounded-2xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold text-sm shadow-lg shadow-[#2D6A4F]/20 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Criando..." : "✨ Crea il mio piano"}
-          </Button>
+        {/* Max Time */}
+        <div className="mb-6">
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
+            Tempo massimo per ricetta
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {timeOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setMaxTime(opt.value)}
+                className={`py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                  maxTime === opt.value
+                    ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
+                    : "bg-white dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Servings */}
+        <div className="mb-6">
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
+            Per quante persone?
+          </label>
+          <div className="flex items-center gap-4 justify-center bg-white dark:bg-[#1A2B20] border border-gray-100 dark:border-[#3D5246] rounded-xl py-3">
+            <button
+              onClick={() => setServings((s) => Math.max(1, s - 1))}
+              className="w-9 h-9 rounded-xl border border-gray-200 dark:border-[#3D5246] flex items-center justify-center hover:bg-gray-50 dark:hover:bg-[#2D3F35]"
+            >
+              <Minus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </button>
+            <div className="text-center">
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">{servings}</span>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500">{servings === 1 ? "persona" : "persone"}</p>
+            </div>
+            <button
+              onClick={() => setServings((s) => Math.min(12, s + 1))}
+              className="w-9 h-9 rounded-xl border border-gray-200 dark:border-[#3D5246] flex items-center justify-center hover:bg-gray-50 dark:hover:bg-[#2D3F35]"
+            >
+              <Plus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            </button>
+          </div>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-1.5">Le quantità di ingredienti si adatteranno automaticamente</p>
+        </div>
+
+        <Button
+          onClick={() => onCreate({ days, focus, maxTime, servings })}
+          disabled={isLoading}
+          className="w-full py-6 rounded-2xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold text-sm shadow-lg shadow-[#2D6A4F]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Criando..." : "✨ Crea il mio piano"}
+        </Button>
       </div>
     </div>
   );
