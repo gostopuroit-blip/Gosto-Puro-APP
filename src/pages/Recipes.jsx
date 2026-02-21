@@ -214,10 +214,37 @@ export default function Recipes() {
              <p className="text-5xl mb-4">🍳</p>
              <p className="text-gray-400 dark:text-gray-500 text-sm">Nessuna ricetta trovata</p>
            </div> :
-
           <>
              {paginatedRecipes.map((recipe) =>
             <RecipeCard key={recipe.id} recipe={recipe} />
+            )}
+            {/* Locked recipes for free users */}
+            {!isPremium && lockedRecipes.length > 0 && currentPage === totalPages && (
+              <>
+                {lockedRecipes.slice(0, 3).map((recipe) => (
+                  <div key={recipe.id} className="relative rounded-3xl overflow-hidden">
+                    <div className="pointer-events-none opacity-30 blur-sm select-none">
+                      <RecipeCard recipe={recipe} />
+                    </div>
+                    <Link
+                      to={createPageUrl("Profile")}
+                      className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm"
+                    >
+                      <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-2">
+                        <Lock className="w-5 h-5 text-amber-500" />
+                      </div>
+                      <p className="text-xs font-bold text-gray-800 mb-1">Ricetta Premium</p>
+                      <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl">✨ Sblocca Premium</span>
+                    </Link>
+                  </div>
+                ))}
+                {lockedRecipes.length > 3 && (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-400 mb-2">+{lockedRecipes.length - 3} ricette disponibili con Premium</p>
+                    <Link to={createPageUrl("Profile")} className="text-amber-500 font-bold text-sm">✨ Sblocca tutto</Link>
+                  </div>
+                )}
+              </>
             )}
            </>
           }
