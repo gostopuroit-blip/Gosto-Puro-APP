@@ -111,16 +111,16 @@ export default function Recipes() {
   const isPremium = user?.plan === "premium" || user?.role === "admin";
   const FREE_LIMIT = 4;
 
-  const visibleRecipes = useMemo(() => {
-    if (isPremium || !activeTags.occasion) return filteredRecipes;
-    // Group by category and limit to FREE_LIMIT per category for free users
-    const categoryCount = {};
-    return filteredRecipes.filter((r) => {
-      const cat = r.category || "other";
-      categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-      return categoryCount[cat] <= FREE_LIMIT;
-    });
-  }, [filteredRecipes, isPremium, activeTags.occasion]);
+  // For free users: first FREE_LIMIT recipes are free, rest are locked
+  const { freeRecipes, lockedRecipes } = useMemo(() => {
+    if (isPremium) return { freeRecipes: filteredRecipes, lockedRecipes: [] };
+    return {
+      freeRecipes: filteredRecipes.slice(0, FREE_LIMIT),
+      lockedRecipes: filteredRecipes.slice(FREE_LIMIT),
+    };
+  }, [filteredRecipes, isPremium]);
+
+  const visibleRecipes = freeRecipes;
 
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
