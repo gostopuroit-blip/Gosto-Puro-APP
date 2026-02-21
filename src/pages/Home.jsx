@@ -40,6 +40,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
+  const [userPlan, setUserPlan] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef(null);
   const cardWidth = 176 + 12;
