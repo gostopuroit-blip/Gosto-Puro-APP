@@ -154,33 +154,11 @@ export default function Home() {
       {/* PWA Install Banner */}
       <InstallPWABanner />
 
-      {/* Daily Notification Banner */}
-      {dailyNotif &&
-        <div className="mx-5 mb-4 mt-2 bg-gradient-to-r from-[#2D6A4F] to-[#40916C] rounded-2xl p-4 text-white">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            <p className="text-xs font-bold tracking-wide text-white/90">RICETTE DI OGGI</p>
-          </div>
-          <div className="space-y-2">
-            {(dailyNotif.recipe_ids || []).map((id, i) =>
-            <Link
-              key={id}
-              to={createPageUrl(`RecipeDetail?id=${id}`)}
-              className="flex items-center justify-between bg-white/10 rounded-xl px-3 py-2 active:bg-white/20 transition-all">
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">{occIcons[dailyNotif.occasions?.[i]] || "🍽️"}</span>
-                  <div>
-                    <p className="text-[13px] text-white/70 font-medium">{dailyNotif.occasions?.[i]}</p>
-                    <p className="text-[13px] font-semibold text-white leading-tight">{dailyNotif.recipe_titles?.[i]}</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-white/60 flex-shrink-0" />
-              </Link>
-            )}
-          </div>
+      {/* Daily Message */}
+        <div className="mx-5 mb-4 mt-2 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Ogni giorno nuove ricette ti aspettano!</p>
         </div>
-        }
 
       {/* Daily Occasions — card style like image */}
       <div className="px-5 mt-2">
