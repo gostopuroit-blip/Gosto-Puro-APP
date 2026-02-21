@@ -191,9 +191,10 @@ export default function ShoppingList() {
               size="sm"
               onClick={generateList}
               disabled={generating}
-              className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
+              className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] gap-1.5"
             >
               <RefreshCw className={`w-4 h-4 ${generating ? "animate-spin" : ""}`} />
+              Aggiorna lista
             </Button>
           </div>
         </div>
