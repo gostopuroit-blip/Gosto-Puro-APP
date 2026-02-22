@@ -84,11 +84,8 @@ export default function Folders() {
     const existing = userRecipes.find((u) => u.recipe_id === recipe.id);
     const isFree = currentUser?.plan !== "premium" && currentUser?.role !== "admin";
     
-    // Check if free user already has 4 saved recipes
-    if (isFree && existing?.recipe_id) {
-      // Recipe already exists, just updating
-    } else if (isFree && !existing?.recipe_id) {
-      // New recipe - check limit
+    // Only limit free users adding NEW recipes
+    if (isFree && !existing) {
       const totalSaved = getTotalSavedRecipes();
       if (totalSaved >= 4) {
         toast.error("Limite di 4 ricette raggiunto per gli utenti gratuiti");
