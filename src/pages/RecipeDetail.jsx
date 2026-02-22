@@ -67,10 +67,13 @@ export default function RecipeDetail() {
   }, [recipeId]);
 
   const loadRecipe = async () => {
+    const currentUser = await base44.auth.me().catch(() => null);
     const [recipes, userRecipes, allSaved] = await Promise.all([
       base44.entities.Recipe.filter({ id: recipeId }),
       base44.entities.UserRecipe.filter({ recipe_id: recipeId }),
-      base44.entities.UserRecipe.filter({ is_saved: true }),
+      currentUser
+        ? base44.entities.UserRecipe.filter({ is_saved: true, created_by: currentUser.email })
+        : Promise.resolve([]),
     ]);
     if (recipes.length > 0) {
       setRecipe(recipes[0]);
