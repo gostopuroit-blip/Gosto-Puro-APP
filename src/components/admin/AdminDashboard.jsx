@@ -14,12 +14,13 @@ export default function AdminDashboard({ onNavigate }) {
   }, []);
 
   const load = async () => {
-    const [users, recipes, webhooks] = await Promise.all([
-      base44.entities.User.list(),
+    const [usersResult, recipes, webhooks] = await Promise.all([
+      base44.entities.User.list().catch(() => null),
       base44.entities.Recipe.list("-numero_salvate", 100),
-      base44.entities.WebhookLog.filter({ status: "error" }),
+      base44.entities.WebhookLog.filter({ status: "error" }).catch(() => []),
     ]);
 
+    const users = usersResult || [];
     const now = Date.now();
     const h24 = webhooks.filter((w) => new Date(w.timestamp || w.created_date).getTime() > now - 86400000);
 
@@ -27,9 +28,9 @@ export default function AdminDashboard({ onNavigate }) {
     const topPrepared = [...recipes].sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0)).slice(0, 5);
 
     setStats({
-      totalUsers: users.length,
-      premiumUsers: users.filter((u) => u.plan === "premium").length,
-      freeUsers: users.filter((u) => !u.plan || u.plan === "free").length,
+      totalUsers: usersResult ? users.length : null,
+      premiumUsers: usersResult ? users.filter((u) => u.plan === "premium").length : null,
+      freeUsers: usersResult ? users.filter((u) => !u.plan || u.plan === "free").length : null,
       totalRecipes: recipes.length,
       topSaved,
       topPrepared,
