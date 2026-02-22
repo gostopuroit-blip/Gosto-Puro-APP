@@ -25,7 +25,10 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
 
   const loadFolders = async () => {
     setLoadingFolders(true);
-    const f = await base44.entities.Folder.filter({ is_system: false });
+    const user = await base44.auth.me().catch(() => null);
+    const f = user
+      ? await base44.entities.Folder.filter({ is_system: false, created_by: user.email })
+      : [];
     setCustomFolders(f);
     setLoadingFolders(false);
   };
