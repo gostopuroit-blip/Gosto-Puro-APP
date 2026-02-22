@@ -112,7 +112,7 @@ export default function ShoppingList() {
     }
 
     // Delete old items
-    const oldItems = await base44.entities.ShoppingItem.list("category", 200);
+    const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
     for (const item of oldItems) {
       await base44.entities.ShoppingItem.delete(item.id);
     }
