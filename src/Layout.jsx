@@ -18,11 +18,25 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const theme = localStorage.getItem("theme");
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    }
-    base44.auth.me().then(setUser).catch(() => setUser(null));
+    base44.auth.me().then((u) => {
+      setUser(u);
+      // Prioriza preferência salva no perfil do usuário
+      if (u?.dark_mode) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else if (u && !u.dark_mode) {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      } else {
+        // Fallback para localStorage se não autenticado
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") document.documentElement.classList.add("dark");
+      }
+    }).catch(() => {
+      setUser(null);
+      const theme = localStorage.getItem("theme");
+      if (theme === "dark") document.documentElement.classList.add("dark");
+    });
   }, []);
 
   useEffect(() => {
