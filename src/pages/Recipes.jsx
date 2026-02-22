@@ -111,14 +111,17 @@ export default function Recipes() {
   const isPremium = user?.plan === "premium" || user?.role === "admin";
   const FREE_LIMIT = 4;
 
-  // For free users: first FREE_LIMIT recipes are free, rest are locked
+  // For free users: only show the 4 newest recipes that existed when they registered
   const { freeRecipes, lockedRecipes } = useMemo(() => {
     if (isPremium) return { freeRecipes: filteredRecipes, lockedRecipes: [] };
-    return {
-      freeRecipes: filteredRecipes.slice(0, FREE_LIMIT),
-      lockedRecipes: filteredRecipes.slice(FREE_LIMIT)
-    };
-  }, [filteredRecipes, isPremium]);
+    // recipes are already sorted by -created_date
+    // free users see the 4 most recent recipes published up to their registration date
+    const userCreatedDate = user?.created_date ? new Date(user.created_date) : new Date();
+    const availableAtRegistration = filteredRecipes.filter(r => !r.created_date || new Date(r.created_date) <= userCreatedDate);
+    const freeOnes = availableAtRegistration.slice(0, FREE_LIMIT);
+    const lockedOnes = filteredRecipes.filter(r => !freeOnes.find(f => f.id === r.id));
+    return { freeRecipes: freeOnes, lockedRecipes: lockedOnes };
+  }, [filteredRecipes, isPremium, user]);
 
   const visibleRecipes = freeRecipes;
 
