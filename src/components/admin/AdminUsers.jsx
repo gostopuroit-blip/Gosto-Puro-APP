@@ -15,10 +15,10 @@ export default function AdminUsers() {
 
   const load = async () => {
     try {
-      const data = await base44.entities.User.list("-created_date", 200);
-      setUsers(data);
+      const res = await base44.functions.invoke('adminGetUsers');
+      setUsers(res.data);
     } catch (e) {
-      setError("Permissão insuficiente para listar usuários. Apenas o administrador principal tem acesso a esta seção.");
+      setError("Errore nel caricamento degli utenti.");
     } finally {
       setLoading(false);
     }
