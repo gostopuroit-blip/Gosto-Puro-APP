@@ -50,7 +50,8 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
 
   const handleSave = async () => {
     setSaving(true);
-    const existing = await base44.entities.UserRecipe.filter({ recipe_id: recipeId });
+    const user = await base44.auth.me().catch(() => null);
+    const existing = await base44.entities.UserRecipe.filter({ recipe_id: recipeId, created_by: user?.email });
     const isFavorite = selectedFolders.includes("preferite");
     const customIds = selectedFolders.filter((id) => id !== "per_fare" && id !== "preferite");
 
