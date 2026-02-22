@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import DailyRecipesSection from "@/components/DailyRecipesSection";
-import { Search, SlidersHorizontal, Loader2, X, Lock } from "lucide-react";
+import { Search, SlidersHorizontal, Loader2, X, Lock, Crown } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
