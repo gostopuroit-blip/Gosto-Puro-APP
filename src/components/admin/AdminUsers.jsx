@@ -11,10 +11,17 @@ export default function AdminUsers() {
 
   useEffect(() => { load(); }, []);
 
+  const [error, setError] = useState(null);
+
   const load = async () => {
-    const data = await base44.entities.User.list("-created_date", 200);
-    setUsers(data);
-    setLoading(false);
+    try {
+      const data = await base44.entities.User.list("-created_date", 200);
+      setUsers(data);
+    } catch (e) {
+      setError("Permissão insuficiente para listar usuários. Apenas o administrador principal tem acesso a esta seção.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const update = async (userId, data, label) => {
