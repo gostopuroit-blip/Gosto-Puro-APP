@@ -370,7 +370,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     const modifiers = occ.image_modifiers?.join(", ") || "";
     const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution`;
     
-    return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${modifiers}, ${fixed}.`;
+    return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${pastaVisual} ${modifiers}, ${fixed}.`;
   };
 
   const handleGenerate = async () => {
