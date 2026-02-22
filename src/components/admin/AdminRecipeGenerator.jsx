@@ -357,6 +357,14 @@ Difficoltà valide: Facile, Media, Difficile.`;
       ? `All fillings must stay mostly INSIDE the bread. No oversized leaves sticking out. No ingredients falling or floating outside. No messy American fast food aesthetic. Clean Italian artisanal presentation. Compact structure, realistic proportions. Ingredients neatly layered and properly cut. No molten sauce dripping excessively.`
       : ``;
 
+    // Pasta/sauce detection
+    const pastaKeywords = ["pasta", "spaghetti", "tagliatelle", "penne", "rigatoni", "fusilli", "linguine", "fettuccine", "lasagne", "gnocchi", "trofie", "orecchiette", "bucatini", "maccheroni", "macarrão", "carbonara", "amatriciana", "arrabbiata", "bolognese", "ragù", "pesto", "cacio e pepe", "gricia", "vongole", "norma", "all'uovo", "pomodoro", "matriciana"];
+    const titleLower = title.toLowerCase();
+    const isPasta = pastaKeywords.some(k => titleLower.includes(k)) || (recipe.ingredients || []).some(i => pastaKeywords.some(k => i.name?.toLowerCase().includes(k)));
+    const pastaVisual = isPasta
+      ? `CRITICAL PASTA RULE: The pasta MUST be completely coated and enveloped in the sauce — never dry, never with sauce sitting separately on top. The sauce is structural, not decorative. The dish must look like it was just finished "saltato in padella" (tossed in the pan). Pasta should appear slightly glistening and moist. No white dry pasta visible. No sauce pooled only at the bottom. No ingredients floating randomly. Sauce fully integrated with pasta. Realistic Italian home cooking proportions — not excessive sauce, not too little. Authentic texture: creamy sauces look silky and light (not heavy American cream sauce), tomato sauces look rich and naturally red (not neon), meat ragù looks dense and mixed throughout.`
+      : ``;
+
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
     const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
