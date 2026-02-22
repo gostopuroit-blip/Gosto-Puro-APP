@@ -233,7 +233,7 @@ export default function Recipes() {
                       <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-2">
                         <Lock className="w-5 h-5 text-amber-500" />
                       </div>
-                      <p className="text-xs font-bold text-gray-800 mb-1">Ricetta Premium</p>
+                      <p className="text-slate-50 mb-1 text-xs font-bold">Ricetta Premium</p>
                       <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl">✨ Sblocca Premium</span>
                     </Link>
                   </div>
