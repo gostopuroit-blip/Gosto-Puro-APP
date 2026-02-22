@@ -129,7 +129,7 @@ export default function ShoppingList() {
       await base44.entities.ShoppingItem.bulkCreate(newItems);
     }
 
-    const created = await base44.entities.ShoppingItem.list("category", 200);
+    const created = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
     setItems(created);
     setLoading(false);
     setGenerating(false);
