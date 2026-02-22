@@ -28,20 +28,23 @@ export default function ShoppingList() {
   }, []);
 
   const loadItems = async () => {
-    const existingItems = await base44.entities.ShoppingItem.list("category", 200);
+    const u = await base44.auth.me().catch(() => null);
+    setUser(u);
+    const existingItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
     if (existingItems.length > 0) {
       setItems(existingItems);
       setLoading(false);
     } else {
-      await generateList();
+      await generateList(u);
     }
   };
 
-  const generateList = async () => {
+  const generateList = async (currentUser) => {
+    const u = currentUser || user;
     setGenerating(true);
     
     // Get active plan
-    const plans = await base44.entities.MealPlan.filter({ is_active: true });
+    const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u?.email });
     
     if (plans.length === 0) {
       setLoading(false);
