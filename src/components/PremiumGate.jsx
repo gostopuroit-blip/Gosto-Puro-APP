@@ -17,13 +17,13 @@ export default function PremiumGate({ children, user, feature = "questa funziona
           <Crown className="w-7 h-7 text-amber-500" />
         </div>
         <p className="text-sm font-bold text-gray-900 dark:text-white mb-2">Funzionalità Premium</p>
-        <p className="text-gray-700 dark:text-gray-200 mb-6 text-xs font-normal text-center leading-relaxed">
+        <p className="text-gray-700 mb-6 text-base font-semibold text-center leading-relaxed dark:text-gray-200">
           Sblocca {feature} con il piano Premium
         </p>
         <Link
           to={createPageUrl("Profile")}
-          className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors"
-        >
+          className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
+
           <Crown className="w-4 h-4" />
           Sblocca Premium
         </Link>
