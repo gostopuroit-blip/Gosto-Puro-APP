@@ -37,6 +37,7 @@ export default function AdminUsers() {
   );
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
+  if (error) return <div className="bg-red-50 border border-red-100 rounded-2xl p-6 text-center text-sm text-red-600">{error}</div>;
 
   return (
     <div className="space-y-4">
