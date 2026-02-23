@@ -20,6 +20,57 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
+  const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
+
+  useEffect(() => {
+    if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setNotifStatus("unsupported");
+      return;
+    }
+    if (Notification.permission === "granted") setNotifStatus("subscribed");
+    else if (Notification.permission === "denied") setNotifStatus("denied");
+  }, []);
+
+  const handleToggleNotifications = async () => {
+    if (notifStatus === "subscribed") return; // already on
+    if (notifStatus === "denied") {
+      toast.error("Notifiche bloccate — abilitale nelle impostazioni del browser");
+      return;
+    }
+    setNotifStatus("asking");
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") { setNotifStatus("denied"); return; }
+
+      const keyRes = await base44.functions.invoke("getVapidPublicKey");
+      const vapidPublicKey = keyRes.data?.publicKey;
+      if (!vapidPublicKey) throw new Error("VAPID key not available");
+
+      function urlBase64ToUint8Array(base64String) {
+        const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+        return outputArray;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      });
+
+      const { endpoint, keys } = subscription.toJSON();
+      await base44.functions.invoke("savePushSubscription", { endpoint, p256dh: keys.p256dh, auth: keys.auth });
+
+      setNotifStatus("subscribed");
+      toast.success("Notifiche attivate! 🔔");
+    } catch {
+      setNotifStatus("denied");
+      toast.error("Errore nell'attivazione delle notifiche");
+    }
+  };
 
   useEffect(() => {
     loadUser();
