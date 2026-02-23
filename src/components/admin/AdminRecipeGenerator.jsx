@@ -262,7 +262,7 @@ REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
 
 Crea una ricetta ${isIntl && country ? `autentica di cucina ${country}` : "autentica italiana"} per questa occasione.
 ${titlesBlock}
-${extraNote ? `⚠️ ISTRUZIONE PRIORITARIA (segui PRIMA di tutto il resto): ${extraNote}\nQuesto vincolo ha la priorità assoluta su qualsiasi altra linea guida. La ricetta DEVE rispettare questa istruzione.\n` : ""}
+${extraNote ? `\n🚨 VINCOLO ASSOLUTO — LEGGI PRIMA DI TUTTO:\nL'utente ha richiesto ESATTAMENTE: "${extraNote}"\nDevi creare LA RICETTA CHE L'UTENTE HA CHIESTO. Non ignorare questa richiesta. Non interpretarla liberamente. Non sostituirla con qualcosa di simile. Se ha scritto un nome di piatto, quello è il titolo della ricetta. Se ha indicato un ingrediente, deve essere protagonista. Se ha indicato una restrizione (es: senza carne), rispettala al 100%. Questo vincolo SOVRASCRIVE qualsiasi altra regola di questa sezione.\n` : ""}
 Occasione: ${occ.label}${country ? ` — Paese: ${country}` : ""}
 Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
