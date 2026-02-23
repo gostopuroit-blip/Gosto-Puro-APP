@@ -42,11 +42,28 @@ export default function Profile() {
   }, []);
 
   const handleToggleNotifications = async () => {
-    if (notifStatus === "subscribed") return; // already on
+    if (notifStatus === "asking") return;
+
+    if (notifStatus === "subscribed") {
+      // Unsubscribe
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) await sub.unsubscribe();
+        setNotifStatus("idle");
+        toast.success("Notifiche disattivate");
+      } catch {
+        toast.error("Errore nella disattivazione");
+      }
+      return;
+    }
+
     if (notifStatus === "denied") {
       toast.error("Notifiche bloccate — abilitale nelle impostazioni del browser");
       return;
     }
+
+    // Subscribe
     setNotifStatus("asking");
     try {
       const permission = await Notification.requestPermission();
@@ -76,8 +93,9 @@ export default function Profile() {
 
       setNotifStatus("subscribed");
       toast.success("Notifiche attivate! 🔔");
-    } catch {
-      setNotifStatus("denied");
+    } catch (err) {
+      console.error("Push subscription error:", err);
+      setNotifStatus("idle");
       toast.error("Errore nell'attivazione delle notifiche");
     }
   };
