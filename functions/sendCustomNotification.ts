@@ -14,7 +14,8 @@ Deno.serve(async (req) => {
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
     const vapidEmail = Deno.env.get('VAPID_EMAIL');
 
-    webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
+    const email = vapidEmail.startsWith('mailto:') ? vapidEmail : `mailto:${vapidEmail}`;
+    webpush.setVapidDetails(email, vapidPublicKey, vapidPrivateKey);
 
     const { title, body, url } = await req.json();
 
