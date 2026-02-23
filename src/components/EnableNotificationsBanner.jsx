@@ -42,10 +42,15 @@ export default function EnableNotificationsBanner() {
         return;
       }
 
+      // Fetch VAPID public key from backend (avoids hardcoding in frontend)
+      const keyRes = await base44.functions.invoke("getVapidPublicKey");
+      const vapidPublicKey = keyRes.data?.publicKey;
+      if (!vapidPublicKey) throw new Error("VAPID key not available");
+
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
       const { endpoint, keys } = subscription.toJSON();
@@ -56,7 +61,8 @@ export default function EnableNotificationsBanner() {
       });
 
       setStatus("subscribed");
-    } catch {
+    } catch (err) {
+      console.error("Push subscription error:", err);
       setStatus("denied");
     }
   };
