@@ -17,10 +17,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'title and body are required' }, { status: 400 });
     }
 
-    // Use same VAPID setup as sendDailyPushNotifications
     const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
     const vapidEmail = Deno.env.get('VAPID_EMAIL');
+
+    // Log key info for debugging (no actual values)
+    console.log('PUB len:', vapidPublicKey?.length, 'hasPlusSlash:', /[+/=]/.test(vapidPublicKey || ''));
+    console.log('PRIV len:', vapidPrivateKey?.length, 'hasPlusSlash:', /[+/=]/.test(vapidPrivateKey || ''));
+    console.log('EMAIL:', vapidEmail);
 
     webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
 
