@@ -136,9 +136,20 @@ export default function AdminRecipeGenerator() {
   useEffect(() => {
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 50)
       .then(setOccasions).finally(() => setLoadingOcc(false));
-    // Load all existing recipe titles to avoid duplicates
-    base44.entities.Recipe.list("-created_date", 500)
-      .then(recipes => setExistingTitles(recipes.map(r => r.title)));
+    // Load ALL existing recipe titles to avoid duplicates
+    const loadAllTitles = async () => {
+      let all = [];
+      let skip = 0;
+      const limit = 200;
+      while (true) {
+        const batch = await base44.entities.Recipe.list("-created_date", limit, skip);
+        all = all.concat(batch);
+        if (batch.length < limit) break;
+        skip += limit;
+      }
+      setExistingTitles(all.map(r => r.title));
+    };
+    loadAllTitles();
   }, []);
 
   const grouped = {
