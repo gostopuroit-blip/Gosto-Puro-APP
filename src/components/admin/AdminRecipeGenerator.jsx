@@ -268,7 +268,7 @@ Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
 Stagione: ${occ.stagione || "all"}
 Difficoltà: ${difficulty}
-Tempo massimo: ${maxTime} minuti
+Tempo di preparazione: ESATTAMENTE circa ${maxTime} minuti (rispetta questo tempo — non ridurlo, non ignorarlo)
 Porzioni: ${servings}
 
 ${countryBlock}
