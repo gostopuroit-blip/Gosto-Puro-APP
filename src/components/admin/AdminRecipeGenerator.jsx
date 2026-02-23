@@ -276,7 +276,7 @@ ${pranzoExtra}${cenaExtra}${velociExtra}${nataleExtra}${capodannoExtra}${extraNo
 ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
-IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
+IMPORTANTE: La ricetta generata deve essere COMPLETAMENTE DIVERSA da tutte quelle nell'elenco sopra — non solo nel nome, ma nel tipo di piatto, negli ingredienti principali e nella tecnica di cottura. Se l'elenco ha già molte paste, fai qualcosa di diverso. Se ha già molto pollo, evitalo. Sii creativo e varia.
 
 Rispondi SOLO in formato JSON con questa struttura:
 {
