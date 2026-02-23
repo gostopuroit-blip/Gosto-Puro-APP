@@ -27,8 +27,18 @@ export default function Profile() {
       setNotifStatus("unsupported");
       return;
     }
-    if (Notification.permission === "granted") setNotifStatus("subscribed");
-    else if (Notification.permission === "denied") setNotifStatus("denied");
+    if (Notification.permission === "denied") {
+      setNotifStatus("denied");
+      return;
+    }
+    if (Notification.permission === "granted") {
+      // Check if actually subscribed
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          setNotifStatus(sub ? "subscribed" : "idle");
+        });
+      });
+    }
   }, []);
 
   const handleToggleNotifications = async () => {
