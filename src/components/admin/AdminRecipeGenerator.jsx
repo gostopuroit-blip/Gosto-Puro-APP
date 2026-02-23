@@ -253,7 +253,7 @@ REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
 ` : "";
 
     const titlesBlock = existingTitles.length > 0
-      ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
+      ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI — neanche piatti con lo stesso nome principale cambiando solo la variante o il condimento):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n\nSe tendi a ripetere piatti come pasta/risotto/pollo, scegli qualcosa di diverso questa volta.\n`
       : "";
 
     const isIntl = label.includes("cucina internazionale");
