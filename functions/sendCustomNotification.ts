@@ -26,12 +26,6 @@ Deno.serve(async (req) => {
 
     webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
 
-    const { title, body, url } = await req.json();
-
-    if (!title || !body) {
-      return Response.json({ error: 'title and body are required' }, { status: 400 });
-    }
-
     const subscriptions = await base44.asServiceRole.entities.PushSubscription.list();
 
     let sent = 0;
