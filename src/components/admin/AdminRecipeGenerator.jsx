@@ -218,7 +218,7 @@ REGOLE SPECIFICHE PER RICETTE VELOCI ITALIANE:
 REGOLE SPECIFICHE PER CENA ITALIANA:
 - La cena deve essere più leggera rispetto al pranzo: NO lasagne pesanti, NO fritti, NO piatti eccessivamente grassi
 - Preferire: verdure, proteine leggere (pesce, uova, pollo), zuppe, minestre, frittate
-- Preparazione semplice e veloce: idealmente 20–30 minuti, al massimo ${maxTime} minuti
+- Preparazione: al massimo ${maxTime} minuti (rispetta questo tempo)
 - Porzione moderata: l'italiano non vuole appesantirsi la sera
 - Piatto digeribile: cultura italiana di "non appesantirsi la sera" è fondamentale
 - Ingredienti stagionali e facilmente reperibili in un supermercato italiano
