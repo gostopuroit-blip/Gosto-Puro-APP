@@ -67,6 +67,7 @@ function AdminContent() {
         {activeTab === "utenti" && <AdminUsers />}
         {activeTab === "ricette" && <AdminRecipesManager />}
         {activeTab === "genera" && <AdminRecipeGenerator />}
+        {activeTab === "notifiche" && <AdminNotifications />}
         {activeTab === "permessi" && <AdminPermissions />}
         {activeTab === "webhooks" && <AdminWebhooks />}
         {activeTab === "impostazioni" && <AdminSettings />}
