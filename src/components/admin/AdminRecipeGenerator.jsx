@@ -289,6 +289,7 @@ Rispondi SOLO in formato JSON con questa struttura:
   "calories": 320,
   "difficulty": "Facile",
   "occasions": ["${occ.label}"],
+  "paese": "${country || ""}",
   "ingredients": [
     { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }
   ],
