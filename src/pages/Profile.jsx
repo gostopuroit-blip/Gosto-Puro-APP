@@ -66,12 +66,29 @@ export default function Profile() {
     // Subscribe
     setNotifStatus("asking");
     try {
+      // Step 1: Request permission
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") { setNotifStatus("denied"); return; }
+      if (permission !== "granted") {
+        toast.error(`Permesso notifiche: ${permission}`);
+        setNotifStatus("denied");
+        return;
+      }
 
+      // Step 2: Get VAPID key
       const keyRes = await base44.functions.invoke("getVapidPublicKey");
       const vapidPublicKey = keyRes.data?.publicKey;
-      if (!vapidPublicKey) throw new Error("VAPID key not available");
+      if (!vapidPublicKey) {
+        toast.error("Chiave VAPID non trovata nel server");
+        setNotifStatus("idle");
+        return;
+      }
+
+      // Step 3: Wait for service worker
+      if (!navigator.serviceWorker.controller) {
+        toast.error("Service Worker non attivo — riprova dopo aver installato la PWA");
+        setNotifStatus("idle");
+        return;
+      }
 
       function urlBase64ToUint8Array(base64String) {
         const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -82,21 +99,35 @@ export default function Profile() {
         return outputArray;
       }
 
+      // Step 4: Subscribe to push
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-      });
+      let subscription;
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+      } catch (subErr) {
+        toast.error(`Errore subscribe: ${subErr.message}`);
+        setNotifStatus("idle");
+        return;
+      }
 
+      // Step 5: Save to server
       const { endpoint, keys } = subscription.toJSON();
-      await base44.functions.invoke("savePushSubscription", { endpoint, p256dh: keys.p256dh, auth: keys.auth });
+      const saveRes = await base44.functions.invoke("savePushSubscription", { endpoint, p256dh: keys.p256dh, auth: keys.auth });
+      if (saveRes.data?.error) {
+        toast.error(`Errore salvataggio: ${saveRes.data.error}`);
+        setNotifStatus("idle");
+        return;
+      }
 
       setNotifStatus("subscribed");
-      toast.success("Notifiche attivate! 🔔");
+      toast.success("Notifiche attivate! 🔔 Controlla il banco dati.");
     } catch (err) {
       console.error("Push subscription error:", err);
       setNotifStatus("idle");
-      toast.error("Errore nell'attivazione delle notifiche");
+      toast.error(`Errore: ${err.message}`);
     }
   };
 
