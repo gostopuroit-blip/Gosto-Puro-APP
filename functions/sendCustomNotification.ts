@@ -10,10 +10,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')?.trim();
-    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')?.trim();
+    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')?.trim().replace(/\s/g, '');
+    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')?.trim().replace(/\s/g, '');
     const vapidEmailRaw = Deno.env.get('VAPID_EMAIL')?.trim();
     const vapidEmail = vapidEmailRaw?.startsWith('mailto:') ? vapidEmailRaw : `mailto:${vapidEmailRaw}`;
+
+    console.log('VAPID_PUBLIC_KEY length:', vapidPublicKey?.length);
+    console.log('VAPID_PRIVATE_KEY length:', vapidPrivateKey?.length);
+    console.log('VAPID_EMAIL:', vapidEmail);
 
     webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
 
