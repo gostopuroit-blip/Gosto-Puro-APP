@@ -248,7 +248,7 @@ export default function Home() {
           {lifestyleTags.map((tag) =>
               <Link
                 key={tag.label}
-                to={createPageUrl(`Recipes?lifestyle=${encodeURIComponent(tag.label)}`)}
+                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
                 className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
 
                 <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
