@@ -1,11 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import webpush from 'npm:web-push@3.6.7';
 
+// Convert standard base64 -> url-safe base64 (no padding)
+function toBase64url(str) {
+  return str.trim().replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 Deno.serve(async (req) => {
   try {
-    const body_raw = await req.text();
-    console.log('RAW BODY:', body_raw);
-
     const base44 = createClientFromRequest(req);
 
     let user = null;
@@ -14,20 +16,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { title, body, url } = JSON.parse(body_raw);
+    const { title, body, url } = await req.json();
 
     if (!title || !body) {
       return Response.json({ error: 'title and body are required' }, { status: 400 });
     }
 
-    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
-    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
-    const vapidEmail = Deno.env.get('VAPID_EMAIL');
-
-    // Log key info for debugging (no actual values)
-    console.log('PUB len:', vapidPublicKey?.length, 'hasPlusSlash:', /[+/=]/.test(vapidPublicKey || ''));
-    console.log('PRIV len:', vapidPrivateKey?.length, 'hasPlusSlash:', /[+/=]/.test(vapidPrivateKey || ''));
-    console.log('EMAIL:', vapidEmail);
+    const vapidPublicKey = toBase64url(Deno.env.get('VAPID_PUBLIC_KEY') || '');
+    const vapidPrivateKey = toBase64url(Deno.env.get('VAPID_PRIVATE_KEY') || '');
+    const vapidEmailRaw = (Deno.env.get('VAPID_EMAIL') || '').trim();
+    const vapidEmail = vapidEmailRaw.startsWith('mailto:') ? vapidEmailRaw : `mailto:${vapidEmailRaw}`;
 
     webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
 
