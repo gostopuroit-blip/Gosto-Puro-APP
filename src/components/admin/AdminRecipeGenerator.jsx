@@ -262,6 +262,7 @@ REGOLE CRITICHE PER CAPODANNO - CENA ELEGANTE:
 
 Crea una ricetta ${isIntl && country ? `autentica di cucina ${country}` : "autentica italiana"} per questa occasione.
 ${titlesBlock}
+${extraNote ? `⚠️ ISTRUZIONE PRIORITARIA (segui PRIMA di tutto il resto): ${extraNote}\nQuesto vincolo ha la priorità assoluta su qualsiasi altra linea guida. La ricetta DEVE rispettare questa istruzione.\n` : ""}
 Occasione: ${occ.label}${country ? ` — Paese: ${country}` : ""}
 Mood: ${occ.mood || ""}
 Categoria principale: ${occ.categoria_principale || "all"}
