@@ -5,9 +5,16 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    const user = await base44.auth.me();
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_e) { /* unauthenticated */ }
     if (user?.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const { title, body, url } = await req.json();
+
+    if (!title || !body) {
+      return Response.json({ error: 'title and body are required' }, { status: 400 });
     }
 
     // Sanitize VAPID keys: remove whitespace, convert standard base64 to url-safe base64, strip padding
