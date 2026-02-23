@@ -17,12 +17,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'title and body are required' }, { status: 400 });
     }
 
-    // Sanitize VAPID keys: remove whitespace, convert standard base64 to url-safe base64, strip padding
-    const sanitizeKey = (k) => k?.trim().replace(/\s/g, '').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    const vapidPublicKey = sanitizeKey(Deno.env.get('VAPID_PUBLIC_KEY'));
-    const vapidPrivateKey = sanitizeKey(Deno.env.get('VAPID_PRIVATE_KEY'));
-    const vapidEmailRaw = Deno.env.get('VAPID_EMAIL')?.trim();
-    const vapidEmail = vapidEmailRaw?.startsWith('mailto:') ? vapidEmailRaw : `mailto:${vapidEmailRaw}`;
+    // Use same VAPID setup as sendDailyPushNotifications
+    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
+    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
+    const vapidEmail = Deno.env.get('VAPID_EMAIL');
 
     webpush.setVapidDetails(vapidEmail, vapidPublicKey, vapidPrivateKey);
 
