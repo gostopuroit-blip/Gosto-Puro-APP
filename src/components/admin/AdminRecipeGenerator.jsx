@@ -545,7 +545,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
         <div>
           <label className="text-xs text-gray-400 font-semibold block mb-1">Note aggiuntive (opzionale)</label>
           <textarea value={extraNote} onChange={e => setExtraNote(e.target.value)}
-            placeholder="Es: ricetta senza glutine, usa zucchine, piatto tipico siciliano..."
+            placeholder="Es: 'Pasta al Ragù di Manzo' (nome esatto), 'senza glutine', 'usa melanzane', 'piatto tipico siciliano', 'con salmone e limone'..."
             rows={2}
             className="w-full text-xs px-3 py-2 rounded-xl border border-gray-100 bg-gray-50 focus:outline-none resize-none" />
         </div>
