@@ -209,6 +209,37 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Notifications */}
+      {notifStatus !== "unsupported" && (
+        <div className="px-5 mt-4">
+          <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${notifStatus === "subscribed" ? "bg-green-100 dark:bg-green-900/40" : "bg-gray-100 dark:bg-[#1A2B20]"}`}>
+                {notifStatus === "subscribed"
+                  ? <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  : notifStatus === "denied"
+                    ? <BellOff className="w-5 h-5 text-red-400" />
+                    : <Bell className="w-5 h-5 text-gray-400" />
+                }
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">Notifiche</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  {notifStatus === "subscribed" ? "Attive — ricevi le ricette del giorno" : notifStatus === "denied" ? "Bloccate nelle impostazioni" : "Ricevi le ricette ogni giorno"}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleToggleNotifications}
+              disabled={notifStatus === "asking" || notifStatus === "subscribed"}
+              className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${notifStatus === "subscribed" ? "bg-[#2D6A4F]" : "bg-gray-200"} disabled:opacity-60`}
+            >
+              <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${notifStatus === "subscribed" ? "translate-x-6" : "translate-x-0.5"}`} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Appearance */}
       <div className="px-5 mt-4">
         <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
