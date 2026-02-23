@@ -404,6 +404,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
           calories: { type: "number" },
           difficulty: { type: "string" },
           occasions: { type: "array", items: { type: "string" } },
+          paese: { type: "string" },
           ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
           instructions: { type: "array", items: { type: "string" } },
         },
