@@ -7,6 +7,7 @@ import AdminRecipeGenerator from "@/components/admin/AdminRecipeGenerator";
 import AdminPermissions from "@/components/admin/AdminPermissions";
 import AdminWebhooks from "@/components/admin/AdminWebhooks";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminNotifications from "@/components/admin/AdminNotifications";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft } from "lucide-react";
@@ -16,6 +17,7 @@ const tabs = [
   { key: "utenti", label: "Utenti", icon: "👥" },
   { key: "ricette", label: "Ricette", icon: "🍽️" },
   { key: "genera", label: "Genera AI", icon: "✨" },
+  { key: "notifiche", label: "Notifiche", icon: "🔔" },
   { key: "permessi", label: "Permessi", icon: "🔐" },
   { key: "webhooks", label: "Webhooks", icon: "📡" },
   { key: "impostazioni", label: "Impostazioni", icon: "⚙️" },
