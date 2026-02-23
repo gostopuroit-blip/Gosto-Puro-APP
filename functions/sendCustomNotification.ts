@@ -3,6 +3,9 @@ import webpush from 'npm:web-push@3.6.7';
 
 Deno.serve(async (req) => {
   try {
+    const body_raw = await req.text();
+    console.log('RAW BODY:', body_raw);
+
     const base44 = createClientFromRequest(req);
 
     let user = null;
@@ -11,7 +14,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { title, body, url } = await req.json();
+    const { title, body, url } = JSON.parse(body_raw);
 
     if (!title || !body) {
       return Response.json({ error: 'title and body are required' }, { status: 400 });
