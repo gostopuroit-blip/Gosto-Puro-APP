@@ -37,10 +37,17 @@ export default function AdminRecipesManager() {
   useEffect(() => { load(); }, []);
 
   const load = async () => {
-    const data = await base44.entities.Recipe.list("-created_date", 200);
+    const [data, occs] = await Promise.all([
+      base44.entities.Recipe.list("-created_date", 200),
+      base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 100),
+    ]);
     setRecipes(data);
+    setOccasions(occs);
     setLoading(false);
   };
+
+  const allOccasions = [...new Set(occasions.filter(o => o.tipo === "giorno" || o.tipo === "speciale").map(o => o.label))];
+  const allLifestyle = [...new Set(occasions.filter(o => o.tipo === "stile_vita").map(o => o.label))];
 
   const openNew = () => { setForm(emptyForm); setEditId(null); setShowForm(true); };
   const openEdit = (r) => {
