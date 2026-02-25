@@ -21,6 +21,7 @@ const emptyForm = {
 
 export default function AdminRecipesManager() {
   const [recipes, setRecipes] = useState([]);
+  const [occasions, setOccasions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("Tutti");
