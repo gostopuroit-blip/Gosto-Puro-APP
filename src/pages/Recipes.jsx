@@ -62,15 +62,19 @@ export default function Recipes() {
       );
     }
 
-    // Tags
+    // Tags — cerca sia in occasions che in lifestyle per coprire entrambi i casi
     if (activeTags.occasion) {
       result = result.filter(
-        (r) => r.occasions && r.occasions.includes(activeTags.occasion)
+        (r) =>
+          (r.occasions && r.occasions.includes(activeTags.occasion)) ||
+          (r.lifestyle && r.lifestyle.includes(activeTags.occasion))
       );
     }
     if (activeTags.lifestyle) {
       result = result.filter(
-        (r) => r.lifestyle && r.lifestyle.includes(activeTags.lifestyle)
+        (r) =>
+          (r.lifestyle && r.lifestyle.includes(activeTags.lifestyle)) ||
+          (r.occasions && r.occasions.includes(activeTags.lifestyle))
       );
     }
 
@@ -108,7 +112,7 @@ export default function Recipes() {
     setCurrentPage(1);
   };
 
-  const isPremium = user?.plan === "premium" || user?.role === "admin";
+  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
   const FREE_LIMIT = 4;
 
   // For free users: only show the 4 newest recipes that existed when they registered
