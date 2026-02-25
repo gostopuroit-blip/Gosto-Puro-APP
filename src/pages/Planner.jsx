@@ -278,28 +278,32 @@ export default function Planner() {
                 return (
                   <div
                     key={meal}
-                    onClick={() => setReplaceTarget({ dayIndex, meal })}
-                    className={`rounded-2xl border-2 cursor-pointer transition-all overflow-hidden ${
-                    replaceTarget?.meal === meal && replaceTarget?.dayIndex === dayIndex ?
-                    "border-[#2D6A4F] bg-[#F0F7F4] dark:bg-[#1A2B20]" :
-                    "border-gray-100 dark:border-[#3D5246] bg-gray-50 dark:bg-[#1A2B20] hover:border-[#2D6A4F]/30"}`
+                    className={`rounded-2xl border-2 transition-all overflow-hidden ${
+                    "border-gray-100 dark:border-[#3D5246] bg-gray-50 dark:bg-[#1A2B20]"}`
                     }>
 
                       {recipe && recipe.image_url &&
-                    <div className="relative h-32 bg-gradient-to-t from-black/40 to-transparent overflow-hidden group">
+                    <Link to={createPageUrl(`RecipeDetail?id=${recipeId}`)} className="block">
+                      <div className="relative h-32 bg-gradient-to-t from-black/40 to-transparent overflow-hidden group">
                           <img
                         src={recipe.image_url}
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-
                         </div>
+                    </Link>
                     }
                       <div className="p-3 flex items-center justify-between">
                         <div className="flex-1">
                           <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{mealLabels[meal]}</p>
-                          <p className={`text-sm font-semibold ${title ? "text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-500"}`}>
-                            {title || "Nessuna ricetta"}
-                          </p>
+                          {recipeId ? (
+                            <Link to={createPageUrl(`RecipeDetail?id=${recipeId}`)}>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white hover:underline">
+                                {title}
+                              </p>
+                            </Link>
+                          ) : (
+                            <p className="text-sm font-semibold text-gray-400 dark:text-gray-500">Nessuna ricetta</p>
+                          )}
                           {recipe && recipe.prep_time &&
                         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
                               <Clock className="w-3 h-3" />
@@ -307,17 +311,26 @@ export default function Planner() {
                             </div>
                         }
                         </div>
-                        {recipe &&
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeMeal(dayIndex, meal);
-                        }}
-                        className="text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition ml-2 flex-shrink-0">
-
+                        <div className="flex flex-col gap-1 ml-2 flex-shrink-0">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReplaceTarget({ dayIndex, meal });
+                            }}
+                            className="text-[#2D6A4F] dark:text-[#40916C] hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition">
+                            <Shuffle className="w-4 h-4" />
+                          </button>
+                          {recipe &&
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeMeal(dayIndex, meal);
+                            }}
+                            className="text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition">
                             <X className="w-4 h-4" />
                           </button>
-                      }
+                          }
+                        </div>
                       </div>
                     </div>);
 
