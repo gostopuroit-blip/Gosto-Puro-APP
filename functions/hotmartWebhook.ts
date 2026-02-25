@@ -17,7 +17,9 @@ Deno.serve(async (req) => {
 
   const eventType = body?.event || body?.data?.event || "unknown";
   const buyerEmail = body?.data?.buyer?.email || body?.buyer?.email || null;
-  const status = body?.data?.purchase?.status || body?.purchase?.status || null;
+  const productId = body?.data?.product?.id || body?.product?.id || null;
+
+  const PREMIUM_PRODUCT_ID = 7079227;
 
   // Log the webhook
   await base44.asServiceRole.entities.WebhookLog.create({
@@ -29,7 +31,11 @@ Deno.serve(async (req) => {
     user_email: buyerEmail || "",
   });
 
-  // Handle purchase approved / subscription active events
+  // Only process events for the Premium product
+  if (String(productId) !== String(PREMIUM_PRODUCT_ID)) {
+    return Response.json({ received: true, skipped: true, reason: "product_not_matched" });
+  }
+
   const approvedEvents = [
     "PURCHASE_APPROVED",
     "PURCHASE_COMPLETE",
@@ -45,7 +51,7 @@ Deno.serve(async (req) => {
 
   if (buyerEmail) {
     if (approvedEvents.includes(eventType)) {
-      // Find user and set role to premium
+      // Find user and set role to premium (lifetime access)
       const users = await base44.asServiceRole.entities.User.filter({ email: buyerEmail });
       if (users.length > 0) {
         await base44.asServiceRole.entities.User.update(users[0].id, { role: "premium" });
