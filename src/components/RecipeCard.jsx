@@ -33,7 +33,9 @@ export default function RecipeCard({ recipe, variant = "default" }) {
             </div>
           )}
           <div className="absolute bottom-0 left-0 right-0 p-3">
-            <h3 className="text-white font-semibold text-sm leading-tight">{recipe.title}</h3>
+            <h3 className="text-white font-semibold text-sm leading-tight">
+              {recipe.paese && countryFlags[recipe.paese] ? `${countryFlags[recipe.paese]} ` : ""}{recipe.title}
+            </h3>
             <div className="flex items-center gap-2 mt-1.5">
               <div className="flex items-center gap-1 text-white/80">
                 <Clock className="w-3 h-3" />
