@@ -233,8 +233,8 @@ export default function Recipes() {
                     <div className="pointer-events-none opacity-30 blur-sm select-none">
                       <RecipeCard recipe={recipe} />
                     </div>
-                    <Link
-                  to={createPageUrl("Profile")} className="bg-black/15 absolute inset-0 flex flex-col items-center justify-center">
+                    <a
+                  href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="bg-black/15 absolute inset-0 flex flex-col items-center justify-center">
 
 
                       <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-2">
@@ -242,7 +242,7 @@ export default function Recipes() {
                       </div>
                       <p className="text-slate-50 mb-1 text-xs font-bold">Ricetta Premium</p>
                       <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl flex items-center gap-1"><Crown className="w-3.5 h-3.5" /> Sblocca Premium</span>
-                    </Link>
+                    </a>
                   </div>
               )}
                 {lockedRecipes.length > 3 &&
