@@ -38,7 +38,7 @@ export default function AdminRecipesManager() {
 
   const load = async () => {
     const [data, occs] = await Promise.all([
-      base44.entities.Recipe.list("-created_date", 200),
+      base44.entities.Recipe.list("-created_date", 1000),
       base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 100),
     ]);
     setRecipes(data);
