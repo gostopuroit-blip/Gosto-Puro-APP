@@ -248,7 +248,7 @@ export default function Recipes() {
                 {lockedRecipes.length > 3 &&
               <div className="text-center py-4">
                     <p className="text-sm text-gray-400 mb-2">+{lockedRecipes.length - 3} ricette disponibili con Premium</p>
-                    <Link to={createPageUrl("Profile")} className="text-amber-500 font-bold text-sm">✨ Sblocca tutto</Link>
+                    <a href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="text-amber-500 font-bold text-sm">✨ Sblocca tutto</a>
                   </div>
               }
               </>
