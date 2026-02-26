@@ -2,6 +2,16 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "../utils";
 import { Clock, Star, Heart, ChefHat, Flame } from "lucide-react";
 
+const countryFlags = {
+  "Giappone": "🇯🇵",
+  "Messico": "🇲🇽",
+  "India": "🇮🇳",
+  "Thailandia": "🇹🇭",
+  "Spagna": "🇪🇸",
+  "Grecia": "🇬🇷",
+  "Stati Uniti": "🇺🇸",
+};
+
 export default function RecipeCard({ recipe, variant = "default" }) {
   if (variant === "compact") {
     return (
