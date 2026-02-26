@@ -356,12 +356,12 @@ export default function Folders() {
                   <img src={recipe.image_url} alt="" className="w-12 h-12 rounded object-cover" />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">{recipe.title}</p>
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2 mt-2 overflow-x-auto hide-scrollbar pb-1">
                       {systemFolders.map((f) => (
                         <button
                           key={f.key}
                           onClick={() => { addRecipeToFolder(recipe, f.key); setShowAddRecipe(false); }}
-                          className="text-xs px-2 py-1 rounded bg-white dark:bg-[#2D3F35] border border-gray-200 dark:border-[#3D5246] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3D5246] transition"
+                          className="flex-shrink-0 text-xs px-2 py-1 rounded bg-white dark:bg-[#2D3F35] border border-gray-200 dark:border-[#3D5246] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3D5246] transition"
                         >
                           {f.label}
                         </button>
@@ -370,9 +370,9 @@ export default function Folders() {
                         <button
                           key={cf.id}
                           onClick={() => { addRecipeToFolder(recipe, cf.id); setShowAddRecipe(false); }}
-                          className="text-xs px-2 py-1 rounded bg-white dark:bg-[#2D3F35] border border-gray-200 dark:border-[#3D5246] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3D5246] transition"
+                          className="flex-shrink-0 text-xs px-2 py-1 rounded bg-white dark:bg-[#2D3F35] border border-gray-200 dark:border-[#3D5246] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3D5246] transition"
                         >
-                          {cf.name}
+                          {cf.icon} {cf.name}
                         </button>
                       ))}
                     </div>
