@@ -20,13 +20,15 @@ export default function PremiumGate({ children, user, feature = "questa funziona
         <p className="text-gray-700 mb-6 text-base font-semibold text-center leading-relaxed dark:text-gray-200">
           Sblocca {feature} con il piano Premium
         </p>
-        <Link
-          to={createPageUrl("Profile")}
+        <a
+          href="https://gostopuro.it"
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
 
           <Crown className="w-4 h-4" />
           Sblocca Premium
-        </Link>
+        </a>
       </div>
     </div>);
 
