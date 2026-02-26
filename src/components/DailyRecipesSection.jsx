@@ -27,7 +27,7 @@ export default function DailyRecipesSection({ occasion, user }) {
     const allRecipes = await base44.entities.Recipe.filter(
       { status: "pubblicata", category: occasion },
       "-created_date",
-      50
+      1000
     );
     setRecipes(allRecipes);
     setActiveFilter("all");
@@ -42,7 +42,7 @@ export default function DailyRecipesSection({ occasion, user }) {
     } else if (activeFilter === "preparate") {
       result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
     }
-    return result.slice(0, 3);
+    return result;
   })();
 
   const checkScroll = () => {
