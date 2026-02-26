@@ -11,7 +11,7 @@ import { createPageUrl } from "@/utils";
 import RecipeCard from "@/components/RecipeCard";
 
 const systemFolders = [
-  { key: "per_fare", label: "Per fare", icon: "📋" },
+  { key: "per_fare", label: "Da fare", icon: "📋" },
   { key: "fatte", label: "Fatte", icon: "✅" },
   { key: "preferite", label: "Preferite", icon: "❤️" },
   { key: "valutate", label: "Più valutate", icon: "⭐" },

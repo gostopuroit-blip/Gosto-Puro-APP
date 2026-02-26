@@ -7,7 +7,7 @@ import { Check, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const systemFolders = [
-  { id: "per_fare", name: "Per fare", icon: "📋" },
+  { id: "per_fare", name: "Da fare", icon: "📋" },
   { id: "preferite", name: "Preferite", icon: "❤️" },
 ];
 
