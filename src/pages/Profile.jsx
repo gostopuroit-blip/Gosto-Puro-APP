@@ -326,6 +326,33 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Install PWA */}
+      {!isInstalled && (
+        <div className="px-5 mt-4">
+          <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#F0F7F4] dark:bg-[#1A2B20] flex items-center justify-center">
+                <Download className="w-5 h-5 text-[#2D6A4F]" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">Installa App</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Aggiungi alla schermata Home</p>
+              </div>
+            </div>
+            {installPrompt ? (
+              <button
+                onClick={handleInstallPWA}
+                className="bg-[#2D6A4F] text-white text-[13px] font-bold px-4 py-2 rounded-xl"
+              >
+                Installa
+              </button>
+            ) : (
+              <p className="text-[11px] text-gray-400 text-right max-w-[100px]">Usa "Aggiungi a Home" dal browser</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Appearance */}
       <div className="px-5 mt-4">
         <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
