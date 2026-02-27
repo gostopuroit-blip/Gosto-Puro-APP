@@ -18,7 +18,9 @@ REGOLE SPECIFICHE PER PRANZO ITALIANO:
 const CENA_EXTRA = `
 REGOLE SPECIFICHE PER CENA ITALIANA:
 - La cena deve essere più leggera rispetto al pranzo: NO lasagne pesanti, NO fritti, NO piatti eccessivamente grassi
-- Preferire: verdure, proteine leggere (pesce, uova, pollo), zuppe, minestre, frittate
+- VARIETÀ OBBLIGATORIA: ruota tra categorie diverse ogni sera: un giorno pesce, un altro pollo, un altro verdure, un altro legumi, un altro uova (frittata SOLO occasionalmente, non più di 1 volta su 10)
+- Evita assolutamente di ripetere la stessa tipologia di piatto due volte consecutive
+- Esempi di variety: salmone al forno, petto di pollo con verdure, minestrone, pasta e fagioli, merluzzo al pomodoro, scaloppine al limone, zuppa di lenticchie, branzino al cartoccio, tofu marinato
 - Preparazione semplice e veloce: idealmente 20–30 minuti, al massimo 40 minuti
 - Porzione moderata: l'italiano non vuole appesantirsi la sera
 - Piatto digeribile, ingredienti stagionali e facilmente reperibili
