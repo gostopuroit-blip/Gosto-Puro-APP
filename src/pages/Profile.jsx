@@ -21,6 +21,8 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) {
