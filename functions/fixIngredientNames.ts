@@ -1,93 +1,62 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-// Common wrong ingredient names → correct Italian
+// Wrong ingredient names → correct Italian name
 const CORRECTIONS = {
-  // "sale" (salt) wrongly translated
   "vendita": "sale",
   "sell": "sale",
   "salt": "sale",
   "venta": "sale",
   "salita": "sale",
-  "saldo": "sale",
-  "salato": "sale",
-  // "zucchero" (sugar) wrongly translated
   "asino": "zucchero",
   "sugar": "zucchero",
-  "azúcar": "zucchero",
-  "sucre": "zucchero",
   "açúcar": "zucchero",
-  // "burro" (butter)
+  "azúcar": "zucchero",
   "butter": "burro",
-  // "farina" (flour)
   "flour": "farina",
-  // "uova" / "uovo" (eggs)
   "eggs": "uova",
   "egg": "uovo",
-  // "latte" (milk)
   "milk": "latte",
-  // "olio" (oil)
   "oil": "olio",
-  // "panna" (cream)
   "cream": "panna",
-  // "acqua" (water)
   "water": "acqua",
-  // "pepe" (pepper)
   "pepper": "pepe",
-  // "aglio" (garlic)
   "garlic": "aglio",
-  // "cipolla" (onion)
   "onion": "cipolla",
-  // "pomodoro" (tomato)
   "tomato": "pomodoro",
-  // other common wrong words
-  "asinine": "zucchero",
-  "donkey": "zucchero",
+  "tomatoes": "pomodori",
 };
 
 function fixIngredient(name) {
   if (!name) return name;
   const lower = name.trim().toLowerCase();
-  if (CORRECTIONS[lower]) {
-    // Preserve original capitalization if first letter was uppercase
-    const corrected = CORRECTIONS[lower];
-    if (name[0] === name[0].toUpperCase() && name[0] !== name[0].toLowerCase()) {
-      return corrected.charAt(0).toUpperCase() + corrected.slice(1);
-    }
-    return corrected;
-  }
-  return name;
-}
-
-function needsFixing(name) {
-  if (!name) return false;
-  return !!CORRECTIONS[name.trim().toLowerCase()];
+  return CORRECTIONS[lower] || name;
 }
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-
     const user = await base44.auth.me();
     if (user?.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Load all recipes
-    const recipes = await base44.asServiceRole.entities.Recipe.list("-created_date", 1000);
+    const wrongWords = Object.keys(CORRECTIONS);
+    let fixedRecipes = [];
+    let totalFixed = 0;
 
-    let fixedCount = 0;
-    let checkedCount = 0;
+    // Load all recipes in batches
+    const recipes = await base44.asServiceRole.entities.Recipe.list("-created_date", 1000);
 
     for (const recipe of recipes) {
       if (!recipe.ingredients || recipe.ingredients.length === 0) continue;
-      checkedCount++;
 
       let hasChange = false;
       const fixedIngredients = recipe.ingredients.map(ing => {
-        const corrected = fixIngredient(ing.name);
-        if (corrected !== ing.name) {
+        if (!ing.name) return ing;
+        const lower = ing.name.trim().toLowerCase();
+        if (wrongWords.includes(lower)) {
           hasChange = true;
-          return { ...ing, name: corrected };
+          return { ...ing, name: CORRECTIONS[lower] };
         }
         return ing;
       });
@@ -96,15 +65,16 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.Recipe.update(recipe.id, {
           ingredients: fixedIngredients,
         });
-        fixedCount++;
+        fixedRecipes.push({ id: recipe.id, title: recipe.title });
+        totalFixed++;
       }
     }
 
     return Response.json({
       success: true,
-      checked: checkedCount,
-      fixed: fixedCount,
-      message: `Corrette ${fixedCount} ricette su ${checkedCount} controllate.`,
+      total_recipes_checked: recipes.length,
+      recipes_fixed: totalFixed,
+      fixed_list: fixedRecipes,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
