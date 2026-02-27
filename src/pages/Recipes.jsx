@@ -113,15 +113,11 @@ export default function Recipes() {
   };
 
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
-  const FREE_LIMIT = 12;
 
-  // For free users: show 12 recipes, rest locked
+  // All users see all recipes in the Ricette tab
   const { freeRecipes, lockedRecipes } = useMemo(() => {
-    if (isPremium) return { freeRecipes: filteredRecipes, lockedRecipes: [] };
-    const freeOnes = filteredRecipes.slice(0, FREE_LIMIT);
-    const lockedOnes = filteredRecipes.slice(FREE_LIMIT);
-    return { freeRecipes: freeOnes, lockedRecipes: lockedOnes };
-  }, [filteredRecipes, isPremium, user]);
+    return { freeRecipes: filteredRecipes, lockedRecipes: [] };
+  }, [filteredRecipes]);
 
   const visibleRecipes = freeRecipes;
 
