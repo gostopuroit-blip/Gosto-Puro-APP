@@ -46,13 +46,12 @@ function getExtra(categoria) {
 function buildRecipePrompt(occ, existingTitles) {
   const guidelines = (occ.linee_guida || []).join("\n- ");
   const extra = getExtra(occ.categoria_principale || occ.label.toLowerCase());
-  // Use only the last 200 titles to keep the prompt focused
   const recentTitles = existingTitles.slice(0, 200);
   const titlesBlock = recentTitles.length > 0
     ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI, NÉ PIATTI DELLO STESSO TIPO):\n${recentTitles.map(t => `- ${t}`).join("\n")}\n`
     : "";
 
-  return `Sei uno chef esperto di cucina italiana.
+  return `Sei uno chef esperto di cucina italiana. Scrivi come un italiano, non come un traduttore automatico.
 
 Crea una ricetta autentica italiana per questa occasione.
 ${titlesBlock}
@@ -73,13 +72,35 @@ ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 La ricetta deve essere autentica, realistica e coerente con l'occasione italiana.
 IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
 
-REGOLA CRITICA SUGLI INGREDIENTI:
-- Tutti i nomi degli ingredienti DEVONO essere in italiano corretto e reale.
-- NON usare mai parole sbagliate o non alimentari come nomi di ingredienti.
-- Esempi corretti: "sale", "zucchero", "farina", "burro", "uova", "olio", "latte", "panna", "acqua".
-- Se l'ingrediente è sale → scrivi SEMPRE "sale" (mai "vendita", "sell", "salt" o altre parole).
-- Se l'ingrediente è zucchero → scrivi SEMPRE "zucchero" (mai "asino", "sugar" o altre parole).
-- Controlla ogni ingrediente: deve essere un alimento reale con il nome italiano corretto.
+═══════════════════════════════════════
+REGOLE ASSOLUTE SUGLI INGREDIENTI — NON DEROGABILI
+═══════════════════════════════════════
+1. Tutti i nomi degli ingredienti DEVONO essere in italiano corretto e reale.
+2. MAI usare parole in inglese, spagnolo, portoghese o altre lingue.
+3. MAI usare parole non alimentari (es: "vendita", "asino", "oggetti", ecc.)
+4. DIZIONARIO OBBLIGATORIO — usa SEMPRE questi nomi esatti:
+   - sale (MAI: vendita, sell, salt, salita, venta)
+   - zucchero (MAI: asino, sugar, açúcar, azúcar)
+   - zucchero di canna (MAI: brown sugar)
+   - farina 00 o farina integrale (MAI: flour)
+   - burro (MAI: butter)
+   - uova / uovo (MAI: eggs/egg)
+   - latte (MAI: milk)
+   - olio extravergine di oliva (MAI: oil, olive oil)
+   - panna (MAI: cream)
+   - acqua (MAI: water)
+   - pepe (MAI: pepper)
+   - aglio (MAI: garlic)
+   - cipolla (MAI: onion)
+   - pomodori / pomodoro (MAI: tomato/tomatoes)
+   - basilico, rosmarino, timo, origano, prezzemolo (erbe aromatiche)
+   - parmigiano reggiano, mozzarella, ricotta, pecorino (formaggi)
+   - prosciutto crudo, prosciutto cotto, pancetta, speck (salumi)
+   - noci, mandorle, nocciole, pistacchi (frutta secca)
+   - miele, marmellata, confettura (dolcificanti naturali)
+5. Prima di inserire un ingrediente, verificare: "È un alimento reale? Il nome è in italiano?"
+   Se no → correggerlo immediatamente.
+═══════════════════════════════════════
 
 Rispondi SOLO in formato JSON con questa struttura:
 {
