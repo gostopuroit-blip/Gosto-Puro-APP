@@ -46,8 +46,10 @@ function getExtra(categoria) {
 function buildRecipePrompt(occ, existingTitles) {
   const guidelines = (occ.linee_guida || []).join("\n- ");
   const extra = getExtra(occ.categoria_principale || occ.label.toLowerCase());
-  const titlesBlock = existingTitles.length > 0
-    ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI):\n${existingTitles.map(t => `- ${t}`).join("\n")}\n`
+  // Use only the last 200 titles to keep the prompt focused
+  const recentTitles = existingTitles.slice(0, 200);
+  const titlesBlock = recentTitles.length > 0
+    ? `\nRICETTE GIÀ ESISTENTI (NON RIPETERE MAI QUESTI TITOLI, NÉ VARIANTI SIMILI, NÉ PIATTI DELLO STESSO TIPO):\n${recentTitles.map(t => `- ${t}`).join("\n")}\n`
     : "";
 
   return `Sei uno chef esperto di cucina italiana.
