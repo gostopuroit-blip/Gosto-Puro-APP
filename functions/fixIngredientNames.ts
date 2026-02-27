@@ -47,8 +47,20 @@ const CORRECTIONS = {
 function fixIngredient(name) {
   if (!name) return name;
   const lower = name.trim().toLowerCase();
-  if (CORRECTIONS[lower]) return CORRECTIONS[lower];
+  if (CORRECTIONS[lower]) {
+    // Preserve original capitalization if first letter was uppercase
+    const corrected = CORRECTIONS[lower];
+    if (name[0] === name[0].toUpperCase() && name[0] !== name[0].toLowerCase()) {
+      return corrected.charAt(0).toUpperCase() + corrected.slice(1);
+    }
+    return corrected;
+  }
   return name;
+}
+
+function needsFixing(name) {
+  if (!name) return false;
+  return !!CORRECTIONS[name.trim().toLowerCase()];
 }
 
 Deno.serve(async (req) => {
