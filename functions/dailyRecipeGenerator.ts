@@ -73,6 +73,14 @@ ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 La ricetta deve essere autentica, realistica e coerente con l'occasione italiana.
 IMPORTANTE: La ricetta generata deve essere completamente diversa da tutte quelle nell'elenco sopra.
 
+REGOLA CRITICA SUGLI INGREDIENTI:
+- Tutti i nomi degli ingredienti DEVONO essere in italiano corretto e reale.
+- NON usare mai parole sbagliate o non alimentari come nomi di ingredienti.
+- Esempi corretti: "sale", "zucchero", "farina", "burro", "uova", "olio", "latte", "panna", "acqua".
+- Se l'ingrediente è sale → scrivi SEMPRE "sale" (mai "vendita", "sell", "salt" o altre parole).
+- Se l'ingrediente è zucchero → scrivi SEMPRE "zucchero" (mai "asino", "sugar" o altre parole).
+- Controlla ogni ingrediente: deve essere un alimento reale con il nome italiano corretto.
+
 Rispondi SOLO in formato JSON con questa struttura:
 {
   "title": "Nome ricetta",
