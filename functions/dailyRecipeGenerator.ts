@@ -137,8 +137,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No giorno occasions found' }, { status: 404 });
     }
 
-    // Load existing titles to avoid duplicates
-    const existingRecipes = await base44.asServiceRole.entities.Recipe.list("-created_date", 500);
+    // Load existing titles to avoid duplicates (prioritize recent ones)
+    const existingRecipes = await base44.asServiceRole.entities.Recipe.list("-created_date", 1000);
     const existingTitles = existingRecipes.map(r => r.title);
 
     const results = [];
