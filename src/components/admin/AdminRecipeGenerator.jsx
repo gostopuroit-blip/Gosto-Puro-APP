@@ -440,6 +440,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
       },
     });
     setRecipe(result);
+    setEditedCalories(result?.calories?.toString() || "");
     setGenerating(false);
     toast.success("Ricetta generata! Controlla e poi genera l'immagine.");
   };
