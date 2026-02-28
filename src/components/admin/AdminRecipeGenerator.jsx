@@ -463,6 +463,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     setSaving(true);
     const data = {
       ...recipe,
+      calories: editedCalories ? Number(editedCalories) : recipe.calories,
       image_url: imageUrl || "",
       status: "pubblicata",
       gen_prompt: buildRecipePrompt(selectedOcc, selectedCountry),
