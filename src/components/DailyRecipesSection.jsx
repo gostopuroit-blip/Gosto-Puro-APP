@@ -27,7 +27,7 @@ export default function DailyRecipesSection({ occasion, user }) {
     const allRecipes = await base44.entities.Recipe.filter(
       { status: "pubblicata", category: occasion },
       "-created_date",
-      1000
+      3
     );
     setRecipes(allRecipes);
     setActiveFilter("all");
