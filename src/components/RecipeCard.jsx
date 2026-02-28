@@ -23,6 +23,8 @@ export default function RecipeCard({ recipe, variant = "default" }) {
           <img
             src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
             alt={recipe.title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -68,6 +70,8 @@ export default function RecipeCard({ recipe, variant = "default" }) {
           <img
             src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800"}
             alt={recipe.title}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
           {recipe.media_rating > 0 && recipe.rating_count > 0 && (
