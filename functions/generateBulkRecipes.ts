@@ -125,6 +125,32 @@ REGOLE ASSOLUTE SUGLI INGREDIENTI — NON DEROGABILI
    Se no → correggerlo immediatamente.
 ═══════════════════════════════════════
 
+═══════════════════════════════════════
+CALCOLO CALORIE OBBLIGATORIO — NON DEROGABILE
+═══════════════════════════════════════
+1. Calcola le calorie di OGNI ingrediente usando valori medi reali:
+   - Uova: 70 kcal per uovo
+   - Olio extravergine di oliva: 9 kcal per grammo (≈ 90 kcal per 10 ml)
+   - Burro: 720 kcal per 100g
+   - Farina 00: 360 kcal per 100g
+   - Zucchero: 400 kcal per 100g
+   - Latte intero: 64 kcal per 100ml
+   - Panna: 300 kcal per 100ml
+   - Prosciutto crudo: 250 kcal per 100g
+   - Formaggi stagionati (parmigiano, pecorino): 380 kcal per 100g
+   - Mozzarella: 250 kcal per 100g
+   - Pane / pasta / riso cotti: 130–160 kcal per 100g
+   - Pasta / riso crudi: 350 kcal per 100g
+   - Carne (pollo, manzo): 150–200 kcal per 100g
+   - Pesce: 100–180 kcal per 100g
+   - Verdure: 20–50 kcal per 100g
+2. Somma tutte le calorie di tutti gli ingredienti.
+3. Dividi per il numero di porzioni.
+4. NON stimare. NON arrotondare per difetto. NON ignorare olio, burro o formaggi.
+5. Se il valore calcolato appare troppo basso (es: meno di 250 kcal per un piatto principale), RICALCOLARE.
+6. È vietato generare calorie basate su stime generiche o approssimative.
+═══════════════════════════════════════
+
 Rispondi SOLO in formato JSON:
 {
   "title": "Nome ricetta",
