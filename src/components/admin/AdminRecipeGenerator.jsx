@@ -279,6 +279,33 @@ ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
 IMPORTANTE: La ricetta generata deve essere COMPLETAMENTE DIVERSA da tutte quelle nell'elenco sopra — non solo nel nome, ma nel tipo di piatto, negli ingredienti principali e nella tecnica di cottura. Se l'elenco ha già molte paste, fai qualcosa di diverso. Se ha già molto pollo, evitalo. Sii creativo e varia.
 
+═══════════════════════════════════════
+CALCOLO CALORIE OBBLIGATORIO — NON DEROGABILE
+═══════════════════════════════════════
+Devi calcolare le calorie per OGNI ingrediente usando valori medi reali, sommarlo e dividere per le porzioni.
+Valori di riferimento OBBLIGATORI:
+- Uova: 70 kcal per uovo
+- Olio extravergine di oliva: 9 kcal per grammo (≈ 90 kcal per 10ml / ≈ 135 kcal per 15ml)
+- Burro: 720 kcal per 100g
+- Farina 00: 360 kcal per 100g
+- Zucchero: 400 kcal per 100g
+- Latte intero: 64 kcal per 100ml
+- Panna: 300 kcal per 100ml
+- Prosciutto crudo: 250 kcal per 100g
+- Formaggi stagionati (parmigiano, pecorino): 380 kcal per 100g
+- Mozzarella: 250 kcal per 100g
+- Pasta/riso crudi: 350 kcal per 100g
+- Pane: 250 kcal per 100g
+- Carne (pollo, manzo): 150–200 kcal per 100g
+- Pesce: 100–180 kcal per 100g
+- Verdure: 20–50 kcal per 100g
+REGOLE:
+1. NON ignorare l'olio, il burro o i formaggi nel calcolo.
+2. NON usare stime generiche o valori medi del piatto.
+3. Se il totale appare troppo basso per un piatto principale (< 300 kcal a porzione), RICALCOLARE.
+4. Somma ingrediente per ingrediente, poi dividi per ${servings} porzioni.
+═══════════════════════════════════════
+
 Rispondi SOLO in formato JSON con questa struttura:
 {
   "title": "Nome ricetta",
