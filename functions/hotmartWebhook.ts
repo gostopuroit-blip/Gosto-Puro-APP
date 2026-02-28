@@ -42,8 +42,18 @@ Deno.serve(async (req) => {
   }
 
   const users = await base44.asServiceRole.entities.User.filter({ email: buyerEmail });
+  
+  // If user doesn't exist yet, save as pending premium so it's applied when they register
   if (users.length === 0) {
-    return Response.json({ received: true, skipped: true, reason: "user_not_found" });
+    const pendingData = {
+      email: buyerEmail,
+      product_id: productId,
+      event_type: eventType,
+      raw_payload: JSON.stringify(body),
+      status: "pending",
+    };
+    await base44.asServiceRole.entities.PendingPremium.create(pendingData);
+    return Response.json({ received: true, queued: true, reason: "user_not_found_yet", email: buyerEmail });
   }
 
   const userId = users[0].id;
