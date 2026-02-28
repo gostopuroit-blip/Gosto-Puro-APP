@@ -128,6 +128,7 @@ export default function AdminRecipeGenerator() {
 
   // generated
   const [recipe, setRecipe] = useState(null);
+  const [editedCalories, setEditedCalories] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
