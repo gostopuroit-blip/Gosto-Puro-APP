@@ -608,7 +608,15 @@ Difficoltà valide: Facile, Media, Difficile.`;
               <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-lg">{recipe.difficulty}</span>
               <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-lg">{recipe.prep_time} min</span>
               <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-lg">{recipe.servings} porzioni</span>
-              {recipe.calories && <span className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-lg">{recipe.calories} kcal</span>}
+              <span className="flex items-center gap-1 text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded-lg font-semibold">
+                <input
+                  type="number"
+                  value={editedCalories}
+                  onChange={e => setEditedCalories(e.target.value)}
+                  className="w-14 bg-transparent text-orange-700 font-semibold outline-none text-xs"
+                />
+                kcal
+              </span>
             </div>
           </div>
 
