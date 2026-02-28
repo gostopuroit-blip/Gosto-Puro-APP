@@ -461,23 +461,35 @@ Difficoltà valide: Facile, Media, Difficile.`;
       return toast.error("Seleziona il paese per Cucina Internazionale");
     }
     setSaving(true);
-    const data = {
-      ...recipe,
-      calories: editedCalories ? Number(editedCalories) : recipe.calories,
-      image_url: imageUrl || "",
-      status: "pubblicata",
-      gen_prompt: buildRecipePrompt(selectedOcc, selectedCountry),
-      numero_salvate: 0,
-      numero_preparate: 0,
-      ...(isInternational && { paese: selectedCountry }),
-    };
-    await base44.entities.Recipe.create(data);
-    setSaving(false);
-    toast.success("Ricetta pubblicata!");
-    setRecipe(null);
-    setImageUrl("");
-    setExtraNote("");
-    setSelectedCountry(null);
+    try {
+      const data = {
+        title: recipe.title,
+        description: recipe.description,
+        category: recipe.category,
+        prep_time: recipe.prep_time,
+        servings: recipe.servings,
+        difficulty: recipe.difficulty,
+        occasions: recipe.occasions,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        calories: editedCalories ? Number(editedCalories) : recipe.calories,
+        image_url: imageUrl || "",
+        status: "pubblicata",
+        numero_salvate: 0,
+        numero_preparate: 0,
+        ...(isInternational && selectedCountry ? { paese: selectedCountry } : {}),
+      };
+      await base44.entities.Recipe.create(data);
+      toast.success("Ricetta pubblicata!");
+      setRecipe(null);
+      setImageUrl("");
+      setExtraNote("");
+      setSelectedCountry(null);
+    } catch (err) {
+      toast.error("Errore nel salvataggio: " + (err?.message || "riprova"));
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loadingOcc) return <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 text-[#2D6A4F] animate-spin" /></div>;
