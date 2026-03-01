@@ -66,15 +66,15 @@ export default function Recipes() {
     if (activeTags.occasion) {
       result = result.filter(
         (r) =>
-          (r.occasions && r.occasions.includes(activeTags.occasion)) ||
-          (r.lifestyle && r.lifestyle.includes(activeTags.occasion))
+        r.occasions && r.occasions.includes(activeTags.occasion) ||
+        r.lifestyle && r.lifestyle.includes(activeTags.occasion)
       );
     }
     if (activeTags.lifestyle) {
       result = result.filter(
         (r) =>
-          (r.lifestyle && r.lifestyle.includes(activeTags.lifestyle)) ||
-          (r.occasions && r.occasions.includes(activeTags.lifestyle))
+        r.lifestyle && r.lifestyle.includes(activeTags.lifestyle) ||
+        r.occasions && r.occasions.includes(activeTags.lifestyle)
       );
     }
 
@@ -230,10 +230,10 @@ export default function Recipes() {
            </div> :
           <>
              {paginatedRecipes.map((recipe) => {
-               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
-               if (isLocked) {
-                 return (
-                   <a key={recipe.id} href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">
+              const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
+              if (isLocked) {
+                return (
+                  <a key={recipe.id} href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">
                      <div className="pointer-events-none select-none blur-[2px] opacity-40">
                        <RecipeCard recipe={recipe} />
                      </div>
@@ -241,16 +241,16 @@ export default function Recipes() {
                        <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center">
                          <Lock className="w-5 h-5 text-amber-500" />
                        </div>
-                       <p className="text-white text-xs font-bold drop-shadow">Ricetta Premium</p>
+                       <p className="text-slate-950 text-xs font-bold drop-shadow">Ricetta Premium</p>
                        <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl flex items-center gap-1">
                          <Crown className="w-3.5 h-3.5" /> Sblocca Premium
                        </span>
                      </div>
-                   </a>
-                 );
-               }
-               return <RecipeCard key={recipe.id} recipe={recipe} />;
-             })}
+                   </a>);
+
+              }
+              return <RecipeCard key={recipe.id} recipe={recipe} />;
+            })}
            </>
           }
        </div>
