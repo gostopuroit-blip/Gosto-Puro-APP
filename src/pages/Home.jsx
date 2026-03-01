@@ -189,9 +189,6 @@ export default function Home() {
       </div>
 
       {/* Top Prepared — carousel with dots */}
-      {(() => {
-        const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
-        return (
       <div className="mt-8">
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
