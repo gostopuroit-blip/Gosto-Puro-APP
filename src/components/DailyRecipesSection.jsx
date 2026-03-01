@@ -3,7 +3,9 @@ import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lock, Crown } from "lucide-react";
+
+const FREE_LIMIT = 4;
 
 const filters = [
   { key: "all", label: "Tutte" },
