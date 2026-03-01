@@ -187,6 +187,9 @@ export default function Home() {
       </div>
 
       {/* Top Prepared — carousel with dots */}
+      {(() => {
+        const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
+        return (
       <div className="mt-8">
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
@@ -200,9 +203,34 @@ export default function Home() {
                 setCarouselIndex(idx);
               }}>
 
-            {topRecipes.map((recipe) =>
-              <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />
-              )}
+            {topRecipes.map((recipe, index) => {
+              const isLocked = !isPremium && index >= FREE_LIMIT;
+              if (isLocked) {
+                return (
+                  <a key={recipe.id} href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
+                    <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-100">
+                      <img
+                        src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                        alt={recipe.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover blur-sm opacity-40"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                        <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
+                          <Lock className="w-4 h-4 text-amber-500" />
+                        </div>
+                        <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+                          <Crown className="w-3 h-3" /> Premium
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-[13px] font-semibold text-gray-400 mt-2 line-clamp-2 blur-[2px] select-none">{recipe.title}</p>
+                  </a>
+                );
+              }
+              return <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />;
+            })}
           </div>
           {/* Dots */}
           {topRecipes.length > 0 &&
