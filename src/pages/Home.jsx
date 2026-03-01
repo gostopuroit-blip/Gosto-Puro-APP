@@ -112,6 +112,8 @@ export default function Home() {
     return "Buonasera";
   };
 
+  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
