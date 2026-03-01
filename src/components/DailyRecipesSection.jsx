@@ -104,25 +104,55 @@ export default function DailyRecipesSection({ occasion, user }) {
           ref={carouselRef}
           className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 scroll-smooth"
         >
-          {filteredRecipes.map((recipe) => (
-            <div key={recipe.id} className="flex-shrink-0 w-[200px]">
-              <Link to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}>
-                <div className="overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-[#2D3F35] mb-2 cursor-pointer hover:opacity-85 transition-opacity">
-                  <img
-                    src={recipe.image_url || "https://via.placeholder.com/200"}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <p className="text-[13px] font-bold text-gray-900 dark:text-white line-clamp-2 hover:text-[#2D6A4F] transition-colors">
-                  {recipe.title}
-                </p>
-                <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">
-                  ⏱ {recipe.prep_time}min • {recipe.difficulty || "Media"}
-                </p>
-              </Link>
-            </div>
-          ))}
+          {filteredRecipes.map((recipe, index) => {
+            const isLocked = !isPremium && index >= FREE_LIMIT;
+            return (
+              <div key={recipe.id} className="flex-shrink-0 w-[200px]">
+                {isLocked ? (
+                  <a href="https://gostopuro.it" target="_blank" rel="noopener noreferrer">
+                    <div className="relative overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-[#2D3F35] mb-2">
+                      <img
+                        src={recipe.image_url || "https://via.placeholder.com/200"}
+                        alt={recipe.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover blur-sm opacity-40"
+                      />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                        <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
+                          <Lock className="w-4 h-4 text-amber-500" />
+                        </div>
+                        <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+                          <Crown className="w-3 h-3" /> Premium
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-[13px] font-bold text-gray-400 dark:text-gray-600 line-clamp-2 blur-[2px] select-none">
+                      {recipe.title}
+                    </p>
+                  </a>
+                ) : (
+                  <Link to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}>
+                    <div className="overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-[#2D3F35] mb-2 cursor-pointer hover:opacity-85 transition-opacity">
+                      <img
+                        src={recipe.image_url || "https://via.placeholder.com/200"}
+                        alt={recipe.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="text-[13px] font-bold text-gray-900 dark:text-white line-clamp-2 hover:text-[#2D6A4F] transition-colors">
+                      {recipe.title}
+                    </p>
+                    <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">
+                      ⏱ {recipe.prep_time}min • {recipe.difficulty || "Media"}
+                    </p>
+                  </Link>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Scroll Buttons */}
