@@ -116,18 +116,21 @@ export default function Recipes() {
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   // Build a set of unlocked recipe IDs for free users:
-  // The 4 most recent recipes per category (ordered by created_date desc, already sorted from API)
+  // The 4 most recent recipes per occasion (Colazione/Pranzo/Cena) or category if no occasion.
+  // recipes are sorted -created_date from API (most recent first = unlocked)
   const unlockedIds = useMemo(() => {
     if (isPremium) return null; // null = all unlocked
-    const countPerCategory = {};
+    const countPerGroup = {};
     const ids = new Set();
-    // recipes are sorted -created_date from API
     for (const r of recipes) {
-      const cat = r.category || "Altro";
-      if (!countPerCategory[cat]) countPerCategory[cat] = 0;
-      if (countPerCategory[cat] < FREE_LIMIT_PER_CATEGORY) {
+      // Use main meal occasion as group key if present, otherwise fall back to category
+      const mainOccasions = ["Colazione", "Pranzo", "Cena"];
+      const occasionKey = (r.occasions || []).find((o) => mainOccasions.includes(o));
+      const group = occasionKey || r.category || "Altro";
+      if (!countPerGroup[group]) countPerGroup[group] = 0;
+      if (countPerGroup[group] < FREE_LIMIT_PER_CATEGORY) {
         ids.add(r.id);
-        countPerCategory[cat]++;
+        countPerGroup[group]++;
       }
     }
     return ids;
