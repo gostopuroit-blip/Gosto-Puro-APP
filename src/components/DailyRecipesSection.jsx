@@ -15,6 +15,7 @@ const filters = [
 ];
 
 export default function DailyRecipesSection({ occasion, user }) {
+  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
   const [recipes, setRecipes] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const carouselRef = useRef(null);
