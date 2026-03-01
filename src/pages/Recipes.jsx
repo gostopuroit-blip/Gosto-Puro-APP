@@ -112,22 +112,34 @@ export default function Recipes() {
     setCurrentPage(1);
   };
 
+  const FREE_LIMIT_PER_CATEGORY = 4;
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
-  // All users see all recipes in the Ricette tab
-  const { freeRecipes, lockedRecipes } = useMemo(() => {
-    return { freeRecipes: filteredRecipes, lockedRecipes: [] };
-  }, [filteredRecipes]);
-
-  const visibleRecipes = freeRecipes;
+  // Build a set of unlocked recipe IDs for free users:
+  // The 4 most recent recipes per category (ordered by created_date desc, already sorted from API)
+  const unlockedIds = useMemo(() => {
+    if (isPremium) return null; // null = all unlocked
+    const countPerCategory = {};
+    const ids = new Set();
+    // recipes are sorted -created_date from API
+    for (const r of recipes) {
+      const cat = r.category || "Altro";
+      if (!countPerCategory[cat]) countPerCategory[cat] = 0;
+      if (countPerCategory[cat] < FREE_LIMIT_PER_CATEGORY) {
+        ids.add(r.id);
+        countPerCategory[cat]++;
+      }
+    }
+    return ids;
+  }, [recipes, isPremium]);
 
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIdx = startIdx + ITEMS_PER_PAGE;
-    return visibleRecipes.slice(startIdx, endIdx);
-  }, [visibleRecipes, currentPage]);
+    return filteredRecipes.slice(startIdx, endIdx);
+  }, [filteredRecipes, currentPage]);
 
-  const totalPages = Math.ceil(visibleRecipes.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
