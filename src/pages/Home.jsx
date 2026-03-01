@@ -42,10 +42,12 @@ export default function Home() {
   const [userPhoto, setUserPhoto] = useState("");
   const [userPlan, setUserPlan] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [user, setUser] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef(null);
   const cardWidth = 176 + 12;
   const [dailyNotif, setDailyNotif] = useState(null);
+  const FREE_LIMIT = 4;
 
   useEffect(() => {
     loadData();
