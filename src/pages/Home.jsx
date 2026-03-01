@@ -215,12 +215,13 @@ export default function Home() {
                         decoding="async"
                         className="w-full h-full object-cover blur-sm opacity-40"
                       />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                        <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+                        <div className="w-9 h-9 bg-white/90 rounded-xl flex items-center justify-center shadow">
                           <Lock className="w-4 h-4 text-amber-500" />
                         </div>
-                        <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">
-                          <Crown className="w-3 h-3" /> Premium
+                        <span className="text-white text-[11px] font-bold drop-shadow-md">Ricetta Premium</span>
+                        <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow">
+                          <Crown className="w-3 h-3" /> Sblocca Premium
                         </span>
                       </div>
                     </div>
