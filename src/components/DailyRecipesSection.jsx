@@ -29,7 +29,7 @@ export default function DailyRecipesSection({ occasion, user }) {
     const allRecipes = await base44.entities.Recipe.filter(
       { status: "pubblicata", category: occasion },
       "-created_date",
-      3
+      50
     );
     setRecipes(allRecipes);
     setActiveFilter("all");
