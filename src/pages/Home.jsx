@@ -253,6 +253,8 @@ export default function Home() {
             }
         </div>
       </div>
+        );
+      })()}
 
       {/* Special Occasions — carousel */}
       <div className="mt-8 px-5">
