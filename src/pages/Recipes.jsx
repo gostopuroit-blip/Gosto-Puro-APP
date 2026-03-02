@@ -106,6 +106,11 @@ export default function Recipes() {
   const goToPage = (page) => {
     const params = new URLSearchParams(location.search);
     params.set("page", page);
+    if (search.trim()) {
+      params.set("search", search.trim());
+    } else {
+      params.delete("search");
+    }
     navigate({ search: params.toString() }, { replace: true });
   };
 
