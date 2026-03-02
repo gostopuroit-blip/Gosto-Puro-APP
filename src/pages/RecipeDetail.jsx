@@ -7,7 +7,7 @@ const countryFlags = {
   "Libano": "🇱🇧", "Perù": "🇵🇪", "Vietnam": "🇻🇳",
 };
 import { base44 } from "@/api/base44Client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
   ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Flame, Check, Minus, Plus
