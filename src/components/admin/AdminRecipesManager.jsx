@@ -324,6 +324,25 @@ export default function AdminRecipesManager() {
               </div>
             </div>
 
+            {/* Country / Paese */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Paese (per bandiera 🌍)</label>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                <button type="button"
+                  onClick={() => setForm((f) => ({ ...f, paese: "" }))}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${!form.paese ? "bg-[#2D6A4F] text-white border-[#2D6A4F]" : "border-gray-100 text-gray-500 bg-white"}`}>
+                  Nessuno
+                </button>
+                {countries.map((c) => (
+                  <button key={c.label} type="button"
+                    onClick={() => setForm((f) => ({ ...f, paese: c.label }))}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${form.paese === c.label ? "bg-[#2D6A4F] text-white border-[#2D6A4F]" : "border-gray-100 text-gray-500 bg-white"}`}>
+                    {c.flag} {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Lifestyle */}
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Stile di vita</label>
