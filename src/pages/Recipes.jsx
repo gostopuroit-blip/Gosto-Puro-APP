@@ -32,8 +32,10 @@ export default function Recipes() {
     const occ = params.get("occasion");
     const life = params.get("lifestyle");
     const page = parseInt(params.get("page") || "1", 10);
+    const q = params.get("search") || "";
     setActiveTags({ occasion: occ || null, lifestyle: life || null });
     setCurrentPage(page);
+    setSearch(q);
   }, [location.search]);
 
   useEffect(() => {
