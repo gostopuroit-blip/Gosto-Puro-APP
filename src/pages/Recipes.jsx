@@ -17,6 +17,7 @@ const filters = [
 
 export default function Recipes() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
