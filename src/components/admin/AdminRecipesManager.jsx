@@ -9,6 +9,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Snack", "Bevanda"];
 const difficulties = ["Facile", "Media", "Difficile"];
 const visibilities = ["all", "free", "premium"];
+const countries = [
+  { label: "Giappone", flag: "🇯🇵" },
+  { label: "Messico", flag: "🇲🇽" },
+  { label: "India", flag: "🇮🇳" },
+  { label: "Thailandia", flag: "🇹🇭" },
+  { label: "Spagna", flag: "🇪🇸" },
+  { label: "Grecia", flag: "🇬🇷" },
+  { label: "Stati Uniti", flag: "🇺🇸" },
+  { label: "Francia", flag: "🇫🇷" },
+  { label: "Cina", flag: "🇨🇳" },
+  { label: "Marocco", flag: "🇲🇦" },
+  { label: "Portogallo", flag: "🇵🇹" },
+  { label: "Turchia", flag: "🇹🇷" },
+  { label: "Libano", flag: "🇱🇧" },
+  { label: "Perù", flag: "🇵🇪" },
+  { label: "Vietnam", flag: "🇻🇳" },
+];
 
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
