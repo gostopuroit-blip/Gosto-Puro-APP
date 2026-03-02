@@ -101,6 +101,12 @@ export default function Recipes() {
     setActiveTags((prev) => ({ ...prev, [type]: null }));
   };
 
+  const goToPage = (page) => {
+    const params = new URLSearchParams(location.search);
+    params.set("page", page);
+    navigate({ search: params.toString() }, { replace: true });
+  };
+
   const toggleFilter = (filterKey) => {
     setActiveFilters((prev) => {
       const newFilters = new Set(prev);
@@ -111,7 +117,7 @@ export default function Recipes() {
       }
       return newFilters;
     });
-    setCurrentPage(1);
+    goToPage(1);
   };
 
   const FREE_LIMIT_PER_CATEGORY = 4;
