@@ -124,7 +124,7 @@ export default function AdminRecipeGenerator() {
   const [servings, setServings] = useState(4);
   const [extraNote, setExtraNote] = useState("");
 
-  const isInternational = selectedOcc?.label?.toLowerCase().includes("cucina internazionale");
+  const isInternational = selectedOcc?.label?.toLowerCase().includes("cucina internazionale") || selectedOcc?.label?.toLowerCase().includes("dal mondo");
 
   // generated
   const [recipe, setRecipe] = useState(null);
