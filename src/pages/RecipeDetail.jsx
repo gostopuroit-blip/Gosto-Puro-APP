@@ -199,7 +199,9 @@ export default function RecipeDetail() {
         <div className="bg-white rounded-3xl p-5 shadow-lg border border-gray-50">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight">{recipe.title}</h1>
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+                {recipe.title}{recipe.paese && countryFlags[recipe.paese] ? ` ${countryFlags[recipe.paese]}` : ""}
+              </h1>
               <p className="text-xs text-gray-400 mt-1">
                 {recipe.category} • {recipe.difficulty || "Facile"}
                 {recipe.paese && ` • ${recipe.paese}`}
