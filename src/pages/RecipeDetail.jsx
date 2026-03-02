@@ -1,4 +1,11 @@
 import { useState, useEffect } from "react";
+
+const countryFlags = {
+  "Giappone": "🇯🇵", "Messico": "🇲🇽", "India": "🇮🇳", "Thailandia": "🇹🇭",
+  "Spagna": "🇪🇸", "Grecia": "🇬🇷", "Stati Uniti": "🇺🇸", "Francia": "🇫🇷",
+  "Cina": "🇨🇳", "Marocco": "🇲🇦", "Portogallo": "🇵🇹", "Turchia": "🇹🇷",
+  "Libano": "🇱🇧", "Perù": "🇵🇪", "Vietnam": "🇻🇳",
+};
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
