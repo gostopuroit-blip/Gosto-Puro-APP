@@ -178,11 +178,11 @@ export default function RecipeDetail() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
         <Link
-          to={createPageUrl("Recipes")}
-          className="absolute top-12 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
+          onClick={() => navigate(-1)}
+          className="absolute top-12 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5 text-gray-800" />
-        </Link>
+        </button>
         <button
           onClick={handleSaveClick}
           className="absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
