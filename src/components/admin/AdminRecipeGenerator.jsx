@@ -14,6 +14,14 @@ const countries = [
   { label: "Spagna", flag: "🇪🇸" },
   { label: "Grecia", flag: "🇬🇷" },
   { label: "Stati Uniti", flag: "🇺🇸" },
+  { label: "Francia", flag: "🇫🇷" },
+  { label: "Cina", flag: "🇨🇳" },
+  { label: "Marocco", flag: "🇲🇦" },
+  { label: "Portogallo", flag: "🇵🇹" },
+  { label: "Turchia", flag: "🇹🇷" },
+  { label: "Libano", flag: "🇱🇧" },
+  { label: "Perù", flag: "🇵🇪" },
+  { label: "Vietnam", flag: "🇻🇳" },
 ];
 
 const countryProfiles = {
