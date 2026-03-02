@@ -33,7 +33,7 @@ const emptyForm = {
   ingredients: [{ name: "", quantity: "", category: "" }],
   instructions: [""], occasions: [], lifestyle: [],
   visibility: "all", numero_salvate: 0, numero_preparate: 0,
-  gen_prompt: "", status: "pubblicata",
+  gen_prompt: "", status: "pubblicata", paese: "",
 };
 
 export default function AdminRecipesManager() {
