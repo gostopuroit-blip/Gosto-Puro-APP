@@ -10,6 +10,14 @@ const countryFlags = {
   "Spagna": "🇪🇸",
   "Grecia": "🇬🇷",
   "Stati Uniti": "🇺🇸",
+  "Francia": "🇫🇷",
+  "Cina": "🇨🇳",
+  "Marocco": "🇲🇦",
+  "Portogallo": "🇵🇹",
+  "Turchia": "🇹🇷",
+  "Libano": "🇱🇧",
+  "Perù": "🇵🇪",
+  "Vietnam": "🇻🇳",
 };
 
 export default function RecipeCard({ recipe, variant = "default" }) {
