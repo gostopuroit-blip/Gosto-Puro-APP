@@ -27,12 +27,41 @@ export default function DailyRecipesSection({ occasion, user }) {
   }, [occasion]);
 
   const loadRecipes = async () => {
-    const allRecipes = await base44.entities.Recipe.filter(
+    const today = new Date().toISOString().split("T")[0];
+    const dailyNotifs = await base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1);
+
+    if (dailyNotifs.length > 0) {
+      const notif = dailyNotifs[0];
+      // Find which index corresponds to this occasion (Colazione=0, Pranzo=1, Cena=2)
+      const occasionIndex = notif.occasions?.indexOf(occasion);
+      if (occasionIndex !== -1 && notif.recipe_ids?.[occasionIndex]) {
+        const recipeId = notif.recipe_ids[occasionIndex];
+        const found = await base44.entities.Recipe.filter({ id: recipeId, status: "pubblicata" });
+        setRecipes(found.slice(0, 1));
+        setActiveFilter("all");
+        return;
+      }
+      // fallback: load all 3 daily recipes filtered by this category
+      if (notif.recipe_ids?.length > 0) {
+        const allDaily = await Promise.all(
+          notif.recipe_ids.map((id) => base44.entities.Recipe.filter({ id, status: "pubblicata" }))
+        );
+        const flat = allDaily.flat().filter((r) => r.category === occasion);
+        if (flat.length > 0) {
+          setRecipes(flat.slice(0, 3));
+          setActiveFilter("all");
+          return;
+        }
+      }
+    }
+
+    // fallback: last 3 published recipes of this category
+    const fallback = await base44.entities.Recipe.filter(
       { status: "pubblicata", category: occasion },
       "-created_date",
-      50
+      3
     );
-    setRecipes(allRecipes);
+    setRecipes(fallback);
     setActiveFilter("all");
   };
 
