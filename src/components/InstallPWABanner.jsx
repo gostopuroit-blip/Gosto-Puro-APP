@@ -7,28 +7,14 @@ export default function InstallPWABanner() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
-    // Already installed as PWA
-    const isStandalone =
-      window.navigator.standalone === true ||
-      window.matchMedia("(display-mode: standalone)").matches;
-
-    if (isStandalone) return;
-
-    // Dismissed recently (24h)
-    const dismissed = localStorage.getItem("pwa_banner_dismissed");
-    if (dismissed && Date.now() - parseInt(dismissed) < 86400000) return;
-
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     setIsIOS(ios);
+    setShow(true);
 
-    if (ios) {
-      setShow(true);
-    } else {
-      // Android/Desktop: listen for beforeinstallprompt
+    if (!ios) {
       const handler = (e) => {
         e.preventDefault();
         setDeferredPrompt(e);
-        setShow(true);
       };
       window.addEventListener("beforeinstallprompt", handler);
       return () => window.removeEventListener("beforeinstallprompt", handler);
