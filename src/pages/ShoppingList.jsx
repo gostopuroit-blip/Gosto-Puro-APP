@@ -40,7 +40,9 @@ export default function ShoppingList() {
 
   const generateList = async (currentUser) => {
     const u = currentUser || user;
+    if (!u) return;
     setGenerating(true);
+    setLoading(false);
     
     // Get active plan
     const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u?.email });

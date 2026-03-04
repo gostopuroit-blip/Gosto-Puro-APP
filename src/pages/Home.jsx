@@ -156,9 +156,6 @@ export default function Home() {
         </p>
       </div>
 
-      {/* PWA Install Banner */}
-      <InstallPWABanner />
-
       {/* Daily Message */}
         <div className="mx-5 mb-4 mt-2 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />
