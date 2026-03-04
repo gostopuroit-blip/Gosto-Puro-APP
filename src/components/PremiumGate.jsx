@@ -8,11 +8,11 @@ export default function PremiumGate({ children, user, feature = "questa funziona
   if (isPremium) return children;
 
   return (
-    <div className="relative">
-      <div className="pointer-events-none opacity-20 select-none">
+    <div className="relative rounded-2xl overflow-hidden">
+      <div className="pointer-events-none opacity-20 select-none" aria-hidden="true">
         {children}
       </div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl z-10 px-4 py-8 text-center pointer-events-auto bg-black/10 dark:bg-black/40">
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4 py-8 text-center bg-black/10 dark:bg-black/40">
         <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center mb-4">
           <Crown className="w-7 h-7 text-amber-500" />
         </div>
@@ -25,7 +25,6 @@ export default function PremiumGate({ children, user, feature = "questa funziona
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
-
           <Crown className="w-4 h-4" />
           Sblocca Premium
         </a>
