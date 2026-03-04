@@ -75,49 +75,51 @@ export default function ShoppingList() {
 
     // Merge ingredients — sum numeric quantities, deduplicate by normalized name
     const merged = {};
+
     const parseQty = (str) => {
       if (!str) return { num: 0, unit: "" };
-      const match = String(str).match(/^([\d.,]+)\s*(.*)/);
-      if (match) return { num: parseFloat(match[1].replace(",", ".")), unit: match[2].trim() };
-      return { num: 0, unit: str.trim() };
+      const s = String(str).trim();
+      const match = s.match(/^([\d.,]+)\s*(.*)/);
+      if (match) return { num: parseFloat(match[1].replace(",", ".")), unit: match[2].trim().toLowerCase() };
+      return { num: 0, unit: s.toLowerCase() };
+    };
+
+    const formatQty = (num, unit) => {
+      const n = Number.isInteger(num) ? num : parseFloat(num.toFixed(1));
+      return unit ? `${n} ${unit}` : `${n}`;
     };
 
     // Scale ratio: plan.servings / recipe.servings
     const planServings = plan.servings || 2;
     const scaleQty = (qtyStr, ratio) => {
-      if (!qtyStr || ratio === 1) return qtyStr || "";
-      const match = String(qtyStr).match(/^([\d.,]+)\s*(.*)/);
-      if (!match) return qtyStr || "";
-      const num = parseFloat(match[1].replace(",", "."));
-      const unit = match[2].trim();
-      const scaled = num * ratio;
-      const formatted = Number.isInteger(scaled) ? scaled : parseFloat(scaled.toFixed(1));
-      return unit ? `${formatted} ${unit}` : `${formatted}`;
+      if (!qtyStr) return "";
+      if (ratio === 1) return String(qtyStr);
+      const { num, unit } = parseQty(qtyStr);
+      if (num > 0) return formatQty(num * ratio, unit);
+      return String(qtyStr);
     };
 
     for (const recipe of planRecipes) {
       const ratio = planServings / (recipe.servings || 4);
       for (const ing of (recipe.ingredients || [])) {
         const scaledQty = scaleQty(ing.quantity, ratio);
-        const key = ing.name.toLowerCase().trim().replace(/[aeiou]$/, "");
+        const key = ing.name.toLowerCase().trim().replace(/\s+/g, " ");
         if (merged[key]) {
           const existing = parseQty(merged[key].rawQty);
           const incoming = parseQty(scaledQty);
           if (existing.num > 0 && incoming.num > 0 && existing.unit === incoming.unit) {
-            const total = existing.num + incoming.num;
-            merged[key].rawQty = `${Number.isInteger(total) ? total : total.toFixed(1)} ${existing.unit}`.trim();
+            merged[key].rawQty = formatQty(existing.num + incoming.num, existing.unit);
           } else if (existing.num > 0 && incoming.num > 0) {
-            merged[key].rawQty = `${existing.num} ${existing.unit} + ${incoming.num} ${incoming.unit}`.trim();
+            // different units — sum the numbers, keep first unit (best effort)
+            merged[key].rawQty = formatQty(existing.num + incoming.num, existing.unit || incoming.unit);
           } else {
-            merged[key].rawQty = [merged[key].rawQty, scaledQty].filter(Boolean).join(" + ");
+            merged[key].rawQty = scaledQty || merged[key].rawQty;
           }
-          merged[key].count = (merged[key].count || 1) + 1;
         } else {
           merged[key] = {
             name: ing.name,
             rawQty: scaledQty,
             category: ing.category || "Altro",
-            count: 1,
           };
         }
       }
