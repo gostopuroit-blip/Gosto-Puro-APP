@@ -45,7 +45,7 @@ export default function ShoppingList() {
     setLoading(false);
     
     // Get active plan
-    const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u?.email });
+    const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u?.email }, "-created_date", 1);
     
     if (plans.length === 0) {
       // Delete any orphaned items and show empty state
@@ -61,13 +61,17 @@ export default function ShoppingList() {
     }
 
     const plan = plans[0];
-    const recipeIds = plan.plan_data
-      .flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id])
-      .filter(Boolean);
+    const recipeIds = [...new Set(
+      plan.plan_data
+        .flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id])
+        .filter(Boolean)
+    )];
 
-    // Get recipes
-    const recipes = await base44.entities.Recipe.list("-created_date", 100);
-    const planRecipes = recipes.filter((r) => recipeIds.includes(r.id));
+    // Fetch all recipes matching the plan IDs in parallel
+    const recipeResults = await Promise.all(
+      recipeIds.map((id) => base44.entities.Recipe.filter({ id }, "-created_date", 1).then((r) => r[0]).catch(() => null))
+    );
+    const planRecipes = recipeResults.filter(Boolean);
 
     // Merge ingredients — sum numeric quantities, deduplicate by normalized name
     const merged = {};
