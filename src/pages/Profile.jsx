@@ -11,6 +11,15 @@ import { PremiumBadge } from "@/components/PremiumGate";
 
 
 
+// Persist the install prompt across navigation (event fires only once)
+if (typeof window !== "undefined" && !window.__pwaInstallPrompt) {
+  window.__pwaInstallPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    window.__pwaInstallPrompt = e;
+  });
+}
+
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
@@ -21,7 +30,7 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
-  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installPrompt, setInstallPrompt] = useState(() => window.__pwaInstallPrompt || null);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
@@ -29,13 +38,10 @@ export default function Profile() {
     if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) {
       setIsInstalled(true);
     }
-    // Listen for install prompt
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    // Sync from global in case it fired before this mount
+    if (window.__pwaInstallPrompt) {
+      setInstallPrompt(window.__pwaInstallPrompt);
+    }
   }, []);
 
   const handleInstallPWA = async () => {
