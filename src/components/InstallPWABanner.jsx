@@ -7,9 +7,14 @@ export default function InstallPWABanner() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
+    // Show only once per session
+    const shownThisSession = sessionStorage.getItem("pwa_banner_shown");
+    if (shownThisSession) return;
+
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     setIsIOS(ios);
     setShow(true);
+    sessionStorage.setItem("pwa_banner_shown", "1");
 
     if (!ios) {
       const handler = (e) => {
