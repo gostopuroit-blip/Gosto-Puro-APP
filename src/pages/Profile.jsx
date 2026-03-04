@@ -51,6 +51,7 @@ export default function Profile() {
     if (outcome === "accepted") {
       setIsInstalled(true);
       setInstallPrompt(null);
+      window.__pwaInstallPrompt = null;
       toast.success("App installata! 🎉");
     }
   };
