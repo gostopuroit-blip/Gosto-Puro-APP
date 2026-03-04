@@ -48,8 +48,15 @@ export default function ShoppingList() {
     const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u?.email });
     
     if (plans.length === 0) {
+      // Delete any orphaned items and show empty state
+      const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
+      for (const item of oldItems) {
+        await base44.entities.ShoppingItem.delete(item.id);
+      }
+      setItems([]);
       setLoading(false);
       setGenerating(false);
+      toast.error("Nessun piano attivo trovato");
       return;
     }
 
