@@ -5,7 +5,7 @@ import PremiumGate from "@/components/PremiumGate";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
-  CalendarDays, Plus, RefreshCw, Trash2, Clock, ChefHat, ShoppingCart, Loader2, Search, X, Trash, Shuffle } from
+  CalendarDays, Plus, RefreshCw, Trash2, Clock, ChefHat, ShoppingCart, Loader2, Search, X, Trash, Shuffle, Crown } from
 "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
