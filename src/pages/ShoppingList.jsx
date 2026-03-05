@@ -124,11 +124,9 @@ export default function ShoppingList() {
       }
     }
 
-    // Delete old items
+    // Delete old items in parallel
     const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
-    for (const item of oldItems) {
-      await base44.entities.ShoppingItem.delete(item.id);
-    }
+    await Promise.all(oldItems.map((item) => base44.entities.ShoppingItem.delete(item.id)));
 
     // Create new items
     const newItems = Object.values(merged).map((ing) => ({
