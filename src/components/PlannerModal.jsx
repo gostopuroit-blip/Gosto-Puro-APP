@@ -104,7 +104,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
           <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
             Tempo massimo per ricetta
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             {timeOptions.map((opt) => (
               <button
                 key={opt.value}
@@ -119,6 +119,23 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
                 {opt.label}
               </button>
             ))}
+          </div>
+          {/* Custom time input */}
+          <div className="flex items-center gap-3 bg-white dark:bg-[#1A2B20] border border-gray-100 dark:border-[#3D5246] rounded-xl px-4 py-2.5">
+            <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">Personalizzato:</span>
+            <input
+              type="number"
+              min={5}
+              max={180}
+              value={maxTime}
+              onChange={(e) => {
+                const v = parseInt(e.target.value);
+                if (!isNaN(v) && v >= 5) setMaxTime(v);
+              }}
+              className="w-16 text-center font-bold text-gray-900 dark:text-white bg-transparent outline-none text-sm"
+            />
+            <span className="text-sm text-gray-400">min</span>
           </div>
         </div>
 
