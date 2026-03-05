@@ -29,7 +29,16 @@ export default function ShoppingList() {
   const loadItems = async () => {
     const u = await base44.auth.me().catch(() => null);
     setUser(u);
-    await generateList(u);
+    if (!u) { setLoading(false); return; }
+
+    // Load existing items first — only regenerate if none exist
+    const existing = await base44.entities.ShoppingItem.filter({ created_by: u.email }, "category", 200);
+    if (existing.length > 0) {
+      setItems(existing);
+      setLoading(false);
+    } else {
+      await generateList(u);
+    }
   };
 
   const generateList = async (currentUser) => {
