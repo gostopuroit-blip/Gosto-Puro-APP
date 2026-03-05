@@ -203,7 +203,7 @@ export default function Home() {
               const isLocked = !isPremium && index >= FREE_LIMIT;
               if (isLocked) {
                 return (
-                  <a key={recipe.id} href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
+                  <a key={recipe.id} href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
                     <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-100">
                       <img
                         src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}

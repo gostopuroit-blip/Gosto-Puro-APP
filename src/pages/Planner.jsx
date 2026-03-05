@@ -194,10 +194,22 @@ export default function Planner() {
   return (
     <div className="pb-4">
       {!isPremium &&
-      <div className="bg-black/15 absolute inset-0 flex flex-col items-center justify-center">
-          <PremiumGate user={user} feature="il Pianificatore Pasti">
-            <div />
-          </PremiumGate>
+      <div className="fixed inset-0 bg-black/30 z-40 flex flex-col items-center justify-center px-6 text-center" style={{ bottom: "72px" }}>
+          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4">
+            <Crown className="w-7 h-7 text-amber-500" />
+          </div>
+          <p className="text-sm font-bold text-white mb-2">Funzionalità Premium</p>
+          <p className="text-white/80 mb-6 text-base font-semibold leading-relaxed">
+            Sblocca il Pianificatore Pasti con il piano Premium
+          </p>
+          <a
+            href="https://gostopuro.it/premium/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
+            <Crown className="w-4 h-4" />
+            Sblocca Premium
+          </a>
         </div>
       }
       <div className={!isPremium ? "pointer-events-none opacity-20 select-none" : ""}>

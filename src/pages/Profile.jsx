@@ -411,7 +411,7 @@ export default function Profile() {
 
           </div>
           {(!user?.plan || user?.plan === "free") && user?.role !== "admin" && (
-            <a href="https://gostopuro.it" target="_blank" rel="noopener noreferrer" className="bg-amber-500 dark:bg-amber-600 text-white text-[13px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0">
+            <a href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer" className="bg-amber-500 dark:bg-amber-600 text-white text-[13px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0">
               Upgrade
             </a>
           )}
