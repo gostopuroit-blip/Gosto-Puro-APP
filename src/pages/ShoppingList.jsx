@@ -67,11 +67,10 @@ export default function ShoppingList() {
         .filter(Boolean)
     )];
 
-    // Fetch all recipes matching the plan IDs in parallel
-    const recipeResults = await Promise.all(
-      recipeIds.map((id) => base44.entities.Recipe.filter({ id }, "-created_date", 1).then((r) => r[0]).catch(() => null))
-    );
-    const planRecipes = recipeResults.filter(Boolean);
+    // Fetch all published recipes in one call and filter locally by ID
+    const allRecipes = await base44.entities.Recipe.list("-created_date", 1000);
+    const recipeMap = Object.fromEntries(allRecipes.map((r) => [r.id, r]));
+    const planRecipes = recipeIds.map((id) => recipeMap[id]).filter(Boolean);
 
     // Merge ingredients — sum numeric quantities, deduplicate by normalized name
     const merged = {};
