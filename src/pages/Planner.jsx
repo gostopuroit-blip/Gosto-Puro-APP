@@ -67,7 +67,8 @@ export default function Planner() {
         if (familyFirst.length > 0) eligible = familyFirst;
       }
 
-      eligible.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
+      // Sort by newest first (created_date desc)
+      eligible.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
       return eligible;
     };
 
