@@ -19,10 +19,10 @@ export default function PremiumConversionsChart() {
   const [selectedDays, setSelectedDays] = useState(30);
 
   useEffect(() => {
-    base44.entities.User.list().then((data) => {
-      setUsers(data);
+    base44.functions.invoke('adminGetUsers').then((res) => {
+      setUsers(Array.isArray(res.data) ? res.data : []);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   // Filter premium users whose updated_date falls within the selected period
