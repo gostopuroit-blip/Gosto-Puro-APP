@@ -14,11 +14,12 @@ export default function AdminDashboard({ onNavigate }) {
   }, []);
 
   const load = async () => {
-    const [usersResult, recipes, webhooks] = await Promise.all([
-      base44.entities.User.list().catch(() => null),
+    const [usersRes, recipes, webhooks] = await Promise.all([
+      base44.functions.invoke('adminGetUsers').catch(() => null),
       base44.entities.Recipe.list("-numero_salvate", 100),
       base44.entities.WebhookLog.filter({ status: "error" }).catch(() => []),
     ]);
+    const usersResult = usersRes?.data || null;
 
     const users = usersResult || [];
     const now = Date.now();
