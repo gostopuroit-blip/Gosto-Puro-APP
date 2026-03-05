@@ -50,7 +50,9 @@ export default function ShoppingList() {
     if (plans.length === 0) {
       // Delete any orphaned items and show empty state
       const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
-      await Promise.all(oldItems.map((item) => base44.entities.ShoppingItem.delete(item.id)));
+      for (let i = 0; i < oldItems.length; i += 5) {
+        await Promise.all(oldItems.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id)));
+      }
       setItems([]);
       setLoading(false);
       setGenerating(false);
