@@ -26,7 +26,7 @@ export default function AdminUsers() {
 
   const update = async (userId, data, label) => {
     setUpdating(userId + Object.keys(data)[0]);
-    await base44.entities.User.update(userId, data);
+    await base44.functions.invoke('adminUpdateUser', { userId, data });
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, ...data } : u));
     toast.success(label);
     setUpdating(null);
