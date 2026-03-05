@@ -21,7 +21,7 @@ export default function PremiumGate({ children, user, feature = "questa funziona
           Sblocca {feature} con il piano Premium
         </p>
         <a
-          href="https://gostopuro.it"
+          href="https://gostopuro.it/premium/"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">

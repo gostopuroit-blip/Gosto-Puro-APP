@@ -131,7 +131,12 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
               value={maxTime}
               onChange={(e) => {
                 const v = parseInt(e.target.value);
-                if (!isNaN(v) && v >= 5) setMaxTime(v);
+                if (!isNaN(v)) setMaxTime(v);
+              }}
+              onBlur={(e) => {
+                const v = parseInt(e.target.value);
+                if (isNaN(v) || v < 5) setMaxTime(5);
+                else if (v > 180) setMaxTime(180);
               }}
               className="w-16 text-center font-bold text-gray-900 dark:text-white bg-transparent outline-none text-sm"
             />
