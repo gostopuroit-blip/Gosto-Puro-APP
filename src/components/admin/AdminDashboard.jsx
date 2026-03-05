@@ -21,7 +21,7 @@ export default function AdminDashboard({ onNavigate }) {
     ]);
     const usersResult = usersRes?.data || null;
 
-    const users = usersResult || [];
+    const users = Array.isArray(usersResult) ? usersResult : [];
     const now = Date.now();
     const h24 = webhooks.filter((w) => new Date(w.timestamp || w.created_date).getTime() > now - 86400000);
 
