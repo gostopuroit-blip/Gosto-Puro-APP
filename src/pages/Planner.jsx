@@ -34,7 +34,7 @@ export default function Planner() {
     setUser(currentUser);
     const [plans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
     base44.entities.MealPlan.filter({ is_active: true, created_by: currentUser?.email }),
-    base44.entities.Recipe.list("-numero_preparate", 1000),
+    base44.entities.Recipe.list("-created_date", 1000),
     base44.entities.Folder.list(),
     base44.entities.UserRecipe.list()]
     );
