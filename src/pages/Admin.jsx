@@ -8,12 +8,14 @@ import AdminPermissions from "@/components/admin/AdminPermissions";
 import AdminWebhooks from "@/components/admin/AdminWebhooks";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminNotifications from "@/components/admin/AdminNotifications";
+import AdminEngagement from "@/components/admin/AdminEngagement";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft } from "lucide-react";
 
 const tabs = [
   { key: "dashboard", label: "Dashboard", icon: "📊" },
+  { key: "engagement", label: "Engagement", icon: "📈" },
   { key: "utenti", label: "Utenti", icon: "👥" },
   { key: "ricette", label: "Ricette", icon: "🍽️" },
   { key: "genera", label: "Genera AI", icon: "✨" },
@@ -64,6 +66,7 @@ function AdminContent() {
       {/* Content */}
       <div className="px-5 mt-4">
         {activeTab === "dashboard" && <AdminDashboard onNavigate={setActiveTab} />}
+        {activeTab === "engagement" && <AdminEngagement />}
         {activeTab === "utenti" && <AdminUsers />}
         {activeTab === "ricette" && <AdminRecipesManager />}
         {activeTab === "genera" && <AdminRecipeGenerator />}
