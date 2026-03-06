@@ -109,7 +109,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
             {timeOptions.map((opt) => (
               <button
                 key={opt.value}
-                onClick={() => setMaxTime(opt.value)}
+                onClick={() => { setMaxTime(opt.value); setMaxTimeInput(String(opt.value)); }}
                 className={`py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
                   maxTime === opt.value
                     ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
@@ -126,18 +126,21 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
             <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
             <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">Personalizzato:</span>
             <input
-              type="number"
-              min={5}
-              max={180}
-              value={maxTime}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={maxTimeInput}
               onChange={(e) => {
-                const v = parseInt(e.target.value);
-                if (!isNaN(v)) setMaxTime(v);
+                const raw = e.target.value.replace(/[^0-9]/g, "");
+                setMaxTimeInput(raw);
+                const v = parseInt(raw);
+                if (!isNaN(v) && v >= 1) setMaxTime(v);
               }}
-              onBlur={(e) => {
-                const v = parseInt(e.target.value);
-                if (isNaN(v) || v < 5) setMaxTime(5);
-                else if (v > 180) setMaxTime(180);
+              onBlur={() => {
+                const v = parseInt(maxTimeInput);
+                const clamped = isNaN(v) || v < 5 ? 5 : v > 180 ? 180 : v;
+                setMaxTime(clamped);
+                setMaxTimeInput(String(clamped));
               }}
               className="w-16 text-center font-bold text-gray-900 dark:text-white bg-transparent outline-none text-sm"
             />
