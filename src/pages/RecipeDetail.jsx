@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
+import { trackEvent } from "@/components/useAnalytics";
 
 // Scale a quantity string by a ratio
 function scaleQty(qtyStr, ratio) {
