@@ -260,7 +260,9 @@ export default function Home() {
           {specialOccasions.map((occ) =>
               <Link
                 key={occ.label}
-                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+                onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
+                className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
 
                 <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
                   {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{occ.icon}</span>}
@@ -279,6 +281,7 @@ export default function Home() {
               <Link
                 key={tag.label}
                 to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
+                onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
                 className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
 
                 <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
