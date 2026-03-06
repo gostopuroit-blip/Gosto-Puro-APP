@@ -17,6 +17,7 @@ const navItems = [
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
+  useSessionTracking();
 
   useEffect(() => {
     base44.auth.me().then((u) => {

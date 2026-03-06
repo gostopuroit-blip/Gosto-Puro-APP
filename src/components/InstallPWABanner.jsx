@@ -33,6 +33,7 @@ export default function InstallPWABanner() {
   };
 
   const handleInstall = async () => {
+    trackEvent("pwa_install_click");
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
