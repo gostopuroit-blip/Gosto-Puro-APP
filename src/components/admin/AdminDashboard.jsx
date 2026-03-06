@@ -41,7 +41,7 @@ export default function AdminDashboard({ onNavigate }) {
       totalUsers: usersResult ? users.length : null,
       premiumUsers: usersResult ? users.filter((u) => u.plan === "premium").length : null,
       freeUsers: usersResult ? users.filter((u) => !u.plan || u.plan === "free").length : null,
-      totalRecipes: recipes.length,
+      totalRecipes: allRecipes.length,
       topSaved,
       topPrepared,
       webhookErrors24h: h24.length,
