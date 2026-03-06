@@ -89,6 +89,7 @@ export default function RecipeDetail() {
     if (recipes.length > 0) {
       setRecipe(recipes[0]);
       setServings(recipes[0].servings || 4);
+      trackEvent("recipe_view", { recipe_id: recipeId, recipe_title: recipes[0].title });
     }
     if (userRecipes.length > 0) setUserRecipe(userRecipes[0]);
     setSavedCount(allSaved.length);
