@@ -414,6 +414,28 @@ Difficoltà valide: Facile, Media, Difficile.`;
       ? `CRITICAL PASTA RULE: The pasta MUST be completely coated and enveloped in the sauce — never dry, never with sauce sitting separately on top. The sauce is structural, not decorative. The dish must look like it was just finished "saltato in padella" (tossed in the pan). Pasta should appear slightly glistening and moist. No white dry pasta visible. No sauce pooled only at the bottom. No ingredients floating randomly. Sauce fully integrated with pasta. Realistic Italian home cooking proportions — not excessive sauce, not too little. Authentic texture: creamy sauces look silky and light (not heavy American cream sauce), tomato sauces look rich and naturally red (not neon), meat ragù looks dense and mixed throughout.`
       : ``;
 
+    // Fish detection — filetti vs pesce intero
+    const fishKeywords = ["pesce", "orata", "branzino", "salmone", "tonno", "baccalà", "spigola", "merluzzo", "trota", "sgombro", "sardin", "alici", "calamari", "gamberi", "polpo", "seppia", "rombo", "halibut", "sogliola", "fish"];
+    const filletKeywords = ["filetti", "filetto", "trancio", "tranci", "fillet"];
+    const wholeKeywords = ["intero", "intera", "al forno intero", "pesce al forno"];
+
+    const allText = (titleLower + " " + ingredLower + " " + (recipe.instructions || []).join(" ").toLowerCase());
+    const hasFish = fishKeywords.some(k => allText.includes(k));
+    const hasFillets = filletKeywords.some(k => allText.includes(k));
+    const hasWhole = wholeKeywords.some(k => allText.includes(k));
+
+    let fishVisual = "";
+    if (hasFish) {
+      if (hasFillets && !hasWhole) {
+        fishVisual = `CRITICAL FISH RULE: MOSTRARE chiaramente filetti separati di pesce, pezzi piatti senza testa né lisca centrale visibile. NON mostrare pesce intero con testa e coda. La ricetta usa filetti — mostrare 2 o 4 pezzi di filetto nel piatto, con doratura leggera, pelle croccante opzionale. Stile mediterraneo: olio d'oliva visibile, erbe fresche, limone a fette, verdure arrosto attorno. Piatto ceramica rustico italiana, luce naturale, nessuna salsa pesante.`;
+      } else if (hasWhole && !hasFillets) {
+        fishVisual = `CRITICAL FISH RULE: MOSTRARE pesce intero con testa e coda visibili, pelle integra, cotto in teglia da forno con erbe e limone. NON mostrare filetti. Pesce intero autentico — teglia rustica, verdure arrosto attorno, limone a fette, erbe aromatiche, olio extravergine visibile. Luce naturale, piatto rustico italiano.`;
+      } else {
+        // Default: assume filetti for quick recipes
+        fishVisual = `CRITICAL FISH RULE: MOSTRARE chiaramente pezzi di pesce cotti (filetti o tranci), NON pesce intero con testa e coda a meno che la ricetta non lo specifichi. Stile culinario italiano mediterraneo: semplice, piatto ceramica, luce naturale, erbe fresche, limone.`;
+      }
+    }
+
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
     const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
