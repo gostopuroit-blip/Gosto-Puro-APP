@@ -26,6 +26,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
   const [days, setDays] = useState(5);
   const [focus, setFocus] = useState("pratico");
   const [maxTime, setMaxTime] = useState(20);
+  const [maxTimeInput, setMaxTimeInput] = useState("20");
   const [servings, setServings] = useState(2);
 
   return (
