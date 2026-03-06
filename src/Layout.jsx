@@ -4,6 +4,7 @@ import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { useSessionTracking } from "@/components/useAnalytics";
 
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
