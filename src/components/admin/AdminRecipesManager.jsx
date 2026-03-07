@@ -296,6 +296,7 @@ export default function AdminRecipesManager() {
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase">Tempo (min)</label>
+
                 <Input type="number" value={form.prep_time} onChange={(e) => setForm({ ...form, prep_time: e.target.value })} className="rounded-xl mt-1" />
               </div>
               <div>
