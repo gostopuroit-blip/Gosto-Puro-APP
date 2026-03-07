@@ -220,14 +220,14 @@ export default function AdminEngagement() {
       </Section>
 
       {/* 1. Retention / Return */}
-      <Section title="↩️ Utenti che tornano" subtitle={`Ultimi ${days} giorni`}>
+      <Section title="↩️ Usuários que voltam" subtitle={`Últimos ${days} dias`}>
         <div className="grid grid-cols-2 gap-3">
-          <Metric label="Utenti totali" value={uniqueUsers} icon={Users} color="text-blue-600 bg-blue-50" />
-          <Metric label="Utenti che tornano" value={returningUsers} icon={TrendingUp} color="text-green-600 bg-green-50" />
-          <Metric label="Free che tornano" value={returningFreeUniq} emoji="👤" color="text-gray-600 bg-gray-50" />
-          <Metric label="Premium che tornano" value={returningPremiumUniq} emoji="✨" color="text-amber-600 bg-amber-50" />
+          <Metric label="Usuários únicos" value={uniqueUsers} icon={Users} color="text-blue-600 bg-blue-50" />
+          <Metric label="Usuários que voltaram" value={returningUsers} icon={TrendingUp} color="text-green-600 bg-green-50" />
+          <Metric label="Free que voltaram" value={returningFreeUniq} emoji="👤" color="text-gray-600 bg-gray-50" />
+          <Metric label="Premium que voltaram" value={returningPremiumUniq} emoji="✨" color="text-amber-600 bg-amber-50" />
         </div>
-        <p className="text-[10px] text-gray-400 mt-2">* "Torna" = ha aperto l'app più di 1 volta nel periodo</p>
+        <p className="text-[10px] text-gray-400 mt-2">* "Voltou" = abriu o app mais de 1 vez no período</p>
       </Section>
 
       {/* 2. Recipe & Occasion engagement */}
