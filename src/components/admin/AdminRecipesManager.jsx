@@ -157,7 +157,7 @@ export default function AdminRecipesManager() {
     await base44.entities.Recipe.delete(id);
     setRecipes((prev) => prev.filter((r) => r.id !== id));
     setDeleting(null);
-    toast.success("Ricetta eliminata");
+    toast.success("Receita excluída");
   };
 
   const filtered = recipes.filter((r) => {
