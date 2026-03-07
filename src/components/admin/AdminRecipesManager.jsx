@@ -152,7 +152,7 @@ export default function AdminRecipesManager() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Eliminare questa ricetta?")) return;
+    if (!confirm("Excluir esta receita?")) return;
     setDeleting(id);
     await base44.entities.Recipe.delete(id);
     setRecipes((prev) => prev.filter((r) => r.id !== id));
