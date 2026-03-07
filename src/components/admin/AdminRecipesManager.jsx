@@ -129,7 +129,7 @@ export default function AdminRecipesManager() {
     const result = await base44.integrations.Core.GenerateImage({ prompt: imagePrompt });
     setForm((f) => ({ ...f, image_url: result.url }));
     setGeneratingImage(false);
-    toast.success("Immagine generata!");
+    toast.success("Imagem gerada!");
   };
 
   const handleSave = async () => {
