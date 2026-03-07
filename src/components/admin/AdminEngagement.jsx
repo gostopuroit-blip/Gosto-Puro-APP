@@ -66,6 +66,19 @@ export default function AdminEngagement() {
   const recipeViews = events.filter(e => e.event_type === "recipe_view");
   const occasionClicks = events.filter(e => e.event_type === "occasion_click");
   const pwaClicks = events.filter(e => e.event_type === "pwa_install_click");
+  const recipeSaves = events.filter(e => e.event_type === "recipe_saved");
+  const plannerCreated = events.filter(e => e.event_type === "planner_created");
+
+  // Top receitas salvas
+  const saveCounts = {};
+  recipeSaves.forEach(e => {
+    if (e.recipe_title) saveCounts[e.recipe_title] = (saveCounts[e.recipe_title] || 0) + 1;
+  });
+  const topSaved = Object.entries(saveCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+  // Free vs Premium unique users
+  const freeUsers = new Set(events.filter(e => e.event_type === "session_start" && e.user_plan === "free" && e.user_email).map(e => e.user_email)).size;
+  const premiumUsers = new Set(events.filter(e => e.event_type === "session_start" && e.user_plan === "premium" && e.user_email).map(e => e.user_email)).size;
 
   // Unique returning users (more than 1 session)
   const sessionsByUser = {};
