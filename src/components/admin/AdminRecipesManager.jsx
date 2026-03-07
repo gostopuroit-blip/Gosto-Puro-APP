@@ -251,7 +251,7 @@ export default function AdminRecipesManager() {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#2D6A4F] text-white text-xs font-bold transition-all hover:bg-[#235c43] disabled:opacity-60"
                 >
                   {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  {generating ? "Genero..." : "Genera ricetta"}
+                  {generating ? "Gerando..." : "Gerar receita"}
                 </button>
                 <button
                   type="button"
@@ -260,7 +260,7 @@ export default function AdminRecipesManager() {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#E07A3A] text-white text-xs font-bold transition-all hover:bg-[#c86a2e] disabled:opacity-60"
                 >
                   {generatingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Image className="w-3.5 h-3.5" />}
-                  {generatingImage ? "Genero..." : "Genera immagine"}
+                  {generatingImage ? "Gerando..." : "Gerar imagem"}
                 </button>
               </div>
             </div>
