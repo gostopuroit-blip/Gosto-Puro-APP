@@ -126,6 +126,69 @@ export default function AdminEngagement() {
         </div>
       </div>
 
+      {/* 0. Sessions & Time — moved to top */}
+      <Section
+        title="⏱ Sessões & Tempo no app"
+        subtitle="Quantas vezes o app foi aberto e quanto tempo os usuários ficam"
+      >
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <Metric
+            label="Total de sessões abertas"
+            value={sessionStarts.length}
+            icon={Clock}
+            color="text-[#2D6A4F] bg-green-50"
+            tooltip="Cada vez que alguém abre o app conta como 1 sessão"
+          />
+          <Metric
+            label="Sessões com duração registrada"
+            value={durations.length}
+            emoji="⏱"
+            color="text-blue-600 bg-blue-50"
+            tooltip="Sessões em que o app conseguiu registrar o tempo antes de fechar"
+          />
+          <Metric
+            label="Usuários únicos no período"
+            value={uniqueUsers}
+            icon={Users}
+            color="text-purple-600 bg-purple-50"
+            tooltip="Número de e-mails distintos que abriram o app"
+          />
+          <Metric
+            label="Usuários que voltaram"
+            value={returningUsers}
+            icon={TrendingUp}
+            color="text-green-600 bg-green-50"
+            tooltip="Abriram o app mais de 1 vez no período"
+          />
+        </div>
+
+        {durations.length > 0 ? (
+          <div className="space-y-2">
+            <div className="flex items-start gap-3 bg-green-50 rounded-2xl p-4">
+              <Clock className="w-6 h-6 text-[#2D6A4F] mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{fmtSeconds(avgDuration)}</p>
+                <p className="text-xs font-semibold text-gray-600">Média por sessão</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Tempo médio que o usuário fica no app em cada visita</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 bg-blue-50 rounded-2xl p-4">
+              <Clock className="w-6 h-6 text-blue-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{fmtSeconds(avgDurationPerUser)}</p>
+                <p className="text-xs font-semibold text-gray-600">Média por usuário</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Soma de todas as sessões de cada pessoa, depois tira a média entre elas</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-50 rounded-xl p-3">
+            <p className="text-xs text-gray-500 font-semibold">Aguardando dados de duração</p>
+            <p className="text-[10px] text-gray-400 mt-1">O tempo é registrado quando o usuário fecha ou minimiza o app. As sessões abertas já aparecem acima.</p>
+          </div>
+        )}
+      </Section>
+
       {/* 1. Retention / Return */}
       <Section title="↩️ Utenti che tornano" subtitle={`Ultimi ${days} giorni`}>
         <div className="grid grid-cols-2 gap-3">
