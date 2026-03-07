@@ -18,7 +18,7 @@ export default function AdminUsers() {
       const res = await base44.functions.invoke('adminGetUsers');
       setUsers(res.data);
     } catch (e) {
-      setError("Errore nel caricamento degli utenti.");
+      setError("Erro ao carregar os usuários.");
     } finally {
       setLoading(false);
     }
