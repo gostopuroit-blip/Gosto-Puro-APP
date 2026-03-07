@@ -133,7 +133,7 @@ export default function AdminRecipesManager() {
   };
 
   const handleSave = async () => {
-    if (!form.title.trim()) return toast.error("Inserisci un titolo");
+    if (!form.title.trim()) return toast.error("Insira um título");
     setSaving(true);
     const cleanIngredients = form.ingredients.filter((i) => i.name.trim());
     const cleanInstructions = form.instructions.filter((s) => s.trim());
@@ -141,11 +141,11 @@ export default function AdminRecipesManager() {
     if (editId) {
       await base44.entities.Recipe.update(editId, data);
       setRecipes((prev) => prev.map((r) => r.id === editId ? { ...r, ...data } : r));
-      toast.success("Ricetta aggiornata!");
+      toast.success("Receita atualizada!");
     } else {
       const created = await base44.entities.Recipe.create(data);
       setRecipes((prev) => [created, ...prev]);
-      toast.success("Ricetta creata!");
+      toast.success("Receita criada!");
     }
     setSaving(false);
     setShowForm(false);
