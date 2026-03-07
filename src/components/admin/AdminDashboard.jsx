@@ -122,7 +122,7 @@ export default function AdminDashboard({ onNavigate }) {
       {/* Top saved */}
 
       <div>
-        <p className="text-sm font-bold text-gray-700 mb-2">🏆 Più salvate</p>
+        <p className="text-sm font-bold text-gray-700 mb-2">🏆 Mais salvas</p>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
           {stats.topSaved.map((r, i) => (
             <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < stats.topSaved.length - 1 ? "border-b border-gray-50" : ""}`}>
