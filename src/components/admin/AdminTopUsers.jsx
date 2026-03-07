@@ -46,7 +46,7 @@ export default function AdminTopUsers({ events, allUsers }) {
         ...u,
         score: Math.round(u.views * W_VIEWS + u.saved * W_SAVED + u.planner * W_PLANNER + u.sessions * W_SESSION),
       }))
-      .filter(u => u.score > 0)
+      .filter(u => u.score > 0 && u.role !== "admin")
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
   }, [events, allUsers]);
