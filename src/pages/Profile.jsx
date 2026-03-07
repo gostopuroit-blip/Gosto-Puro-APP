@@ -12,14 +12,6 @@ import { trackEvent } from "@/components/useAnalytics";
 
 
 
-// Persist the install prompt across navigation (event fires only once)
-if (typeof window !== "undefined" && !window.__pwaInstallPrompt) {
-  window.__pwaInstallPrompt = null;
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    window.__pwaInstallPrompt = e;
-  });
-}
 
 export default function Profile() {
   const [user, setUser] = useState(null);
