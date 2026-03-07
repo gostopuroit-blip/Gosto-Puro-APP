@@ -96,8 +96,8 @@ export default function AdminDashboard({ onNavigate }) {
             <Plus className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-bold text-sm">Crea nuova ricetta</p>
-            <p className="text-xs text-white/70">Aggiungi al catalogo</p>
+            <p className="font-bold text-sm">Criar nova receita</p>
+            <p className="text-xs text-white/70">Adicionar ao catálogo</p>
           </div>
         </button>
 
