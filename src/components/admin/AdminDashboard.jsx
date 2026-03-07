@@ -53,10 +53,10 @@ export default function AdminDashboard({ onNavigate }) {
     setGeneratingBulk(true);
     try {
       const result = await base44.functions.invoke('generateBulkRecipes');
-      toast.success(`✓ ${result.data.totalGenerated} ricette generate con successo!`);
-      load(); // Reload stats
+      toast.success(`✓ ${result.data.totalGenerated} receitas geradas com sucesso!`);
+      load();
     } catch (error) {
-      toast.error("Errore nella generazione delle ricette");
+      toast.error("Erro ao gerar as receitas");
     }
     setGeneratingBulk(false);
   };
