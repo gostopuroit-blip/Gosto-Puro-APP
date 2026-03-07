@@ -64,11 +64,11 @@ export default function AdminDashboard({ onNavigate }) {
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
 
   const cards = [
-    { label: "Utenti totali", value: stats.totalUsers ?? "N/D", icon: Users, color: "bg-blue-50 text-blue-600" },
-    { label: "Premium attivi", value: stats.premiumUsers ?? "N/D", icon: "✨", color: "bg-amber-50 text-amber-600", emoji: true },
-    { label: "Free attivi", value: stats.freeUsers ?? "N/D", icon: "👤", color: "bg-gray-50 text-gray-600", emoji: true },
-    { label: "Ricette totali", value: stats.totalRecipes, icon: BookOpen, color: "bg-green-50 text-green-600" },
-    { label: "Errori webhook 24h", value: stats.webhookErrors24h, icon: AlertCircle, color: "bg-red-50 text-red-500" },
+    { label: "Usuários totais", value: stats.totalUsers ?? "N/D", icon: Users, color: "bg-blue-50 text-blue-600" },
+    { label: "Premium ativos", value: stats.premiumUsers ?? "N/D", icon: "✨", color: "bg-amber-50 text-amber-600", emoji: true },
+    { label: "Free ativos", value: stats.freeUsers ?? "N/D", icon: "👤", color: "bg-gray-50 text-gray-600", emoji: true },
+    { label: "Receitas totais", value: stats.totalRecipes, icon: BookOpen, color: "bg-green-50 text-green-600" },
+    { label: "Erros webhook 24h", value: stats.webhookErrors24h, icon: AlertCircle, color: "bg-red-50 text-red-500" },
   ];
 
   return (
