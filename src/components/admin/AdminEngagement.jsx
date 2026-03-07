@@ -83,9 +83,19 @@ export default function AdminEngagement() {
   });
   const topOccasions = Object.entries(occasionCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
 
-  // Avg session duration
+  // Avg session duration (per sessione)
   const durations = sessionEnds.map(e => e.session_duration_seconds).filter(Boolean);
   const avgDuration = avg(durations);
+
+  // Avg time per user (soma das sessões de cada usuário, depois média entre usuários)
+  const durationByUser = {};
+  sessionEnds.forEach(e => {
+    if (e.user_email && e.session_duration_seconds > 0) {
+      durationByUser[e.user_email] = (durationByUser[e.user_email] || 0) + e.session_duration_seconds;
+    }
+  });
+  const userTotals = Object.values(durationByUser);
+  const avgDurationPerUser = avg(userTotals);
 
   // PWA — separate banner impressions from real install clicks
   const pwaBannerShown = pwaClicks.filter(e => e.occasion_label === "banner_shown");
