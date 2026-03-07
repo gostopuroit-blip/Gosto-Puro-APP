@@ -180,13 +180,15 @@ export default function AdminEngagement() {
       </Section>
 
       {/* 3. PWA Install */}
-      <Section title="📲 Installazione PWA" subtitle="Click sul pulsante installa">
+      <Section title="📲 Installazione PWA" subtitle="Banner mostrato + click installa">
         <div className="grid grid-cols-2 gap-3">
-          <Metric label="Click totali" value={pwaTotal} icon={Smartphone} color="text-purple-600 bg-purple-50" />
-          <Metric label="Utenti unici" value={pwaUniqueUsers} emoji="👤" color="text-purple-600 bg-purple-50" />
+          <Metric label="Banner mostrato" value={pwaBannerTotal} emoji="👁️" color="text-gray-600 bg-gray-50" />
+          <Metric label="Utenti (banner)" value={pwaBannerUniqueUsers} emoji="👤" color="text-gray-600 bg-gray-50" />
+          <Metric label="Click installa" value={pwaTotal} icon={Smartphone} color="text-purple-600 bg-purple-50" />
+          <Metric label="Utenti (click)" value={pwaUniqueUsers} emoji="✅" color="text-purple-600 bg-purple-50" />
         </div>
-        {pwaTotal === 0 && (
-          <p className="text-[10px] text-gray-400 mt-2">Nessun click sul pulsante installa nel periodo.</p>
+        {pwaTotal === 0 && pwaBannerTotal === 0 && (
+          <p className="text-[10px] text-gray-400 mt-2">Nessun dato nel periodo.</p>
         )}
       </Section>
 
