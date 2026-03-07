@@ -146,6 +146,11 @@ export default function Folders() {
 
   const createFolder = async () => {
     if (!newFolderName.trim()) return;
+    const isFree = currentUser?.plan !== "premium" && currentUser?.role !== "admin";
+    if (isFree) {
+      toast.error("Solo gli utenti premium possono creare cartelle personalizzate");
+      return;
+    }
     await base44.entities.Folder.create({ name: newFolderName.trim(), icon: "📁", is_system: false });
     setNewFolderName("");
     setShowNewFolder(false);
