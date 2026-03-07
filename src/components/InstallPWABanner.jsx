@@ -16,6 +16,8 @@ export default function InstallPWABanner() {
     setIsIOS(ios);
     setShow(true);
     sessionStorage.setItem("pwa_banner_shown", "1");
+    // Track banner impression
+    trackEvent("pwa_install_click", { occasion_label: "banner_shown" });
 
     if (!ios) {
       const handler = (e) => {
