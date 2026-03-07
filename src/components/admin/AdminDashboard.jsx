@@ -53,10 +53,10 @@ export default function AdminDashboard({ onNavigate }) {
     setGeneratingBulk(true);
     try {
       const result = await base44.functions.invoke('generateBulkRecipes');
-      toast.success(`✓ ${result.data.totalGenerated} receitas geradas com sucesso!`);
-      load();
+      toast.success(`✓ ${result.data.totalGenerated} ricette generate con successo!`);
+      load(); // Reload stats
     } catch (error) {
-      toast.error("Erro ao gerar as receitas");
+      toast.error("Errore nella generazione delle ricette");
     }
     setGeneratingBulk(false);
   };
@@ -64,11 +64,11 @@ export default function AdminDashboard({ onNavigate }) {
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
 
   const cards = [
-    { label: "Total de usuários", value: stats.totalUsers ?? "N/D", icon: Users, color: "bg-blue-50 text-blue-600" },
-    { label: "Premium ativos", value: stats.premiumUsers ?? "N/D", icon: "✨", color: "bg-amber-50 text-amber-600", emoji: true },
-    { label: "Free ativos", value: stats.freeUsers ?? "N/D", icon: "👤", color: "bg-gray-50 text-gray-600", emoji: true },
-    { label: "Total de receitas", value: stats.totalRecipes, icon: BookOpen, color: "bg-green-50 text-green-600" },
-    { label: "Erros webhook 24h", value: stats.webhookErrors24h, icon: AlertCircle, color: "bg-red-50 text-red-500" },
+    { label: "Utenti totali", value: stats.totalUsers ?? "N/D", icon: Users, color: "bg-blue-50 text-blue-600" },
+    { label: "Premium attivi", value: stats.premiumUsers ?? "N/D", icon: "✨", color: "bg-amber-50 text-amber-600", emoji: true },
+    { label: "Free attivi", value: stats.freeUsers ?? "N/D", icon: "👤", color: "bg-gray-50 text-gray-600", emoji: true },
+    { label: "Ricette totali", value: stats.totalRecipes, icon: BookOpen, color: "bg-green-50 text-green-600" },
+    { label: "Errori webhook 24h", value: stats.webhookErrors24h, icon: AlertCircle, color: "bg-red-50 text-red-500" },
   ];
 
   return (
@@ -96,8 +96,8 @@ export default function AdminDashboard({ onNavigate }) {
             <Plus className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-bold text-sm">Criar nova receita</p>
-            <p className="text-xs text-white/70">Adicionar ao catálogo</p>
+            <p className="font-bold text-sm">Crea nuova ricetta</p>
+            <p className="text-xs text-white/70">Aggiungi al catalogo</p>
           </div>
         </button>
 
@@ -110,8 +110,8 @@ export default function AdminDashboard({ onNavigate }) {
             {generatingBulk ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
           </div>
           <div>
-            <p className="font-bold text-sm">{generatingBulk ? "Gerando..." : "Gerar receitas diárias"}</p>
-            <p className="text-xs text-white/70">Café, Almoço, Jantar</p>
+            <p className="font-bold text-sm">{generatingBulk ? "Generando..." : "Genera ricette giornaliere"}</p>
+            <p className="text-xs text-white/70">Colazione, Pranzo, Cena</p>
           </div>
         </button>
       </div>
@@ -122,7 +122,7 @@ export default function AdminDashboard({ onNavigate }) {
       {/* Top saved */}
 
       <div>
-        <p className="text-sm font-bold text-gray-700 mb-2">🏆 Mais salvas</p>
+        <p className="text-sm font-bold text-gray-700 mb-2">🏆 Più salvate</p>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
           {stats.topSaved.map((r, i) => (
             <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < stats.topSaved.length - 1 ? "border-b border-gray-50" : ""}`}>
@@ -141,7 +141,7 @@ export default function AdminDashboard({ onNavigate }) {
 
       {/* Top prepared */}
       <div>
-        <p className="text-sm font-bold text-gray-700 mb-2">👨‍🍳 Mais preparadas</p>
+        <p className="text-sm font-bold text-gray-700 mb-2">👨‍🍳 Più preparate</p>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
           {stats.topPrepared.map((r, i) => (
             <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < stats.topPrepared.length - 1 ? "border-b border-gray-50" : ""}`}>

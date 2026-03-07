@@ -18,7 +18,7 @@ export default function AdminUsers() {
       const res = await base44.functions.invoke('adminGetUsers');
       setUsers(res.data);
     } catch (e) {
-      setError("Erro ao carregar os usuários.");
+      setError("Errore nel caricamento degli utenti.");
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ export default function AdminUsers() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
         <input
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-100 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
-          placeholder="Buscar por nome ou email..."
+          placeholder="Cerca per nome o email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -73,7 +73,7 @@ export default function AdminUsers() {
                       ? <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">✨ Premium</span>
                       : <span className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Free</span>
                     }
-                    {isBlocked && <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">🚫 Bloqueado</span>}
+                    {isBlocked && <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">🚫 Bloccato</span>}
                   </div>
                 </div>
               </div>
@@ -82,30 +82,30 @@ export default function AdminUsers() {
               <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-50">
                 <ActionBtn
                   loading={updating === u.id + "plan"}
-                  onClick={() => update(u.id, { plan: isPremium ? "free" : "premium" }, isPremium ? "Plano alterado para Free" : "Plano alterado para Premium")}
+                  onClick={() => update(u.id, { plan: isPremium ? "free" : "premium" }, isPremium ? "Piano impostato su Free" : "Piano impostato su Premium")}
                   icon={isPremium ? "↓" : <Crown className="w-3 h-3" />}
                   label={isPremium ? "→ Free" : "→ Premium"}
                   color={isPremium ? "gray" : "amber"}
                 />
                 <ActionBtn
                   loading={updating === u.id + "role"}
-                  onClick={() => update(u.id, { role: isAdmin ? "user" : "admin" }, isAdmin ? "Admin removido" : "Promovido a Admin")}
+                  onClick={() => update(u.id, { role: isAdmin ? "user" : "admin" }, isAdmin ? "Rimosso da Admin" : "Promosso Admin")}
                   icon={isAdmin ? <Shield className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
-                  label={isAdmin ? "Remover Admin" : "Tornar Admin"}
+                  label={isAdmin ? "Rimuovi Admin" : "Rendi Admin"}
                   color={isAdmin ? "red" : "purple"}
                 />
                 <ActionBtn
                   loading={updating === u.id + "status"}
-                  onClick={() => update(u.id, { status: isBlocked ? "active" : "blocked" }, isBlocked ? "Usuário desbloqueado" : "Usuário bloqueado")}
+                  onClick={() => update(u.id, { status: isBlocked ? "active" : "blocked" }, isBlocked ? "Utente sbloccato" : "Utente bloccato")}
                   icon={isBlocked ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
-                  label={isBlocked ? "Desbloquear" : "Bloquear"}
+                  label={isBlocked ? "Sblocca" : "Blocca"}
                   color={isBlocked ? "green" : "red"}
                 />
               </div>
             </div>
           );
         })}
-        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nenhum usuário encontrado</p>}
+        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nessun utente trovato</p>}
       </div>
     </div>
   );

@@ -87,7 +87,7 @@ export default function AdminRecipesManager() {
   };
 
   const handleGenerateRecipe = async () => {
-    if (!form.gen_prompt.trim()) return toast.error("Insira um prompt antes de gerar");
+    if (!form.gen_prompt.trim()) return toast.error("Inserisci un prompt prima di generare");
     setGenerating(true);
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `Sei un cuoco italiano esperto. Crea una ricetta italiana autentica basata su questo contesto:\n\n${form.gen_prompt}\n\nRispondi SOLO in formato JSON con questa struttura esatta:\n{\n  "title": "...",\n  "description": "Una frase breve e invitante (max 20 parole)",\n  "prep_time": 25,\n  "servings": 4,\n  "calories": 320,\n  "difficulty": "Facile",\n  "ingredients": [\n    { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }\n  ],\n  "instructions": [\n    "Primo passo...",\n    "Secondo passo..."\n  ]\n}\n\nCategorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.\nDifficoltà valide: Facile, Media, Difficile.\nUsa ingredienti tipici italiani. Le istruzioni siano chiare e dettagliate.`,
@@ -117,11 +117,11 @@ export default function AdminRecipesManager() {
       instructions: result.instructions?.length ? result.instructions : f.instructions,
     }));
     setGenerating(false);
-    toast.success("Receita gerada! Verifique e edite se necessário.");
+    toast.success("Ricetta generata! Controlla e modifica se necessario.");
   };
 
   const handleGenerateImage = async () => {
-    if (!form.gen_prompt.trim() && !form.title.trim()) return toast.error("Insira um prompt ou um título");
+    if (!form.gen_prompt.trim() && !form.title.trim()) return toast.error("Inserisci un prompt o un titolo");
     setGeneratingImage(true);
     const imagePrompt = form.gen_prompt.trim()
       ? `Professional food photography: ${form.gen_prompt}. Italian cuisine, ${form.category || "food"}, restaurant quality, natural light, high resolution, beautiful plating.`
@@ -129,11 +129,11 @@ export default function AdminRecipesManager() {
     const result = await base44.integrations.Core.GenerateImage({ prompt: imagePrompt });
     setForm((f) => ({ ...f, image_url: result.url }));
     setGeneratingImage(false);
-    toast.success("Imagem gerada!");
+    toast.success("Immagine generata!");
   };
 
   const handleSave = async () => {
-    if (!form.title.trim()) return toast.error("Insira um título");
+    if (!form.title.trim()) return toast.error("Inserisci un titolo");
     setSaving(true);
     const cleanIngredients = form.ingredients.filter((i) => i.name.trim());
     const cleanInstructions = form.instructions.filter((s) => s.trim());
@@ -141,23 +141,23 @@ export default function AdminRecipesManager() {
     if (editId) {
       await base44.entities.Recipe.update(editId, data);
       setRecipes((prev) => prev.map((r) => r.id === editId ? { ...r, ...data } : r));
-      toast.success("Receita atualizada!");
+      toast.success("Ricetta aggiornata!");
     } else {
       const created = await base44.entities.Recipe.create(data);
       setRecipes((prev) => [created, ...prev]);
-      toast.success("Receita criada!");
+      toast.success("Ricetta creata!");
     }
     setSaving(false);
     setShowForm(false);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Excluir esta receita?")) return;
+    if (!confirm("Eliminare questa ricetta?")) return;
     setDeleting(id);
     await base44.entities.Recipe.delete(id);
     setRecipes((prev) => prev.filter((r) => r.id !== id));
     setDeleting(null);
-    toast.success("Receita excluída");
+    toast.success("Ricetta eliminata");
   };
 
   const filtered = recipes.filter((r) => {
@@ -189,7 +189,7 @@ export default function AdminRecipesManager() {
           <input className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-100 text-sm bg-white focus:outline-none" placeholder="Cerca ricetta..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <button onClick={openNew} className="flex items-center gap-1 bg-[#2D6A4F] text-white px-4 py-2.5 rounded-xl text-sm font-bold">
-          <Plus className="w-4 h-4" /> Nova
+          <Plus className="w-4 h-4" /> Nuova
         </button>
       </div>
 
@@ -224,21 +224,21 @@ export default function AdminRecipesManager() {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nenhuma receita encontrada</p>}
+        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nessuna ricetta trovata</p>}
       </div>
 
       {/* Form dialog */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-sm mx-auto max-h-[90vh] overflow-y-auto rounded-3xl">
           <DialogHeader>
-            <DialogTitle>{editId ? "Editar Receita" : "Nova Receita"}</DialogTitle>
+            <DialogTitle>{editId ? "Modifica Ricetta" : "Nuova Ricetta"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {/* Prompt AI */}
             <div>
-              <label className="text-[10px] text-gray-400 font-semibold uppercase">Prompt de geração IA</label>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Prompt di generazione AI</label>
               <textarea
-                placeholder="Descreva a receita: atmosfera, ocasião, ingredientes principais, estilo visual para a imagem..."
+                placeholder="Descrivi la ricetta: atmosfera, occasione, ingredienti chiave, stile visivo per l'immagine..."
                 value={form.gen_prompt}
                 onChange={(e) => setForm({ ...form, gen_prompt: e.target.value })}
                 className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2.5 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
@@ -251,7 +251,7 @@ export default function AdminRecipesManager() {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#2D6A4F] text-white text-xs font-bold transition-all hover:bg-[#235c43] disabled:opacity-60"
                 >
                   {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  {generating ? "Gerando..." : "Gerar receita"}
+                  {generating ? "Genero..." : "Genera ricetta"}
                 </button>
                 <button
                   type="button"
@@ -260,7 +260,7 @@ export default function AdminRecipesManager() {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#E07A3A] text-white text-xs font-bold transition-all hover:bg-[#c86a2e] disabled:opacity-60"
                 >
                   {generatingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Image className="w-3.5 h-3.5" />}
-                  {generatingImage ? "Gerando..." : "Gerar imagem"}
+                  {generatingImage ? "Genero..." : "Genera immagine"}
                 </button>
               </div>
             </div>
@@ -274,19 +274,18 @@ export default function AdminRecipesManager() {
               </label>
             </div>
 
-            <Input placeholder="Título *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl" />
-            <textarea placeholder="Descrição" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-xl border border-gray-100 px-3 py-2 text-sm resize-none h-20 focus:outline-none" />
+            <Input placeholder="Titolo *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl" />
+            <textarea placeholder="Descrizione" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-xl border border-gray-100 px-3 py-2 text-sm resize-none h-20 focus:outline-none" />
 
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase">Categoria</label>
-
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2 text-sm bg-white focus:outline-none">
                   {categories.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 font-semibold uppercase">Dificuldade</label>
+                <label className="text-[10px] text-gray-400 font-semibold uppercase">Difficoltà</label>
                 <select value={form.difficulty} onChange={(e) => setForm({ ...form, difficulty: e.target.value })} className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2 text-sm bg-white focus:outline-none">
                   {difficulties.map((d) => <option key={d}>{d}</option>)}
                 </select>
@@ -296,7 +295,6 @@ export default function AdminRecipesManager() {
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase">Tempo (min)</label>
-
                 <Input type="number" value={form.prep_time} onChange={(e) => setForm({ ...form, prep_time: e.target.value })} className="rounded-xl mt-1" />
               </div>
               <div>
