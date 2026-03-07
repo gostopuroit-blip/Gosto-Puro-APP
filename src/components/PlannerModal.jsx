@@ -75,7 +75,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
         {/* Focus */}
         <div className="mb-5">
           <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
-            Foco
+            Stile
           </label>
           <div className="space-y-2">
             {focusOptions.map((opt) => (
