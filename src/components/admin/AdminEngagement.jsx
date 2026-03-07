@@ -276,7 +276,7 @@ export default function AdminEngagement() {
         )}
 
         {topRecipes.length === 0 && topOccasions.length === 0 && (
-          <p className="text-xs text-gray-400 mt-2">Nessun dato ancora. Il tracking si attiverà man mano che gli utenti usano l'app.</p>
+          <p className="text-xs text-gray-400 mt-2">Sem dados ainda. O tracking ativará conforme os usuários usam o app.</p>
         )}
       </Section>
 
