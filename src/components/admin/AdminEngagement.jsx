@@ -327,6 +327,31 @@ export default function AdminEngagement() {
   );
 }
 
+function ScrollDepthStats({ events }) {
+  const scrollEvents = events.filter(e => e.event_type === "recipe_scroll");
+  const total = new Set(scrollEvents.filter(e => e.recipe_id).map(e => `${e.user_email}-${e.recipe_id}`)).size;
+  const pcts = [25, 50, 75, 100];
+  const counts = pcts.map(p => ({
+    pct: p,
+    users: new Set(scrollEvents.filter(e => e.scroll_percentage >= p && e.user_email).map(e => `${e.user_email}-${e.recipe_id}`)).size,
+  }));
+  if (!total) return <p className="text-xs text-gray-400">Sem dados de scroll ainda. Aparecerá quando usuários lerem receitas.</p>;
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] text-gray-400">{total} leituras únicas (usuário × receita)</p>
+      {counts.map(c => (
+        <div key={c.pct} className="flex items-center gap-3">
+          <span className="text-xs font-bold text-gray-500 w-8">{c.pct}%</span>
+          <div className="flex-1 bg-gray-100 rounded-full h-2">
+            <div className="bg-[#2D6A4F] h-2 rounded-full" style={{ width: `${Math.max(4, Math.round((c.users / total) * 100))}%` }} />
+          </div>
+          <span className="text-xs font-bold text-gray-700 w-8 text-right">{c.users}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Section({ title, subtitle, children }) {
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
