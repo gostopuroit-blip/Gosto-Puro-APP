@@ -82,23 +82,23 @@ export default function AdminUsers() {
               <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-50">
                 <ActionBtn
                   loading={updating === u.id + "plan"}
-                  onClick={() => update(u.id, { plan: isPremium ? "free" : "premium" }, isPremium ? "Piano impostato su Free" : "Piano impostato su Premium")}
+                  onClick={() => update(u.id, { plan: isPremium ? "free" : "premium" }, isPremium ? "Plano alterado para Free" : "Plano alterado para Premium")}
                   icon={isPremium ? "↓" : <Crown className="w-3 h-3" />}
                   label={isPremium ? "→ Free" : "→ Premium"}
                   color={isPremium ? "gray" : "amber"}
                 />
                 <ActionBtn
                   loading={updating === u.id + "role"}
-                  onClick={() => update(u.id, { role: isAdmin ? "user" : "admin" }, isAdmin ? "Rimosso da Admin" : "Promosso Admin")}
+                  onClick={() => update(u.id, { role: isAdmin ? "user" : "admin" }, isAdmin ? "Admin removido" : "Promovido a Admin")}
                   icon={isAdmin ? <Shield className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
-                  label={isAdmin ? "Rimuovi Admin" : "Rendi Admin"}
+                  label={isAdmin ? "Remover Admin" : "Tornar Admin"}
                   color={isAdmin ? "red" : "purple"}
                 />
                 <ActionBtn
                   loading={updating === u.id + "status"}
-                  onClick={() => update(u.id, { status: isBlocked ? "active" : "blocked" }, isBlocked ? "Utente sbloccato" : "Utente bloccato")}
+                  onClick={() => update(u.id, { status: isBlocked ? "active" : "blocked" }, isBlocked ? "Usuário desbloqueado" : "Usuário bloqueado")}
                   icon={isBlocked ? <CheckCircle className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
-                  label={isBlocked ? "Sblocca" : "Blocca"}
+                  label={isBlocked ? "Desbloquear" : "Bloquear"}
                   color={isBlocked ? "green" : "red"}
                 />
               </div>
