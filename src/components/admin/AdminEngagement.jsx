@@ -200,7 +200,15 @@ export default function AdminEngagement() {
           <Metric label="Click installa" value={pwaTotal} icon={Smartphone} color="text-purple-600 bg-purple-50" />
           <Metric label="Utenti (click)" value={pwaUniqueUsers} emoji="✅" color="text-purple-600 bg-purple-50" />
         </div>
-        {pwaTotal === 0 && pwaBannerTotal === 0 && (
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <p className="text-xs font-bold text-gray-500 mb-2">📱 Aberturas como app instalado</p>
+          <div className="grid grid-cols-2 gap-3">
+            <Metric label="Sessões no app instalado" value={pwaInstalledSessions} emoji="📱" color="text-green-600 bg-green-50" />
+            <Metric label="Usuários com app instalado" value={pwaInstalledUsers} emoji="✅" color="text-green-600 bg-green-50" />
+          </div>
+          {pwaInstalledSessions === 0 && <p className="text-[10px] text-gray-400 mt-2">Nenhuma sessão como app instalado ainda no período.</p>}
+        </div>
+        {pwaTotal === 0 && pwaBannerTotal === 0 && pwaInstalledSessions === 0 && (
           <p className="text-[10px] text-gray-400 mt-2">Nessun dato nel periodo.</p>
         )}
       </Section>
