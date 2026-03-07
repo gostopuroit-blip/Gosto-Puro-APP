@@ -65,31 +65,31 @@ export default function InstallPWABanner() {
 
   if (isIOS) {
     return (
-      <div className="mx-5 mb-4 bg-gradient-to-br from-[#2D6A4F] to-[#40916C] rounded-2xl p-4 shadow-lg text-white">
+      <div className="mx-5 mb-4 bg-gradient-to-br from-[#2D6A4F] via-[#40916C] to-[#2D6A4F] rounded-2xl p-4 shadow-xl text-white border border-white/10">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">📲</span>
-            <p className="text-sm font-bold">Installa l'app sul telefono</p>
+            <span className="text-2xl animate-bounce" style={{ animationDelay: "0s" }}>📲</span>
+            <div>
+              <p className="text-sm font-bold leading-tight">Installa l'app</p>
+              <p className="text-[11px] text-white/70">Accesso rapido + notifiche</p>
+            </div>
           </div>
-          <button onClick={handleDismiss} className="text-white/60 p-1 -mt-1 -mr-1">
+          <button onClick={handleDismiss} className="text-white/60 hover:text-white p-1 -mt-1 -mr-1 transition">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-white/80 mb-3 leading-relaxed">
-          Aggiungi Gosto Puro alla schermata Home per accedere rapidamente e ricevere le ricette del giorno.
-        </p>
-        <div className="bg-white/15 rounded-xl p-3 space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
-            <p className="text-xs text-white/90">Tocca <span className="font-bold">⬆️ Condividi</span> nella barra del Safari</p>
+        <div className="bg-white/15 backdrop-blur-sm rounded-xl p-3 space-y-2.5">
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5">1</div>
+            <p className="text-xs text-white/90 leading-snug">Tocca <span className="font-bold">⬆️ Condividi</span> in basso</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
-            <p className="text-xs text-white/90">Scorri e tocca <span className="font-bold">"Aggiungi alla schermata Home"</span></p>
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5">2</div>
+            <p className="text-xs text-white/90 leading-snug">Scegli <span className="font-bold">"Aggiungi alla schermata Home"</span></p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
-            <p className="text-xs text-white/90">Tocca <span className="font-bold">"Aggiungi"</span> in alto a destra ✅</p>
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5">3</div>
+            <p className="text-xs text-white/90 leading-snug">Conferma con <span className="font-bold">"Aggiungi"</span> ✅</p>
           </div>
         </div>
       </div>
