@@ -295,6 +295,11 @@ export default function AdminEngagement() {
         )}
       </Section>
 
+      {/* 4. Premium Funnel */}
+      <Section title="💳 Funil Premium" subtitle="Da visualização do paywall até a conversão">
+        <AdminPremiumFunnel events={events} />
+      </Section>
+
       {/* 5. Per-user breakdown */}
       <Section title="👤 Métricas por usuário" subtitle={`${allUsers.length} usuários cadastrados · ${uniqueUsers} ativos no período`}>
         <AdminEngagementUsers events={events} allUsers={allUsers} />
