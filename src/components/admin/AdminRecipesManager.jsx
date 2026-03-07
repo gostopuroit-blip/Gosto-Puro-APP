@@ -231,7 +231,7 @@ export default function AdminRecipesManager() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-sm mx-auto max-h-[90vh] overflow-y-auto rounded-3xl">
           <DialogHeader>
-            <DialogTitle>{editId ? "Modifica Ricetta" : "Nuova Ricetta"}</DialogTitle>
+            <DialogTitle>{editId ? "Editar Receita" : "Nova Receita"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {/* Prompt AI */}
