@@ -186,6 +186,34 @@ export default function AdminEngagement() {
 
   return (
     <div className="space-y-5">
+      {/* Online Now + Today */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-bold text-gray-800">🟢 Tempo Real</p>
+          <span className="text-[10px] text-gray-400">atualiza a cada 60s</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-green-50 rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <p className="text-[10px] text-green-700 font-semibold uppercase tracking-wide">Online agora</p>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{onlineNowUsers}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">usuários únicos nos últimos 5 min</p>
+            {onlineNowSessions > 0 && <p className="text-[10px] text-green-600 mt-0.5">{onlineNowSessions} sess{onlineNowSessions !== 1 ? "ões" : "ão"}</p>}
+          </div>
+          <div className="bg-blue-50 rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">📅</span>
+              <p className="text-[10px] text-blue-700 font-semibold uppercase tracking-wide">Hoje</p>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{todayUniqueUsers}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">usuários únicos hoje</p>
+            <p className="text-[10px] text-blue-600 mt-0.5">{todaySessions.length} sess{todaySessions.length !== 1 ? "ões" : "ão"} abertas</p>
+          </div>
+        </div>
+      </div>
+
       {/* Period selector */}
       <div className="flex items-center justify-between">
         <p className="text-sm font-bold text-gray-700">Engagement & Analytics</p>
