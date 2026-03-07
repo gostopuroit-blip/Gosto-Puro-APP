@@ -86,13 +86,21 @@ export default function AdminEngagementUsers({ events, allUsers = [] }) {
           {/* Header */}
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
+              {u.name && <p className="text-[10px] text-gray-400">{u.name}</p>}
               <p className="text-xs font-bold text-gray-800 truncate">{u.email}</p>
             </div>
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
-              u.plan === "premium" ? "bg-amber-100 text-amber-700" : "bg-gray-200 text-gray-500"
-            }`}>
-              {u.plan === "premium" ? "✨ Premium" : "Free"}
-            </span>
+            <div className="flex flex-col items-end gap-1">
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                u.plan === "premium" ? "bg-amber-100 text-amber-700" : "bg-gray-200 text-gray-500"
+              }`}>
+                {u.plan === "premium" ? "✨ Premium" : "Free"}
+              </span>
+              {u.sessions === 0 && (
+                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-400">
+                  Inativo no período
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Metrics grid */}
