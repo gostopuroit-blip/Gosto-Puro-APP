@@ -87,9 +87,13 @@ export default function AdminEngagement() {
   const durations = sessionEnds.map(e => e.session_duration_seconds).filter(Boolean);
   const avgDuration = avg(durations);
 
-  // PWA
-  const pwaTotal = pwaClicks.length;
-  const pwaUniqueUsers = new Set(pwaClicks.filter(e => e.user_email).map(e => e.user_email)).size;
+  // PWA — separate banner impressions from real install clicks
+  const pwaBannerShown = pwaClicks.filter(e => e.occasion_label === "banner_shown");
+  const pwaRealClicks = pwaClicks.filter(e => e.occasion_label !== "banner_shown");
+  const pwaTotal = pwaRealClicks.length;
+  const pwaBannerTotal = pwaBannerShown.length;
+  const pwaUniqueUsers = new Set(pwaRealClicks.filter(e => e.user_email).map(e => e.user_email)).size;
+  const pwaBannerUniqueUsers = new Set(pwaBannerShown.filter(e => e.user_email).map(e => e.user_email)).size;
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 text-[#2D6A4F] animate-spin" /></div>;
 
