@@ -83,8 +83,15 @@ export default function Folders() {
   const addRecipeToFolder = async (recipe, folderId) => {
     const existing = userRecipes.find((u) => u.recipe_id === recipe.id);
     const isFree = currentUser?.plan !== "premium" && currentUser?.role !== "admin";
-    
-    // Only limit free users adding NEW recipes
+
+    // Check if trying to add to custom folder as free user
+    const isCustomFolder = !["per_fare", "fatte", "preferite", "valutate"].includes(folderId);
+    if (isFree && isCustomFolder) {
+      toast.error("Solo gli utenti premium possono usare cartelle personalizzate");
+      return;
+    }
+
+    // Only limit free users adding NEW recipes to system folders
     if (isFree && !existing) {
       const totalSaved = getTotalSavedRecipes();
       if (totalSaved >= 4) {
