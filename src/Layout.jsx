@@ -4,7 +4,7 @@ import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { useSessionTracking } from "@/components/useAnalytics";
+import { useSessionTracking, trackEvent } from "@/components/useAnalytics";
 
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
@@ -31,6 +31,11 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     base44.auth.me().then((u) => {
       setUser(u);
+      // Track login once per session
+      if (u?.email && !sessionStorage.getItem("gp_login_tracked")) {
+        sessionStorage.setItem("gp_login_tracked", "1");
+        trackEvent("login");
+      }
       // Prioriza preferência salva no perfil do usuário
       if (u?.dark_mode) {
         document.documentElement.classList.add("dark");
