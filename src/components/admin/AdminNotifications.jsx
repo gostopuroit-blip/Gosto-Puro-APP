@@ -13,7 +13,7 @@ export default function AdminNotifications() {
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) {
-      toast.error("Titolo e messaggio sono obbligatori");
+      toast.error("Título e mensagem são obrigatórios");
       return;
     }
     setSending(true);
@@ -22,12 +22,12 @@ export default function AdminNotifications() {
     setSending(false);
     if (res.data?.success) {
       setResult(res.data);
-      toast.success(`Notifica inviata a ${res.data.sent} utenti!`);
+      toast.success(`Notificação enviada para ${res.data.sent} usuários!`);
       setTitle("");
       setBody("");
       setUrl("");
     } else {
-      toast.error("Errore nell'invio della notifica");
+      toast.error("Erro ao enviar a notificação");
     }
   };
 
