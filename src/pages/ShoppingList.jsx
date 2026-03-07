@@ -127,10 +127,10 @@ export default function ShoppingList() {
       }
     }
 
-    // Delete old items one by one, ignoring not-found errors
+    // Delete old items in batches to avoid rate limit
     const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
-    for (const item of oldItems) {
-      await base44.entities.ShoppingItem.delete(item.id).catch(() => null);
+    for (let i = 0; i < oldItems.length; i += 5) {
+      await Promise.all(oldItems.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id).catch(() => null)));
     }
 
     // Create new items
