@@ -30,20 +30,9 @@ export default function AdminEngagement() {
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
 
-    // Load all analytics events in the period + all users in parallel
-    const [, usersResult] = await Promise.all([
-      (async () => {
-        let all = [];
-        let skip = 0;
-        while (true) {
-          const batch = await base44.entities.AppAnalytics.list("-created_date", 200, skip);
-          const filtered = batch.filter(e => e.date >= cutoffStr);
-          all = all.concat(filtered);
-          if (batch.length < 200 || filtered.length < batch.length) break;
-          skip += 200;
-        }
-        setEvents(all);
-      })(),
+    // Fetch events and users in parallel — events filtered by date on the server side
+    const [eventsResult, usersResult] = await Promise.all([
+      base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000),
       (async () => {
         let users = [];
         let skip = 0;
@@ -56,6 +45,7 @@ export default function AdminEngagement() {
         return users;
       })(),
     ]);
+    setEvents(eventsResult);
     setAllUsers(usersResult);
     setLoading(false);
   };
