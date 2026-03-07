@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { trackEvent } from "@/components/useAnalytics";
 import PlannerModal from "@/components/PlannerModal";
 import PremiumGate from "@/components/PremiumGate";
 import { Link } from "react-router-dom";
