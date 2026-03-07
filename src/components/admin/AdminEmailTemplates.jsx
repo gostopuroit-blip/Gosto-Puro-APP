@@ -91,7 +91,7 @@ export default function AdminEmailTemplates() {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Body (HTML)</label>
-            <p className="text-xs text-gray-500 mb-2">Use <code className="bg-gray-100 px-1 rounded">{{USER_NAME}}</code> e <code className="bg-gray-100 px-1 rounded">{{RECIPE_LIST}}</code> como placeholders</p>
+            <p className="text-xs text-gray-500 mb-2">Use <code className="bg-gray-100 px-1 rounded">{'{'}{'{''}USER_NAME{'}'}{'}'}}</code> e <code className="bg-gray-100 px-1 rounded">{'{'}{'{''}RECIPE_LIST{'}'}{'}'}}</code> como placeholders</p>
             <textarea
               value={form.body}
               onChange={(e) => setForm({...form, body: e.target.value})}
