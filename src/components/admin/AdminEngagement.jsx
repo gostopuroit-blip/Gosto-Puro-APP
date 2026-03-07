@@ -7,6 +7,7 @@ import AdminPremiumFunnel from "./AdminPremiumFunnel";
 import AdminSessionsChart from "./AdminSessionsChart";
 import AdminRetention from "./AdminRetention";
 import AdminTopUsers from "./AdminTopUsers";
+import AdminFreePremiumChart from "./AdminFreePremiumChart";
 
 const DAYS_OPTIONS = [7, 14, 30];
 
