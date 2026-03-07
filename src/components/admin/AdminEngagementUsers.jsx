@@ -14,6 +14,8 @@ export default function AdminEngagementUsers({ events, allUsers = [] }) {
         sessions: 0,
         totalDuration: 0,
         recipeViews: 0,
+        recipeSaved: 0,
+        plannerCreated: 0,
         occasionClicks: 0,
         pwaInstallClick: false,
         pwaOpenedInstalled: false,
