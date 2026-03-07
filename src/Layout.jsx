@@ -65,6 +65,11 @@ export default function Layout({ children, currentPageName }) {
     }
   }, [currentPageName]);
 
+  // Admin page gets its own full-screen layout — no banner, no bottom nav
+  if (currentPageName === "Admin") {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex flex-col overflow-x-hidden">
       <style>{`
