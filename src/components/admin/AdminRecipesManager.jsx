@@ -117,7 +117,7 @@ export default function AdminRecipesManager() {
       instructions: result.instructions?.length ? result.instructions : f.instructions,
     }));
     setGenerating(false);
-    toast.success("Ricetta generata! Controlla e modifica se necessario.");
+    toast.success("Receita gerada! Verifique e edite se necessário.");
   };
 
   const handleGenerateImage = async () => {
