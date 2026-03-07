@@ -274,7 +274,7 @@ export default function AdminRecipesManager() {
               </label>
             </div>
 
-            <Input placeholder="Titolo *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl" />
+            <Input placeholder="Título *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="rounded-xl" />
             <textarea placeholder="Descrizione" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-xl border border-gray-100 px-3 py-2 text-sm resize-none h-20 focus:outline-none" />
 
             <div className="grid grid-cols-2 gap-2">
