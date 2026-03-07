@@ -125,6 +125,7 @@ export default function Planner() {
     const created = await base44.entities.MealPlan.create(newPlan);
     setPlan(created);
     setCreating(false);
+    trackEvent("planner_created", { days, focus });
     toast.success("Piano creato!");
   };
 
