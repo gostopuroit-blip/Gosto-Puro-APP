@@ -87,7 +87,7 @@ export default function AdminRecipesManager() {
   };
 
   const handleGenerateRecipe = async () => {
-    if (!form.gen_prompt.trim()) return toast.error("Inserisci un prompt prima di generare");
+    if (!form.gen_prompt.trim()) return toast.error("Insira um prompt antes de gerar");
     setGenerating(true);
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `Sei un cuoco italiano esperto. Crea una ricetta italiana autentica basata su questo contesto:\n\n${form.gen_prompt}\n\nRispondi SOLO in formato JSON con questa struttura esatta:\n{\n  "title": "...",\n  "description": "Una frase breve e invitante (max 20 parole)",\n  "prep_time": 25,\n  "servings": 4,\n  "calories": 320,\n  "difficulty": "Facile",\n  "ingredients": [\n    { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }\n  ],\n  "instructions": [\n    "Primo passo...",\n    "Secondo passo..."\n  ]\n}\n\nCategorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.\nDifficoltà valide: Facile, Media, Difficile.\nUsa ingredienti tipici italiani. Le istruzioni siano chiare e dettagliate.`,
