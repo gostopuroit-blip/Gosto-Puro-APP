@@ -5,6 +5,8 @@ import { fmtSeconds } from "./engagementUtils";
 import AdminEngagementUsers from "./AdminEngagementUsers";
 import AdminPremiumFunnel from "./AdminPremiumFunnel";
 import AdminSessionsChart from "./AdminSessionsChart";
+import AdminRetention from "./AdminRetention";
+import AdminTopUsers from "./AdminTopUsers";
 
 const DAYS_OPTIONS = [7, 14, 30];
 
@@ -295,12 +297,27 @@ export default function AdminEngagement() {
         )}
       </Section>
 
-      {/* 4. Premium Funnel */}
+      {/* 4. Retenção D1/D7/D30 */}
+      <Section title="🔄 Retenção de Usuários" subtitle="Percentagem que voltou no D1, D7 e D30 após cadastro">
+        <AdminRetention events={events} allUsers={allUsers} />
+      </Section>
+
+      {/* 5. Premium Funnel */}
       <Section title="💳 Funil Premium" subtitle="Da visualização do paywall até a conversão">
         <AdminPremiumFunnel events={events} />
       </Section>
 
-      {/* 5. Per-user breakdown */}
+      {/* 6. Top Users */}
+      <Section title="🏆 Top Usuários" subtitle="Ranking por engagement score no período">
+        <AdminTopUsers events={events} allUsers={allUsers} />
+      </Section>
+
+      {/* 7. Scroll das receitas */}
+      <Section title="📜 Profundidade de Leitura" subtitle="Quanto os usuários leram as receitas">
+        <ScrollDepthStats events={events} />
+      </Section>
+
+      {/* 8. Per-user breakdown */}
       <Section title="👤 Métricas por usuário" subtitle={`${allUsers.length} usuários cadastrados · ${uniqueUsers} ativos no período`}>
         <AdminEngagementUsers events={events} allUsers={allUsers} />
       </Section>

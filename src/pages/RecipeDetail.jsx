@@ -9,6 +9,7 @@ const countryFlags = {
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { useRef, useEffect, useState } from "react";
 import {
   ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Flame, Check, Minus, Plus
 } from "lucide-react";
@@ -63,10 +64,30 @@ export default function RecipeDetail() {
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [servings, setServings] = useState(null);
+  const scrollTracked = useRef(new Set());
 
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const recipeId = params.get("id");
+
+  // Scroll depth tracking
+  useEffect(() => {
+    if (!recipeId) return;
+    const handleScroll = () => {
+      const el = document.documentElement;
+      const scrolled = el.scrollTop + el.clientHeight;
+      const total = el.scrollHeight;
+      const pct = Math.round((scrolled / total) * 100);
+      [25, 50, 75, 100].forEach(milestone => {
+        if (pct >= milestone && !scrollTracked.current.has(milestone)) {
+          scrollTracked.current.add(milestone);
+          trackEvent("recipe_scroll", { recipe_id: recipeId, scroll_percentage: milestone });
+        }
+      });
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [recipeId]);
 
   const FREE_SAVE_LIMIT = 4;
 
