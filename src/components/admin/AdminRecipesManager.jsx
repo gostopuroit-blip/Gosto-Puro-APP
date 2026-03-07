@@ -224,7 +224,7 @@ export default function AdminRecipesManager() {
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nessuna ricetta trovata</p>}
+        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nenhuma receita encontrada</p>}
       </div>
 
       {/* Form dialog */}
