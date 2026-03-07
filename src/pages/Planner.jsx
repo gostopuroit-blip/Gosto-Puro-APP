@@ -183,14 +183,6 @@ export default function Planner() {
     toast.success("Ricette eliminate");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
-      </div>);
-
-  }
-
   const isPremium = user?.plan === "premium" || user?.role === "admin";
 
   // Track premium_view when non-premium user sees the paywall
@@ -199,6 +191,13 @@ export default function Planner() {
       trackEvent("premium_view", { source: "planner" });
     }
   }, [user, isPremium]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
+      </div>);
+  }
 
   return (
     <div className="pb-4">
