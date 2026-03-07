@@ -14,6 +14,15 @@ const navItems = [
 { name: "Profilo", icon: UserCircle2, page: "Profile" }];
 
 
+// Capture PWA install prompt globally as early as possible
+if (typeof window !== "undefined") {
+  window.__pwaInstallPrompt = window.__pwaInstallPrompt || null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    window.__pwaInstallPrompt = e;
+  });
+}
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
