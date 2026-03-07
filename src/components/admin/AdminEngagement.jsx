@@ -236,7 +236,7 @@ export default function AdminEngagement() {
 
         {topRecipes.length > 0 && (
           <div className="mt-3">
-            <p className="text-xs font-bold text-gray-500 mb-2">Top ricette visualizzate</p>
+            <p className="text-xs font-bold text-gray-500 mb-2">Top receitas visualizadas</p>
             <div className="space-y-1.5">
               {topRecipes.map(([title, count], i) => (
                 <div key={i} className="flex items-center gap-2">
