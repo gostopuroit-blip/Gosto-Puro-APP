@@ -22,10 +22,15 @@ export default function EnableNotificationsBanner() {
       setStatus("unsupported");
       return;
     }
-    if (localStorage.getItem("notif_dismissed")) {
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    // In PWA standalone mode, ignore the "dismissed" flag — always re-offer notifications
+    if (!isStandalone && localStorage.getItem("notif_dismissed")) {
       setDismissed(true);
       return;
     }
+
     if (Notification.permission === "granted") {
       setStatus("subscribed");
     } else if (Notification.permission === "denied") {
