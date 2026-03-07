@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, RefreshCw, Users, BookOpen, Smartphone, Clock, TrendingUp } from "lucide-react";
 import { fmtSeconds } from "./engagementUtils";
@@ -21,8 +21,33 @@ export default function AdminEngagement() {
   const [events, setEvents] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [now, setNow] = useState(new Date());
+  const timerRef = useRef(null);
 
   useEffect(() => { load(); }, [days]);
+
+  // Refresh "online now" every 60 seconds
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      loadRecent();
+      setNow(new Date());
+    }, 60000);
+    loadRecent();
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  const loadRecent = async () => {
+    // Fetch last 5 minutes of session_start events
+    const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    try {
+      const recent = await base44.entities.AppAnalytics.filter(
+        { event_type: "session_start", created_date: { $gte: since } },
+        "-created_date", 100
+      );
+      setRecentEvents(recent);
+    } catch {}
+  };
 
   const load = async () => {
     setLoading(true);
