@@ -162,8 +162,8 @@ export default function ShoppingList() {
 
   const clearChecked = async () => {
     const checked = items.filter((i) => i.is_checked);
-    for (const item of checked) {
-      await base44.entities.ShoppingItem.delete(item.id);
+    for (let i = 0; i < checked.length; i += 5) {
+      await Promise.all(checked.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id).catch(() => null)));
     }
     setItems((prev) => prev.filter((i) => !i.is_checked));
     toast.success("Elementi completati rimossi");
