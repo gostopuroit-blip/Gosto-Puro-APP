@@ -1,19 +1,14 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, RefreshCw, Users, BookOpen, Smartphone, Clock, TrendingUp } from "lucide-react";
+import { fmtSeconds } from "./engagementUtils";
+import AdminEngagementUsers from "./AdminEngagementUsers";
 
 const DAYS_OPTIONS = [7, 14, 30];
 
 function avg(arr) {
   if (!arr.length) return 0;
   return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
-}
-
-function fmtSeconds(s) {
-  if (!s || s < 60) return `${s || 0}s`;
-  const m = Math.floor(s / 60);
-  const rem = s % 60;
-  return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
 }
 
 export default function AdminEngagement() {
