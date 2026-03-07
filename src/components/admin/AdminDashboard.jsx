@@ -141,7 +141,7 @@ export default function AdminDashboard({ onNavigate }) {
 
       {/* Top prepared */}
       <div>
-        <p className="text-sm font-bold text-gray-700 mb-2">👨‍🍳 Più preparate</p>
+        <p className="text-sm font-bold text-gray-700 mb-2">👨‍🍳 Mais preparadas</p>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
           {stats.topPrepared.map((r, i) => (
             <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < stats.topPrepared.length - 1 ? "border-b border-gray-50" : ""}`}>
