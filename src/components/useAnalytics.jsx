@@ -47,10 +47,30 @@ export function useSessionTracking() {
     const handleEnd = () => {
       const duration = Math.round((Date.now() - startRef.current) / 1000);
       if (duration < 3) return;
+      // Use sendBeacon for reliability on mobile/PWA close
+      const user_email = sessionStorage.getItem("gp_user_email") || null;
+      const user_plan = sessionStorage.getItem("gp_user_plan") || "free";
+      const payload = JSON.stringify({
+        event_type: "session_end",
+        user_email,
+        user_plan,
+        session_id: getSessionId(),
+        date: todayStr(),
+        session_duration_seconds: duration,
+      });
+      // Fire via normal trackEvent as well (best effort)
       trackEvent("session_end", { session_duration_seconds: duration });
     };
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") handleEnd();
+    };
+
     window.addEventListener("pagehide", handleEnd);
-    return () => window.removeEventListener("pagehide", handleEnd);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pagehide", handleEnd);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
 }
