@@ -121,7 +121,7 @@ export default function AdminRecipesManager() {
   };
 
   const handleGenerateImage = async () => {
-    if (!form.gen_prompt.trim() && !form.title.trim()) return toast.error("Inserisci un prompt o un titolo");
+    if (!form.gen_prompt.trim() && !form.title.trim()) return toast.error("Insira um prompt ou um título");
     setGeneratingImage(true);
     const imagePrompt = form.gen_prompt.trim()
       ? `Professional food photography: ${form.gen_prompt}. Italian cuisine, ${form.category || "food"}, restaurant quality, natural light, high resolution, beautiful plating.`
