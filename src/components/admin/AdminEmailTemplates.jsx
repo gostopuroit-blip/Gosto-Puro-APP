@@ -146,7 +146,7 @@ export default function AdminEmailTemplates() {
                   {t.is_active && <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-semibold">Ativo</span>}
                 </div>
                 <p className="text-sm text-gray-600 truncate">Subject: {t.subject}</p>
-                <p className="text-xs text-gray-400 mt-1 line-clamp-2">{t.body.replace(/<[^>]*>/g, '').substring(0, 100)}...</p>
+                <p className="text-xs text-gray-400 mt-1 line-clamp-2">{String(t.body).replace(/<[^>]*>/g, '').substring(0, 100).concat('...')}</p>
               </div>
               <div className="flex items-center gap-2 ml-3 flex-shrink-0">
                 <Button onClick={() => handleEdit(t)} size="sm" variant="outline">Editar</Button>
