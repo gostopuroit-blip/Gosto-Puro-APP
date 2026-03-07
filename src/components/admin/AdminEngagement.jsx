@@ -126,7 +126,14 @@ export default function AdminEngagement() {
   const pwaUniqueUsers = new Set(pwaRealClicks.filter(e => e.user_email).map(e => e.user_email)).size;
   const pwaBannerUniqueUsers = new Set(pwaBannerShown.filter(e => e.user_email).map(e => e.user_email)).size;
   const pwaInstalledSessions = pwaOpenedInstalled.length;
-  const pwaInstalledUsers = new Set(pwaOpenedInstalled.filter(e => e.user_email).map(e => e.user_email)).size;
+  const pwaInstalledUsersSet = new Set(pwaOpenedInstalled.filter(e => e.user_email).map(e => e.user_email));
+  const pwaInstalledUsers = pwaInstalledUsersSet.size;
+
+  // PWA installed users: how many returned (>1 session) vs opened only once
+  const pwaInstalledReturned = [...pwaInstalledUsersSet].filter(email => (sessionsByUser[email] || 0) > 1).length;
+  const pwaInstalledNotReturned = pwaInstalledUsers - pwaInstalledReturned;
+  // Users who never installed (opened via browser only, not standalone)
+  const nonInstalledActiveUsers = uniqueUsers - [...pwaInstalledUsersSet].filter(email => sessionsByUser[email]).length;
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 text-[#2D6A4F] animate-spin" /></div>;
 
