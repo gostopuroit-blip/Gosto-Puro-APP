@@ -189,7 +189,7 @@ export default function AdminRecipesManager() {
           <input className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-100 text-sm bg-white focus:outline-none" placeholder="Cerca ricetta..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <button onClick={openNew} className="flex items-center gap-1 bg-[#2D6A4F] text-white px-4 py-2.5 rounded-xl text-sm font-bold">
-          <Plus className="w-4 h-4" /> Nuova
+          <Plus className="w-4 h-4" /> Nova
         </button>
       </div>
 
