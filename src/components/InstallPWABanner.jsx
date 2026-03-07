@@ -8,14 +8,14 @@ export default function InstallPWABanner() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   useEffect(() => {
-    // Show only once per session
-    const shownThisSession = sessionStorage.getItem("pwa_banner_shown");
-    if (shownThisSession) return;
+    // Show once every 3 days
+    const lastShown = localStorage.getItem("pwa_banner_last_shown");
+    if (lastShown && Date.now() - parseInt(lastShown) < 3 * 24 * 60 * 60 * 1000) return;
 
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     setIsIOS(ios);
     setShow(true);
-    sessionStorage.setItem("pwa_banner_shown", "1");
+    localStorage.setItem("pwa_banner_last_shown", Date.now().toString());
     // Track banner impression
     trackEvent("pwa_install_click", { occasion_label: "banner_shown" });
 
