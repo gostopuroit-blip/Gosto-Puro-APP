@@ -42,16 +42,21 @@ export default function InstallPWABanner() {
   }, []);
 
   const handleDismiss = () => {
-    localStorage.setItem("pwa_banner_dismissed", Date.now().toString());
+    const count = parseInt(localStorage.getItem("pwa_banner_dismiss_count") || "0");
+    localStorage.setItem("pwa_banner_dismiss_count", (count + 1).toString());
+    trackEvent("pwa_install_click", { occasion_label: "banner_dismissed" });
     setShow(false);
   };
 
   const handleInstall = async () => {
-    trackEvent("pwa_install_click");
+    trackEvent("pwa_install_click", { occasion_label: "banner_clicked" });
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") setShow(false);
+      if (outcome === "accepted") {
+        trackEvent("pwa_install_click", { occasion_label: "banner_installed" });
+        setShow(false);
+      }
       setDeferredPrompt(null);
     }
   };
