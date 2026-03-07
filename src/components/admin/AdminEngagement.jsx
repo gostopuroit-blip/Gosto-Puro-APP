@@ -193,16 +193,21 @@ export default function AdminEngagement() {
       </Section>
 
       {/* 4. Session duration */}
-      <Section title="⏱ Tempo medio in app" subtitle={`Basato su ${durations.length} sessioni`}>
-        <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-4">
-          <Clock className="w-8 h-8 text-[#2D6A4F]" />
-          <div>
-            <p className="text-3xl font-bold text-gray-900">{fmtSeconds(avgDuration)}</p>
-            <p className="text-xs text-gray-400">tempo medio per sessione</p>
-          </div>
+      <Section title="⏱ Sessioni & Tempo in app" subtitle={`${sessionStarts.length} sessioni avviate nel periodo`}>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <Metric label="Sessioni totali" value={sessionStarts.length} icon={Clock} color="text-[#2D6A4F] bg-green-50" />
+          <Metric label="Sessioni con durata" value={durations.length} emoji="⏱" color="text-blue-600 bg-blue-50" />
         </div>
-        {durations.length === 0 && (
-          <p className="text-[10px] text-gray-400 mt-2">Nessuna sessione completata registrata ancora.</p>
+        {durations.length > 0 ? (
+          <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-4">
+            <Clock className="w-8 h-8 text-[#2D6A4F]" />
+            <div>
+              <p className="text-3xl font-bold text-gray-900">{fmtSeconds(avgDuration)}</p>
+              <p className="text-xs text-gray-400">tempo medio per sessione</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-[10px] text-gray-400">Il tempo medio si calcolerà man mano che gli utenti chiudono l'app. Le sessioni avviate sono già visibili sopra.</p>
         )}
       </Section>
     </div>
