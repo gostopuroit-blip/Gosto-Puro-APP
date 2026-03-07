@@ -39,13 +39,27 @@ export default function AdminEngagementUsers({ events }) {
     return Object.values(map).sort((a, b) => b.sessions - a.sessions);
   }, [events]);
 
+  const [search, setSearch] = useState("");
+
   if (!userMap.length) return (
     <p className="text-xs text-gray-400">Nenhum dado de usuário no período.</p>
   );
 
+  const filtered = search.trim()
+    ? userMap.filter(u => u.email.toLowerCase().includes(search.toLowerCase()))
+    : userMap;
+
   return (
     <div className="space-y-2">
-      {userMap.map(u => (
+      <input
+        type="text"
+        placeholder="Buscar por e-mail..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 mb-1 outline-none"
+      />
+      <p className="text-[10px] text-gray-400 mb-1">{filtered.length} usuário{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}</p>
+      {filtered.map(u => (
         <div key={u.email} className="bg-gray-50 rounded-xl p-3 space-y-2">
           {/* Header */}
           <div className="flex items-center justify-between gap-2">
