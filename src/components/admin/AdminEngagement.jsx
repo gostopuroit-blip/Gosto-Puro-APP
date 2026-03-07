@@ -171,6 +171,54 @@ export default function AdminEngagement() {
         </div>
       </div>
 
+      {/* UTM / Origem do tráfego */}
+      <Section title="🔗 Origem do Tráfego (UTM)" subtitle="De onde os usuários chegam ao app — via links com ?utm_source=">
+        {topUtm.length === 0 ? (
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500">Nenhum acesso via link UTM registrado ainda.</p>
+            <div className="bg-amber-50 rounded-xl p-3">
+              <p className="text-xs font-bold text-amber-700 mb-1">Como usar:</p>
+              <p className="text-[11px] text-amber-600 leading-relaxed">Adicione <code className="bg-amber-100 px-1 rounded">?utm_source=tiktok</code> no final dos seus links. Exemplos:</p>
+              <div className="mt-2 space-y-1">
+                {["tiktok", "instagram", "facebook", "email", "whatsapp"].map(s => (
+                  <p key={s} className="text-[10px] font-mono text-amber-700 bg-amber-100 rounded px-2 py-0.5 truncate">
+                    gostopuro.it?utm_source={s}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              <Metric label="Total de visitas UTM" value={utmVisits.length} emoji="🔗" color="text-blue-600 bg-blue-50" />
+              <Metric label="Fontes distintas" value={topUtm.length} emoji="📊" color="text-purple-600 bg-purple-50" />
+            </div>
+            {topUtm.map((item, i) => {
+              const sourceEmoji = {
+                tiktok: "🎵", instagram: "📸", facebook: "👥", email: "📧",
+                whatsapp: "💬", youtube: "▶️", google: "🔍", twitter: "🐦", x: "🐦"
+              }[item.src.toLowerCase()] || "🔗";
+              return (
+                <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                  <span className="text-xl w-8 text-center">{sourceEmoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-bold text-gray-800 capitalize">{item.src}</p>
+                      <span className="text-xs font-bold text-[#2D6A4F]">{item.visits} visitas</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div className="bg-[#2D6A4F] h-1.5 rounded-full" style={{ width: `${Math.round((item.visits / topUtm[0].visits) * 100)}%` }} />
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{item.users} usuário{item.users !== 1 ? "s" : ""} únicos</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Section>
+
       {/* 0a. Sessions chart */}
       <Section title="📊 Sessões por dia" subtitle={`Últimos ${days} dias — verde escuro = sessões, verde claro = usuários únicos`}>
         <AdminSessionsChart events={events} days={days} />
