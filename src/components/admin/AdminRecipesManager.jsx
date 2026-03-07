@@ -280,6 +280,7 @@ export default function AdminRecipesManager() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase">Categoria</label>
+
                 <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2 text-sm bg-white focus:outline-none">
                   {categories.map((c) => <option key={c}>{c}</option>)}
                 </select>
