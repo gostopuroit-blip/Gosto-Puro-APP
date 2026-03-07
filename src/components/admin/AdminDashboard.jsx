@@ -110,8 +110,8 @@ export default function AdminDashboard({ onNavigate }) {
             {generatingBulk ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
           </div>
           <div>
-            <p className="font-bold text-sm">{generatingBulk ? "Generando..." : "Genera ricette giornaliere"}</p>
-            <p className="text-xs text-white/70">Colazione, Pranzo, Cena</p>
+            <p className="font-bold text-sm">{generatingBulk ? "Gerando..." : "Gerar receitas diárias"}</p>
+            <p className="text-xs text-white/70">Café, Almoço, Jantar</p>
           </div>
         </button>
       </div>
