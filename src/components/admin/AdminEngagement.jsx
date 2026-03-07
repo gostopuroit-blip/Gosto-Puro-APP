@@ -281,12 +281,12 @@ export default function AdminEngagement() {
       </Section>
 
       {/* 3. PWA Install */}
-      <Section title="📲 Installazione PWA" subtitle="Banner mostrato + click installa">
+      <Section title="📲 Instalação PWA" subtitle="Banner exibido + cliques para instalar">
         <div className="grid grid-cols-2 gap-3">
-          <Metric label="Banner mostrato" value={pwaBannerTotal} emoji="👁️" color="text-gray-600 bg-gray-50" />
-          <Metric label="Utenti (banner)" value={pwaBannerUniqueUsers} emoji="👤" color="text-gray-600 bg-gray-50" />
-          <Metric label="Click installa" value={pwaTotal} icon={Smartphone} color="text-purple-600 bg-purple-50" />
-          <Metric label="Utenti (click)" value={pwaUniqueUsers} emoji="✅" color="text-purple-600 bg-purple-50" />
+          <Metric label="Banner exibido" value={pwaBannerTotal} emoji="👁️" color="text-gray-600 bg-gray-50" />
+          <Metric label="Usuários (banner)" value={pwaBannerUniqueUsers} emoji="👤" color="text-gray-600 bg-gray-50" />
+          <Metric label="Cliques em instalar" value={pwaTotal} icon={Smartphone} color="text-purple-600 bg-purple-50" />
+          <Metric label="Usuários (clique)" value={pwaUniqueUsers} emoji="✅" color="text-purple-600 bg-purple-50" />
         </div>
         <div className="mt-3 pt-3 border-t border-gray-100">
           <p className="text-xs font-bold text-gray-500 mb-2">📱 Aberturas como app instalado</p>
