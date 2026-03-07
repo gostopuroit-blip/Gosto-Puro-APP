@@ -311,6 +311,48 @@ export default function AdminEngagement() {
         )}
       </Section>
 
+      {/* NEW: Receitas Salvas */}
+      <Section title="❤️ Receitas Salvas" subtitle={`${recipeSaves.length} saves no período · ${new Set(recipeSaves.filter(e => e.user_email).map(e => e.user_email)).size} usuários`}>
+        {topSaved.length > 0 ? (
+          <div className="space-y-1.5">
+            {topSaved.map(([title, count], i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-300 w-4">{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-xs text-gray-700 truncate">{title}</p>
+                    <span className="text-xs font-bold text-amber-600">{count}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div className="bg-amber-400 h-1.5 rounded-full" style={{ width: `${Math.round((count / topSaved[0][1]) * 100)}%` }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400">Sem saves ainda no período.</p>
+        )}
+      </Section>
+
+      {/* NEW: Planners criados */}
+      <Section title="📅 Planners Criados" subtitle="Quantos meal plans foram gerados no período">
+        <div className="grid grid-cols-2 gap-3">
+          <Metric label="Total de planners criados" value={plannerCreated.length} emoji="📅" color="text-[#2D6A4F] bg-green-50" />
+          <Metric label="Usuários que criaram" value={new Set(plannerCreated.filter(e => e.user_email).map(e => e.user_email)).size} emoji="👤" color="text-purple-600 bg-purple-50" />
+        </div>
+        {plannerCreated.length === 0 && <p className="text-[10px] text-gray-400 mt-1">Sem planners criados no período.</p>}
+      </Section>
+
+      {/* NEW: Free vs Premium */}
+      <Section title="👥 Free vs Premium" subtitle="Sessões diárias por tipo de plano">
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <Metric label="Usuários Free ativos" value={freeUsers} emoji="👤" color="text-gray-600 bg-gray-50" />
+          <Metric label="Usuários Premium ativos" value={premiumUsers} emoji="✨" color="text-amber-600 bg-amber-50" />
+        </div>
+        <AdminFreePremiumChart events={events} days={days} />
+      </Section>
+
       {/* 4. Retenção D1/D7/D30 */}
       <Section title="🔄 Retenção de Usuários" subtitle="Percentagem que voltou no D1, D7 e D30 após cadastro">
         <AdminRetention events={events} allUsers={allUsers} />
