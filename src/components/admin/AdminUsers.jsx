@@ -105,7 +105,7 @@ export default function AdminUsers() {
             </div>
           );
         })}
-        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nessun utente trovato</p>}
+        {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nenhum usuário encontrado</p>}
       </div>
     </div>
   );
