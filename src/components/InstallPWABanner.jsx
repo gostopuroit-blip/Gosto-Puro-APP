@@ -97,25 +97,25 @@ export default function InstallPWABanner() {
   }
 
   return (
-    <div className="mx-5 mb-4 bg-white border border-[#2D6A4F]/20 rounded-2xl p-4 shadow-sm">
+    <div className="mx-5 mb-4 bg-gradient-to-br from-[#2D6A4F] to-[#1a4d38] rounded-2xl p-4 shadow-xl border border-white/10 text-white">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-[#2D6A4F]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-          <Bell className="w-5 h-5 text-[#2D6A4F]" />
+        <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
+          <Download className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-gray-900">Ricevi le ricette del giorno</p>
-          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-            Installa l'app sul telefono per ricevere una notifica ogni mattina con le ricette del giorno.
+          <p className="text-sm font-bold text-white">Installa l'app gratis 📱</p>
+          <p className="text-xs text-white/80 mt-0.5 leading-snug">
+            Accesso rapido + notifiche giornaliere delle ricette
           </p>
           <button
             onClick={handleInstall}
-            className="mt-2.5 flex items-center gap-1.5 bg-[#2D6A4F] text-white text-xs font-semibold px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
+            className="mt-2.5 flex items-center gap-1.5 bg-white/95 text-[#2D6A4F] text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all shadow-lg hover:bg-white"
           >
-            <Download className="w-3.5 h-3.5" />
-            Installa l'app
+            <span>👆</span>
+            Installa ora
           </button>
         </div>
-        <button onClick={handleDismiss} className="text-gray-400 p-1 -mt-1 -mr-1 flex-shrink-0">
+        <button onClick={handleDismiss} className="text-white/50 hover:text-white/80 p-1 -mt-1 -mr-1 flex-shrink-0 transition">
           <X className="w-4 h-4" />
         </button>
       </div>
