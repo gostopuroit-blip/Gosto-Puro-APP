@@ -9,9 +9,10 @@ import AdminWebhooks from "@/components/admin/AdminWebhooks";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminEngagement from "@/components/admin/AdminEngagement";
+import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
@@ -19,6 +20,7 @@ const tabs = [
   { key: "utenti",       label: "Usuários",        icon: Users },
   { key: "ricette",      label: "Receitas",        icon: UtensilsCrossed },
   { key: "genera",       label: "Gerar com IA",    icon: Sparkles },
+  { key: "emails",       label: "Email Templates",  icon: Mail },
   { key: "notifiche",    label: "Notificações",    icon: Bell },
   { key: "permessi",     label: "Permissões",      icon: Lock },
   { key: "webhooks",     label: "Webhooks",        icon: Webhook },
@@ -128,6 +130,7 @@ function AdminContent() {
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
+          {activeTab === "emails"       && <AdminEmailTemplates />}
           {activeTab === "notifiche"    && <AdminNotifications />}
           {activeTab === "permessi"     && <AdminPermissions />}
           {activeTab === "webhooks"     && <AdminWebhooks />}
