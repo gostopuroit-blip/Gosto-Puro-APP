@@ -253,7 +253,7 @@ export default function AdminEngagement() {
 
         {topOccasions.length > 0 && (
           <div className="mt-3">
-            <p className="text-xs font-bold text-gray-500 mb-2">Occasioni più cliccate</p>
+            <p className="text-xs font-bold text-gray-500 mb-2">Ocasiões mais clicadas</p>
             <div className="space-y-1.5">
               {topOccasions.map(([label, count], i) => (
                 <div key={i} className="flex items-center gap-2">
