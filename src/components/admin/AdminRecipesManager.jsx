@@ -236,9 +236,9 @@ export default function AdminRecipesManager() {
           <div className="space-y-3">
             {/* Prompt AI */}
             <div>
-              <label className="text-[10px] text-gray-400 font-semibold uppercase">Prompt di generazione AI</label>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Prompt de geração IA</label>
               <textarea
-                placeholder="Descrivi la ricetta: atmosfera, occasione, ingredienti chiave, stile visivo per l'immagine..."
+                placeholder="Descreva a receita: atmosfera, ocasião, ingredientes principais, estilo visual para a imagem..."
                 value={form.gen_prompt}
                 onChange={(e) => setForm({ ...form, gen_prompt: e.target.value })}
                 className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2.5 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
