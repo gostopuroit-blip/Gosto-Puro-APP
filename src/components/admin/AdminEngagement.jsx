@@ -55,23 +55,35 @@ export default function AdminEngagement() {
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
 
-    // Fetch events and users in parallel — events filtered by date on the server side
-    const [eventsResult, usersResult] = await Promise.all([
-      base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000),
-      (async () => {
-        let users = [];
-        let skip = 0;
-        while (true) {
-          const batch = await base44.entities.User.list("-created_date", 200, skip);
-          users = users.concat(batch);
-          if (batch.length < 200) break;
-          skip += 200;
-        }
-        return users;
-      })(),
-    ]);
-    setEvents(eventsResult);
-    setAllUsers(usersResult);
+    try {
+      // Fetch events and users in parallel
+      const [eventsResult, usersResult] = await Promise.all([
+        base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000).catch(() => []),
+        (async () => {
+          try {
+            let users = [];
+            let skip = 0;
+            let maxIterations = 10;
+            let iterations = 0;
+            while (iterations < maxIterations) {
+              const batch = await base44.entities.User.list("-created_date", 200, skip);
+              users = users.concat(batch);
+              if (batch.length < 200) break;
+              skip += 200;
+              iterations++;
+            }
+            return users;
+          } catch {
+            return [];
+          }
+        })(),
+      ]);
+      setEvents(eventsResult || []);
+      setAllUsers(usersResult || []);
+    } catch {
+      setEvents([]);
+      setAllUsers([]);
+    }
     setLoading(false);
   };
 
