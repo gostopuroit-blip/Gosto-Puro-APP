@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-
 import { useRef, useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,7 +15,6 @@ const countryFlags = {
   "Libano": "🇱🇧", "Perù": "🇵🇪", "Vietnam": "🇻🇳",
 };
 
-// Scale a quantity string by a ratio
 function scaleQty(qtyStr, ratio) {
   if (!qtyStr || ratio === 1) return qtyStr;
   const match = String(qtyStr).match(/^([\d.,]+)\s*(.*)/);
@@ -69,7 +66,6 @@ export default function RecipeDetail() {
   const params = new URLSearchParams(window.location.search);
   const recipeId = params.get("id");
 
-  // Scroll depth tracking
   useEffect(() => {
     if (!recipeId) return;
     const handleScroll = () => {
@@ -133,16 +129,9 @@ export default function RecipeDetail() {
   const handlePrepare = async () => {
     setSaving(true);
     if (userRecipe) {
-      await base44.entities.UserRecipe.update(userRecipe.id, {
-        is_prepared: true,
-        status: "fatta",
-      });
+      await base44.entities.UserRecipe.update(userRecipe.id, { is_prepared: true, status: "fatta" });
     } else {
-      await base44.entities.UserRecipe.create({
-        recipe_id: recipeId,
-        is_prepared: true,
-        status: "fatta",
-      });
+      await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_prepared: true, status: "fatta" });
     }
     const newCount = (recipe.numero_preparate || 0) + 1;
     await base44.entities.Recipe.update(recipeId, { numero_preparate: newCount });
@@ -156,14 +145,10 @@ export default function RecipeDetail() {
     const newTotal = (recipe.total_rating || 0) - oldRating + rating;
     const newCount = (recipe.rating_count || 0) + (oldRating ? 0 : 1);
     const newAvg = newTotal / newCount;
-
     if (userRecipe) {
       await base44.entities.UserRecipe.update(userRecipe.id, { user_rating: rating });
     } else {
-      await base44.entities.UserRecipe.create({
-        recipe_id: recipeId,
-        user_rating: rating,
-      });
+      await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
     }
     await base44.entities.Recipe.update(recipeId, {
       total_rating: newTotal,
@@ -195,7 +180,6 @@ export default function RecipeDetail() {
 
   return (
     <div className="pb-8">
-      {/* Hero Image */}
       <div className="relative">
         <img
           src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800"}
@@ -213,15 +197,10 @@ export default function RecipeDetail() {
           onClick={handleSaveClick}
           className="absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
         >
-          <Heart
-            className={`w-5 h-5 transition-colors ${
-              userRecipe?.is_saved ? "text-rose-500 fill-rose-500" : "text-gray-600"
-            }`}
-          />
+          <Heart className={`w-5 h-5 transition-colors ${userRecipe?.is_saved ? "text-rose-500 fill-rose-500" : "text-gray-600"}`} />
         </button>
       </div>
 
-      {/* Content */}
       <div className="px-5 -mt-6 relative">
         <div className="bg-white rounded-3xl p-5 shadow-lg border border-gray-50">
           <div className="flex items-start justify-between">
@@ -240,13 +219,11 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="flex gap-2 mt-4 flex-wrap">
             <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
               <Clock className="w-4 h-4 text-[#2D6A4F]" />
               <span className="text-xs font-semibold">{recipe.prep_time} min</span>
             </div>
-            {/* Servings selector */}
             <div className="flex items-center gap-1 bg-gray-50 rounded-xl px-2 py-1.5">
               <Users className="w-4 h-4 text-[#2D6A4F]" />
               <button
@@ -278,9 +255,7 @@ export default function RecipeDetail() {
             <div className="flex items-center gap-3 mt-3 bg-orange-50 rounded-xl px-3 py-2.5 w-fit">
               <span className="text-base">🔥</span>
               <div>
-                <div className="text-xs font-bold text-orange-600">
-                  {recipe.calories} kcal / porzione
-                </div>
+                <div className="text-xs font-bold text-orange-600">{recipe.calories} kcal / porzione</div>
                 <div className="text-xs text-orange-400 mt-0.5">
                   Totale: {Math.round(recipe.calories * servings)} kcal ({servings} {servings === 1 ? "porzione" : "porzioni"})
                 </div>
@@ -290,7 +265,6 @@ export default function RecipeDetail() {
         </div>
       </div>
 
-      {/* Ingredients */}
       <div className="px-5 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-900">Ingredienti</h2>
@@ -309,7 +283,6 @@ export default function RecipeDetail() {
         </div>
       </div>
 
-      {/* Instructions */}
       <div className="px-5 mt-6">
         <h2 className="text-lg font-bold text-gray-900 mb-3">Preparazione</h2>
         <div className="space-y-3">
@@ -324,7 +297,6 @@ export default function RecipeDetail() {
         </div>
       </div>
 
-      {/* Rating */}
       <div className="px-5 mt-6">
         <h2 className="text-lg font-bold text-gray-900 mb-3">Valuta questa ricetta</h2>
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 flex items-center justify-center gap-2">
@@ -336,9 +308,7 @@ export default function RecipeDetail() {
             >
               <Star
                 className={`w-8 h-8 transition-colors ${
-                  star <= (userRecipe?.user_rating || 0)
-                    ? "text-amber-400 fill-amber-400"
-                    : "text-gray-200"
+                  star <= (userRecipe?.user_rating || 0) ? "text-amber-400 fill-amber-400" : "text-gray-200"
                 }`}
               />
             </button>
@@ -346,7 +316,6 @@ export default function RecipeDetail() {
         </div>
       </div>
 
-      {/* Action Buttons */}
       <div className="px-5 mt-6 space-y-3">
         <Button
           onClick={handlePrepare}
