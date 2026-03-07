@@ -411,55 +411,113 @@ export default function AdminEngagement() {
       </Section>
 
       {/* 3. PWA Install */}
-      <Section title="📲 Instalação PWA" subtitle="Banner exibido + cliques para instalar">
-        <div className="grid grid-cols-2 gap-3">
-          <Metric label="Banner exibido" value={pwaBannerTotal} emoji="👁️" color="text-gray-600 bg-gray-50" />
-          <Metric label="Usuários (banner)" value={pwaBannerUniqueUsers} emoji="👤" color="text-gray-600 bg-gray-50" />
-          <Metric label="Cliques em instalar" value={pwaTotal} icon={Smartphone} color="text-purple-600 bg-purple-50" />
-          <Metric label="Usuários (clique)" value={pwaUniqueUsers} emoji="✅" color="text-purple-600 bg-purple-50" />
-        </div>
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <p className="text-xs font-bold text-gray-500 mb-2">📱 Aberturas como app instalado</p>
-          <div className="grid grid-cols-2 gap-3">
-            <Metric label="Sessões no app instalado" value={pwaInstalledSessions} emoji="📱" color="text-green-600 bg-green-50" />
-            <Metric label="Usuários com app instalado" value={pwaInstalledUsers} emoji="✅" color="text-green-600 bg-green-50" />
+      <Section title="📲 Instalação PWA" subtitle={`Métricas de instalação e uso do app instalado`}>
+        
+        {/* Bloco 1: Funil de instalação */}
+        <div>
+          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Funil de instalação</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+              <span className="text-lg">👁️</span>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-gray-700">Banner exibido</p>
+                <p className="text-[10px] text-gray-400">Usuários que viram o convite para instalar</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-gray-900">{pwaBannerUniqueUsers}</p>
+                <p className="text-[10px] text-gray-400">{pwaBannerTotal} impressões</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-purple-50 rounded-xl p-3">
+              <span className="text-lg">👆</span>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-gray-700">Clicaram em instalar</p>
+                <p className="text-[10px] text-gray-400">Tocaram no botão de instalação</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-purple-700">{pwaUniqueUsers}</p>
+                <p className="text-[10px] text-gray-400">{pwaTotal} cliques</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-green-50 rounded-xl p-3">
+              <span className="text-lg">📱</span>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-gray-700">Abriram como app instalado</p>
+                <p className="text-[10px] text-gray-400">Confirmado via modo standalone — instalação real</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-green-700">{pwaInstalledUsers}</p>
+                <p className="text-[10px] text-gray-400">{pwaInstalledSessions} sessões</p>
+              </div>
+            </div>
           </div>
-          {pwaInstalledSessions === 0 && <p className="text-[10px] text-gray-400 mt-2">Nenhuma sessão como app instalado ainda no período.</p>}
+          {pwaBannerUniqueUsers > 0 && (
+            <p className="text-[10px] text-gray-400 mt-1.5">
+              Taxa de instalação confirmada: <span className="font-bold text-green-600">{Math.round((pwaInstalledUsers / pwaBannerUniqueUsers) * 100)}%</span> dos que viram o banner
+            </p>
+          )}
         </div>
 
+        {/* Bloco 2: Quem instalou */}
         {pwaInstalledUsers > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs font-bold text-gray-500 mb-2">🔄 Retenção — app instalado vs browser</p>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <Metric label="Instalados que voltaram" value={pwaInstalledReturned} emoji="📱✅" color="text-green-600 bg-green-50" />
-              <Metric label="Instalados que não voltaram" value={pwaInstalledNotReturned} emoji="📱❌" color="text-gray-500 bg-gray-50" />
+          <div className="pt-3 border-t border-gray-100">
+            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2">Usuários com app instalado</p>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              <div className="bg-green-50 rounded-xl p-2.5 text-center">
+                <p className="text-xl font-bold text-green-700">{pwaInstalledUsers}</p>
+                <p className="text-[9px] text-gray-500 leading-tight">Total instalado</p>
+              </div>
+              <div className="bg-blue-50 rounded-xl p-2.5 text-center">
+                <p className="text-xl font-bold text-blue-700">{pwaInstalledReturned}</p>
+                <p className="text-[9px] text-gray-500 leading-tight">Voltaram (+1 sessão)</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-2.5 text-center">
+                <p className="text-xl font-bold text-gray-600">{pwaInstalledNotReturned}</p>
+                <p className="text-[9px] text-gray-500 leading-tight">Não voltaram</p>
+              </div>
             </div>
-            {/* Visual bar */}
-            {pwaInstalledUsers > 0 && (
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
-                  <span>Voltaram ({Math.round((pwaInstalledReturned / pwaInstalledUsers) * 100)}%)</span>
-                  <span>Não voltaram ({Math.round((pwaInstalledNotReturned / pwaInstalledUsers) * 100)}%)</span>
-                </div>
-                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
-                  <div className="bg-[#2D6A4F] h-full rounded-l-full transition-all" style={{ width: `${Math.round((pwaInstalledReturned / pwaInstalledUsers) * 100)}%` }} />
-                  <div className="bg-gray-200 h-full rounded-r-full flex-1" />
-                </div>
-                <p className="text-[10px] text-gray-400 mt-2">* "Voltou" = mais de 1 sessão no período, abrindo pelo app instalado</p>
+            {/* Barra de retenção */}
+            <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+              <span>Voltaram: {Math.round((pwaInstalledReturned / pwaInstalledUsers) * 100)}%</span>
+              <span>Não voltaram: {Math.round((pwaInstalledNotReturned / pwaInstalledUsers) * 100)}%</span>
+            </div>
+            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
+              <div className="bg-[#2D6A4F] h-full rounded-l-full" style={{ width: `${Math.round((pwaInstalledReturned / pwaInstalledUsers) * 100)}%` }} />
+              <div className="bg-gray-200 h-full rounded-r-full flex-1" />
+            </div>
+            {/* Lista de e-mails dos instalados */}
+            <div className="mt-2">
+              <p className="text-[10px] text-gray-400 mb-1.5">Quem instalou (e-mails únicos):</p>
+              <div className="space-y-1 max-h-36 overflow-y-auto">
+                {[...pwaInstalledUsersSet].map((email, i) => {
+                  const sessions = sessionsByUser[email] || 1;
+                  const returned = sessions > 1;
+                  return (
+                    <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-2.5 py-1.5">
+                      <span className="text-sm">{returned ? "🔄" : "1️⃣"}</span>
+                      <p className="text-[11px] text-gray-700 flex-1 truncate">{email}</p>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${returned ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500"}`}>
+                        {sessions} sess{sessions !== 1 ? "ões" : "ão"}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] text-gray-500">Usuários ativos <span className="font-bold">sem</span> app instalado (browser)</p>
-                <p className="text-sm font-bold text-gray-700">{nonInstalledActiveUsers}</p>
-              </div>
-              <p className="text-[10px] text-gray-400 mt-0.5">Abriram o app no período, mas nunca via modo standalone</p>
             </div>
           </div>
         )}
 
+        {/* Bloco 3: Usuários sem app */}
+        <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-gray-600">Ativos só pelo browser</p>
+            <p className="text-[10px] text-gray-400">Nunca abriram pelo app instalado</p>
+          </div>
+          <p className="text-2xl font-bold text-gray-700">{nonInstalledActiveUsers}</p>
+        </div>
+
         {pwaTotal === 0 && pwaBannerTotal === 0 && pwaInstalledSessions === 0 && (
-          <p className="text-[10px] text-gray-400 mt-2">Sem dados no período.</p>
+          <p className="text-[10px] text-gray-400">Sem dados no período.</p>
         )}
       </Section>
 

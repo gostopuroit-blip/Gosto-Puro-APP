@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Loader2, Sparkles, Lock, Crown } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
+import EnableNotificationsBanner from "@/components/EnableNotificationsBanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 
