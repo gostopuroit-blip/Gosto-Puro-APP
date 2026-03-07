@@ -193,6 +193,13 @@ export default function Planner() {
 
   const isPremium = user?.plan === "premium" || user?.role === "admin";
 
+  // Track premium_view when non-premium user sees the paywall
+  useEffect(() => {
+    if (user && !isPremium) {
+      trackEvent("premium_view", { source: "planner" });
+    }
+  }, [user, isPremium]);
+
   return (
     <div className="pb-4">
       {!isPremium &&
@@ -202,12 +209,13 @@ export default function Planner() {
           </div>
           <p className="text-sm font-bold text-white mb-2">Funzionalità Premium</p>
           <p className="text-white/80 mb-6 text-base font-semibold leading-relaxed">
-            Sblocca il Pianificatore Pasti con il piano Premium
+            Sblocca il Pianificatore Pasti com o plano Premium
           </p>
           <a
             href="https://gostopuro.it/premium/"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackEvent("premium_click", { source: "planner" })}
             className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
             <Crown className="w-4 h-4" />
             Sblocca Premium
