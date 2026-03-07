@@ -73,7 +73,7 @@ export default function AdminUsers() {
                       ? <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">✨ Premium</span>
                       : <span className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Free</span>
                     }
-                    {isBlocked && <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">🚫 Bloccato</span>}
+                    {isBlocked && <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">🚫 Bloqueado</span>}
                   </div>
                 </div>
               </div>
