@@ -26,8 +26,15 @@ Deno.serve(async (req) => {
 
     const notif = notifs[0];
     
-    // Build email body
-    const emailBody = (notif.occasions || []).map((occ, i) => {
+    // Get active email template
+    const templates = await base44.asServiceRole.entities.EmailTemplate.filter({ is_active: true }, '-created_date', 1);
+    const template = templates[0] || {
+      subject: '🍽️ Le ricette di oggi - Gosto Puro',
+      body: '<h2>Ciao {{USER_NAME}}! 👋</h2><p>Ecco le ricette speciali di oggi:</p><br>{{RECIPE_LIST}}<br><br><p><a href="https://gostopuro.it">Vedi sul app</a></p>'
+    };
+    
+    // Build recipe list
+    const recipeList = (notif.occasions || []).map((occ, i) => {
       const icons = { Colazione: '☕', Pranzo: '🍝', Cena: '🍷' };
       const title = notif.recipe_titles?.[i] || 'Ricetta';
       return `<strong>${icons[occ] || '🍽️'} ${occ}</strong><br>${title}`;
@@ -43,19 +50,14 @@ Deno.serve(async (req) => {
       if (!user.email) continue;
 
       try {
+        const body = template.body
+          .replace('{{USER_NAME}}', user.full_name || 'Amico')
+          .replace('{{RECIPE_LIST}}', recipeList);
+        
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: user.email,
-          subject: '🍽️ Le ricette di oggi - Gosto Puro',
-          body: `
-            <h2>Ciao ${user.full_name || 'Amico'}! 👋</h2>
-            <p>Ecco le ricette speciali di oggi per te:</p>
-            <br>
-            ${emailBody}
-            <br><br>
-            <p><a href="https://gostopuro.it" style="background: #2D6A4F; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">Vedi sul app</a></p>
-            <br>
-            <p style="font-size: 12px; color: #999;">Non vuoi ricevere questi email? Scrivici su support.</p>
-          `,
+          subject: template.subject,
+          body,
         });
         sent++;
       } catch (err) {
