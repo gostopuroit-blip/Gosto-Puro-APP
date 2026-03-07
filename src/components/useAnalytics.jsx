@@ -41,6 +41,11 @@ export function useSessionTracking() {
 
     if (!alreadyStarted) {
       sessionStorage.setItem("gp_session_started", "1");
+      // Cache user info for session_end (needed on page close)
+      base44.auth.me().then(u => {
+        if (u?.email) sessionStorage.setItem("gp_user_email", u.email);
+        if (u?.plan) sessionStorage.setItem("gp_user_plan", u.plan);
+      }).catch(() => {});
       trackEvent("session_start");
     }
 
