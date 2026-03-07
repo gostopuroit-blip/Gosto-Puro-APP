@@ -47,6 +47,7 @@ export default function Profile() {
 
   const handleInstallPWA = async () => {
     if (!installPrompt) return;
+    trackEvent("pwa_install_click", { occasion_label: "profile_install_click" });
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     if (outcome === "accepted") {
