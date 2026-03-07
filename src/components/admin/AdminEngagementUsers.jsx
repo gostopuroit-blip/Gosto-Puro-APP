@@ -110,11 +110,13 @@ export default function AdminEngagementUsers({ events, allUsers = [] }) {
           </div>
 
           {/* Metrics grid */}
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-3 gap-1.5">
             <MiniStat label="Sessões" value={u.sessions} emoji="📅" />
             <MiniStat label="Tempo total" value={fmtSeconds(u.totalDuration)} emoji="⏱" />
-            <MiniStat label="Receitas vistas" value={u.recipeViews} emoji="📖" />
+            <MiniStat label="Vistas" value={u.recipeViews} emoji="📖" />
+            <MiniStat label="Salvas" value={u.recipeSaved} emoji="❤️" />
             <MiniStat label="Ocasiões" value={u.occasionClicks} emoji="🏷" />
+            <MiniStat label="Planner" value={u.plannerCreated} emoji="📅" />
           </div>
 
           {/* PWA badges */}
