@@ -242,7 +242,7 @@ export default function AdminEngagement() {
               <p className="text-xs font-bold text-amber-700 mb-1">Como usar:</p>
               <p className="text-[11px] text-amber-600 leading-relaxed">Adicione <code className="bg-amber-100 px-1 rounded">?utm_source=tiktok</code> no final dos seus links. Exemplos:</p>
               <div className="mt-2 space-y-1">
-                {["tiktok", "instagram", "facebook", "email", "whatsapp"].map(s => (
+                {["tiktok", "instagram", "pinterest", "facebook", "email", "whatsapp", "google", "youtube", "linkedin", "twitter"].map(s => (
                   <p key={s} className="text-[10px] font-mono text-amber-700 bg-amber-100 rounded px-2 py-0.5 truncate">
                     gostopuro.it?utm_source={s}
                   </p>
