@@ -303,6 +303,38 @@ export default function AdminEngagement() {
           </div>
           {pwaInstalledSessions === 0 && <p className="text-[10px] text-gray-400 mt-2">Nenhuma sessão como app instalado ainda no período.</p>}
         </div>
+
+        {pwaInstalledUsers > 0 && (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs font-bold text-gray-500 mb-2">🔄 Retenção — app instalado vs browser</p>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <Metric label="Instalados que voltaram" value={pwaInstalledReturned} emoji="📱✅" color="text-green-600 bg-green-50" />
+              <Metric label="Instalados que não voltaram" value={pwaInstalledNotReturned} emoji="📱❌" color="text-gray-500 bg-gray-50" />
+            </div>
+            {/* Visual bar */}
+            {pwaInstalledUsers > 0 && (
+              <div>
+                <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                  <span>Voltaram ({Math.round((pwaInstalledReturned / pwaInstalledUsers) * 100)}%)</span>
+                  <span>Não voltaram ({Math.round((pwaInstalledNotReturned / pwaInstalledUsers) * 100)}%)</span>
+                </div>
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                  <div className="bg-[#2D6A4F] h-full rounded-l-full transition-all" style={{ width: `${Math.round((pwaInstalledReturned / pwaInstalledUsers) * 100)}%` }} />
+                  <div className="bg-gray-200 h-full rounded-r-full flex-1" />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-2">* "Voltou" = mais de 1 sessão no período, abrindo pelo app instalado</p>
+              </div>
+            )}
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] text-gray-500">Usuários ativos <span className="font-bold">sem</span> app instalado (browser)</p>
+                <p className="text-sm font-bold text-gray-700">{nonInstalledActiveUsers}</p>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-0.5">Abriram o app no período, mas nunca via modo standalone</p>
+            </div>
+          </div>
+        )}
+
         {pwaTotal === 0 && pwaBannerTotal === 0 && pwaInstalledSessions === 0 && (
           <p className="text-[10px] text-gray-400 mt-2">Sem dados no período.</p>
         )}
