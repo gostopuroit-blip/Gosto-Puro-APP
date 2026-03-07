@@ -155,6 +155,15 @@ export default function AdminEngagement() {
   const userTotals = Object.values(durationByUser);
   const avgDurationPerUser = avg(userTotals);
 
+  // Online now — unique users with session_start in last 5 min (no websocket needed)
+  const onlineNowUsers = new Set(recentEvents.filter(e => e.user_email).map(e => e.user_email)).size;
+  const onlineNowSessions = recentEvents.length;
+
+  // Today's entries (session_starts today)
+  const todayStr = now.toISOString().slice(0, 10);
+  const todaySessions = events.filter(e => e.event_type === "session_start" && e.date === todayStr);
+  const todayUniqueUsers = new Set(todaySessions.filter(e => e.user_email).map(e => e.user_email)).size;
+
   // PWA — separate banner impressions from real install clicks
   const pwaBannerShown = pwaClicks.filter(e => e.occasion_label === "banner_shown");
   const pwaOpenedInstalled = pwaClicks.filter(e => e.occasion_label === "pwa_opened_installed");
