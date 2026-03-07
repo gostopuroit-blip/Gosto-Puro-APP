@@ -32,6 +32,8 @@ export default function AdminEngagementUsers({ events, allUsers = [] }) {
           sessions: 0,
           totalDuration: 0,
           recipeViews: 0,
+          recipeSaved: 0,
+          plannerCreated: 0,
           occasionClicks: 0,
           pwaInstallClick: false,
           pwaOpenedInstalled: false,
@@ -50,6 +52,8 @@ export default function AdminEngagementUsers({ events, allUsers = [] }) {
         u.totalDuration += e.session_duration_seconds;
       }
       if (e.event_type === "recipe_view") u.recipeViews += 1;
+      if (e.event_type === "recipe_saved") u.recipeSaved += 1;
+      if (e.event_type === "planner_created") u.plannerCreated += 1;
       if (e.event_type === "occasion_click") u.occasionClicks += 1;
       if (e.event_type === "pwa_install_click") {
         if (e.occasion_label === "pwa_opened_installed") u.pwaOpenedInstalled = true;
