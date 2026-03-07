@@ -1,15 +1,16 @@
 import { useMemo, useState } from "react";
 import { fmtSeconds } from "./engagementUtils";
 
-export default function AdminEngagementUsers({ events }) {
+export default function AdminEngagementUsers({ events, allUsers = [] }) {
   const userMap = useMemo(() => {
     const map = {};
 
-    events.forEach(e => {
-      if (!e.user_email) return;
-      const u = map[e.user_email] || {
-        email: e.user_email,
-        plan: e.user_plan || "free",
+    // Seed all known users first (so even inactive ones appear)
+    allUsers.forEach(u => {
+      map[u.email] = {
+        email: u.email,
+        name: u.full_name || null,
+        plan: u.plan || "free",
         sessions: 0,
         totalDuration: 0,
         recipeViews: 0,
@@ -18,6 +19,28 @@ export default function AdminEngagementUsers({ events }) {
         pwaOpenedInstalled: false,
         lastSeen: null,
       };
+    });
+
+    // Merge analytics events
+    events.forEach(e => {
+      if (!e.user_email) return;
+      if (!map[e.user_email]) {
+        map[e.user_email] = {
+          email: e.user_email,
+          name: null,
+          plan: e.user_plan || "free",
+          sessions: 0,
+          totalDuration: 0,
+          recipeViews: 0,
+          occasionClicks: 0,
+          pwaInstallClick: false,
+          pwaOpenedInstalled: false,
+          lastSeen: null,
+        };
+      }
+      const u = map[e.user_email];
+      // Always update plan from latest event if available
+      if (e.user_plan) u.plan = e.user_plan;
 
       if (e.event_type === "session_start") {
         u.sessions += 1;
@@ -32,12 +55,11 @@ export default function AdminEngagementUsers({ events }) {
         if (e.occasion_label === "pwa_opened_installed") u.pwaOpenedInstalled = true;
         else if (e.occasion_label !== "banner_shown") u.pwaInstallClick = true;
       }
-
-      map[e.user_email] = u;
     });
 
+    // Sort: active users first (by sessions desc), then inactive
     return Object.values(map).sort((a, b) => b.sessions - a.sessions);
-  }, [events]);
+  }, [events, allUsers]);
 
   const [search, setSearch] = useState("");
 
