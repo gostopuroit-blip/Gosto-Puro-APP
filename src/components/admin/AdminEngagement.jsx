@@ -209,11 +209,20 @@ export default function AdminEngagement() {
           <Metric label="Sessioni con durata" value={durations.length} emoji="⏱" color="text-blue-600 bg-blue-50" />
         </div>
         {durations.length > 0 ? (
-          <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-4">
-            <Clock className="w-8 h-8 text-[#2D6A4F]" />
-            <div>
-              <p className="text-3xl font-bold text-gray-900">{fmtSeconds(avgDuration)}</p>
-              <p className="text-xs text-gray-400">tempo medio per sessione</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-4">
+              <Clock className="w-6 h-6 text-[#2D6A4F]" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{fmtSeconds(avgDuration)}</p>
+                <p className="text-[10px] text-gray-400 leading-tight">media per sessione</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-4">
+              <Clock className="w-6 h-6 text-blue-500" />
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{fmtSeconds(avgDurationPerUser)}</p>
+                <p className="text-[10px] text-gray-400 leading-tight">media per utente</p>
+              </div>
             </div>
           </div>
         ) : (
