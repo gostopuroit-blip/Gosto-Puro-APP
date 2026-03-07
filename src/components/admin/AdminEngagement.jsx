@@ -208,6 +208,11 @@ export default function AdminEngagement() {
         )}
       </Section>
 
+      {/* 5. Per-user breakdown */}
+      <Section title="👤 Métricas por usuário" subtitle={`${uniqueUsers} usuários no período`}>
+        <AdminEngagementUsers events={events} />
+      </Section>
+
       {/* 4. Session duration */}
       <Section title="⏱ Sessioni & Tempo in app" subtitle={`${sessionStarts.length} sessioni avviate nel periodo`}>
         <div className="grid grid-cols-2 gap-3 mb-3">
