@@ -59,6 +59,19 @@ export default function AdminEngagement() {
   const recipeSaves = events.filter(e => e.event_type === "recipe_saved");
   const plannerCreated = events.filter(e => e.event_type === "planner_created");
 
+  // UTM visits
+  const utmVisits = events.filter(e => e.event_type === "utm_visit");
+  const utmBySouce = {};
+  utmVisits.forEach(e => {
+    const src = e.occasion_label || "desconhecido";
+    if (!utmBySouce[src]) utmBySouce[src] = { visits: 0, users: new Set() };
+    utmBySouce[src].visits++;
+    if (e.user_email) utmBySouce[src].users.add(e.user_email);
+  });
+  const topUtm = Object.entries(utmBySouce)
+    .map(([src, d]) => ({ src, visits: d.visits, users: d.users.size }))
+    .sort((a, b) => b.visits - a.visits);
+
   // Top receitas salvas
   const saveCounts = {};
   recipeSaves.forEach(e => {
