@@ -47,6 +47,13 @@ export function useSessionTracking() {
         if (u?.plan) sessionStorage.setItem("gp_user_plan", u.plan);
       }).catch(() => {});
       trackEvent("session_start");
+
+      // Track if opened as installed PWA (standalone mode)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+      if (isStandalone) {
+        trackEvent("pwa_install_click", { occasion_label: "pwa_opened_installed" });
+      }
     }
 
     const handleEnd = () => {
