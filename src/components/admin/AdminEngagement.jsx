@@ -297,7 +297,7 @@ export default function AdminEngagement() {
           {pwaInstalledSessions === 0 && <p className="text-[10px] text-gray-400 mt-2">Nenhuma sessão como app instalado ainda no período.</p>}
         </div>
         {pwaTotal === 0 && pwaBannerTotal === 0 && pwaInstalledSessions === 0 && (
-          <p className="text-[10px] text-gray-400 mt-2">Nessun dato nel periodo.</p>
+          <p className="text-[10px] text-gray-400 mt-2">Sem dados no período.</p>
         )}
       </Section>
 
