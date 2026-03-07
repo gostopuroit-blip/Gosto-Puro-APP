@@ -231,8 +231,8 @@ export default function AdminEngagement() {
       </Section>
 
       {/* 2. Recipe & Occasion engagement */}
-      <Section title="📖 Accesso alle ricette" subtitle={`${recipeViews.length} visualizzazioni totali`}>
-        <Metric label="Utenti che hanno visto ricette" value={usersViewedRecipes} icon={BookOpen} color="text-green-600 bg-green-50" />
+      <Section title="📖 Acesso às receitas" subtitle={`${recipeViews.length} visualizações totais`}>
+        <Metric label="Usuários que viram receitas" value={usersViewedRecipes} icon={BookOpen} color="text-green-600 bg-green-50" />
 
         {topRecipes.length > 0 && (
           <div className="mt-3">
