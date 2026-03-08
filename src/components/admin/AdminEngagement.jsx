@@ -120,8 +120,8 @@ export default function AdminEngagement() {
   const topSaved = Object.entries(saveCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   // Free vs Premium unique users
-  const freeUsers = new Set(events.filter(e => e.event_type === "session_start" && e.user_plan === "free" && e.user_email).map(e => e.user_email)).size;
-  const premiumUsers = new Set(events.filter(e => e.event_type === "session_start" && e.user_plan === "premium" && e.user_email).map(e => e.user_email)).size;
+  const freeUsers = new Set(nonAdminEvents.filter(e => e.event_type === "session_start" && e.user_plan === "free" && e.user_email).map(e => e.user_email)).size;
+  const premiumUsers = new Set(nonAdminEvents.filter(e => e.event_type === "session_start" && e.user_plan === "premium" && e.user_email).map(e => e.user_email)).size;
 
   // Unique returning users (more than 1 session)
   const sessionsByUser = {};
