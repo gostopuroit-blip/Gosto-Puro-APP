@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const notif = notifs[0] || null;
 
     // Build recipe list if available
-    let recipeList = '<p><a href="https://gostopuro.it">👉 Apri Gosto Puro per vedere le ricette di oggi</a></p>';
+    let recipeList = '<p><a href="https://gostopuro.com">👉 Apri Gosto Puro per vedere le ricette di oggi</a></p>';
     if (notif && notif.recipe_titles?.length) {
       recipeList = (notif.occasions || []).map((occ, i) => {
         const icons = { Colazione: '☕', Pranzo: '🍝', Cena: '🍷' };
