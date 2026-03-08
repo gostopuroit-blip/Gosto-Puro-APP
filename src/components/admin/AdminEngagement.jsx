@@ -580,7 +580,7 @@ export default function AdminEngagement() {
 
       {/* 4. Retenção D1/D7/D30 */}
       <Section title="🔄 Retenção de Usuários" subtitle="Percentagem que voltou no D1, D7 e D30 após cadastro">
-        <AdminRetention events={events} allUsers={allUsers} />
+        <AdminRetention events={nonAdminEvents} allUsers={allUsers} />
       </Section>
 
       {/* 5. Premium Funnel */}
