@@ -18,6 +18,7 @@ import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCross
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
   { key: "engagement",   label: "Analytics",       icon: TrendingUp },
+  { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
   { key: "utenti",       label: "Usuários",        icon: Users },
   { key: "ricette",      label: "Receitas",        icon: UtensilsCrossed },
   { key: "genera",       label: "Gerar com IA",    icon: Sparkles },
