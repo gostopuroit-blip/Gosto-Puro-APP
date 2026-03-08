@@ -18,12 +18,13 @@ function todayStr() {
 // Track a single event (fire and forget — never throws)
 export async function trackEvent(eventType, extra = {}) {
   try {
-    let user = null;
-    try { user = await base44.auth.me(); } catch {}
+    // Use cached user data from session to avoid extra network requests
+    const user_email = sessionStorage.getItem("gp_user_email") || null;
+    const user_plan = sessionStorage.getItem("gp_user_plan") || "free";
     await base44.entities.AppAnalytics.create({
       event_type: eventType,
-      user_email: user?.email || null,
-      user_plan: user?.plan || "free",
+      user_email,
+      user_plan,
       session_id: getSessionId(),
       date: todayStr(),
       ...extra,
