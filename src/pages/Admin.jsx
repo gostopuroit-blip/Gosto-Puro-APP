@@ -129,6 +129,7 @@ function AdminContent() {
         <main className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
           {activeTab === "dashboard"    && <AdminDashboard onNavigate={setActiveTab} />}
           {activeTab === "engagement"   && <AdminEngagement />}
+          {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
