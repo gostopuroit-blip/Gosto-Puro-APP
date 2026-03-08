@@ -298,7 +298,7 @@ export default function AdminEngagement() {
 
       {/* 0a. Sessions chart */}
       <Section title="📊 Sessões por dia" subtitle={`Últimos ${days} dias — verde escuro = sessões, verde claro = usuários únicos`}>
-        <AdminSessionsChart events={events} days={days} />
+        <AdminSessionsChart events={nonAdminEvents} days={days} />
       </Section>
 
       {/* 0. Sessions & Time — moved to top */}
