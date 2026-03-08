@@ -590,7 +590,7 @@ export default function AdminEngagement() {
 
       {/* 6. Top Users */}
       <Section title="🏆 Top Usuários" subtitle="Ranking por engagement score no período">
-        <AdminTopUsers events={events} allUsers={allUsers} />
+        <AdminTopUsers events={nonAdminEvents} allUsers={allUsers} />
       </Section>
 
       {/* 7. Scroll das receitas */}
