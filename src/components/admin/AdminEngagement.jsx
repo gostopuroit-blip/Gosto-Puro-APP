@@ -176,7 +176,7 @@ export default function AdminEngagement() {
 
   // Today's entries (session_starts today)
   const todayStr = now.toISOString().slice(0, 10);
-  const todaySessions = events.filter(e => e.event_type === "session_start" && e.date === todayStr);
+  const todaySessions = nonAdminEvents.filter(e => e.event_type === "session_start" && e.date === todayStr);
   const todayUniqueUsers = new Set(todaySessions.filter(e => e.user_email).map(e => e.user_email)).size;
 
   // PWA — separate banner impressions from real install clicks
