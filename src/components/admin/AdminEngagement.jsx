@@ -88,8 +88,11 @@ export default function AdminEngagement() {
   };
 
   // --- Derived metrics ---
-  const sessionStarts = events.filter(e => e.event_type === "session_start");
-  const sessionEnds = events.filter(e => e.event_type === "session_end" && e.session_duration_seconds > 0);
+  const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
+  const nonAdminEvents = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
+
+  const sessionStarts = nonAdminEvents.filter(e => e.event_type === "session_start");
+  const sessionEnds = nonAdminEvents.filter(e => e.event_type === "session_end" && e.session_duration_seconds > 0);
   const recipeViews = events.filter(e => e.event_type === "recipe_view");
   const occasionClicks = events.filter(e => e.event_type === "occasion_click");
   const pwaClicks = events.filter(e => e.event_type === "pwa_install_click");
