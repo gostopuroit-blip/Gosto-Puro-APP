@@ -585,7 +585,7 @@ export default function AdminEngagement() {
 
       {/* 5. Premium Funnel */}
       <Section title="💳 Funil Premium" subtitle="Da visualização do paywall até a conversão">
-        <AdminPremiumFunnel events={events} />
+        <AdminPremiumFunnel events={nonAdminEvents} />
       </Section>
 
       {/* 6. Top Users */}
