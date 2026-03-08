@@ -61,6 +61,7 @@ export default function RecipeDetail() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [servings, setServings] = useState(null);
   const scrollTracked = useRef(new Set());
+  const viewStartRef = useRef(null);
 
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);

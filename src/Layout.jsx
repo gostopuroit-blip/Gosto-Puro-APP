@@ -56,6 +56,10 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   useEffect(() => {
+    trackEvent("screen_load", { occasion_label: currentPageName });
+  }, [currentPageName]);
+
+  useEffect(() => {
     // Recarrega o usuário sempre que navegar para a página Profile
     if (currentPageName === "Profile") {
       const timer = setTimeout(() => {
