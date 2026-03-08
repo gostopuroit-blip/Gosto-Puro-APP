@@ -93,14 +93,14 @@ export default function AdminEngagement() {
 
   const sessionStarts = nonAdminEvents.filter(e => e.event_type === "session_start");
   const sessionEnds = nonAdminEvents.filter(e => e.event_type === "session_end" && e.session_duration_seconds > 0);
-  const recipeViews = events.filter(e => e.event_type === "recipe_view");
-  const occasionClicks = events.filter(e => e.event_type === "occasion_click");
-  const pwaClicks = events.filter(e => e.event_type === "pwa_install_click");
-  const recipeSaves = events.filter(e => e.event_type === "recipe_saved");
-  const plannerCreated = events.filter(e => e.event_type === "planner_created");
+  const recipeViews = nonAdminEvents.filter(e => e.event_type === "recipe_view");
+  const occasionClicks = nonAdminEvents.filter(e => e.event_type === "occasion_click");
+  const pwaClicks = nonAdminEvents.filter(e => e.event_type === "pwa_install_click");
+  const recipeSaves = nonAdminEvents.filter(e => e.event_type === "recipe_saved");
+  const plannerCreated = nonAdminEvents.filter(e => e.event_type === "planner_created");
 
   // UTM visits
-  const utmVisits = events.filter(e => e.event_type === "utm_visit");
+  const utmVisits = nonAdminEvents.filter(e => e.event_type === "utm_visit");
   const utmBySouce = {};
   utmVisits.forEach(e => {
     const src = e.occasion_label || "desconhecido";
