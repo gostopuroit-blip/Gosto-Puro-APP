@@ -188,9 +188,14 @@ export default function Recipes() {
               placeholder="Cerca ricette sane…"
               value={search}
               onChange={(e) => {
-               setSearch(e.target.value);
-               goToPage(1);
-              }}
+                 setSearch(e.target.value);
+                 goToPage(1);
+                }}
+                onBlur={() => {
+                  if (search.trim().length >= 2) {
+                    trackEvent("recipe_search", { occasion_label: search.trim(), results_count: filteredRecipes.length });
+                  }
+                }}
               className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#2D3F35] rounded-2xl border border-gray-100 dark:border-[#3D5246] text-sm placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F]/30 transition-all" />
 
          </div>
