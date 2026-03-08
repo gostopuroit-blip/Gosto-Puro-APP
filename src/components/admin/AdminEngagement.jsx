@@ -575,7 +575,7 @@ export default function AdminEngagement() {
           <Metric label="Usuários Free ativos" value={freeUsers} emoji="👤" color="text-gray-600 bg-gray-50" />
           <Metric label="Usuários Premium ativos" value={premiumUsers} emoji="✨" color="text-amber-600 bg-amber-50" />
         </div>
-        <AdminFreePremiumChart events={events} days={days} />
+        <AdminFreePremiumChart events={nonAdminEvents} days={days} />
       </Section>
 
       {/* 4. Retenção D1/D7/D30 */}
