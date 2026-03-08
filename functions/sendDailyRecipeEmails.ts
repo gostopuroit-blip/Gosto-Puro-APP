@@ -58,6 +58,8 @@ Deno.serve(async (req) => {
           body,
         });
         sent++;
+        // Small delay to avoid rate limiting
+        await new Promise(r => setTimeout(r, 300));
       } catch (err) {
         failed++;
       }
