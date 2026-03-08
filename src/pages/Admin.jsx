@@ -9,6 +9,7 @@ import AdminWebhooks from "@/components/admin/AdminWebhooks";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminEngagement from "@/components/admin/AdminEngagement";
+import AdminRecipeEngagement from "@/components/admin/AdminRecipeEngagement";
 import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
