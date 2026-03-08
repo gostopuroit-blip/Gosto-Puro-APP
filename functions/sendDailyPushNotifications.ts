@@ -96,6 +96,13 @@ Deno.serve(async (req) => {
           failed++;
         } else if (res.ok || res.status === 201 || res.status === 204) {
           sent++;
+          await base44.asServiceRole.entities.AppAnalytics.create({
+            event_type: "push_sent",
+            user_email: sub.user_email || null,
+            user_plan: "free",
+            date: today,
+            notification_id: notif.id,
+          }).catch(() => {});
         } else {
           failed++;
         }
