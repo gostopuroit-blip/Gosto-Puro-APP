@@ -595,7 +595,7 @@ export default function AdminEngagement() {
 
       {/* 7. Scroll das receitas */}
       <Section title="📜 Profundidade de Leitura" subtitle="Quanto os usuários leram as receitas">
-        <ScrollDepthStats events={events} />
+        <ScrollDepthStats events={nonAdminEvents} />
       </Section>
 
       {/* 8. Per-user breakdown */}
