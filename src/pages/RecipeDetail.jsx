@@ -67,6 +67,18 @@ export default function RecipeDetail() {
   const params = new URLSearchParams(window.location.search);
   const recipeId = params.get("id");
 
+  // Track recipe_view_end on page leave
+  useEffect(() => {
+    return () => {
+      if (viewStartRef.current && recipeId) {
+        const duration = Math.round((Date.now() - viewStartRef.current) / 1000);
+        if (duration >= 2) {
+          trackEvent("recipe_view_end", { recipe_id: recipeId, duration_seconds: duration });
+        }
+      }
+    };
+  }, [recipeId]);
+
   useEffect(() => {
     if (!recipeId) return;
     const handleScroll = () => {
@@ -107,6 +119,8 @@ export default function RecipeDetail() {
       setRecipe(recipes[0]);
       setServings(recipes[0].servings || 4);
       trackEvent("recipe_view", { recipe_id: recipeId, recipe_title: recipes[0].title });
+      trackEvent("recipe_view_start", { recipe_id: recipeId, recipe_title: recipes[0].title });
+      viewStartRef.current = Date.now();
     }
     if (userRecipes.length > 0) setUserRecipe(userRecipes[0]);
     setSavedCount(allSaved.length);
