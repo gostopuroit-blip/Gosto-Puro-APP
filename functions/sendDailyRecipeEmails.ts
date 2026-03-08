@@ -16,29 +16,27 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Get today's daily notification
-    const today = new Date().toISOString().split('T')[0];
-    const notifs = await base44.asServiceRole.entities.DailyNotification.filter({ date: today }, '-created_date', 1);
-    
-    if (!notifs.length) {
-      return Response.json({ error: 'No daily notification found for today' }, { status: 404 });
-    }
-
-    const notif = notifs[0];
-    
     // Get active email template
     const templates = await base44.asServiceRole.entities.EmailTemplate.filter({ is_active: true }, '-created_date', 1);
     const template = templates[0] || {
       subject: '🍽️ Le ricette di oggi - Gosto Puro',
-      body: '<h2>Ciao {{USER_NAME}}! 👋</h2><p>Ecco le ricette speciali di oggi:</p><br>{{RECIPE_LIST}}<br><br><p><a href="https://gostopuro.it">Vedi sul app</a></p>'
+      body: '<h2>Ciao {{USER_NAME}}! 👋</h2><p>Scopri le ricette di oggi su Gosto Puro!</p><br><br><p><a href="https://gostopuro.it">Vedi le ricette</a></p>'
     };
-    
-    // Build recipe list
-    const recipeList = (notif.occasions || []).map((occ, i) => {
-      const icons = { Colazione: '☕', Pranzo: '🍝', Cena: '🍷' };
-      const title = notif.recipe_titles?.[i] || 'Ricetta';
-      return `<strong>${icons[occ] || '🍽️'} ${occ}</strong><br>${title}`;
-    }).join('<br><br>');
+
+    // Try to get today's recipes optionally
+    const today = new Date().toISOString().split('T')[0];
+    const notifs = await base44.asServiceRole.entities.DailyNotification.filter({ date: today }, '-created_date', 1);
+    const notif = notifs[0] || null;
+
+    // Build recipe list if available
+    let recipeList = '<p><a href="https://gostopuro.it">👉 Apri Gosto Puro per vedere le ricette di oggi</a></p>';
+    if (notif && notif.recipe_titles?.length) {
+      recipeList = (notif.occasions || []).map((occ, i) => {
+        const icons = { Colazione: '☕', Pranzo: '🍝', Cena: '🍷' };
+        const title = notif.recipe_titles?.[i] || 'Ricetta';
+        return `<strong>${icons[occ] || '🍽️'} ${occ}</strong><br>${title}`;
+      }).join('<br><br>');
+    }
 
     // Get all users
     const users = await base44.asServiceRole.entities.User.list('-created_date', 1000);
