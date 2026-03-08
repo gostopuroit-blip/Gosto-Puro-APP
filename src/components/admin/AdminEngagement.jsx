@@ -600,7 +600,7 @@ export default function AdminEngagement() {
 
       {/* 8. Per-user breakdown */}
       <Section title="👤 Métricas por usuário" subtitle={`${allUsers.length} usuários cadastrados · ${uniqueUsers} ativos no período`}>
-        <AdminEngagementUsers events={events} allUsers={allUsers} />
+        <AdminEngagementUsers events={nonAdminEvents} allUsers={allUsers} />
       </Section>
 
 
