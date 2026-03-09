@@ -87,10 +87,11 @@ export default function AdminTopUsers({ events, allUsers }) {
             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
               <div className="bg-[#2D6A4F] h-1.5 rounded-full" style={{ width: `${Math.max(4, Math.round((u.score / maxScore) * 100))}%` }} />
             </div>
-            <div className="flex gap-2 text-[9px] text-gray-400">
-              <span>📖 {u.views}</span>
-              <span>❤️ {u.saved}</span>
-              <span>📅 {u.planner}</span>
+            <div className="flex gap-2 text-[9px] text-gray-400 flex-wrap">
+              <span>📖 {u.views} views</span>
+              <span>❤️ {u.saved} saves</span>
+              <span>📅 {u.planner} planners</span>
+              <span>🔑 {u.sessions} sessões</span>
               <span>⏱ {fmtSeconds(u.totalDuration)}</span>
             </div>
           </div>
