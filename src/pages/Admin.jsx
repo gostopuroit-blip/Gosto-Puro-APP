@@ -135,6 +135,7 @@ function AdminContent() {
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}
           {activeTab === "report"         && <AdminAnalyticsReport />}
+          {activeTab === "utm"            && <AdminUTMGenerator />}
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
