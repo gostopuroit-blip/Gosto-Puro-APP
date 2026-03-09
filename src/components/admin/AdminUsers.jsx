@@ -15,15 +15,8 @@ export default function AdminUsers() {
 
   const load = async () => {
     try {
-      let allUsers = [];
-      let skip = 0;
-      while (true) {
-        const batch = await base44.entities.User.list('-created_date', 200, skip);
-        allUsers = allUsers.concat(batch);
-        if (batch.length < 200) break;
-        skip += 200;
-      }
-      setUsers(allUsers);
+      const res = await base44.functions.invoke('adminGetUsers');
+      setUsers(res.data || []);
     } catch (e) {
       setError("Errore nel caricamento degli utenti.");
     } finally {
