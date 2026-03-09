@@ -132,6 +132,7 @@ function AdminContent() {
           {activeTab === "dashboard"    && <AdminDashboard onNavigate={setActiveTab} />}
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}
+          {activeTab === "report"         && <AdminAnalyticsReport />}
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
