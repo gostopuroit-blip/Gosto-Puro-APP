@@ -29,10 +29,11 @@ export default function AdminAnalyticsReport() {
     setLoading(true);
     const cutoff = nDaysAgo(period);
 
-    const [events, allUsers] = await Promise.all([
+    const [events, allUsersRes] = await Promise.all([
       base44.entities.AppAnalytics.filter({ date: { $gte: cutoff } }, "-created_date", 2000).catch(() => []),
-      base44.entities.User.list("-created_date", 200).catch(() => []),
+      base44.functions.invoke('adminGetUsers').catch(() => ({ data: [] })),
     ]);
+    const allUsers = allUsersRes.data || [];
 
     const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
     const ev = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
