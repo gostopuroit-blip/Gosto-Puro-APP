@@ -36,8 +36,20 @@ export default function AdminTopUsers({ events, allUsers }) {
       if (e.event_type === "recipe_view") u.views++;
       if (e.event_type === "recipe_saved") u.saved++;
       if (e.event_type === "planner_created") u.planner++;
-      if (e.event_type === "session_start") u.sessions++;
-      if (e.event_type === "session_end" && e.session_duration_seconds > 0) u.totalDuration += e.session_duration_seconds;
+      // Count sessions by unique session_id to avoid duplicates from session_end events
+      if (e.event_type === "session_start") {
+        if (!u._sessionIds) u._sessionIds = new Set();
+        u._sessionIds.add(e.session_id || Math.random());
+        u.sessions = u._sessionIds.size;
+      }
+      if (e.event_type === "session_end" && e.session_duration_seconds > 0) {
+        // Only count duration from session_end events (deduplicated by session_id)
+        if (!u._durationSessions) u._durationSessions = new Set();
+        if (!u._durationSessions.has(e.session_id)) {
+          u._durationSessions.add(e.session_id);
+          u.totalDuration += e.session_duration_seconds;
+        }
+      }
       if (e.user_plan) u.plan = e.user_plan;
     });
 
