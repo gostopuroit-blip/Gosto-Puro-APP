@@ -165,8 +165,9 @@ export default function AdminEngagement() {
   // Avg time per user (soma das sessões de cada usuário, depois média entre usuários)
   const durationByUser = {};
   sessionEnds.forEach(e => {
-    if (e.user_email && e.session_duration_seconds > 0) {
-      durationByUser[e.user_email] = (durationByUser[e.user_email] || 0) + e.session_duration_seconds;
+    const key = uid(e);
+    if (key && e.session_duration_seconds > 0) {
+      durationByUser[key] = (durationByUser[key] || 0) + e.session_duration_seconds;
     }
   });
   const userTotals = Object.values(durationByUser);
