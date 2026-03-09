@@ -394,26 +394,26 @@ Gosto Puro — Relatório gerado automaticamente
     }
 
     // ── RESUMO EXECUTIVO ──
-    const boxH = 28;
-    if (y + boxH < 285) {
-      doc.setFillColor(45, 106, 79);
-      doc.roundedRect(pad, y, W - pad * 2, boxH, 3, 3, "F");
-      doc.setFillColor(64, 145, 108);
-      doc.roundedRect(pad, y, 2, boxH, 1, 1, "F");
-      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
-      doc.text("Resumo para Reunião", pad + 5, y + 7);
-      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
-      const lines = [
-        `• ${r.totalSessions} sessões abertas por ${r.uniqueUsers} usuários únicos — média de ${r.uniqueUsers > 0 ? (r.totalSessions / r.uniqueUsers).toFixed(1) : 0} acessos por pessoa.`,
-        `• ${r.premiumUsers} assinantes Premium (${premiumRate}% da base ativa) — ${r.freeUsers} ainda no plano Free.`,
-        `• Taxa de retorno: ${retentionRate}% — ${r.returningUsers} usuários voltaram mais de uma vez.`,
-        `• ${r.recipeViews} views de receitas · ${r.recipeSaves} salvas (${saveRate}% de conversão) · ${r.planners} planners criados.`,
-        `• Tempo médio por sessão: ${fmtDuration(r.avgDuration)}.`,
-      ];
-      lines.forEach((l, i) => {
-        doc.text(l, pad + 5, y + 13 + i * 4.5, { maxWidth: W - pad * 2 - 8 });
-      });
-    }
+    const boxH = 35;
+    checkPageBreak(boxH + 5);
+    doc.setFillColor(45, 106, 79);
+    doc.roundedRect(pad, y, W - pad * 2, boxH, 3, 3, "F");
+    doc.setFillColor(64, 145, 108);
+    doc.roundedRect(pad, y, 2, boxH, 1, 1, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+    doc.text("Resumo para Reuniao", pad + 5, y + 7);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+    const summaryLines = [
+      `- ${r.totalSessions} sessoes abertas por ${r.uniqueUsers} usuarios unicos (media: ${r.uniqueUsers > 0 ? (r.totalSessions / r.uniqueUsers).toFixed(1) : 0} acessos/pessoa).`,
+      `- ${r.premiumUsers} assinantes Premium (${premiumRate}% da base ativa) e ${r.freeUsers} usuarios no plano Free.`,
+      `- Taxa de retorno: ${retentionRate}% — ${r.returningUsers} usuarios voltaram mais de uma vez.`,
+      `- ${r.recipeViews} views de receitas, ${r.recipeSaves} salvas (${saveRate}% de conversao) e ${r.planners} planners criados.`,
+      `- Tempo medio por sessao: ${fmtDuration(r.avgDuration)}.`,
+    ];
+    summaryLines.forEach((l, i) => {
+      doc.text(l, pad + 5, y + 14 + i * 5, { maxWidth: W - pad * 2 - 8 });
+    });
+    y += boxH + 4;
 
     // FOOTER
     doc.setFont("helvetica", "normal"); doc.setFontSize(6.5); doc.setTextColor(170, 170, 170);
