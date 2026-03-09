@@ -10,6 +10,20 @@ export default function AdminEmailTemplates() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", subject: "", body: "", is_active: true });
   const [saving, setSaving] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleSendNow = async () => {
+    if (!confirm(`Enviar email para TODOS os usuários agora?`)) return;
+    setSending(true);
+    try {
+      const res = await base44.functions.invoke('sendDailyRecipeEmailsForce');
+      const d = res.data;
+      toast.success(`✅ Enviado! ${d.sent} emails enviados${d.failed > 0 ? `, ${d.failed} falhas` : ''}`);
+    } catch (e) {
+      toast.error("Erro ao enviar: " + e.message);
+    }
+    setSending(false);
+  };
 
   useEffect(() => {
     loadTemplates();
@@ -129,10 +143,16 @@ export default function AdminEmailTemplates() {
           <h2 className="text-lg font-bold">Email Templates</h2>
           <p className="text-sm text-gray-500">Customize o email enviado aos usuários</p>
         </div>
-        <Button onClick={handleNew} className="bg-purple-600 hover:bg-purple-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Template
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleSendNow} disabled={sending} className="bg-green-600 hover:bg-green-700">
+            {sending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+            Enviar agora
+          </Button>
+          <Button onClick={handleNew} className="bg-purple-600 hover:bg-purple-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Template
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3">
