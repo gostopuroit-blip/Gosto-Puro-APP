@@ -319,66 +319,77 @@ Gosto Puro — Relatório gerado automaticamente
 
     // ── TOP RECEITAS MAIS VISTAS ──
     if (r.topRecipes.length > 0) {
+      checkPageBreak(12 + r.topRecipes.length * 12);
       y = sectionTitle("Top Receitas Mais Vistas", y);
       const maxV = r.topRecipes[0][1];
       const labelW = 80;
       const barZone = W - pad * 2 - labelW - 14;
       r.topRecipes.forEach(([title, count], i) => {
-        const bY = y + i * 12;
+        checkPageBreak(12);
+        const bY = y;
         const pct = maxV > 0 ? count / maxV : 0;
         doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(40, 40, 40);
         doc.text(`${i + 1}.`, pad, bY + 5);
-        doc.text(title.length > 38 ? title.slice(0, 36) + "…" : title, pad + 6, bY + 5);
+        const safeTitle = title.replace(/[^\x00-\x7E]/g, "").trim();
+        doc.text(safeTitle.length > 38 ? safeTitle.slice(0, 36) + "..." : safeTitle, pad + 6, bY + 5);
         drawBgBar(pad + labelW, bY, barZone, 6);
         drawBar(pad + labelW, bY, Math.round(pct * barZone), 6, [45, 106, 79]);
         doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(30, 30, 30);
         doc.text(String(count), W - pad, bY + 5, { align: "right" });
+        y += 12;
       });
-      y += r.topRecipes.length * 12 + 6;
+      y += 6;
     }
 
     // ── TOP RECEITAS MAIS SALVAS ──
     if (r.topSaved.length > 0) {
+      checkPageBreak(12 + r.topSaved.length * 12);
       y = sectionTitle("Top Receitas Mais Salvas", y);
-      const maxV = r.topSaved[0][1];
-      const labelW = 80;
-      const barZone = W - pad * 2 - labelW - 14;
+      const maxV2 = r.topSaved[0][1];
+      const labelW2 = 80;
+      const barZone2 = W - pad * 2 - labelW2 - 14;
       r.topSaved.forEach(([title, count], i) => {
-        const bY = y + i * 12;
-        const pct = maxV > 0 ? count / maxV : 0;
+        checkPageBreak(12);
+        const bY = y;
+        const pct = maxV2 > 0 ? count / maxV2 : 0;
         doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(40, 40, 40);
         doc.text(`${i + 1}.`, pad, bY + 5);
-        doc.text(title.length > 38 ? title.slice(0, 36) + "…" : title, pad + 6, bY + 5);
-        drawBgBar(pad + labelW, bY, barZone, 6);
-        drawBar(pad + labelW, bY, Math.round(pct * barZone), 6, [212, 113, 35]);
+        const safeTitle = title.replace(/[^\x00-\x7E]/g, "").trim();
+        doc.text(safeTitle.length > 38 ? safeTitle.slice(0, 36) + "..." : safeTitle, pad + 6, bY + 5);
+        drawBgBar(pad + labelW2, bY, barZone2, 6);
+        drawBar(pad + labelW2, bY, Math.round(pct * barZone2), 6, [212, 113, 35]);
         doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(30, 30, 30);
         doc.text(String(count), W - pad, bY + 5, { align: "right" });
+        y += 12;
       });
-      y += r.topSaved.length * 12 + 6;
+      y += 6;
     }
 
-    // ── ORIGEM DO TRÁFEGO ──
+    // ── ORIGEM DO TRAFEGO ──
+    checkPageBreak(20);
     if (r.topUtm.length > 0) {
-      y = sectionTitle("Origem do Tráfego (UTM)", y);
+      y = sectionTitle("Origem do Trafego (UTM)", y);
       const totalUtm = r.topUtm.reduce((s, [, v]) => s + v, 0);
-      const labelW = 50;
-      const barZone = W - pad * 2 - labelW - 20;
+      const labelW3 = 50;
+      const barZone3 = W - pad * 2 - labelW3 - 20;
       r.topUtm.forEach(([src, count], i) => {
-        const bY = y + i * 12;
+        checkPageBreak(12);
+        const bY = y;
         const pct = totalUtm > 0 ? count / totalUtm : 0;
         if (i % 2 === 0) { doc.setFillColor(248, 250, 248); doc.roundedRect(pad, bY - 1, W - pad * 2, 11, 1, 1, "F"); }
         doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(40, 40, 40);
         doc.text(src.charAt(0).toUpperCase() + src.slice(1), pad + 3, bY + 5.5);
-        drawBgBar(pad + labelW, bY + 1, barZone, 5);
-        drawBar(pad + labelW, bY + 1, Math.round(pct * barZone), 5, [59, 130, 246]);
+        drawBgBar(pad + labelW3, bY + 1, barZone3, 5);
+        drawBar(pad + labelW3, bY + 1, Math.round(pct * barZone3), 5, [59, 130, 246]);
         doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(45, 106, 79);
         doc.text(`${count} (${Math.round(pct * 100)}%)`, W - pad, bY + 5.5, { align: "right" });
+        y += 12;
       });
-      y += r.topUtm.length * 12 + 6;
+      y += 6;
     } else {
-      y = sectionTitle("Origem do Tráfego (UTM)", y);
+      y = sectionTitle("Origem do Trafego (UTM)", y);
       doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140, 140, 140);
-      doc.text("Nenhum acesso via UTM no período. Adicione ?utm_source=instagram aos seus links.", pad + 3, y + 4);
+      doc.text("Nenhum acesso via UTM no periodo. Adicione ?utm_source=instagram aos seus links.", pad + 3, y + 4);
       y += 12;
     }
 
