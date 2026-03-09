@@ -58,12 +58,28 @@ export default function AdminEngagement() {
 
     try {
       // Fetch events and users in parallel
+      // Fetch ALL historical events with pagination (no limit)
+      const fetchAllEvents = async () => {
+        let all = [];
+        let skip = 0;
+        const batchSize = 500;
+        let iterations = 0;
+        while (iterations < 40) { // max 20k events
+          const batch = await base44.entities.AppAnalytics.list("-created_date", batchSize, skip).catch(() => []);
+          all = all.concat(batch);
+          if (batch.length < batchSize) break;
+          skip += batchSize;
+          iterations++;
+        }
+        return all;
+      };
+
       const [eventsResult, allTimeEventsResult, usersResult] = await Promise.all([
         days === 0
-          ? base44.entities.AppAnalytics.list("-created_date", 2000).catch(() => [])
+          ? fetchAllEvents()
           : base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000).catch(() => []),
         days !== 0
-          ? base44.entities.AppAnalytics.list("-created_date", 2000).catch(() => [])
+          ? fetchAllEvents()
           : Promise.resolve(null), // if already fetching all, reuse
         (async () => {
           try {
