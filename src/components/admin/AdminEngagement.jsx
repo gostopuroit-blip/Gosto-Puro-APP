@@ -111,7 +111,8 @@ export default function AdminEngagement() {
   };
 
   // --- Derived metrics ---
-  const nonAdminEvents = events;
+  const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
+  const nonAdminEvents = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
 
   // Helper: unique identifier per user/session (email if available, session_id as fallback)
   const uid = (e) => e.user_email || e.session_id;
@@ -615,7 +616,7 @@ export default function AdminEngagement() {
 
       {/* 6. Top Users */}
       <Section title="🏆 Top Usuários" subtitle="Ranking por engagement score — período selecionado + histórico total">
-        <AdminTopUsers events={nonAdminEvents} allUsers={allUsers} allTimeEvents={allTimeEvents} showingAllTime={days === 0} />
+        <AdminTopUsers events={nonAdminEvents} allUsers={allUsers} allTimeEvents={allTimeEvents.filter(e => !adminEmails.has(e.user_email))} showingAllTime={days === 0} />
       </Section>
 
       {/* 7. Scroll das receitas */}
