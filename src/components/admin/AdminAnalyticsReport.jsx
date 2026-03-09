@@ -132,6 +132,260 @@ export default function AdminAnalyticsReport() {
     URL.revokeObjectURL(url);
   };
 
+  const exportPDF = async () => {
+    if (!report) return;
+    const r = report;
+    const retentionRate = r.uniqueUsers > 0 ? Math.round((r.returningUsers / r.uniqueUsers) * 100) : 0;
+    const premiumRate = r.uniqueUsers > 0 ? Math.round((r.premiumUsers / r.uniqueUsers) * 100) : 0;
+    const freeRate = 100 - premiumRate;
+
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const W = 210;
+    const pad = 15;
+    let y = 0;
+
+    // ---- helpers ----
+    const drawPieChart = (cx, cy, r, segments) => {
+      // segments: [{value, color}]
+      const total = segments.reduce((s, seg) => s + seg.value, 0);
+      if (!total) return;
+      let angle = -Math.PI / 2;
+      segments.forEach(seg => {
+        const slice = (seg.value / total) * 2 * Math.PI;
+        doc.setFillColor(seg.color[0], seg.color[1], seg.color[2]);
+        // draw pie slice using lines
+        const steps = Math.max(12, Math.round(slice * 20));
+        const pts = [[cx, cy]];
+        for (let i = 0; i <= steps; i++) {
+          const a = angle + (i / steps) * slice;
+          pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+        }
+        doc.triangle(pts[0][0], pts[0][1], pts[1][0], pts[1][1], pts[2][0], pts[2][1], "F");
+        for (let i = 2; i < pts.length - 1; i++) {
+          doc.triangle(pts[0][0], pts[0][1], pts[i][0], pts[i][1], pts[i+1][0], pts[i+1][1], "F");
+        }
+        angle += slice;
+      });
+    };
+
+    const drawBar = (x, barY, w, h, color) => {
+      doc.setFillColor(...color);
+      doc.roundedRect(x, barY, w, h, 1, 1, "F");
+    };
+
+    const sectionTitle = (title, sY) => {
+      doc.setFillColor(45, 106, 79);
+      doc.rect(pad, sY, W - pad * 2, 7, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.text(title, pad + 3, sY + 4.8);
+      doc.setTextColor(30, 30, 30);
+      return sY + 10;
+    };
+
+    // ---- COVER ----
+    doc.setFillColor(45, 106, 79);
+    doc.rect(0, 0, W, 50, "F");
+    doc.setFillColor(64, 145, 108);
+    doc.rect(0, 40, W, 15, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(255, 255, 255);
+    doc.text("Gosto Puro", pad, 20);
+    doc.setFontSize(12);
+    doc.text("Relatório de Engajamento", pad, 30);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Período: ${r.dateRange}  |  Últimos ${r.period} dias`, pad, 43);
+    doc.text(`Gerado: ${new Date().toLocaleString("pt-BR")}`, pad, 50);
+
+    y = 60;
+    doc.setTextColor(30, 30, 30);
+
+    // ---- KPI CARDS (2 rows × 4) ----
+    const kpis = [
+      { label: "Sessões Abertas", value: r.totalSessions, color: [209, 236, 224] },
+      { label: "Usuários Únicos", value: r.uniqueUsers, color: [219, 234, 254] },
+      { label: "Taxa de Retorno", value: `${retentionRate}%`, color: [237, 233, 254] },
+      { label: "Tempo Médio/Sessão", value: fmtDuration(r.avgDuration), color: [254, 243, 199] },
+      { label: "Usuários Premium", value: r.premiumUsers, color: [253, 230, 138] },
+      { label: "Usuários Free", value: r.freeUsers, color: [226, 232, 240] },
+      { label: "Views de Receitas", value: r.recipeViews, color: [209, 236, 224] },
+      { label: "Receitas Salvas", value: r.recipeSaves, color: [254, 202, 202] },
+    ];
+    const cardW = (W - pad * 2 - 9) / 4;
+    const cardH = 20;
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 4; col++) {
+        const kpi = kpis[row * 4 + col];
+        if (!kpi) continue;
+        const kx = pad + col * (cardW + 3);
+        const ky = y + row * (cardH + 3);
+        doc.setFillColor(...kpi.color);
+        doc.roundedRect(kx, ky, cardW, cardH, 2, 2, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(30, 30, 30);
+        doc.text(String(kpi.value), kx + cardW / 2, ky + 9, { align: "center" });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6.5);
+        doc.setTextColor(80, 80, 80);
+        doc.text(kpi.label, kx + cardW / 2, ky + 15, { align: "center" });
+      }
+    }
+    y += 2 * (cardH + 3) + 8;
+
+    // ---- PIE CHARTS ROW ----
+    y = sectionTitle("Distribuição de Usuários", y);
+    const pieY = y + 22;
+    const pieR = 18;
+
+    // Pie 1: Free vs Premium
+    const pie1cx = pad + 25;
+    drawPieChart(pie1cx, pieY, pieR, [
+      { value: r.freeUsers, color: [148, 163, 184] },
+      { value: r.premiumUsers, color: [251, 191, 36] },
+    ]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(30, 30, 30);
+    doc.text("Free vs Premium", pie1cx, pieY + pieR + 5, { align: "center" });
+    // Legend
+    doc.setFillColor(148, 163, 184); doc.circle(pie1cx - 12, pieY + pieR + 9, 1.5, "F");
+    doc.setFontSize(6.5); doc.setFont("helvetica", "normal");
+    doc.text(`Free ${freeRate}%`, pie1cx - 9, pieY + pieR + 9.5);
+    doc.setFillColor(251, 191, 36); doc.circle(pie1cx + 2, pieY + pieR + 9, 1.5, "F");
+    doc.text(`Premium ${premiumRate}%`, pie1cx + 5, pieY + pieR + 9.5);
+
+    // Pie 2: Retorno
+    const pie2cx = pad + 90;
+    const returnRate = r.uniqueUsers > 0 ? r.returningUsers : 0;
+    const notReturn = r.uniqueUsers - returnRate;
+    drawPieChart(pie2cx, pieY, pieR, [
+      { value: returnRate, color: [45, 106, 79] },
+      { value: notReturn, color: [209, 236, 224] },
+    ]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("Usuários que Voltaram", pie2cx, pieY + pieR + 5, { align: "center" });
+    doc.setFillColor(45, 106, 79); doc.circle(pie2cx - 14, pieY + pieR + 9, 1.5, "F");
+    doc.setFontSize(6.5); doc.setFont("helvetica", "normal");
+    doc.text(`Voltaram ${retentionRate}%`, pie2cx - 11, pieY + pieR + 9.5);
+    doc.setFillColor(209, 236, 224); doc.circle(pie2cx + 5, pieY + pieR + 9, 1.5, "F");
+    doc.text(`1ª visita ${100 - retentionRate}%`, pie2cx + 8, pieY + pieR + 9.5);
+
+    // Pie 3: UTM sources (top 4)
+    if (r.topUtm.length > 0) {
+      const pie3cx = pad + 160;
+      const pieColors = [[59,130,246],[239,68,68],[245,158,11],[16,185,129],[139,92,246]];
+      const top4 = r.topUtm.slice(0, 4);
+      const othersVal = r.topUtm.slice(4).reduce((s,[,v]) => s + v, 0);
+      const pieSeg = top4.map(([,v], i) => ({ value: v, color: pieColors[i] }));
+      if (othersVal > 0) pieSeg.push({ value: othersVal, color: [156, 163, 175] });
+      const totalUtm = pieSeg.reduce((s, seg) => s + seg.value, 0);
+      if (totalUtm > 0) {
+        drawPieChart(pie3cx, pieY, pieR, pieSeg);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.text("Tráfego por Fonte", pie3cx, pieY + pieR + 5, { align: "center" });
+        top4.forEach(([src,], i) => {
+          doc.setFillColor(...pieColors[i]);
+          doc.circle(pie3cx - 14, pieY + pieR + 9 + i * 5, 1.5, "F");
+          doc.setFontSize(6); doc.setFont("helvetica", "normal");
+          doc.text(src.slice(0,12), pie3cx - 11, pieY + pieR + 9.5 + i * 5);
+        });
+      } else {
+        doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(100, 100, 100);
+        doc.text("Sem UTM no período", pie3cx, pieY, { align: "center" });
+      }
+    }
+
+    y = pieY + pieR + 18 + (r.topUtm.length > 0 ? 8 : 0);
+
+    // ---- TOP RECIPES BAR CHART ----
+    if (r.topRecipes.length > 0) {
+      y = sectionTitle("Top Receitas Mais Vistas", y);
+      const maxV = r.topRecipes[0][1];
+      const maxBarW = W - pad * 2 - 70;
+      r.topRecipes.forEach(([title, count], i) => {
+        const barY = y + i * 10;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(60, 60, 60);
+        const shortTitle = title.length > 30 ? title.slice(0, 28) + "…" : title;
+        doc.text(`${i + 1}. ${shortTitle}`, pad, barY + 4);
+        const bw = Math.max(3, Math.round((count / maxV) * maxBarW));
+        drawBar(pad + 68, barY, bw, 5, [45, 106, 79]);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.text(String(count), pad + 68 + bw + 2, barY + 4);
+      });
+      y += r.topRecipes.length * 10 + 6;
+    }
+
+    // ---- TOP SAVED BAR CHART ----
+    if (r.topSaved.length > 0) {
+      y = sectionTitle("Top Receitas Mais Salvas", y);
+      const maxV = r.topSaved[0][1];
+      const maxBarW = W - pad * 2 - 70;
+      r.topSaved.forEach(([title, count], i) => {
+        const barY = y + i * 10;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(60, 60, 60);
+        const shortTitle = title.length > 30 ? title.slice(0, 28) + "…" : title;
+        doc.text(`${i + 1}. ${shortTitle}`, pad, barY + 4);
+        const bw = Math.max(3, Math.round((count / maxV) * maxBarW));
+        drawBar(pad + 68, barY, bw, 5, [212, 113, 35]);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.text(String(count), pad + 68 + bw + 2, barY + 4);
+      });
+      y += r.topSaved.length * 10 + 6;
+    }
+
+    // ---- UTM TABLE ----
+    if (r.topUtm.length > 0) {
+      y = sectionTitle("Origem do Tráfego (UTM)", y);
+      r.topUtm.forEach(([src, count], i) => {
+        doc.setFontSize(8);
+        doc.setFont("helvetica", i % 2 === 0 ? "normal" : "normal");
+        if (i % 2 === 0) { doc.setFillColor(245, 247, 250); doc.rect(pad, y + i * 8, W - pad * 2, 8, "F"); }
+        doc.setTextColor(60, 60, 60);
+        doc.text(src, pad + 3, y + i * 8 + 5.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(45, 106, 79);
+        doc.text(`${count} visita${count !== 1 ? "s" : ""}`, W - pad - 3, y + i * 8 + 5.5, { align: "right" });
+      });
+      y += r.topUtm.length * 8 + 6;
+    }
+
+    // ---- INSIGHT BOX ----
+    if (y < 260) {
+      doc.setFillColor(45, 106, 79);
+      doc.roundedRect(pad, y, W - pad * 2, 20, 3, 3, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Resumo Executivo", pad + 4, y + 7);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      const summary = `${r.uniqueUsers} usuários ativos · ${r.premiumUsers} Premium (${premiumRate}%) · ${r.returningUsers} voltaram (${retentionRate}%) · ${r.recipeViews} views · ${fmtDuration(r.avgDuration)}/sessão`;
+      doc.text(summary, pad + 4, y + 14, { maxWidth: W - pad * 2 - 8 });
+    }
+
+    // Footer
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Gosto Puro — Relatório automático", W / 2, 290, { align: "center" });
+
+    doc.save(`gostopuro_relatorio_${r.period}dias.pdf`);
+  };
+
   const exportTXT = () => {
     if (!report) return;
     const r = report;
