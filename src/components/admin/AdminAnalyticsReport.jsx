@@ -37,6 +37,9 @@ export default function AdminAnalyticsReport() {
     const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
     const ev = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
 
+    // Use session_id as fallback when user_email is not yet cached
+    const uid = (e) => e.user_email || e.session_id;
+
     const sessionStarts = ev.filter(e => e.event_type === "session_start");
     const sessionEnds = ev.filter(e => e.event_type === "session_end" && e.session_duration_seconds > 0);
     const recipeViews = ev.filter(e => e.event_type === "recipe_view");
