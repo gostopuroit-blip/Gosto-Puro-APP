@@ -45,13 +45,45 @@ export function useSessionTracking() {
 
       // Capture UTM params BEFORE auth (they come from URL, not auth)
       const urlParams = new URLSearchParams(window.location.search);
-      const utmSource = urlParams.get("utm_source");
-      const utmMedium = urlParams.get("utm_medium");
-      const utmCampaign = urlParams.get("utm_campaign");
+      let utmSource = urlParams.get("utm_source");
+      let utmMedium = urlParams.get("utm_medium");
+      let utmCampaign = urlParams.get("utm_campaign");
+
+      // Fallback: detect Instagram/TikTok in-app browser via user agent (they strip UTMs)
+      if (!utmSource) {
+        const ua = navigator.userAgent || "";
+        if (/Instagram/i.test(ua)) utmSource = "instagram";
+        else if (/musical_ly|TikTok/i.test(ua)) utmSource = "tiktok";
+        else if (/FBAN|FBAV|FB_IAB/i.test(ua)) utmSource = "facebook";
+      }
+
+      // Fallback: detect referrer (e.g. from Google search)
+      if (!utmSource && document.referrer) {
+        try {
+          const ref = new URL(document.referrer).hostname;
+          if (ref.includes("google")) utmSource = "google";
+          else if (ref.includes("instagram")) utmSource = "instagram";
+          else if (ref.includes("tiktok")) utmSource = "tiktok";
+          else if (ref.includes("facebook")) utmSource = "facebook";
+          else if (ref.includes("pinterest")) utmSource = "pinterest";
+          else if (ref.includes("youtube")) utmSource = "youtube";
+        } catch {}
+      }
+
+      // Persist UTM in localStorage so it survives navigation within the session
       if (utmSource) {
+        localStorage.setItem("gp_last_utm_source", utmSource);
+        localStorage.setItem("gp_last_utm_date", todayStr());
         sessionStorage.setItem("gp_utm_source", utmSource);
         if (utmMedium) sessionStorage.setItem("gp_utm_medium", utmMedium);
         if (utmCampaign) sessionStorage.setItem("gp_utm_campaign", utmCampaign);
+      } else {
+        // Recover UTM from localStorage if from today (user navigated internally)
+        const savedUtm = localStorage.getItem("gp_last_utm_source");
+        const savedDate = localStorage.getItem("gp_last_utm_date");
+        if (savedUtm && savedDate === todayStr()) {
+          utmSource = savedUtm;
+        }
       }
 
       // CRITICAL: Wait for auth FIRST, then fire events so user_email is cached
