@@ -86,6 +86,22 @@ export function useSessionTracking() {
         }
       }
 
+      // Only fire utm_visit when UTM came from the actual URL/UA (not recovered from localStorage)
+      const utmFromUrl = !!urlParams.get("utm_source") || (
+        !urlParams.get("utm_source") && (() => {
+          const ua = navigator.userAgent || "";
+          return /Instagram/i.test(ua) || /musical_ly|TikTok/i.test(ua) || /FBAN|FBAV|FB_IAB/i.test(ua);
+        })()
+      ) || (
+        !urlParams.get("utm_source") && !!document.referrer && (() => {
+          try {
+            const ref = new URL(document.referrer).hostname;
+            return ref.includes("google") || ref.includes("instagram") || ref.includes("tiktok") ||
+              ref.includes("facebook") || ref.includes("pinterest") || ref.includes("youtube");
+          } catch { return false; }
+        })()
+      );
+
       // CRITICAL: Wait for auth FIRST, then fire events so user_email is cached
       const doInit = async () => {
         try {
@@ -95,7 +111,8 @@ export function useSessionTracking() {
         } catch {}
 
         // Now fire events — user_email is already in sessionStorage
-        if (utmSource) {
+        // Only fire utm_visit when user actually came from UTM (not recovered from localStorage)
+        if (utmSource && utmFromUrl) {
           trackEvent("utm_visit", {
             occasion_label: utmSource,
             source: [utmMedium, utmCampaign].filter(Boolean).join(" / ") || utmSource,
