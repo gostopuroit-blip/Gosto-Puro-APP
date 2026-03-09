@@ -129,9 +129,8 @@ export default function AdminEngagement() {
   // Unique returning users (more than 1 session)
   const sessionsByUser = {};
   sessionStarts.forEach(e => {
-    if (e.user_email) {
-      sessionsByUser[e.user_email] = (sessionsByUser[e.user_email] || 0) + 1;
-    }
+    const key = uid(e);
+    if (key) sessionsByUser[key] = (sessionsByUser[key] || 0) + 1;
   });
   const returningUsers = Object.values(sessionsByUser).filter(c => c > 1).length;
   const uniqueUsers = Object.keys(sessionsByUser).length;
