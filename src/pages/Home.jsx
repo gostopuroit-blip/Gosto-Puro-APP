@@ -89,6 +89,7 @@ export default function Home() {
       "Proteiche": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/9f81f5cc8_Proteiche.png",
       "Senza zucchero": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6c462ddda_Senzazucchero.png",
       "Veloci": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/de87766a6_Veloci.png",
+      "Instagram": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png",
     };
 
     // Separate occasions by type
