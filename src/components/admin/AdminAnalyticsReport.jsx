@@ -227,6 +227,16 @@ Gosto Puro — Relatório gerado automaticamente
       return sY + 12;
     };
 
+    const PAGE_H = 297;
+    const MARGIN_BOTTOM = 15;
+
+    const checkPageBreak = (neededSpace) => {
+      if (y + neededSpace > PAGE_H - MARGIN_BOTTOM) {
+        doc.addPage();
+        y = 15;
+      }
+    };
+
     const statRow = (label, value, note, rowY, highlight = false) => {
       if (highlight) {
         doc.setFillColor(241, 248, 245);
