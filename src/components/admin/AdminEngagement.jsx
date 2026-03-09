@@ -136,10 +136,10 @@ export default function AdminEngagement() {
   const uniqueUsers = Object.keys(sessionsByUser).length;
 
   // Free vs Premium returning
-  const returningFree = sessionStarts.filter(e => e.user_plan === "free" && e.user_email && (sessionsByUser[e.user_email] || 0) > 1);
-  const returningPremium = sessionStarts.filter(e => e.user_plan === "premium" && e.user_email && (sessionsByUser[e.user_email] || 0) > 1);
-  const returningFreeUniq = new Set(returningFree.map(e => e.user_email)).size;
-  const returningPremiumUniq = new Set(returningPremium.map(e => e.user_email)).size;
+  const returningFree = sessionStarts.filter(e => e.user_plan === "free" && uid(e) && (sessionsByUser[uid(e)] || 0) > 1);
+  const returningPremium = sessionStarts.filter(e => e.user_plan === "premium" && uid(e) && (sessionsByUser[uid(e)] || 0) > 1);
+  const returningFreeUniq = new Set(returningFree.map(uid)).size;
+  const returningPremiumUniq = new Set(returningPremium.map(uid)).size;
 
   // Unique users who viewed recipes
   const usersViewedRecipes = new Set(recipeViews.filter(e => e.user_email).map(e => e.user_email)).size;
