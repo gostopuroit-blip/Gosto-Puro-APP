@@ -15,6 +15,7 @@ function buildRanking(events, allUsers, limit = 50) {
         email: u.email,
         name: u.full_name || null,
         plan: u.plan || "free",
+        _planFromUsers: true, // plano vem do cadastro atual
         views: 0, saved: 0, planner: 0, sessions: 0, totalDuration: 0,
         _sessionIds: new Set(),
         _durationSessions: new Set(),
@@ -27,6 +28,7 @@ function buildRanking(events, allUsers, limit = 50) {
     if (!map[e.user_email]) {
       map[e.user_email] = {
         email: e.user_email, name: null, plan: e.user_plan || "free",
+        _planFromUsers: false,
         views: 0, saved: 0, planner: 0, sessions: 0, totalDuration: 0,
         _sessionIds: new Set(),
         _durationSessions: new Set(),
@@ -47,7 +49,8 @@ function buildRanking(events, allUsers, limit = 50) {
         u.totalDuration += e.session_duration_seconds;
       }
     }
-    if (e.user_plan) u.plan = e.user_plan;
+    // Só atualiza o plano pelo evento se o usuário não veio do cadastro atual
+    if (e.user_plan && !u._planFromUsers) u.plan = e.user_plan;
   });
 
   return Object.values(map)
