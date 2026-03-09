@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Download, Loader2, FileText, TrendingUp, Users, BookOpen, Smartphone } from "lucide-react";
+import { Download, Loader2, FileText, TrendingUp, Users, BookOpen, Smartphone, FileDown } from "lucide-react";
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
