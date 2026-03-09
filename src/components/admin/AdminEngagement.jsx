@@ -244,7 +244,7 @@ export default function AdminEngagement() {
               onClick={() => setDays(d)}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${days === d ? "bg-white text-[#2D6A4F] shadow-sm" : "text-gray-500"}`}
             >
-              {d}g
+              {d === 0 ? "∞" : `${d}g`}
             </button>
           ))}
           <button onClick={load} className="p-1 ml-1 text-gray-400 hover:text-[#2D6A4F]">
