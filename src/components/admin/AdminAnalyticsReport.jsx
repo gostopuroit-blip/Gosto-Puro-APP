@@ -304,14 +304,15 @@ Gosto Puro — Relatório gerado automaticamente
     // ── MÉTRICAS-CHAVE (tabela de indicadores) ──
     y = sectionTitle("Indicadores-Chave de Performance", y);
     const metrics = [
-      ["Sessões por usuário único", r.uniqueUsers > 0 ? (r.totalSessions / r.uniqueUsers).toFixed(1) : "—", "média de vezes que cada usuário abriu o app"],
-      ["Taxa de conversão Free → Premium", `${premiumRate}%`, `${r.premiumUsers} Premium de ${r.uniqueUsers} ativos`],
-      ["Taxa de retorno (retention)", `${retentionRate}%`, `${r.returningUsers} de ${r.uniqueUsers} usuários voltaram`],
-      ["Views de receita por usuário", viewsPerUser, `total: ${r.recipeViews} views`],
-      ["Taxa de save (views → saves)", `${saveRate}%`, `${r.recipeSaves} saves de ${r.recipeViews} views`],
-      ["Planners por usuário ativo", r.uniqueUsers > 0 ? (r.planners / r.uniqueUsers).toFixed(2) : "—", `total: ${r.planners} planners criados`],
+      ["Sessoes por usuario unico", r.uniqueUsers > 0 ? (r.totalSessions / r.uniqueUsers).toFixed(1) : "-", "media de vezes que cada usuario abriu o app"],
+      ["Taxa de conversao Free para Premium", `${premiumRate}%`, `${r.premiumUsers} Premium de ${r.uniqueUsers} ativos`],
+      ["Taxa de retorno (retention)", `${retentionRate}%`, `${r.returningUsers} de ${r.uniqueUsers} usuarios voltaram`],
+      ["Views de receita por usuario", viewsPerUser, `total: ${r.recipeViews} views`],
+      ["Taxa de save (views que viraram saves)", `${saveRate}%`, `${r.recipeSaves} saves de ${r.recipeViews} views`],
+      ["Planners por usuario ativo", r.uniqueUsers > 0 ? (r.planners / r.uniqueUsers).toFixed(2) : "-", `total: ${r.planners} planners criados`],
     ];
     metrics.forEach((m, i) => {
+      checkPageBreak(12);
       y = statRow(m[0], m[1], m[2], y, i % 2 === 0);
     });
     y += 4;
