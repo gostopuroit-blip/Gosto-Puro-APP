@@ -39,7 +39,7 @@ export default function AdminDashboard({ onNavigate }) {
       base44.entities.WebhookLog.filter({ status: "error" }).catch(() => []),
     ]);
 
-    const users = Array.isArray(usersResult) ? usersResult : [];
+    const users = usersResult;
     const now = Date.now();
     const h24 = webhooks.filter((w) => new Date(w.timestamp || w.created_date).getTime() > now - 86400000);
 
@@ -47,9 +47,9 @@ export default function AdminDashboard({ onNavigate }) {
     const topPrepared = [...allRecipes].sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0)).slice(0, 5);
 
     setStats({
-      totalUsers: usersResult ? users.length : null,
-      premiumUsers: usersResult ? users.filter((u) => u.plan === "premium").length : null,
-      freeUsers: usersResult ? users.filter((u) => !u.plan || u.plan === "free").length : null,
+      totalUsers: users.length,
+      premiumUsers: users.filter((u) => u.plan === "premium").length,
+      freeUsers: users.filter((u) => !u.plan || u.plan === "free").length,
       totalRecipes: allRecipes.length,
       topSaved,
       topPrepared,
