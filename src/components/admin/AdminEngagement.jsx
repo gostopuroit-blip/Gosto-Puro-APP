@@ -85,6 +85,7 @@ export default function AdminEngagement() {
         })(),
       ]);
       setEvents(eventsResult || []);
+      setAllTimeEvents(allTimeEventsResult !== null ? allTimeEventsResult : eventsResult || []);
       setAllUsers(usersResult || []);
     } catch {
       setEvents([]);
