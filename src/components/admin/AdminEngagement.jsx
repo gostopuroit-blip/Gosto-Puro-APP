@@ -91,6 +91,9 @@ export default function AdminEngagement() {
   const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
   const nonAdminEvents = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
 
+  // Helper: unique identifier per user/session (email if available, session_id as fallback)
+  const uid = (e) => e.user_email || e.session_id;
+
   const sessionStarts = nonAdminEvents.filter(e => e.event_type === "session_start");
   const sessionEnds = nonAdminEvents.filter(e => e.event_type === "session_end" && e.session_duration_seconds > 0);
   const recipeViews = nonAdminEvents.filter(e => e.event_type === "recipe_view");
