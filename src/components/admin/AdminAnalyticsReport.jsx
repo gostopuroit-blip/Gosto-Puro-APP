@@ -47,9 +47,9 @@ export default function AdminAnalyticsReport() {
     const planners = ev.filter(e => e.event_type === "planner_created");
     const utmVisits = ev.filter(e => e.event_type === "utm_visit");
 
-    const uniqueUsers = new Set(sessionStarts.filter(e => e.user_email).map(e => e.user_email));
-    const freeUsers = new Set(sessionStarts.filter(e => e.user_plan === "free" && e.user_email).map(e => e.user_email));
-    const premiumUsers = new Set(sessionStarts.filter(e => e.user_plan === "premium" && e.user_email).map(e => e.user_email));
+    const uniqueUsers = new Set(sessionStarts.filter(e => uid(e)).map(uid));
+    const freeUsers = new Set(sessionStarts.filter(e => e.user_plan === "free" && uid(e)).map(uid));
+    const premiumUsers = new Set(sessionStarts.filter(e => e.user_plan === "premium" && uid(e)).map(uid));
 
     const durations = sessionEnds.map(e => e.session_duration_seconds);
     const avgDuration = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
