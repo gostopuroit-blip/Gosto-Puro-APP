@@ -615,7 +615,7 @@ export default function AdminEngagement() {
 
       {/* 6. Top Users */}
       <Section title="🏆 Top Usuários" subtitle="Ranking por engagement score — período selecionado + histórico total">
-        <AdminTopUsers events={nonAdminEvents} allUsers={allUsers} allTimeEvents={allTimeEvents.filter(e => !adminEmails.has(e.user_email))} showingAllTime={days === 0} />
+        <AdminTopUsers events={nonAdminEvents} allUsers={allUsers} allTimeEvents={allTimeEvents} showingAllTime={days === 0} />
       </Section>
 
       {/* 7. Scroll das receitas */}
