@@ -111,8 +111,7 @@ export default function AdminEngagement() {
   };
 
   // --- Derived metrics ---
-  const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
-  const nonAdminEvents = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
+  const nonAdminEvents = events;
 
   // Helper: unique identifier per user/session (email if available, session_id as fallback)
   const uid = (e) => e.user_email || e.session_id;

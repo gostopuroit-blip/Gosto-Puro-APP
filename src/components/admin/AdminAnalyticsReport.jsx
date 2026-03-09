@@ -34,8 +34,7 @@ export default function AdminAnalyticsReport() {
       base44.entities.User.list("-created_date", 200).catch(() => []),
     ]);
 
-    const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
-    const ev = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
+    const ev = events;
 
     // Use session_id as fallback when user_email is not yet cached
     const uid = (e) => e.user_email || e.session_id;
