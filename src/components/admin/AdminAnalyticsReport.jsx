@@ -478,7 +478,7 @@ Gosto Puro — Relatório gerado automaticamente
             ))}
           </div>
           {report && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button onClick={exportCSV}
                 className="flex items-center gap-1.5 px-3 py-2 bg-[#2D6A4F] text-white rounded-xl text-xs font-semibold hover:bg-[#245a42] transition-all">
                 <Download className="w-3.5 h-3.5" />
@@ -487,7 +487,12 @@ Gosto Puro — Relatório gerado automaticamente
               <button onClick={exportTXT}
                 className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 text-white rounded-xl text-xs font-semibold hover:bg-purple-700 transition-all">
                 <FileText className="w-3.5 h-3.5" />
-                Relatório
+                TXT
+              </button>
+              <button onClick={exportPDF}
+                className="flex items-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-xl text-xs font-semibold hover:bg-red-700 transition-all">
+                <FileDown className="w-3.5 h-3.5" />
+                PDF
               </button>
             </div>
           )}
