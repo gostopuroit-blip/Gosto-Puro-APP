@@ -6,7 +6,7 @@ const W_SAVED = 3;
 const W_PLANNER = 5;
 const W_SESSION = 0.5;
 
-function buildRanking(events, allUsers) {
+function buildRanking(events, allUsers, limit = 50) {
   const map = {};
 
   allUsers.forEach(u => {
@@ -16,6 +16,8 @@ function buildRanking(events, allUsers) {
         name: u.full_name || null,
         plan: u.plan || "free",
         views: 0, saved: 0, planner: 0, sessions: 0, totalDuration: 0,
+        _sessionIds: new Set(),
+        _durationSessions: new Set(),
       };
     }
   });
@@ -23,21 +25,25 @@ function buildRanking(events, allUsers) {
   events.forEach(e => {
     if (!e.user_email) return;
     if (!map[e.user_email]) {
-      map[e.user_email] = { email: e.user_email, name: null, plan: e.user_plan || "free", views: 0, saved: 0, planner: 0, sessions: 0, totalDuration: 0 };
+      map[e.user_email] = {
+        email: e.user_email, name: null, plan: e.user_plan || "free",
+        views: 0, saved: 0, planner: 0, sessions: 0, totalDuration: 0,
+        _sessionIds: new Set(),
+        _durationSessions: new Set(),
+      };
     }
     const u = map[e.user_email];
     if (e.event_type === "recipe_view") u.views++;
     if (e.event_type === "recipe_saved") u.saved++;
     if (e.event_type === "planner_created") u.planner++;
     if (e.event_type === "session_start") {
-      if (!u._sessionIds) u._sessionIds = new Set();
-      u._sessionIds.add(e.session_id || Math.random());
+      u._sessionIds.add(e.session_id || e.id || Math.random());
       u.sessions = u._sessionIds.size;
     }
     if (e.event_type === "session_end" && e.session_duration_seconds > 0) {
-      if (!u._durationSessions) u._durationSessions = new Set();
-      if (!u._durationSessions.has(e.session_id)) {
-        u._durationSessions.add(e.session_id);
+      const key = e.session_id || e.id;
+      if (key && !u._durationSessions.has(key)) {
+        u._durationSessions.add(key);
         u.totalDuration += e.session_duration_seconds;
       }
     }
@@ -46,21 +52,28 @@ function buildRanking(events, allUsers) {
 
   return Object.values(map)
     .map(u => ({
-      ...u,
+      email: u.email,
+      name: u.name,
+      plan: u.plan,
+      views: u.views,
+      saved: u.saved,
+      planner: u.planner,
+      sessions: u.sessions,
+      totalDuration: u.totalDuration,
       score: Math.round(u.views * W_VIEWS + u.saved * W_SAVED + u.planner * W_PLANNER + u.sessions * W_SESSION),
     }))
     .filter(u => u.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+    .slice(0, limit);
 }
 
 export default function AdminTopUsers({ events, allUsers, allTimeEvents, showingAllTime }) {
   const [tab, setTab] = useState("period");
 
-  const periodRanking = useMemo(() => buildRanking(events, allUsers), [events, allUsers]);
-  const allTimeRanking = useMemo(() => buildRanking(allTimeEvents || [], allUsers), [allTimeEvents, allUsers]);
+  const periodRanking = useMemo(() => buildRanking(events, allUsers, 50), [events, allUsers]);
+  const allTimeRanking = useMemo(() => buildRanking(allTimeEvents || [], allUsers, 50), [allTimeEvents, allUsers]);
 
-  const activeRanking = tab === "period" ? periodRanking : allTimeRanking;
+  const activeRanking = (tab === "alltime" || showingAllTime) ? allTimeRanking : periodRanking;
 
   if (!activeRanking.length && !periodRanking.length && !allTimeRanking.length) {
     return <p className="text-xs text-gray-400">Sem dados suficientes ainda.</p>;
@@ -70,7 +83,6 @@ export default function AdminTopUsers({ events, allUsers, allTimeEvents, showing
 
   return (
     <div className="space-y-3">
-      {/* Tab switcher */}
       {!showingAllTime && (
         <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
           <button
@@ -88,7 +100,10 @@ export default function AdminTopUsers({ events, allUsers, allTimeEvents, showing
         </div>
       )}
 
-      <p className="text-[10px] text-gray-400">Score = views×1 + saves×3 + planners×5 + sessões×0.5 {tab === "alltime" || showingAllTime ? "· total acumulado" : "· período selecionado"}</p>
+      <p className="text-[10px] text-gray-400">
+        Score = views×1 + saves×3 + planners×5 + sessões×0.5
+        {(tab === "alltime" || showingAllTime) ? " · total acumulado (nunca perde pontos)" : " · período selecionado"}
+      </p>
 
       {activeRanking.length === 0 ? (
         <p className="text-xs text-gray-400">Sem dados no período.</p>
