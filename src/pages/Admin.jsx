@@ -11,6 +11,7 @@ import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminEngagement from "@/components/admin/AdminEngagement";
 import AdminRecipeEngagement from "@/components/admin/AdminRecipeEngagement";
 import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
+import AdminAnalyticsReport from "@/components/admin/AdminAnalyticsReport";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail } from "lucide-react";
