@@ -26,13 +26,8 @@ export default function AdminDashboard({ onNavigate }) {
 
     let usersResult = [];
     try {
-      let skip = 0;
-      while (true) {
-        const batch = await base44.entities.User.list('-created_date', 200, skip);
-        usersResult = usersResult.concat(batch);
-        if (batch.length < 200) break;
-        skip += 200;
-      }
+      const res = await base44.functions.invoke('adminGetUsers');
+      usersResult = res.data || [];
     } catch {}
 
     const [webhooks] = await Promise.all([

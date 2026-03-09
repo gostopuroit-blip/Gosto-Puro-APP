@@ -81,24 +81,7 @@ export default function AdminEngagement() {
         days !== 0
           ? fetchAllEvents()
           : Promise.resolve(null), // if already fetching all, reuse
-        (async () => {
-          try {
-            let users = [];
-            let skip = 0;
-            let maxIterations = 10;
-            let iterations = 0;
-            while (iterations < maxIterations) {
-              const batch = await base44.entities.User.list("-created_date", 200, skip);
-              users = users.concat(batch);
-              if (batch.length < 200) break;
-              skip += 200;
-              iterations++;
-            }
-            return users;
-          } catch {
-            return [];
-          }
-        })(),
+        base44.functions.invoke('adminGetUsers').then(res => res.data || []).catch(() => []),
       ]);
       setEvents(eventsResult || []);
       setAllTimeEvents(allTimeEventsResult !== null ? allTimeEventsResult : eventsResult || []);
