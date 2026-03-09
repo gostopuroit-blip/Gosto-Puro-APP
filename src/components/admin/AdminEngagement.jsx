@@ -58,7 +58,9 @@ export default function AdminEngagement() {
     try {
       // Fetch events and users in parallel
       const [eventsResult, usersResult] = await Promise.all([
-        base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000).catch(() => []),
+        days === 0
+          ? base44.entities.AppAnalytics.list("-created_date", 2000).catch(() => [])
+          : base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000).catch(() => []),
         (async () => {
           try {
             let users = [];
