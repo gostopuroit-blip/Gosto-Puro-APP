@@ -70,7 +70,7 @@ export default function AdminAnalyticsReport() {
     const topUtm = Object.entries(utmBySource).sort((a, b) => b[1] - a[1]);
 
     const sessionsByUser = {};
-    sessionStarts.forEach(e => { if (e.user_email) sessionsByUser[e.user_email] = (sessionsByUser[e.user_email] || 0) + 1; });
+    sessionStarts.forEach(e => { const k = uid(e); if (k) sessionsByUser[k] = (sessionsByUser[k] || 0) + 1; });
     const returningUsers = Object.values(sessionsByUser).filter(c => c > 1).length;
 
     setReport({
