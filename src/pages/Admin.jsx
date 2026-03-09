@@ -12,15 +12,17 @@ import AdminEngagement from "@/components/admin/AdminEngagement";
 import AdminRecipeEngagement from "@/components/admin/AdminRecipeEngagement";
 import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
 import AdminAnalyticsReport from "@/components/admin/AdminAnalyticsReport";
+import AdminUTMGenerator from "@/components/admin/AdminUTMGenerator";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2 } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
   { key: "engagement",   label: "Analytics",       icon: TrendingUp },
   { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
   { key: "report",         label: "Relatório",         icon: FileBarChart },
+  { key: "utm",            label: "Links UTM",          icon: Link2 },
   { key: "utenti",       label: "Usuários",        icon: Users },
   { key: "ricette",      label: "Receitas",        icon: UtensilsCrossed },
   { key: "genera",       label: "Gerar com IA",    icon: Sparkles },
