@@ -64,7 +64,7 @@ export default function AdminEngagement() {
         let skip = 0;
         const batchSize = 500;
         let iterations = 0;
-        while (iterations < 40) { // max 20k events
+        while (iterations < 100) { // max 50k events
           const batch = await base44.entities.AppAnalytics.list("-created_date", batchSize, skip).catch(() => []);
           all = all.concat(batch);
           if (batch.length < batchSize) break;

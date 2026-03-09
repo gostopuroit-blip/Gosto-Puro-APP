@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function AdminEmailTemplates() {
   const [templates, setTemplates] = useState([]);
