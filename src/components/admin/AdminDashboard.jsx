@@ -24,11 +24,20 @@ export default function AdminDashboard({ onNavigate }) {
       skip += 200;
     }
 
-    const [usersRes, webhooks] = await Promise.all([
-      base44.functions.invoke('adminGetUsers').catch(() => null),
+    let usersResult = [];
+    try {
+      let skip = 0;
+      while (true) {
+        const batch = await base44.entities.User.list('-created_date', 200, skip);
+        usersResult = usersResult.concat(batch);
+        if (batch.length < 200) break;
+        skip += 200;
+      }
+    } catch {}
+
+    const [webhooks] = await Promise.all([
       base44.entities.WebhookLog.filter({ status: "error" }).catch(() => []),
     ]);
-    const usersResult = usersRes?.data || null;
 
     const users = Array.isArray(usersResult) ? usersResult : [];
     const now = Date.now();
