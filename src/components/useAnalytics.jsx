@@ -42,13 +42,8 @@ export function useSessionTracking() {
 
     if (!alreadyStarted) {
       sessionStorage.setItem("gp_session_started", "1");
-      // Cache user info for session_end (needed on page close)
-      base44.auth.me().then(u => {
-        if (u?.email) sessionStorage.setItem("gp_user_email", u.email);
-        if (u?.plan) sessionStorage.setItem("gp_user_plan", u.plan);
-      }).catch(() => {});
 
-      // Capture UTM params from URL (e.g. ?utm_source=tiktok&utm_medium=bio&utm_campaign=lancamento)
+      // Capture UTM params BEFORE auth (they come from URL, not auth)
       const urlParams = new URLSearchParams(window.location.search);
       const utmSource = urlParams.get("utm_source");
       const utmMedium = urlParams.get("utm_medium");
@@ -57,17 +52,33 @@ export function useSessionTracking() {
         sessionStorage.setItem("gp_utm_source", utmSource);
         if (utmMedium) sessionStorage.setItem("gp_utm_medium", utmMedium);
         if (utmCampaign) sessionStorage.setItem("gp_utm_campaign", utmCampaign);
-        trackEvent("utm_visit", { occasion_label: utmSource, source: [utmMedium, utmCampaign].filter(Boolean).join(" / ") || utmSource });
       }
 
-      trackEvent("session_start", utmSource ? { source: utmSource } : {});
+      // CRITICAL: Wait for auth FIRST, then fire events so user_email is cached
+      const doInit = async () => {
+        try {
+          const u = await base44.auth.me();
+          if (u?.email) sessionStorage.setItem("gp_user_email", u.email);
+          if (u?.plan) sessionStorage.setItem("gp_user_plan", u.plan);
+        } catch {}
 
-      // Track if opened as installed PWA (standalone mode)
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
-      if (isStandalone) {
-        trackEvent("pwa_install_click", { occasion_label: "pwa_opened_installed" });
-      }
+        // Now fire events — user_email is already in sessionStorage
+        if (utmSource) {
+          trackEvent("utm_visit", {
+            occasion_label: utmSource,
+            source: [utmMedium, utmCampaign].filter(Boolean).join(" / ") || utmSource,
+          });
+        }
+        trackEvent("session_start", utmSource ? { source: utmSource } : {});
+
+        // Track if opened as installed PWA (standalone mode)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+          || window.navigator.standalone === true;
+        if (isStandalone) {
+          trackEvent("pwa_install_click", { occasion_label: "pwa_opened_installed" });
+        }
+      };
+      doInit();
     }
 
     const handleEnd = () => {
