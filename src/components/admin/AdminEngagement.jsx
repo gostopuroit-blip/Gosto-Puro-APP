@@ -19,6 +19,7 @@ function avg(arr) {
 export default function AdminEngagement() {
   const [days, setDays] = useState(7);
   const [events, setEvents] = useState([]);
+  const [allTimeEvents, setAllTimeEvents] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [recentEvents, setRecentEvents] = useState([]);
