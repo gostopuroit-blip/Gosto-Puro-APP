@@ -197,219 +197,205 @@ Gosto Puro — Relatório gerado automaticamente
     const r = report;
     const retentionRate = r.uniqueUsers > 0 ? Math.round((r.returningUsers / r.uniqueUsers) * 100) : 0;
     const premiumRate = r.uniqueUsers > 0 ? Math.round((r.premiumUsers / r.uniqueUsers) * 100) : 0;
-    const freeRate = 100 - premiumRate;
+    const viewsPerUser = r.uniqueUsers > 0 ? (r.recipeViews / r.uniqueUsers).toFixed(1) : "0";
+    const saveRate = r.recipeViews > 0 ? Math.round((r.recipeSaves / r.recipeViews) * 100) : 0;
 
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     const W = 210;
     const pad = 15;
     let y = 0;
 
-    const drawPieSlice = (cx, cy, r, startAngle, endAngle, color) => {
-      doc.setFillColor(...color);
-      const steps = Math.max(12, Math.round((endAngle - startAngle) * 20));
-      const pts = [[cx, cy]];
-      for (let i = 0; i <= steps; i++) {
-        const a = startAngle + (i / steps) * (endAngle - startAngle);
-        pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
-      }
-      for (let i = 1; i < pts.length - 1; i++) {
-        doc.triangle(pts[0][0], pts[0][1], pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], "F");
-      }
-    };
-
-    const drawPieChart = (cx, cy, r, segments) => {
-      const total = segments.reduce((s, seg) => s + seg.value, 0);
-      if (!total) return;
-      let angle = -Math.PI / 2;
-      segments.forEach(seg => {
-        const slice = (seg.value / total) * 2 * Math.PI;
-        drawPieSlice(cx, cy, r, angle, angle + slice, seg.color);
-        angle += slice;
-      });
-    };
-
+    // helpers
     const drawBar = (x, barY, w, h, color) => {
       doc.setFillColor(...color);
-      doc.roundedRect(x, barY, Math.max(1, w), h, 1, 1, "F");
+      doc.roundedRect(x, barY, Math.max(2, w), h, 1, 1, "F");
+    };
+
+    const drawBgBar = (x, barY, w, h) => {
+      doc.setFillColor(235, 240, 237);
+      doc.roundedRect(x, barY, w, h, 1, 1, "F");
     };
 
     const sectionTitle = (title, sY) => {
       doc.setFillColor(45, 106, 79);
-      doc.rect(pad, sY, W - pad * 2, 7, "F");
+      doc.roundedRect(pad, sY, W - pad * 2, 8, 2, 2, "F");
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
       doc.setTextColor(255, 255, 255);
-      doc.text(title, pad + 3, sY + 4.8);
+      doc.text(title, pad + 4, sY + 5.4);
       doc.setTextColor(30, 30, 30);
-      return sY + 10;
+      return sY + 12;
     };
 
-    // COVER
-    doc.setFillColor(45, 106, 79);
-    doc.rect(0, 0, W, 45, "F");
-    doc.setFillColor(64, 145, 108);
-    doc.rect(0, 38, W, 12, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(255, 255, 255);
-    doc.text("Gosto Puro", pad, 18);
-    doc.setFontSize(12);
-    doc.text("Relatório de Engajamento", pad, 28);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Período: ${r.dateRange}  |  Últimos ${r.period} dias  |  Gerado: ${new Date().toLocaleString("pt-BR")}`, pad, 42);
+    const statRow = (label, value, note, rowY, highlight = false) => {
+      if (highlight) {
+        doc.setFillColor(241, 248, 245);
+        doc.roundedRect(pad, rowY, W - pad * 2, 9, 1, 1, "F");
+      }
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(70, 70, 70);
+      doc.text(label, pad + 3, rowY + 6);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(30, 30, 30);
+      doc.text(String(value), W - pad - 3, rowY + 6, { align: "right" });
+      if (note) {
+        doc.setFont("helvetica", "normal"); doc.setFontSize(6.5); doc.setTextColor(140, 140, 140);
+        doc.text(note, W - pad - 3, rowY + 9.5, { align: "right" });
+      }
+      return rowY + (note ? 11 : 10);
+    };
 
-    y = 54;
+    // ── HEADER ──
+    doc.setFillColor(45, 106, 79);
+    doc.rect(0, 0, W, 40, "F");
+    doc.setFillColor(34, 85, 62);
+    doc.rect(0, 33, W, 7, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(255, 255, 255);
+    doc.text("Gosto Puro", pad, 16);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text("Relatório de Engajamento", pad, 26);
+    doc.setFontSize(7.5);
+    doc.text(`Últimos ${r.period} dias  ·  ${r.dateRange}  ·  Gerado: ${new Date().toLocaleString("pt-BR")}`, pad, 37.5);
+
+    y = 48;
     doc.setTextColor(30, 30, 30);
 
-    // KPI CARDS
+    // ── KPI CARDS 2x4 ──
     const kpis = [
-      { label: "Sessões Abertas", value: r.totalSessions, color: [209, 236, 224] },
-      { label: "Usuários Únicos", value: r.uniqueUsers, color: [219, 234, 254] },
-      { label: "Taxa de Retorno", value: `${retentionRate}%`, color: [237, 233, 254] },
-      { label: "Tempo Médio/Sessão", value: fmtDuration(r.avgDuration), color: [254, 243, 199] },
-      { label: "Usuários Premium", value: r.premiumUsers, color: [253, 230, 138] },
-      { label: "Usuários Free", value: r.freeUsers, color: [226, 232, 240] },
-      { label: "Views de Receitas", value: r.recipeViews, color: [209, 236, 224] },
-      { label: "Receitas Salvas", value: r.recipeSaves, color: [254, 202, 202] },
+      { label: "Sessões abertas", value: r.totalSessions, note: "vezes que o app foi aberto", color: [209, 236, 224], tc: [20, 80, 50] },
+      { label: "Usuários únicos", value: r.uniqueUsers, note: `${r.premiumUsers} Premium · ${r.freeUsers} Free`, color: [219, 234, 254], tc: [30, 60, 130] },
+      { label: "Taxa de retorno", value: `${retentionRate}%`, note: `${r.returningUsers} voltaram ao app`, color: [237, 233, 254], tc: [80, 40, 160] },
+      { label: "Tempo médio/sessão", value: fmtDuration(r.avgDuration), note: "por visita", color: [254, 243, 199], tc: [120, 80, 10] },
+      { label: "Usuários Premium", value: r.premiumUsers, note: `${premiumRate}% da base ativa`, color: [253, 230, 138], tc: [120, 80, 10] },
+      { label: "Views de receitas", value: r.recipeViews, note: `${viewsPerUser} views/usuário`, color: [209, 250, 229], tc: [5, 100, 60] },
+      { label: "Receitas salvas", value: r.recipeSaves, note: `${saveRate}% dos views viraram save`, color: [254, 202, 202], tc: [160, 30, 30] },
+      { label: "Planners criados", value: r.planners, note: "planos de refeição gerados", color: [224, 231, 255], tc: [50, 50, 180] },
     ];
-    const cardW = (W - pad * 2 - 9) / 4;
-    const cardH = 20;
-    for (let row = 0; row < 2; row++) {
-      for (let col = 0; col < 4; col++) {
-        const kpi = kpis[row * 4 + col];
-        if (!kpi) continue;
-        const kx = pad + col * (cardW + 3);
-        const ky = y + row * (cardH + 3);
-        doc.setFillColor(...kpi.color);
-        doc.roundedRect(kx, ky, cardW, cardH, 2, 2, "F");
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(30, 30, 30);
-        doc.text(String(kpi.value), kx + cardW / 2, ky + 9, { align: "center" });
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(6.5);
-        doc.setTextColor(80, 80, 80);
-        doc.text(kpi.label, kx + cardW / 2, ky + 15, { align: "center" });
-      }
-    }
-    y += 2 * (cardH + 3) + 8;
+    const cols = 4;
+    const cW = (W - pad * 2 - (cols - 1) * 3) / cols;
+    const cH = 22;
+    kpis.forEach((k, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const kx = pad + col * (cW + 3);
+      const ky = y + row * (cH + 3);
+      doc.setFillColor(...k.color);
+      doc.roundedRect(kx, ky, cW, cH, 2, 2, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...k.tc);
+      doc.text(String(k.value), kx + cW / 2, ky + 9, { align: "center" });
+      doc.setFont("helvetica", "bold"); doc.setFontSize(6); doc.setTextColor(40, 40, 40);
+      doc.text(k.label, kx + cW / 2, ky + 14.5, { align: "center" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(5.5); doc.setTextColor(110, 110, 110);
+      doc.text(k.note, kx + cW / 2, ky + 19, { align: "center", maxWidth: cW - 2 });
+    });
+    y += 2 * (cH + 3) + 8;
 
-    // PIE CHARTS
-    y = sectionTitle("Distribuição de Usuários", y);
-    const pieY = y + 22;
-    const pieR = 18;
+    // ── MÉTRICAS-CHAVE (tabela de indicadores) ──
+    y = sectionTitle("Indicadores-Chave de Performance", y);
+    const metrics = [
+      ["Sessões por usuário único", r.uniqueUsers > 0 ? (r.totalSessions / r.uniqueUsers).toFixed(1) : "—", "média de vezes que cada usuário abriu o app"],
+      ["Taxa de conversão Free → Premium", `${premiumRate}%`, `${r.premiumUsers} Premium de ${r.uniqueUsers} ativos`],
+      ["Taxa de retorno (retention)", `${retentionRate}%`, `${r.returningUsers} de ${r.uniqueUsers} usuários voltaram`],
+      ["Views de receita por usuário", viewsPerUser, `total: ${r.recipeViews} views`],
+      ["Taxa de save (views → saves)", `${saveRate}%`, `${r.recipeSaves} saves de ${r.recipeViews} views`],
+      ["Planners por usuário ativo", r.uniqueUsers > 0 ? (r.planners / r.uniqueUsers).toFixed(2) : "—", `total: ${r.planners} planners criados`],
+    ];
+    metrics.forEach((m, i) => {
+      y = statRow(m[0], m[1], m[2], y, i % 2 === 0);
+    });
+    y += 4;
 
-    // Pie 1: Free vs Premium
-    const pie1cx = pad + 25;
-    drawPieChart(pie1cx, pieY, pieR, [
-      { value: r.freeUsers, color: [148, 163, 184] },
-      { value: r.premiumUsers, color: [251, 191, 36] },
-    ]);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(30, 30, 30);
-    doc.text("Free vs Premium", pie1cx, pieY + pieR + 5, { align: "center" });
-    doc.setFillColor(148, 163, 184); doc.circle(pie1cx - 10, pieY + pieR + 9, 1.5, "F");
-    doc.setFontSize(6.5); doc.setFont("helvetica", "normal");
-    doc.text(`Free ${freeRate}%`, pie1cx - 7, pieY + pieR + 9.5);
-    doc.setFillColor(251, 191, 36); doc.circle(pie1cx + 4, pieY + pieR + 9, 1.5, "F");
-    doc.text(`Premium ${premiumRate}%`, pie1cx + 7, pieY + pieR + 9.5);
-
-    // Pie 2: Retorno
-    const pie2cx = pad + 90;
-    drawPieChart(pie2cx, pieY, pieR, [
-      { value: r.returningUsers, color: [45, 106, 79] },
-      { value: Math.max(0, r.uniqueUsers - r.returningUsers), color: [209, 236, 224] },
-    ]);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(30, 30, 30);
-    doc.text("Usuários que Voltaram", pie2cx, pieY + pieR + 5, { align: "center" });
-    doc.setFillColor(45, 106, 79); doc.circle(pie2cx - 12, pieY + pieR + 9, 1.5, "F");
-    doc.setFontSize(6.5); doc.setFont("helvetica", "normal");
-    doc.text(`Voltaram ${retentionRate}%`, pie2cx - 9, pieY + pieR + 9.5);
-    doc.setFillColor(209, 236, 224); doc.circle(pie2cx + 5, pieY + pieR + 9, 1.5, "F");
-    doc.text(`1ª visita ${100 - retentionRate}%`, pie2cx + 8, pieY + pieR + 9.5);
-
-    // Pie 3: UTM
-    const pie3cx = pad + 160;
-    if (r.topUtm.length > 0) {
-      const pieColors = [[59,130,246],[239,68,68],[245,158,11],[16,185,129],[139,92,246]];
-      const top4 = r.topUtm.slice(0, 4);
-      const othersVal = r.topUtm.slice(4).reduce((s, [, v]) => s + v, 0);
-      const pieSeg = top4.map(([, v], i) => ({ value: v, color: pieColors[i] }));
-      if (othersVal > 0) pieSeg.push({ value: othersVal, color: [156, 163, 175] });
-      drawPieChart(pie3cx, pieY, pieR, pieSeg);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(30, 30, 30);
-      doc.text("Tráfego por Fonte", pie3cx, pieY + pieR + 5, { align: "center" });
-      top4.slice(0, 3).forEach(([src], i) => {
-        doc.setFillColor(...pieColors[i]);
-        doc.circle(pie3cx - 12, pieY + pieR + 9 + i * 4.5, 1.5, "F");
-        doc.setFontSize(6); doc.setFont("helvetica", "normal");
-        doc.text(src.slice(0, 12), pie3cx - 9, pieY + pieR + 9.5 + i * 4.5);
-      });
-    } else {
-      doc.setFontSize(7); doc.setFont("helvetica", "normal"); doc.setTextColor(130, 130, 130);
-      doc.text("Sem UTM no período", pie3cx, pieY, { align: "center" });
-    }
-
-    y = pieY + pieR + 22;
-
-    // TOP RECIPES BAR
+    // ── TOP RECEITAS MAIS VISTAS ──
     if (r.topRecipes.length > 0) {
       y = sectionTitle("Top Receitas Mais Vistas", y);
       const maxV = r.topRecipes[0][1];
-      const maxBarW = W - pad * 2 - 70;
+      const labelW = 80;
+      const barZone = W - pad * 2 - labelW - 14;
       r.topRecipes.forEach(([title, count], i) => {
-        const barY = y + i * 10;
-        doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(60, 60, 60);
-        doc.text(`${i + 1}. ${title.length > 30 ? title.slice(0, 28) + "…" : title}`, pad, barY + 4);
-        drawBar(pad + 68, barY, Math.round((count / maxV) * maxBarW), 5, [45, 106, 79]);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(30, 30, 30);
-        doc.text(String(count), pad + 68 + Math.round((count / maxV) * maxBarW) + 2, barY + 4);
+        const bY = y + i * 12;
+        const pct = maxV > 0 ? count / maxV : 0;
+        doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(40, 40, 40);
+        doc.text(`${i + 1}.`, pad, bY + 5);
+        doc.text(title.length > 38 ? title.slice(0, 36) + "…" : title, pad + 6, bY + 5);
+        drawBgBar(pad + labelW, bY, barZone, 6);
+        drawBar(pad + labelW, bY, Math.round(pct * barZone), 6, [45, 106, 79]);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(30, 30, 30);
+        doc.text(String(count), W - pad, bY + 5, { align: "right" });
       });
-      y += r.topRecipes.length * 10 + 6;
+      y += r.topRecipes.length * 12 + 6;
     }
 
-    // TOP SAVED BAR
+    // ── TOP RECEITAS MAIS SALVAS ──
     if (r.topSaved.length > 0) {
       y = sectionTitle("Top Receitas Mais Salvas", y);
       const maxV = r.topSaved[0][1];
-      const maxBarW = W - pad * 2 - 70;
+      const labelW = 80;
+      const barZone = W - pad * 2 - labelW - 14;
       r.topSaved.forEach(([title, count], i) => {
-        const barY = y + i * 10;
-        doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(60, 60, 60);
-        doc.text(`${i + 1}. ${title.length > 30 ? title.slice(0, 28) + "…" : title}`, pad, barY + 4);
-        drawBar(pad + 68, barY, Math.round((count / maxV) * maxBarW), 5, [212, 113, 35]);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(30, 30, 30);
-        doc.text(String(count), pad + 68 + Math.round((count / maxV) * maxBarW) + 2, barY + 4);
+        const bY = y + i * 12;
+        const pct = maxV > 0 ? count / maxV : 0;
+        doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(40, 40, 40);
+        doc.text(`${i + 1}.`, pad, bY + 5);
+        doc.text(title.length > 38 ? title.slice(0, 36) + "…" : title, pad + 6, bY + 5);
+        drawBgBar(pad + labelW, bY, barZone, 6);
+        drawBar(pad + labelW, bY, Math.round(pct * barZone), 6, [212, 113, 35]);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(30, 30, 30);
+        doc.text(String(count), W - pad, bY + 5, { align: "right" });
       });
-      y += r.topSaved.length * 10 + 6;
+      y += r.topSaved.length * 12 + 6;
     }
 
-    // UTM TABLE
+    // ── ORIGEM DO TRÁFEGO ──
     if (r.topUtm.length > 0) {
       y = sectionTitle("Origem do Tráfego (UTM)", y);
+      const totalUtm = r.topUtm.reduce((s, [, v]) => s + v, 0);
+      const labelW = 50;
+      const barZone = W - pad * 2 - labelW - 20;
       r.topUtm.forEach(([src, count], i) => {
-        if (i % 2 === 0) { doc.setFillColor(245, 247, 250); doc.rect(pad, y + i * 8, W - pad * 2, 8, "F"); }
-        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(60, 60, 60);
-        doc.text(src, pad + 3, y + i * 8 + 5.5);
-        doc.setFont("helvetica", "bold"); doc.setTextColor(45, 106, 79);
-        doc.text(`${count} visita${count !== 1 ? "s" : ""}`, W - pad - 3, y + i * 8 + 5.5, { align: "right" });
+        const bY = y + i * 12;
+        const pct = totalUtm > 0 ? count / totalUtm : 0;
+        if (i % 2 === 0) { doc.setFillColor(248, 250, 248); doc.roundedRect(pad, bY - 1, W - pad * 2, 11, 1, 1, "F"); }
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(40, 40, 40);
+        doc.text(src.charAt(0).toUpperCase() + src.slice(1), pad + 3, bY + 5.5);
+        drawBgBar(pad + labelW, bY + 1, barZone, 5);
+        drawBar(pad + labelW, bY + 1, Math.round(pct * barZone), 5, [59, 130, 246]);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(45, 106, 79);
+        doc.text(`${count} (${Math.round(pct * 100)}%)`, W - pad, bY + 5.5, { align: "right" });
       });
-      y += r.topUtm.length * 8 + 6;
+      y += r.topUtm.length * 12 + 6;
+    } else {
+      y = sectionTitle("Origem do Tráfego (UTM)", y);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(140, 140, 140);
+      doc.text("Nenhum acesso via UTM no período. Adicione ?utm_source=instagram aos seus links.", pad + 3, y + 4);
+      y += 12;
     }
 
-    // INSIGHT BOX
-    if (y < 262) {
+    // ── RESUMO EXECUTIVO ──
+    const boxH = 28;
+    if (y + boxH < 285) {
       doc.setFillColor(45, 106, 79);
-      doc.roundedRect(pad, y, W - pad * 2, 18, 3, 3, "F");
-      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(255, 255, 255);
-      doc.text("Resumo Executivo", pad + 4, y + 6);
+      doc.roundedRect(pad, y, W - pad * 2, boxH, 3, 3, "F");
+      doc.setFillColor(64, 145, 108);
+      doc.roundedRect(pad, y, 2, boxH, 1, 1, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+      doc.text("Resumo para Reunião", pad + 5, y + 7);
       doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
-      const summary = `${r.uniqueUsers} usuários ativos · ${r.premiumUsers} Premium (${premiumRate}%) · ${r.returningUsers} voltaram (${retentionRate}%) · ${r.recipeViews} views · ${fmtDuration(r.avgDuration)}/sessão`;
-      doc.text(summary, pad + 4, y + 13, { maxWidth: W - pad * 2 - 8 });
+      const lines = [
+        `• ${r.totalSessions} sessões abertas por ${r.uniqueUsers} usuários únicos — média de ${r.uniqueUsers > 0 ? (r.totalSessions / r.uniqueUsers).toFixed(1) : 0} acessos por pessoa.`,
+        `• ${r.premiumUsers} assinantes Premium (${premiumRate}% da base ativa) — ${r.freeUsers} ainda no plano Free.`,
+        `• Taxa de retorno: ${retentionRate}% — ${r.returningUsers} usuários voltaram mais de uma vez.`,
+        `• ${r.recipeViews} views de receitas · ${r.recipeSaves} salvas (${saveRate}% de conversão) · ${r.planners} planners criados.`,
+        `• Tempo médio por sessão: ${fmtDuration(r.avgDuration)}.`,
+      ];
+      lines.forEach((l, i) => {
+        doc.text(l, pad + 5, y + 13 + i * 4.5, { maxWidth: W - pad * 2 - 8 });
+      });
     }
 
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
-    doc.text("Gosto Puro — Relatório automático", W / 2, 290, { align: "center" });
+    // FOOTER
+    doc.setFont("helvetica", "normal"); doc.setFontSize(6.5); doc.setTextColor(170, 170, 170);
+    doc.text(`Gosto Puro  ·  Relatório automático  ·  ${new Date().toLocaleString("pt-BR")}`, W / 2, 292, { align: "center" });
 
     doc.save(`gostopuro_relatorio_${r.period}dias.pdf`);
   };
