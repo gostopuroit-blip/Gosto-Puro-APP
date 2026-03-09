@@ -9,7 +9,7 @@ import AdminRetention from "./AdminRetention";
 import AdminTopUsers from "./AdminTopUsers";
 import AdminFreePremiumChart from "./AdminFreePremiumChart";
 
-const DAYS_OPTIONS = [7, 14, 30];
+const DAYS_OPTIONS = [7, 14, 30, 0]; // 0 = todos
 
 function avg(arr) {
   if (!arr.length) return 0;
