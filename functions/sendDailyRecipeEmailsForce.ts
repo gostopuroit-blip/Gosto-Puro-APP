@@ -43,16 +43,21 @@ Deno.serve(async (req) => {
       recipeListHtml = "<p>Scopri le ricette di oggi su Gosto Puro!</p>";
     }
 
-    const emailBody = template.body.replace("{{RECIPE_LIST}}", recipeListHtml);
-
     let sent = 0;
     let failed = 0;
     for (const u of usersWithEmail) {
       try {
+        const userName = u.full_name || u.email.split("@")[0];
+        const personalizedBody = template.body
+          .replace(/\{\{RECIPE_LIST\}\}/g, recipeListHtml)
+          .replace(/\{\{USER_NAME\}\}/g, userName)
+          .replace(/\{\{APP_LINK\}\}/g, "https://run.base44.app/699707f25ff5e371dc9a1c99");
+        const personalizedSubject = template.subject
+          .replace(/\{\{USER_NAME\}\}/g, userName);
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: u.email,
-          subject: template.subject,
-          body: emailBody,
+          subject: personalizedSubject,
+          body: personalizedBody,
           from_name: "Gosto Puro",
         });
         sent++;
