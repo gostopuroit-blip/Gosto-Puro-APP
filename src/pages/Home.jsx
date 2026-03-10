@@ -176,7 +176,7 @@ export default function Home() {
             const locked = !isPremium && !FREE_OCCASIONS.includes(occ.label);
             if (locked) {
               return (
-                <a key={occ.label} href="https://gostopuro.com" target="_blank" rel="noopener noreferrer"
+                <a key={occ.label} href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer"
                   className="flex-shrink-0 flex flex-col items-center gap-2">
                   <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
                     <img src={occ.img} alt={occ.label} className="w-full h-full object-cover blur-sm opacity-40" />
@@ -277,7 +277,7 @@ export default function Home() {
           {specialOccasions.map((occ) => {
             if (!isPremium) {
               return (
-                <a key={occ.label} href="https://gostopuro.com" target="_blank" rel="noopener noreferrer"
+                <a key={occ.label} href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer"
                   className="flex-shrink-0 flex flex-col items-center gap-2">
                   <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center relative">
                     {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover blur-sm opacity-40" /> : <span className="text-3xl opacity-30">{occ.icon}</span>}
@@ -310,7 +310,7 @@ export default function Home() {
           {lifestyleTags.map((tag) => {
             if (!isPremium) {
               return (
-                <a key={tag.label} href="https://gostopuro.com" target="_blank" rel="noopener noreferrer"
+                <a key={tag.label} href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer"
                   className="flex-shrink-0 flex flex-col items-center gap-2">
                   <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center relative">
                     {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover blur-sm opacity-40" /> : <span className="text-3xl opacity-30">{tag.icon}</span>}
