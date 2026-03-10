@@ -172,23 +172,35 @@ export default function Home() {
       <div className="px-5 mt-2">
         <SectionHeader title="Occasioni del giorno" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
-          {dailyOccasions.map((occ) =>
-            <Link
-              key={occ.label}
-              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
-              onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
-              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-
-              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
-                <img
-                  src={occ.img}
-                  alt={occ.label}
-                  className="w-full h-full object-cover" />
-
-              </div>
-              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
-            </Link>
-            )}
+          {dailyOccasions.map((occ) => {
+            const locked = !isPremium && !FREE_OCCASIONS.includes(occ.label);
+            if (locked) {
+              return (
+                <a key={occ.label} href="https://gostopuro.com" target="_blank" rel="noopener noreferrer"
+                  className="flex-shrink-0 flex flex-col items-center gap-2">
+                  <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                    <img src={occ.img} alt={occ.label} className="w-full h-full object-cover blur-sm opacity-40" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-amber-500" />
+                    </div>
+                  </div>
+                  <span className="text-[13px] font-semibold text-gray-400 text-center">{occ.label}</span>
+                </a>
+              );
+            }
+            return (
+              <Link
+                key={occ.label}
+                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+                onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
+                className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+                  <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+                </div>
+                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -207,7 +219,7 @@ export default function Home() {
               }}>
 
             {topRecipes.map((recipe, index) => {
-              const isLocked = !isPremium && index >= FREE_LIMIT;
+              const isLocked = !isPremium && index >= 3;
               if (isLocked) {
                 return (
                   <a key={recipe.id} href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
@@ -262,19 +274,32 @@ export default function Home() {
       <div className="mt-8 px-5">
         <SectionHeader title="Occasioni Speciali" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {specialOccasions.map((occ) =>
-              <Link
-                key={occ.label}
-                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+          {specialOccasions.map((occ) => {
+            if (!isPremium) {
+              return (
+                <a key={occ.label} href="https://gostopuro.com" target="_blank" rel="noopener noreferrer"
+                  className="flex-shrink-0 flex flex-col items-center gap-2">
+                  <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center relative">
+                    {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover blur-sm opacity-40" /> : <span className="text-3xl opacity-30">{occ.icon}</span>}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-amber-500" />
+                    </div>
+                  </div>
+                  <span className="text-[13px] font-semibold text-gray-400 text-center">{occ.label}</span>
+                </a>
+              );
+            }
+            return (
+              <Link key={occ.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
                 onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
                 className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-
                 <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
                   {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{occ.icon}</span>}
                 </div>
                 <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
               </Link>
-              )}
+            );
+          })}
         </div>
       </div>
 
@@ -282,19 +307,32 @@ export default function Home() {
       <div className="mt-8 px-5">
         <SectionHeader title="Stile di Vita e Salute" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {lifestyleTags.map((tag) =>
-              <Link
-                key={tag.label}
-                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
+          {lifestyleTags.map((tag) => {
+            if (!isPremium) {
+              return (
+                <a key={tag.label} href="https://gostopuro.com" target="_blank" rel="noopener noreferrer"
+                  className="flex-shrink-0 flex flex-col items-center gap-2">
+                  <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center relative">
+                    {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover blur-sm opacity-40" /> : <span className="text-3xl opacity-30">{tag.icon}</span>}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-amber-500" />
+                    </div>
+                  </div>
+                  <span className="text-[13px] font-semibold text-gray-400 text-center">{tag.label}</span>
+                </a>
+              );
+            }
+            return (
+              <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
                 onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
                 className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-
                 <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
                   {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
                 </div>
                 <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{tag.label}</span>
               </Link>
-              )}
+            );
+          })}
         </div>
       </div>
       </div>
