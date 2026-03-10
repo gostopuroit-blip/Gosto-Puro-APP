@@ -49,7 +49,7 @@ export default function Home() {
   const carouselRef = useRef(null);
   const cardWidth = 176 + 12;
   const [dailyNotif, setDailyNotif] = useState(null);
-  const FREE_LIMIT = 4;
+  const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 
   useEffect(() => {
     loadData();

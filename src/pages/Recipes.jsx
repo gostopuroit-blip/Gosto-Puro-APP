@@ -128,18 +128,18 @@ export default function Recipes() {
     goToPage(1);
   };
 
-  const FREE_LIMIT_PER_CATEGORY = 4;
+  const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
+  const FREE_LIMIT_PER_CATEGORY = 3;
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
-  // Build a set of unlocked recipe IDs for free users:
-  // The 4 most recent recipes per category (Colazione, Pranzo, Cena, Dolce, Snack, Bevanda...)
+  // Unlock only 3 recipes per Colazione/Pranzo/Cena — all others locked for free users
   const unlockedIds = useMemo(() => {
-    if (isPremium) return null; // null = all unlocked
+    if (isPremium) return null;
     const countPerCategory = {};
     const ids = new Set();
-    // recipes are sorted -created_date from API (most recent first)
     for (const r of recipes) {
-      const cat = r.category || "Altro";
+      const cat = r.category || "";
+      if (!FREE_CATEGORIES.includes(cat)) continue;
       if (!countPerCategory[cat]) countPerCategory[cat] = 0;
       if (countPerCategory[cat] < FREE_LIMIT_PER_CATEGORY) {
         ids.add(r.id);
