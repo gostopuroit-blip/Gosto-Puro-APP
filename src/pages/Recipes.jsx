@@ -254,7 +254,7 @@ export default function Recipes() {
               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
               if (isLocked) {
                 return (
-                  <a key={recipe.id} href="https://gostopuro.it/premium/" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">
+                  <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">
                      <div className="pointer-events-none select-none blur-[2px] opacity-40">
                        <RecipeCard recipe={recipe} />
                      </div>
