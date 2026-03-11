@@ -138,7 +138,7 @@ export default function DailyRecipesSection({ occasion, user }) {
             return (
               <div key={recipe.id} className="flex-shrink-0 w-[200px]">
                 {isLocked ? (
-                  <a href="https://gostopuro.it" target="_blank" rel="noopener noreferrer">
+                  <a href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer">
                     <div className="relative overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-[#2D3F35] mb-2">
                       <img
                         src={recipe.image_url || "https://via.placeholder.com/200"}
