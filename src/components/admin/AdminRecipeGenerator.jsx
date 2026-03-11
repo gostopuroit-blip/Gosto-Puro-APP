@@ -285,6 +285,11 @@ ${!isIntl ? `Linee guida:\n- ${guidelines}` : ""}
 ${pranzoExtra}${cenaExtra}${velociExtra}${nataleExtra}${capodannoExtra}
 ${occ.prompt_extra ? `\n${occ.prompt_extra}` : ""}
 
+⚠️ REGOLA FONDAMENTALE — PROCESSO DI COTTURA OBBLIGATORIO:
+La ricetta deve includere almeno una vera fase di preparazione culinaria (mescolare, cuocere, impastare, friggere, tostare o cuocere in forno).
+NON generare semplici combinazioni di ingredienti da servire senza cottura o lavorazione reale.
+Ogni ricetta deve avere almeno 1 passo concreto di trasformazione culinaria degli ingredienti.
+
 La ricetta deve essere autentica, realistica e coerente con l'occasione.
 IMPORTANTE: La ricetta generata deve essere COMPLETAMENTE DIVERSA da tutte quelle nell'elenco sopra — non solo nel nome, ma nel tipo di piatto, negli ingredienti principali e nella tecnica di cottura. Se l'elenco ha già molte paste, fai qualcosa di diverso. Se ha già molto pollo, evitalo. Sii creativo e varia.
 
