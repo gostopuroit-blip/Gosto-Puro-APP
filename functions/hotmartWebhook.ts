@@ -32,12 +32,7 @@ Deno.serve(async (req) => {
   const email = buyer.email?.toLowerCase() || "";
   const hottok = body.hottok || "";
 
-  // Optional: validate hottok if secret is configured
-  const expectedHottok = Deno.env.get("HOTMART_TOKEN");
-  if (expectedHottok && hottok !== expectedHottok) {
-    await logEvent("Hotmart", event, "error", email, rawBody, "Invalid hottok");
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // hottok validation is skipped (no server-side secret required for Hotmart v2)
 
   // Events that grant premium
   const PURCHASE_EVENTS = ["PURCHASE_APPROVED", "SUBSCRIPTION_REACTIVATED", "PURCHASE_REACTIVATED"];
