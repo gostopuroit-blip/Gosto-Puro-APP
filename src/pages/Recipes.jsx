@@ -189,7 +189,6 @@ export default function Recipes() {
               value={search}
               onChange={(e) => {
                  setSearch(e.target.value);
-                 goToPage(1);
                 }}
                 onBlur={() => {
                   if (search.trim().length >= 2) {
