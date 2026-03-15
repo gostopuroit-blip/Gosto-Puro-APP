@@ -65,7 +65,13 @@ Deno.serve(async (req) => {
 
   // ─── Find user by email ───────────────────────────────────────────────────
   const findUser = async (email) => {
-    const users = await base44.asServiceRole.entities.User.list("-created_date", 1000);
+    // Try filter first (exact match)
+    try {
+      const results = await base44.asServiceRole.entities.User.filter({ email }, "-created_date", 5);
+      if (results && results.length > 0) return results[0];
+    } catch (_) {}
+    // Fallback: list all and match manually (handles case differences)
+    const users = await base44.asServiceRole.entities.User.list("-created_date", 2000);
     return users.find(u => u.email?.toLowerCase()?.trim() === email) || null;
   };
 
