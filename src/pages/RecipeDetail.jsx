@@ -114,6 +114,9 @@ export default function RecipeDetail() {
       currentUser
         ? base44.entities.UserRecipe.filter({ is_saved: true, created_by: currentUser.email })
         : Promise.resolve([]),
+      currentUser
+        ? base44.entities.UserRecipe.filter({ is_prepared: true, created_by: currentUser.email })
+        : Promise.resolve([]),
     ]);
     if (recipes.length > 0) {
       setRecipe(recipes[0]);
@@ -124,6 +127,7 @@ export default function RecipeDetail() {
     }
     if (userRecipes.length > 0) setUserRecipe(userRecipes[0]);
     setSavedCount(allSaved.length);
+    setPreparedCount(allPrepared.length);
     setLoading(false);
   };
 
