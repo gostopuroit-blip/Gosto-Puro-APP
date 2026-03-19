@@ -92,7 +92,7 @@ export default function Folders() {
     }
 
     // Only limit free users adding NEW recipes to system folders
-    if (isFree && !existing) {
+    if (isFree && !existing?.is_saved) {
       const totalSaved = getTotalSavedRecipes();
       if (totalSaved >= 4) {
         toast.error("Limite di 4 ricette raggiunto per gli utenti gratuiti");
