@@ -32,6 +32,23 @@ export default function AdminUsers() {
     setUpdating(null);
   };
 
+  const [cleaning, setCleaning] = useState(false);
+
+  const handleCleanup = async (dryRun = false) => {
+    setCleaning(true);
+    const res = await base44.functions.invoke('cleanupFreeUserRecipes', { dryRun });
+    const d = res.data;
+    if (dryRun) {
+      toast.info(`Simulazione: ${d.usersAffected} utenti, ${d.totalToDelete} ricette da eliminare`);
+      if (d.report?.length > 0) {
+        d.report.forEach(r => console.log(`${r.email}: ${r.had} → ${r.kept} (elimina ${r.deleted})`));
+      }
+    } else {
+      toast.success(`Pulizia completata: ${d.usersAffected} utenti, ${d.totalDeleted} ricette eliminate`);
+    }
+    setCleaning(false);
+  };
+
   const filtered = users.filter((u) =>
     !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())
   );
