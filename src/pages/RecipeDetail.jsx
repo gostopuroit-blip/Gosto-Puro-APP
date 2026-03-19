@@ -147,10 +147,10 @@ export default function RecipeDetail() {
   };
 
   const handlePrepare = async () => {
-    // Block free users at the limit if this would create a new UserRecipe record
-    if (!isPremium && !userRecipe) {
-      if (savedCount >= FREE_SAVE_LIMIT) {
-        toast.error(`Piano Free: limite di ${FREE_SAVE_LIMIT} ricette raggiunto. Passa a Premium per continuare! ✨`);
+    // Block free users if they already reached the limit and this recipe isn't already prepared
+    if (!isPremium && !userRecipe?.is_prepared) {
+      if (preparedCount >= FREE_SAVE_LIMIT) {
+        toast.error(`Piano Free: puoi segnare solo ${FREE_SAVE_LIMIT} ricette come preparate. Passa a Premium per continuare! ✨`);
         trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
         return;
       }
