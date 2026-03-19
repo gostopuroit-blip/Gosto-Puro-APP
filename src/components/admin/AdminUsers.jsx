@@ -58,6 +58,28 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-4">
+      {/* Cleanup banner */}
+      <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex flex-col gap-2">
+        <p className="text-sm font-semibold text-orange-800">🧹 Pulizia ricette eccedenti (utenti Free)</p>
+        <p className="text-xs text-orange-600">Elimina le ricette salvate degli utenti free che superano il limite di 4. Prima simula, poi esegui.</p>
+        <div className="flex gap-2 mt-1">
+          <button
+            onClick={() => handleCleanup(true)}
+            disabled={cleaning}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-orange-200 text-orange-700 active:scale-95 transition-all"
+          >
+            {cleaning ? <Loader2 className="w-3 h-3 animate-spin" /> : "🔍"} Simula
+          </button>
+          <button
+            onClick={() => handleCleanup(false)}
+            disabled={cleaning}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-orange-500 text-white active:scale-95 transition-all"
+          >
+            {cleaning ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />} Esegui pulizia
+          </button>
+        </div>
+      </div>
+
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
