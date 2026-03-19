@@ -220,7 +220,8 @@ export default function Home() {
               }}>
 
             {topRecipes.map((recipe, index) => {
-              const isLocked = !isPremium && index >= 3;
+              const isInstagram = (recipe.occasions || []).includes("Instagram") || (recipe.lifestyle || []).includes("Instagram");
+              const isLocked = !isPremium && (index >= 3 || isInstagram);
               if (isLocked) {
                 return (
                   <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
