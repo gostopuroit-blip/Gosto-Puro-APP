@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Search, Crown, ShieldCheck, Shield, Ban, CheckCircle } from "lucide-react";
+import { Loader2, Search, Crown, ShieldCheck, Shield, Ban, CheckCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminUsers() {
