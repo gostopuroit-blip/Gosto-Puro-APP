@@ -77,7 +77,7 @@ export default function Folders() {
   };
 
   const getTotalSavedRecipes = () => {
-    return userRecipes.filter((ur) => ur.is_saved || ur.is_favorite || ur.is_prepared || (ur.folder_ids && ur.folder_ids.length > 0)).length;
+    return userRecipes.filter((ur) => ur.is_saved).length;
   };
 
   const addRecipeToFolder = async (recipe, folderId) => {
