@@ -29,21 +29,32 @@ const getExpirationDate = (purchaseData, planType) => {
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Fetch pending entries and all users in parallel (2 API calls total)
-  const [pendingList, allUsers] = await Promise.all([
-    base44.asServiceRole.entities.PendingPremium.filter({ status: "pending" }, "-created_date", 200),
-    base44.asServiceRole.entities.User.list("-created_date", 2000),
-  ]);
+  // Fetch pending entries first
+  const pendingList = await base44.asServiceRole.entities.PendingPremium.filter(
+    { status: "pending" }, "-created_date", 200
+  );
 
   if (!pendingList || pendingList.length === 0) {
     return Response.json({ success: true, processed: 0, message: "No pending entries" });
   }
 
+  // Get unique emails from pending list
+  const pendingEmails = [...new Set(pendingList.map(p => p.email?.toLowerCase()?.trim()).filter(Boolean))];
+
+  // Fetch only the users that match the pending emails (one query per email, in parallel)
+  const userResults = await Promise.all(
+    pendingEmails.map(email =>
+      base44.asServiceRole.entities.User.filter({ email }, "-created_date", 1).catch(() => [])
+    )
+  );
+
   // Build a map of email -> user for O(1) lookup
   const userByEmail = {};
-  for (const u of allUsers) {
-    if (u.email) userByEmail[u.email.toLowerCase().trim()] = u;
-  }
+  pendingEmails.forEach((email, i) => {
+    if (userResults[i] && userResults[i].length > 0) {
+      userByEmail[email] = userResults[i][0];
+    }
+  });
 
   // Group pending entries by email (deduplicate)
   const pendingByEmail = {};
