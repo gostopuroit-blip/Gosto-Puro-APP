@@ -133,12 +133,15 @@ export default function Recipes() {
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   // Unlock only 3 recipes per Colazione/Pranzo/Cena — all others locked for free users
+  // Also always lock Instagram recipes for free users
   const unlockedIds = useMemo(() => {
     if (isPremium) return null;
     const countPerCategory = {};
     const ids = new Set();
     for (const r of recipes) {
       const cat = r.category || "";
+      const isInstagram = (r.occasions || []).includes("Instagram") || (r.lifestyle || []).includes("Instagram");
+      if (isInstagram) continue; // always locked for free
       if (!FREE_CATEGORIES.includes(cat)) continue;
       if (!countPerCategory[cat]) countPerCategory[cat] = 0;
       if (countPerCategory[cat] < FREE_LIMIT_PER_CATEGORY) {
