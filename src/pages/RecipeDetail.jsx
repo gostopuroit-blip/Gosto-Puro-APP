@@ -56,6 +56,7 @@ export default function RecipeDetail() {
   const [userRecipe, setUserRecipe] = useState(null);
   const [user, setUser] = useState(null);
   const [savedCount, setSavedCount] = useState(0);
+  const [preparedCount, setPreparedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
