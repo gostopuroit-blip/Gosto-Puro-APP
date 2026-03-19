@@ -142,6 +142,14 @@ export default function RecipeDetail() {
   };
 
   const handlePrepare = async () => {
+    // Block free users at the limit if this would create a new UserRecipe record
+    if (!isPremium && !userRecipe) {
+      if (savedCount >= FREE_SAVE_LIMIT) {
+        toast.error(`Piano Free: limite di ${FREE_SAVE_LIMIT} ricette raggiunto. Passa a Premium per continuare! ✨`);
+        trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
+        return;
+      }
+    }
     setSaving(true);
     if (userRecipe) {
       await base44.entities.UserRecipe.update(userRecipe.id, { is_prepared: true, status: "fatta" });
