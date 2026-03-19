@@ -51,7 +51,20 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
   const handleSave = async () => {
     setSaving(true);
     const user = await base44.auth.me().catch(() => null);
+    const isPremium = user?.plan === "premium" || user?.role === "admin";
     const existing = await base44.entities.UserRecipe.filter({ recipe_id: recipeId, created_by: user?.email });
+
+    // Check free limit only if creating a new UserRecipe record
+    if (!isPremium && existing.length === 0) {
+      const allUserRecipes = await base44.entities.UserRecipe.filter({ created_by: user?.email });
+      const totalSaved = allUserRecipes.filter(ur => ur.is_saved || ur.is_favorite || ur.is_prepared || (ur.folder_ids && ur.folder_ids.length > 0)).length;
+      if (totalSaved >= 4) {
+        toast.error("Piano Free: limite de 4 receitas atingido. Seja Premium para salvar mais! ✨");
+        setSaving(false);
+        return;
+      }
+    }
+
     const isFavorite = selectedFolders.includes("preferite");
     const customIds = selectedFolders.filter((id) => id !== "per_fare" && id !== "preferite");
 
