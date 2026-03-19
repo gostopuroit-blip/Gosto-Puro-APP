@@ -57,7 +57,7 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
     // Check free limit only if creating a new UserRecipe record
     if (!isPremium && existing.length === 0) {
       const allUserRecipes = await base44.entities.UserRecipe.filter({ created_by: user?.email });
-      const totalSaved = allUserRecipes.filter(ur => ur.is_saved || ur.is_favorite || ur.is_prepared || (ur.folder_ids && ur.folder_ids.length > 0)).length;
+      const totalSaved = allUserRecipes.filter(ur => ur.is_saved).length;
       if (totalSaved >= 4) {
         toast.error("Piano Free: limite de 4 receitas atingido. Seja Premium para salvar mais! ✨");
         setSaving(false);
