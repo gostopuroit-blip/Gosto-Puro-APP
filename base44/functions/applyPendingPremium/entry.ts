@@ -29,48 +29,43 @@ const getExpirationDate = (purchaseData, planType) => {
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Fetch all pending premium entries
-  const pendingList = await base44.asServiceRole.entities.PendingPremium.filter(
-    { status: "pending" },
-    "-created_date",
-    100
-  );
+  // Fetch pending entries and all users in parallel (2 API calls total)
+  const [pendingList, allUsers] = await Promise.all([
+    base44.asServiceRole.entities.PendingPremium.filter({ status: "pending" }, "-created_date", 200),
+    base44.asServiceRole.entities.User.list("-created_date", 2000),
+  ]);
 
   if (!pendingList || pendingList.length === 0) {
     return Response.json({ success: true, processed: 0, message: "No pending entries" });
   }
 
-  // Get unique emails
-  const emails = [...new Set(pendingList.map(p => p.email?.toLowerCase()?.trim()).filter(Boolean))];
+  // Build a map of email -> user for O(1) lookup
+  const userByEmail = {};
+  for (const u of allUsers) {
+    if (u.email) userByEmail[u.email.toLowerCase().trim()] = u;
+  }
+
+  // Group pending entries by email (deduplicate)
+  const pendingByEmail = {};
+  for (const p of pendingList) {
+    const email = p.email?.toLowerCase()?.trim();
+    if (!email) continue;
+    if (!pendingByEmail[email]) pendingByEmail[email] = [];
+    pendingByEmail[email].push(p);
+  }
 
   let applied = 0;
   let notFound = 0;
+  const updates = [];
 
-  for (const email of emails) {
-    // Try to find the user by email
-    let user = null;
-    try {
-      const results = await base44.asServiceRole.entities.User.filter({ email }, "-created_date", 5);
-      if (results && results.length > 0) user = results[0];
-    } catch (_) {}
-
-    if (!user) {
-      // Try case-insensitive fallback
-      try {
-        const all = await base44.asServiceRole.entities.User.list("-created_date", 2000);
-        user = all.find(u => u.email?.toLowerCase()?.trim() === email) || null;
-      } catch (_) {}
-    }
-
+  for (const [email, entries] of Object.entries(pendingByEmail)) {
+    const user = userByEmail[email];
     if (!user) {
       notFound++;
       continue;
     }
 
-    // Get the pending entries for this email
-    const entries = pendingList.filter(p => p.email?.toLowerCase()?.trim() === email);
     const entry = entries[0]; // most recent
-
     let rawPayload = {};
     try { rawPayload = JSON.parse(entry.raw_payload || "{}"); } catch (_) {}
 
@@ -94,16 +89,11 @@ Deno.serve(async (req) => {
       updateData.expiration_date = getExpirationDate(purchaseData, planType);
     }
 
-    await base44.asServiceRole.entities.User.update(user.id, updateData);
-
-    // Mark all pending entries for this email as applied
-    for (const p of entries) {
-      await base44.asServiceRole.entities.PendingPremium.update(p.id, { status: "applied" });
-    }
-
-    // Log
-    try {
-      await base44.asServiceRole.entities.WebhookLog.create({
+    // Collect all update promises
+    updates.push(
+      base44.asServiceRole.entities.User.update(user.id, updateData),
+      ...entries.map(p => base44.asServiceRole.entities.PendingPremium.update(p.id, { status: "applied" })),
+      base44.asServiceRole.entities.WebhookLog.create({
         source: "System",
         event_type: "PENDING_PREMIUM_APPLIED",
         status: "success",
@@ -111,11 +101,14 @@ Deno.serve(async (req) => {
         payload: JSON.stringify({ userId: user.id, productId, plan: updateData.subscription_plan }),
         error_message: "",
         timestamp: new Date().toISOString(),
-      });
-    } catch (_) {}
+      }).catch(() => {}),
+    );
 
     applied++;
   }
 
-  return Response.json({ success: true, processed: emails.length, applied, notFound });
+  // Run all updates in parallel
+  await Promise.all(updates);
+
+  return Response.json({ success: true, processed: Object.keys(pendingByEmail).length, applied, notFound });
 });
