@@ -107,7 +107,7 @@ export default function RecipeDetail() {
 
   const loadRecipe = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
-    const [recipes, userRecipes, allSaved] = await Promise.all([
+    const [recipes, userRecipes, allSaved, allPrepared] = await Promise.all([
       base44.entities.Recipe.filter({ id: recipeId }),
       currentUser
         ? base44.entities.UserRecipe.filter({ recipe_id: recipeId, created_by: currentUser.email })
