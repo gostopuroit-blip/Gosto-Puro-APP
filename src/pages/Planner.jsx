@@ -397,14 +397,49 @@ export default function Planner() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-[#3D5246] dark:bg-[#1A2B20] dark:text-white text-sm" />
-
             </div>
+
+            {/* Folder filter */}
+            <div className="flex gap-2 overflow-x-auto hide-scrollbar mb-3 pb-1">
+              <button
+                onClick={() => setSelectedFolder(null)}
+                className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                  selectedFolder === null
+                    ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                    : "bg-gray-50 dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#3D5246]"
+                }`}>
+                Tutte
+              </button>
+              {folders.map((folder) => {
+                const folderRecipeIds = new Set(
+                  userRecipes.filter((ur) => ur.folder_ids?.includes(folder.id)).map((ur) => ur.recipe_id)
+                );
+                if (folderRecipeIds.size === 0) return null;
+                return (
+                  <button
+                    key={folder.id}
+                    onClick={() => setSelectedFolder(folder.id === selectedFolder ? null : folder.id)}
+                    className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                      selectedFolder === folder.id
+                        ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                        : "bg-gray-50 dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#3D5246]"
+                    }`}>
+                    {folder.icon} {folder.name}
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="flex-1 overflow-y-auto space-y-2">
               {recipes.
-            filter((r) =>
-            r.title.toLowerCase().includes(searchQuery.toLowerCase()) && (
-            r.category === "Colazione" || r.category === "Pranzo" || r.category === "Cena")
-            ).
+            filter((r) => {
+              const matchSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
+              const matchCategory = r.category === "Colazione" || r.category === "Pranzo" || r.category === "Cena";
+              const matchFolder = !selectedFolder || userRecipes.some(
+                (ur) => ur.recipe_id === r.id && ur.folder_ids?.includes(selectedFolder)
+              );
+              return matchSearch && matchCategory && matchFolder;
+            }).
             map((recipe) =>
             <button
               key={recipe.id}
