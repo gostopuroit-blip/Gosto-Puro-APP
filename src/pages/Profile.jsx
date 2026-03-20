@@ -327,7 +327,7 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Install PWA */}
+      {/* Install PWA — sempre visibile */}
       <div className="px-5 mt-4">
         <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
           <div className="flex items-center gap-3">
