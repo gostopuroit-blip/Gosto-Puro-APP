@@ -382,7 +382,7 @@ export default function Planner() {
       {/* Replace Recipe Search */}
       {replaceTarget &&
       <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-end z-50">
-          <div className="w-full bg-white dark:bg-[#2D3F35] rounded-t-3xl p-4 max-h-96 flex flex-col border-t border-gray-100 dark:border-[#3D5246]">
+          <div className="w-full bg-white dark:bg-[#2D3F35] rounded-t-3xl p-4 max-h-[70vh] flex flex-col border-t border-gray-100 dark:border-[#3D5246]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-900 dark:text-white">Scegli ricetta</h3>
               <button onClick={() => setReplaceTarget(null)} className="text-gray-400 dark:text-gray-600">
