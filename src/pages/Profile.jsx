@@ -347,7 +347,9 @@ export default function Profile() {
               Installa
             </button>
           ) : (
-            <p className="text-[11px] text-gray-400 text-right max-w-[100px]">Usa "Aggiungi a Home" dal browser</p>
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-[11px] text-gray-400 text-right max-w-[120px]">Tocca <strong>⎋</strong> poi "Aggiungi a Home"</p>
+            </div>
           )}
         </div>
       </div>
