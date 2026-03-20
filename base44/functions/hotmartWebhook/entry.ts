@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
 // Product IDs
 const PRODUCT_LIFETIME = "7079227";   // Accesso Premium: App Gosto Puro (lifetime)
