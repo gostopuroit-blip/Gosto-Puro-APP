@@ -26,6 +26,13 @@ export default function RecipeComments({ recipeId, currentUser }) {
     setLoading(false);
   };
 
+  const deleteComment = async (commentId) => {
+    if (!confirm("Eliminare questo commento?")) return;
+    await base44.entities.RecipeComment.delete(commentId);
+    setComments(comments.filter((c) => c.id !== commentId));
+    toast.success("Commento eliminato");
+  };
+
   const submitComment = async () => {
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Devi essere loggato per commentare");
