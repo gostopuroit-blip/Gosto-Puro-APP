@@ -106,9 +106,9 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
             </p>
           </div>
         </div>
-        {isOwner && (
+        {(isOwner || currentUser?.role === "admin") && (
           <button onClick={deletePost} className="text-gray-400 hover:text-red-500 transition p-1">
-            <MoreHorizontal className="w-5 h-5" />
+            <Trash2 className="w-4 h-4" />
           </button>
         )}
       </div>
