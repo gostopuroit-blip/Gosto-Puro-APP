@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download } from "lucide-react";
+import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -418,6 +418,22 @@ export default function Profile() {
             </a>
           )}
         </div>
+      </div>
+
+      {/* Community Button */}
+      <div className="px-5 mt-4">
+        <Link to="/Community" className="w-full block">
+          <div className="bg-gradient-to-r from-[#2D6A4F]/10 to-[#40916C]/10 dark:from-[#2D6A4F]/20 dark:to-[#40916C]/20 rounded-2xl p-4 border border-[#2D6A4F]/20 flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#2D6A4F] rounded-xl flex items-center justify-center flex-shrink-0">
+              <Users className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-gray-800 dark:text-white">Comunità 🧪</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Condividi, ispira e scopri ricette</p>
+            </div>
+            <span className="text-xs bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-bold px-2 py-1 rounded-lg">Beta</span>
+          </div>
+        </Link>
       </div>
 
       {/* Admin Button */}
