@@ -364,6 +364,11 @@ export default function RecipeDetail() {
         </Button>
       </div>
 
+      {/* Comments */}
+      <div className="px-5 mt-6">
+        <RecipeComments recipeId={recipeId} currentUser={user} />
+      </div>
+
       <SaveToFolderModal
         open={showSaveModal}
         onClose={() => setShowSaveModal(false)}
