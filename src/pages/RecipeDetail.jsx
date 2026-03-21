@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
 import { trackEvent } from "@/components/useAnalytics";
+import RecipeComments from "@/components/recipe/RecipeComments";
 
 const countryFlags = {
   "Giappone": "🇯🇵", "Messico": "🇲🇽", "India": "🇮🇳", "Thailandia": "🇹🇭",
