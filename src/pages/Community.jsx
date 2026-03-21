@@ -1,0 +1,124 @@
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { Plus, Loader2, Users, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import CommunityPostCard from "@/components/community/CommunityPostCard";
+import NewPostModal from "@/components/community/NewPostModal";
+
+export default function Community() {
+  const [user, setUser] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showNewPost, setShowNewPost] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  useEffect(() => {
+    const init = async () => {
+      const u = await base44.auth.me().catch(() => null);
+      setUser(u);
+      await loadPosts();
+    };
+    init();
+  }, []);
+
+  const loadPosts = async () => {
+    setLoading(true);
+    const data = await base44.entities.CommunityPost.filter(
+      { status: "active" },
+      "-created_date",
+      PAGE_SIZE
+    );
+    setPosts(data);
+    setLoading(false);
+  };
+
+  const handlePostUpdate = (updated, originalId) => {
+    if (updated === null) {
+      setPosts((prev) => prev.filter((p) => p.id !== originalId));
+    } else {
+      setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    }
+  };
+
+  const handleNewPost = (post) => {
+    setPosts((prev) => [post, ...prev]);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">
+      {/* Header */}
+      <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur border-b border-gray-100 dark:border-[#2A2A2A]">
+        <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Link to={createPageUrl("Profile")} className="text-gray-400 hover:text-gray-600">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-[#2D6A4F]" />
+              <h1 className="font-bold text-gray-900 dark:text-white text-lg">Comunità</h1>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => setShowNewPost(true)}
+            className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
+            <Plus className="w-4 h-4" />
+            Post
+          </Button>
+        </div>
+      </div>
+
+      {/* Beta banner */}
+      <div className="max-w-lg mx-auto px-4 pt-4">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
+          <span className="text-2xl">🧪</span>
+          <div>
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Versione Beta</p>
+            <p className="text-xs text-amber-700 dark:text-amber-400">La comunità è in fase di test. Condividi le tue esperienze culinarie!</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Feed */}
+      <div className="max-w-lg mx-auto px-4 pb-24 space-y-4">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-5xl mb-4">🍳</p>
+            <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post ancora</p>
+            <p className="text-sm text-gray-400 mb-6">Sii il primo a condividere qualcosa!</p>
+            <Button
+              onClick={() => setShowNewPost(true)}
+              className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl">
+              Crea il primo post
+            </Button>
+          </div>
+        ) : (
+          posts.map((post) => (
+            <CommunityPostCard
+              key={post.id}
+              post={post}
+              currentUser={user}
+              onUpdate={(updated) => handlePostUpdate(updated, post.id)}
+            />
+          ))
+        )}
+      </div>
+
+      {/* New post modal */}
+      {showNewPost && (
+        <NewPostModal
+          currentUser={user}
+          onClose={() => setShowNewPost(false)}
+          onCreated={handleNewPost}
+        />
+      )}
+    </div>
+  );
+}
