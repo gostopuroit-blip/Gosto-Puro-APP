@@ -120,6 +120,14 @@ export default function RecipeComments({ recipeId, currentUser }) {
                   <span className="text-xs text-gray-400 ml-1">
                     {formatDistanceToNow(new Date(c.created_date), { addSuffix: true, locale: ptBR })}
                   </span>
+                  {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
+                    <button
+                      onClick={() => deleteComment(c.id)}
+                      className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{c.content}</p>
               </div>
