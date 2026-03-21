@@ -186,6 +186,14 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
                         {c.user_name || c.user_email?.split("@")[0]}
                       </p>
                       {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
+                      {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
+                        <button
+                          onClick={() => deleteComment(c.id)}
+                          className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                     <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
                   </div>
