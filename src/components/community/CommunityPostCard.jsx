@@ -59,6 +59,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
     setSubmitting(false);
   };
 
+  const deleteComment = async (commentId) => {
+    if (!confirm("Eliminare questo commento?")) return;
+    await base44.entities.CommunityComment.delete(commentId);
+    setComments(comments.filter((c) => c.id !== commentId));
+    await base44.entities.CommunityPost.update(post.id, {
+      comments_count: Math.max(0, (post.comments_count || 1) - 1),
+    });
+    onUpdate({ ...post, comments_count: Math.max(0, (post.comments_count || 1) - 1) });
+    toast.success("Commento eliminato");
+  };
+
   const deletePost = async () => {
     if (!confirm("Eliminar questo post?")) return;
     await base44.entities.CommunityPost.delete(post.id);
