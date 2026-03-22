@@ -100,7 +100,16 @@ export default function ExpertProfile() {
                   <BadgeCheck className="w-5 h-5 text-[#2D6A4F]" />
                 )}
               </div>
-              <p className="text-xs text-gray-400 mb-3">{expertEmail}</p>
+              <p className="text-xs font-medium mb-3">
+                {expert?.is_expert
+                  ? <span className="text-[#2D6A4F]">✅ Expert</span>
+                  : expertEmail === currentUser?.email
+                    ? (currentUser?.plan === "premium"
+                        ? <span className="text-purple-600">⭐ Premium</span>
+                        : <span className="text-gray-400">Free</span>)
+                    : <span className="text-gray-400">Membro</span>
+                }
+              </p>
 
               {/* Stats */}
               <div className="flex gap-4">
