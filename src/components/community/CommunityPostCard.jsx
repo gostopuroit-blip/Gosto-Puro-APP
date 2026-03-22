@@ -197,6 +197,45 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
         </button>
+        <div className="ml-auto relative group">
+          <button className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-[#2D6A4F] transition">
+            <Share2 className="w-5 h-5" />
+          </button>
+          <div className="absolute bottom-8 right-0 hidden group-hover:flex flex-col gap-1 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl p-2 z-10 w-44">
+            <ShareBtn
+              label="Instagram"
+              emoji="📸"
+              onClick={() => {
+                navigator.clipboard.writeText(post.image_url || window.location.href);
+                toast.success("Link copiato! Incollalo su Instagram");
+              }}
+            />
+            <ShareBtn
+              label="TikTok"
+              emoji="🎵"
+              onClick={() => {
+                navigator.clipboard.writeText(post.image_url || window.location.href);
+                toast.success("Link copiato! Incollalo su TikTok");
+              }}
+            />
+            <ShareBtn
+              label="Facebook"
+              emoji="📘"
+              onClick={() => {
+                const url = encodeURIComponent(window.location.href);
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+              }}
+            />
+            <ShareBtn
+              label="Copia link"
+              emoji="🔗"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Link copiato!");
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Comments */}
