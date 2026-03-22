@@ -108,9 +108,29 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
     toast.success("Post eliminato");
   };
 
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {
+        const el = document.createElement("textarea");
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+      });
+    } else {
+      const el = document.createElement("textarea");
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
+  };
+
   const handleShare = (fn) => {
     setShowShare(false);
-    fn();
+    setTimeout(fn, 50);
   };
 
   const avatar = post.user_photo;
