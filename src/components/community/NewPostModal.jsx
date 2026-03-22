@@ -74,7 +74,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-end">
-      <div className="w-full bg-white dark:bg-[#1A1A1A] rounded-t-3xl p-5 max-h-[92vh] flex flex-col">
+      <div className="w-full bg-white dark:bg-[#1A1A1A] rounded-t-3xl p-5 pb-8 max-h-[92vh] flex flex-col" style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-gray-900 dark:text-white text-lg">Nuovo post</h2>
           <button onClick={onClose} className="text-gray-400">
