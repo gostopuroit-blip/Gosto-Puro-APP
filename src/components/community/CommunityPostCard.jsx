@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Bookmark } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
