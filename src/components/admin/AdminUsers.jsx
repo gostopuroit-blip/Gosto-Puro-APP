@@ -129,12 +129,19 @@ export default function AdminUsers() {
                   color={isPremium ? "gray" : "amber"}
                 />
                 <ActionBtn
-                  loading={updating === u.id + "role"}
-                  onClick={() => update(u.id, { role: isAdmin ? "user" : "admin" }, isAdmin ? "Rimosso da Admin" : "Promosso Admin")}
-                  icon={isAdmin ? <Shield className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
-                  label={isAdmin ? "Rimuovi Admin" : "Rendi Admin"}
-                  color={isAdmin ? "red" : "purple"}
-                />
+                   loading={updating === u.id + "role"}
+                   onClick={() => update(u.id, { role: isAdmin ? "user" : "admin" }, isAdmin ? "Rimosso da Admin" : "Promosso Admin")}
+                   icon={isAdmin ? <Shield className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
+                   label={isAdmin ? "Rimuovi Admin" : "Rendi Admin"}
+                   color={isAdmin ? "red" : "purple"}
+                 />
+                <ActionBtn
+                   loading={updating === u.id + "expert"}
+                   onClick={() => update(u.id, { role: isExpert ? "user" : "expert" }, isExpert ? "Expert rimosso" : "Promosso Expert")}
+                   icon="✅"
+                   label={isExpert ? "Rimuovi Expert" : "Rendi Expert"}
+                   color={isExpert ? "gray" : "green"}
+                 />
                 <ActionBtn
                   loading={updating === u.id + "status"}
                   onClick={() => update(u.id, { status: isBlocked ? "active" : "blocked" }, isBlocked ? "Utente sbloccato" : "Utente bloccato")}
