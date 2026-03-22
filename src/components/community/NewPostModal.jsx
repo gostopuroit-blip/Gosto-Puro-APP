@@ -34,34 +34,40 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
     if (!content.trim()) return toast.error("Scrivi qualcosa!");
     setUploading(true);
 
-    let image_url = null;
-    if (imageFile) {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
-      image_url = file_url;
+    try {
+      let image_url = null;
+      if (imageFile) {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFile });
+        image_url = file_url;
+      }
+
+      const tagList = tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
+
+      const post = await base44.entities.CommunityPost.create({
+        user_email: currentUser?.email,
+        user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+        user_photo: currentUser?.photo_url || null,
+        content: content.trim(),
+        title: title.trim() || null,
+        image_url,
+        tags: tagList,
+        post_type: postType,
+        is_premium: postType === "premium_content" ? true : isPremium,
+        likes: [],
+        likes_count: 0,
+        comments_count: 0,
+        is_expert: isExpertOrAdmin,
+        status: "active",
+      });
+
+      toast.success("Post pubblicato!");
+      onCreated(post);
+      onClose();
+    } catch (err) {
+      toast.error("Errore nella pubblicazione. Riprova.");
+    } finally {
+      setUploading(false);
     }
-
-    const tagList = tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
-
-    const post = await base44.entities.CommunityPost.create({
-      user_email: currentUser?.email,
-      user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
-      user_photo: currentUser?.photo_url || null,
-      content: content.trim(),
-      title: title.trim() || null,
-      image_url,
-      tags: tagList,
-      post_type: postType,
-      is_premium: postType === "premium_content" ? true : isPremium,
-      likes: [],
-      likes_count: 0,
-      comments_count: 0,
-      is_expert: isExpertOrAdmin,
-      status: "active",
-    });
-
-    toast.success("Post pubblicato!");
-    onCreated(post);
-    onClose();
   };
 
   const availableTypes = POST_TYPES.filter((t) => !t.expertOnly || isExpertOrAdmin);
