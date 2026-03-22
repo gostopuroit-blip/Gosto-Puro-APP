@@ -13,6 +13,17 @@ const POST_TYPE_META = {
   image_post: null,
 };
 
+function ShareBtn({ label, emoji, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
+    >
+      <span>{emoji}</span> {label}
+    </button>
+  );
+}
+
 export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
