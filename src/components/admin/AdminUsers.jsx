@@ -109,6 +109,7 @@ export default function AdminUsers() {
                   <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
                   <div className="flex gap-1.5 mt-1 flex-wrap">
                     {isAdmin && <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">👑 Admin</span>}
+                    {isExpert && <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✅ Expert</span>}
                     {isPremium
                       ? <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">✨ Premium</span>
                       : <span className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Free</span>
