@@ -261,14 +261,14 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
               <button
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
                 onClick={() => handleShare(() => {
-                  navigator.clipboard.writeText(post.image_url || window.location.href);
+                  copyToClipboard(post.image_url || window.location.href);
                   toast.success("Link copiato! Incollalo su Instagram");
                 })}
               >📸 Instagram</button>
               <button
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
                 onClick={() => handleShare(() => {
-                  navigator.clipboard.writeText(post.image_url || window.location.href);
+                  copyToClipboard(post.image_url || window.location.href);
                   toast.success("Link copiato! Incollalo su TikTok");
                 })}
               >🎵 TikTok</button>
@@ -282,7 +282,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
               <button
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
                 onClick={() => handleShare(() => {
-                  navigator.clipboard.writeText(window.location.href);
+                  copyToClipboard(window.location.href);
                   toast.success("Link copiato!");
                 })}
               >🔗 Copia link</button>
