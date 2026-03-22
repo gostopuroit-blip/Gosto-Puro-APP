@@ -181,7 +181,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         <Button
           onClick={handleSubmit}
           disabled={uploading || !content.trim()}
-          className="mt-4 w-full bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl h-11 text-base font-semibold">
+          className="mt-4 mb-16 w-full bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl h-11 text-base font-semibold flex-shrink-0">
           {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pubblica"}
         </Button>
       </div>
