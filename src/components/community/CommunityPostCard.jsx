@@ -122,7 +122,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           <div className="min-w-0">
             <div className="flex items-center gap-1">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                {post.user_name || post.user_email?.split("@")[0]}
+                {post.user_name || "Utente"}
               </p>
               {post.is_expert && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
             </div>
