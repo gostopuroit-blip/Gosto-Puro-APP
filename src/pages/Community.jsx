@@ -87,7 +87,7 @@ export default function Community() {
                 {user.full_name || user.email?.split("@")[0]}
               </p>
               <p className="text-xs text-gray-400">
-                {user.role === "expert" ? "✅ Expert" : user.role === "admin" ? "👑 Admin" : "Membro"}
+                {user.role === "expert" ? "✅ Expert" : user.role === "admin" ? "👑 Admin" : user.plan === "premium" ? "⭐ Premium" : "Free"}
               </p>
             </div>
             <button

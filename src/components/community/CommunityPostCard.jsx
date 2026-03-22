@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Share2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,28 +13,36 @@ const POST_TYPE_META = {
   image_post: null,
 };
 
-function ShareBtn({ label, emoji, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
-    >
-      <span>{emoji}</span> {label}
-    </button>
-  );
-}
-
 export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const shareRef = useRef(null);
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "admin";
   const isBlurred = post.is_premium && !isPremiumUser;
+  const isVerified = post.is_expert; // só admin/expert têm is_expert=true
+
+  // Fechar share ao clicar fora
+  useEffect(() => {
+    if (!showShare) return;
+    const handler = (e) => {
+      if (shareRef.current && !shareRef.current.contains(e.target)) {
+        setShowShare(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [showShare]);
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
@@ -100,9 +108,19 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
     toast.success("Post eliminato");
   };
 
+  const handleShare = (fn) => {
+    setShowShare(false);
+    fn();
+  };
+
   const avatar = post.user_photo;
-  const initials = (post.user_name || post.user_email || "U").charAt(0).toUpperCase();
+  const initials = (post.user_name || "U").charAt(0).toUpperCase();
   const typeMeta = POST_TYPE_META[post.post_type] || null;
+
+  // Label do plano do autor do post (baseado nos dados do post)
+  const authorPlanLabel = post.is_expert
+    ? null // expert/admin: mostra badge verificado em vez disso
+    : null; // usuário comum: nada extra
 
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
@@ -124,12 +142,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                 {post.user_name || "Utente"}
               </p>
-              {post.is_expert && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
+              {/* Badge verificado apenas para expert/admin */}
+              {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
             </div>
+            {/* Data + plano do autor */}
             <p className="text-xs text-gray-400">
               {formatDistanceToNow(new Date(post.created_date), { addSuffix: true, locale: ptBR })}
             </p>
-          
           </div>
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -208,44 +227,47 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
         </button>
-        <div className="ml-auto relative group">
-          <button className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-[#2D6A4F] transition">
+
+        {/* Share button — state-controlled, não hover */}
+        <div className="ml-auto relative" ref={shareRef}>
+          <button
+            onClick={() => setShowShare((v) => !v)}
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-[#2D6A4F] transition p-1"
+          >
             <Share2 className="w-5 h-5" />
           </button>
-          <div className="absolute bottom-8 right-0 hidden group-hover:flex flex-col gap-1 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl p-2 z-10 w-44">
-            <ShareBtn
-              label="Instagram"
-              emoji="📸"
-              onClick={() => {
-                navigator.clipboard.writeText(post.image_url || window.location.href);
-                toast.success("Link copiato! Incollalo su Instagram");
-              }}
-            />
-            <ShareBtn
-              label="TikTok"
-              emoji="🎵"
-              onClick={() => {
-                navigator.clipboard.writeText(post.image_url || window.location.href);
-                toast.success("Link copiato! Incollalo su TikTok");
-              }}
-            />
-            <ShareBtn
-              label="Facebook"
-              emoji="📘"
-              onClick={() => {
-                const url = encodeURIComponent(window.location.href);
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
-              }}
-            />
-            <ShareBtn
-              label="Copia link"
-              emoji="🔗"
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success("Link copiato!");
-              }}
-            />
-          </div>
+          {showShare && (
+            <div className="absolute bottom-10 right-0 flex flex-col gap-1 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl p-2 z-50 w-44">
+              <button
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
+                onClick={() => handleShare(() => {
+                  navigator.clipboard.writeText(post.image_url || window.location.href);
+                  toast.success("Link copiato! Incollalo su Instagram");
+                })}
+              >📸 Instagram</button>
+              <button
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
+                onClick={() => handleShare(() => {
+                  navigator.clipboard.writeText(post.image_url || window.location.href);
+                  toast.success("Link copiato! Incollalo su TikTok");
+                })}
+              >🎵 TikTok</button>
+              <button
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
+                onClick={() => handleShare(() => {
+                  const url = encodeURIComponent(window.location.href);
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
+                })}
+              >📘 Facebook</button>
+              <button
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
+                onClick={() => handleShare(() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copiato!");
+                })}
+              >🔗 Copia link</button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -280,7 +302,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
                     <img src={c.user_photo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
                   ) : (
                     <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                      {(c.user_name || c.user_email || "U").charAt(0).toUpperCase()}
+                      {(c.user_name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="bg-gray-50 dark:bg-[#111] rounded-xl px-3 py-2 flex-1">
