@@ -95,6 +95,7 @@ export default function AdminUsers() {
       <div className="space-y-2">
         {filtered.map((u) => {
           const isAdmin = u.role === "admin";
+          const isExpert = u.role === "expert";
           const isPremium = u.plan === "premium";
           const isBlocked = u.status === "blocked";
           return (
