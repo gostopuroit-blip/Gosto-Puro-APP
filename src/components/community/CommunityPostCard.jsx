@@ -109,28 +109,20 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   };
 
   const copyToClipboard = (text) => {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(() => {
-        const el = document.createElement("textarea");
-        el.value = text;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand("copy");
-        document.body.removeChild(el);
-      });
-    } else {
-      const el = document.createElement("textarea");
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-    }
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.focus();
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
   };
 
   const handleShare = (fn) => {
     setShowShare(false);
-    setTimeout(fn, 50);
+    fn();
   };
 
   const avatar = post.user_photo;
