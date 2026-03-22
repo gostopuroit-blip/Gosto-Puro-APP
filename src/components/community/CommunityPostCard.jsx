@@ -118,6 +118,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
             <p className="text-xs text-gray-400">
               {formatDistanceToNow(new Date(post.created_date), { addSuffix: true, locale: ptBR })}
             </p>
+          
           </div>
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0">
