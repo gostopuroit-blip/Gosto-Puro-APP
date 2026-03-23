@@ -453,9 +453,16 @@ Difficoltà valide: Facile, Media, Difficile.`;
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
     const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
-    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution`;
+    // Lemon rule: only show lemon if explicitly protagonist in title/instructions
+    const allTextLower = (titleLower + " " + (recipe.description || "").toLowerCase() + " " + (recipe.instructions || []).join(" ").toLowerCase());
+    const lemonIsProtagonist = ["fette di limone", "decorazione con limone", "limone protagonista", "al limone e", "con limone"].some(k => allTextLower.includes(k)) && ["succo di limone", "aroma", "scorza"].every(k => !allTextLower.includes(k));
+    const lemonRule = lemonIsProtagonist
+      ? `lemon slices may appear subtly as garnish,`
+      : `CRITICAL: DO NOT show lemon slices, lemon wedges, or decorative lemon pieces. If lemon is used it is only for flavor/aroma — it must NOT appear visually in the dish or as decoration. No lemon at all, or at most a barely visible subtle hint in the background.`;
+
+    const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution, CRITICAL: NO visible labels, NO readable text on bottles or packaging, NO branded products, NO olive oil bottles with labels, all containers must be plain unlabeled or blurred, artisanal Italian kitchen aesthetic`;
     
-    return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${pastaVisual} ${fishVisual} ${modifiers}, ${fixed}.`;
+    return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${pastaVisual} ${fishVisual} ${lemonRule} ${modifiers}, ${fixed}.`;
   };
 
   const handleGenerate = async () => {
