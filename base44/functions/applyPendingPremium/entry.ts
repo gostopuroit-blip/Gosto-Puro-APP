@@ -67,6 +67,18 @@ Deno.serve(async (req) => {
     const user = userByEmail[email];
     if (!user) {
       notFound++;
+      // Log so we can track emails that haven't registered yet
+      updates.push(
+        base44.asServiceRole.entities.WebhookLog.create({
+          source: "System",
+          event_type: "PENDING_PREMIUM_NOT_FOUND",
+          status: "error",
+          user_email: email,
+          payload: JSON.stringify({ pendingCount: entries.length }),
+          error_message: "User not registered yet — will retry next cycle",
+          timestamp: new Date().toISOString(),
+        }).catch(() => {})
+      );
       continue;
     }
 
