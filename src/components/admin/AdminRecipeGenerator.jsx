@@ -411,8 +411,8 @@ Difficoltà valide: Facile, Media, Difficile.`;
     if (isIntl && countryProfile) {
       const base = `Professional realistic food photography of ${title},`;
       const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
-      const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution`;
-      return `${base} ${ingredients} ${colorHints} ${textureHints} ${countryProfile.imageStyle}, ${fixed}.`;
+      const fixedIntl = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution, CRITICAL: NO visible labels, NO readable text on bottles or packaging, NO branded products, all containers plain unlabeled or blurred`;
+      return `${base} ${ingredients} ${colorHints} ${textureHints} ${countryProfile.imageStyle}, ${fixedIntl}.`;
     }
 
     const isSandwich = title.toLowerCase().includes("panino") || title.toLowerCase().includes("piadina") || title.toLowerCase().includes("tramezzino");
