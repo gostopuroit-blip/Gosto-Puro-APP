@@ -41,20 +41,14 @@ Deno.serve(async (req) => {
   // Get unique emails from pending list
   const pendingEmails = [...new Set(pendingList.map(p => p.email?.toLowerCase()?.trim()).filter(Boolean))];
 
-  // Fetch only the users that match the pending emails (one query per email, in parallel)
-  const userResults = await Promise.all(
-    pendingEmails.map(email =>
-      base44.asServiceRole.entities.User.filter({ email }, "-created_date", 1).catch(() => [])
-    )
-  );
-
-  // Build a map of email -> user for O(1) lookup
+  // Fetch ALL users and build a map by email (same robust approach as hotmartWebhook)
+  const allUsers = await base44.asServiceRole.entities.User.list("-created_date", 5000);
   const userByEmail = {};
-  pendingEmails.forEach((email, i) => {
-    if (userResults[i] && userResults[i].length > 0) {
-      userByEmail[email] = userResults[i][0];
+  for (const u of allUsers) {
+    if (u.email) {
+      userByEmail[u.email.toLowerCase().trim()] = u;
     }
-  });
+  }
 
   // Group pending entries by email (deduplicate)
   const pendingByEmail = {};
