@@ -107,12 +107,12 @@ Deno.serve(async (req) => {
 
       const user = await findUser(email);
       if (user) {
-        await base44.asServiceRole.entities.User.update(user.id, updateData);
+        await base44.entities.User.update(user.id, updateData);
         await logEvent(event, "success", email, rawBody, "");
         return Response.json({ success: true, action: "plan_upgraded", email, plan: updateData.subscription_plan });
       } else {
         // User not registered yet — save as pending
-        await base44.asServiceRole.entities.PendingPremium.create({
+        await base44.entities.PendingPremium.create({
           email,
           product_id: productId,
           event_type: event,
