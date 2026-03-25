@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
   // ─── Find user by email ───────────────────────────────────────────────────
   const findUser = async (email) => {
     // List all and match manually (handles case differences and filter indexing issues)
-    const users = await base44.asServiceRole.entities.User.list("-created_date", 5000);
+    const users = await base44.entities.User.list("-created_date", 5000);
     return users.find(u => u.email?.toLowerCase()?.trim() === email) || null;
   };
 
