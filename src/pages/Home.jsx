@@ -4,7 +4,7 @@ import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles, Lock, Crown, ChefHat } from "lucide-react";
+import { Loader2, Sparkles, Lock, Crown } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
 import EnableNotificationsBanner from "@/components/EnableNotificationsBanner";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -150,7 +150,7 @@ export default function Home() {
                 ) : userPlan === "premium" ? (
                   <span className="text-[10px] font-bold bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded-lg">👑 Premium</span>
                 ) : (
-                  <span className="text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-lg">Free</span>
+                  <span className="text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-lg">Base</span>
                 )}
               </div>
             </div>
