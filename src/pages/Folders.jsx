@@ -214,6 +214,36 @@ export default function Folders() {
         </div>
       </div>
 
+      {/* Cosa cucino adesso — Premium only */}
+      <div className="px-5 mb-4">
+        {isPremium ? (
+          <Link to="/WhatToCook" className="flex items-center gap-3 bg-gradient-to-r from-[#2D6A4F] to-[#40916C] rounded-2xl px-4 py-3.5 shadow-md">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <ChefHat className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-bold text-sm">Cosa cucino adesso?</p>
+              <p className="text-white/70 text-xs">Filtra per tempo e ingredienti disponibili</p>
+            </div>
+            <span className="text-white/60 text-lg">→</span>
+          </Link>
+        ) : (
+          <a href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600 rounded-2xl px-4 py-3.5 shadow-md relative overflow-hidden">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <ChefHat className="w-5 h-5 text-white/60" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white/70 font-bold text-sm">Cosa cucino adesso?</p>
+              <p className="text-white/50 text-xs">Filtra per tempo e ingredienti disponibili</p>
+            </div>
+            <div className="flex items-center gap-1 bg-amber-400 text-amber-900 text-[11px] font-bold px-2 py-1 rounded-lg">
+              <Crown className="w-3 h-3" /> Premium
+            </div>
+          </a>
+        )}
+      </div>
+
       {/* Custom Folders - Premium Gate */}
       {/* Folder Grid */}
       <div className="px-5 space-y-3">
