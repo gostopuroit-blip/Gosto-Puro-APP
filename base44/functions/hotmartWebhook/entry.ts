@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
           PURCHASE_REVERSED: "refunded",
           PURCHASE_CHARGEBACK: "refunded",
         };
-        await base44.asServiceRole.entities.User.update(user.id, {
+        await base44.entities.User.update(user.id, {
           plan: "free",
           subscription_level: "free",
           subscription_status: statusMap[event] || "cancelled",
