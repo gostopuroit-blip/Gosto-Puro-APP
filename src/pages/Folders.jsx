@@ -181,6 +181,8 @@ export default function Folders() {
    };
 
 
+  const isPremium = currentUser?.plan === "premium" || currentUser?.role === "admin";
+
   const filteredSearch = recipes.filter((r) =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
