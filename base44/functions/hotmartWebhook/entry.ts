@@ -1,16 +1,15 @@
-import { createClient } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 // Product IDs
-const PRODUCT_LIFETIME = "7079227";   // Accesso Premium: App Gosto Puro (lifetime)
-const PRODUCT_SUBSCRIPTION = "6991197"; // Ricette per ogni occasione premium (monthly/yearly)
-
-const base44 = createClient({ appId: Deno.env.get("BASE44_APP_ID"), serviceRole: true });
+const PRODUCT_LIFETIME = "7079227";
+const PRODUCT_SUBSCRIPTION = "6991197";
 
 Deno.serve(async (req) => {
+  const base44 = createClientFromRequest(req);
 
   const logEvent = async (event_type, status, user_email, payload, error_message) => {
     try {
-      await base44.entities.WebhookLog.create({
+      await base44.asServiceRole.entities.WebhookLog.create({
         source: "Hotmart",
         event_type,
         status,
@@ -36,46 +35,36 @@ Deno.serve(async (req) => {
   const productId = String(body.data?.product?.id || "");
   const subscription = body.data?.subscription || {};
 
-  // ─── Detect plan type for subscription product ───────────────────────────
   const detectPlanType = () => {
     const planName = (subscription.plan?.name || "").toLowerCase();
     const offerCode = (body.data?.purchase?.offer?.code || "").toLowerCase();
     const combined = planName + " " + offerCode;
     if (combined.includes("anual") || combined.includes("annual") || combined.includes("yearly")) return "yearly";
     if (combined.includes("mensal") || combined.includes("monthly")) return "monthly";
-    // Fallback: check recurrence period in ms (Hotmart dateNextCharge - now)
     if (subscription.dateNextCharge) {
-      const msUntilNext = subscription.dateNextCharge - Date.now();
-      const daysUntilNext = msUntilNext / (1000 * 60 * 60 * 24);
+      const daysUntilNext = (subscription.dateNextCharge - Date.now()) / (1000 * 60 * 60 * 24);
       return daysUntilNext > 60 ? "yearly" : "monthly";
     }
-    return "monthly"; // safe default
+    return "monthly";
   };
 
-  // ─── Compute expiration date ──────────────────────────────────────────────
   const getExpirationDate = (planType) => {
     if (subscription.dateNextCharge) {
       return new Date(subscription.dateNextCharge).toISOString().split("T")[0];
     }
-    // Fallback if no dateNextCharge
     const d = new Date();
     if (planType === "yearly") d.setDate(d.getDate() + 370);
     else d.setDate(d.getDate() + 35);
     return d.toISOString().split("T")[0];
   };
 
-  // ─── Find user by email ───────────────────────────────────────────────────
   const findUser = async (email) => {
-    // List all and match manually (handles case differences and filter indexing issues)
-    const users = await base44.entities.User.list("-created_date", 5000);
+    const users = await base44.asServiceRole.entities.User.list("-created_date", 5000);
     return users.find(u => u.email?.toLowerCase()?.trim() === email) || null;
   };
 
-  // ─── Events that GRANT premium ────────────────────────────────────────────
   const PURCHASE_EVENTS = ["PURCHASE_APPROVED", "SUBSCRIPTION_REACTIVATED", "PURCHASE_REACTIVATED"];
-  // ─── Events that REVOKE premium immediately ───────────────────────────────
   const REVOKE_EVENTS = ["PURCHASE_REFUNDED", "PURCHASE_REVERSED", "PURCHASE_CHARGEBACK"];
-  // ─── Cancellation: keep access until expiry, but mark cancelled ──────────
   const CANCEL_EVENTS = ["SUBSCRIPTION_CANCELLATION", "PURCHASE_CANCELLED"];
 
   try {
@@ -100,19 +89,17 @@ Deno.serve(async (req) => {
         updateData.subscription_plan = planType;
         updateData.expiration_date = getExpirationDate(planType);
       } else {
-        // Unknown product — grant lifetime to be safe
         updateData.subscription_plan = "lifetime";
         updateData.expiration_date = null;
       }
 
       const user = await findUser(email);
       if (user) {
-        await base44.entities.User.update(user.id, updateData);
+        await base44.asServiceRole.entities.User.update(user.id, updateData);
         await logEvent(event, "success", email, rawBody, "");
         return Response.json({ success: true, action: "plan_upgraded", email, plan: updateData.subscription_plan });
       } else {
-        // User not registered yet — save as pending
-        await base44.entities.PendingPremium.create({
+        await base44.asServiceRole.entities.PendingPremium.create({
           email,
           product_id: productId,
           event_type: event,
@@ -130,12 +117,8 @@ Deno.serve(async (req) => {
       }
       const user = await findUser(email);
       if (user) {
-        const statusMap = {
-          PURCHASE_REFUNDED: "refunded",
-          PURCHASE_REVERSED: "refunded",
-          PURCHASE_CHARGEBACK: "refunded",
-        };
-        await base44.entities.User.update(user.id, {
+        const statusMap = { PURCHASE_REFUNDED: "refunded", PURCHASE_REVERSED: "refunded", PURCHASE_CHARGEBACK: "refunded" };
+        await base44.asServiceRole.entities.User.update(user.id, {
           plan: "free",
           subscription_level: "free",
           subscription_status: statusMap[event] || "cancelled",
@@ -149,17 +132,13 @@ Deno.serve(async (req) => {
       }
 
     } else if (CANCEL_EVENTS.includes(event)) {
-      // Cancelled: mark cancelled but keep premium until expiration_date
       if (!email) {
         await logEvent(event, "error", "", rawBody, "No buyer email");
         return Response.json({ error: "No email" }, { status: 400 });
       }
       const user = await findUser(email);
       if (user) {
-        await base44.entities.User.update(user.id, {
-          subscription_status: "cancelled",
-          // Keep plan as-is — the scheduled job will revoke when expired
-        });
+        await base44.asServiceRole.entities.User.update(user.id, { subscription_status: "cancelled" });
         await logEvent(event, "success", email, rawBody, "Marked cancelled, access until expiry");
         return Response.json({ success: true, action: "marked_cancelled", email });
       } else {
@@ -168,7 +147,6 @@ Deno.serve(async (req) => {
       }
 
     } else {
-      // Unknown event — log and return 200 so Hotmart doesn't retry
       await logEvent(event, "success", email, rawBody, "");
       return Response.json({ success: true, action: "ignored", event });
     }
