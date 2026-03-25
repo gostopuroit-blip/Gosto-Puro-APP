@@ -171,7 +171,7 @@ export default function Home() {
 
       {/* What to Cook Banner */}
       <div className="px-5 mb-4">
-        <Link to="/WhatToCook" className="flex items-center gap-3 bg-gradient-to-r from-[#2D6A4F] to-[#40916C] rounded-2xl px-4 py-3.5 shadow-md">
+        <Link to="/Folders" className="flex items-center gap-3 bg-gradient-to-r from-[#2D6A4F] to-[#40916C] rounded-2xl px-4 py-3.5 shadow-md">
           <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
             <ChefHat className="w-5 h-5 text-white" />
           </div>
