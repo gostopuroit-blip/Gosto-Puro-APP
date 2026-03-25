@@ -76,6 +76,19 @@ export default function Layout({ children, currentPageName }) {
     return <>{children}</>;
   }
 
+  // Community pages: only visible to admins
+  if (communityPages.includes(currentPageName) && user !== null && user?.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-4xl mb-4">🔒</p>
+          <p className="text-gray-700 dark:text-gray-300 font-semibold text-lg">Em breve</p>
+          <p className="text-gray-400 text-sm mt-1">A Comunità sarà disponibile presto</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex flex-col overflow-x-hidden">
       <style>{`
