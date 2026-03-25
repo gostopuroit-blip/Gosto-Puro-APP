@@ -1,11 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClient } from 'npm:@base44/sdk@0.8.23';
 
 // Product IDs
 const PRODUCT_LIFETIME = "7079227";   // Accesso Premium: App Gosto Puro (lifetime)
 const PRODUCT_SUBSCRIPTION = "6991197"; // Ricette per ogni occasione premium (monthly/yearly)
 
+const base44 = createClient({ appId: Deno.env.get("BASE44_APP_ID"), serviceRole: true });
+
 Deno.serve(async (req) => {
-  const base44 = createClientFromRequest(req);
 
   const logEvent = async (event_type, status, user_email, payload, error_message) => {
     try {
