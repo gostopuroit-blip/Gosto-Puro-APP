@@ -13,6 +13,8 @@ const navItems = [
 { name: "Planner", icon: CalendarDays, page: "Planner" },
 { name: "Profilo", icon: UserCircle2, page: "Profile" }];
 
+const communityPages = ["Community", "ExpertProfile"];
+
 
 // Capture PWA install prompt globally as early as possible
 if (typeof window !== "undefined") {

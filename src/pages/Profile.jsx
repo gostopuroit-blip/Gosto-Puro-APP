@@ -397,7 +397,7 @@ export default function Profile() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-gray-800 dark:text-white">
-              {user?.plan === "premium" || user?.role === "admin" ? "Piano Premium attivo ✨" : "Piano Free"}
+              {user?.plan === "premium" || user?.role === "admin" ? "Piano Premium attivo ✨" : "Piano Base"}
             </p>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
               {user?.plan === "premium" || user?.role === "admin"
