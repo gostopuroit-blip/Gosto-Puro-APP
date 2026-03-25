@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
       }
       const user = await findUser(email);
       if (user) {
-        await base44.asServiceRole.entities.User.update(user.id, {
+        await base44.entities.User.update(user.id, {
           subscription_status: "cancelled",
           // Keep plan as-is — the scheduled job will revoke when expired
         });
