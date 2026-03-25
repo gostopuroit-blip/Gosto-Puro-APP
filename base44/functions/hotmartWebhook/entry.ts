@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
 
   const logEvent = async (event_type, status, user_email, payload, error_message) => {
     try {
-      await base44.asServiceRole.entities.WebhookLog.create({
+      await base44.entities.WebhookLog.create({
         source: "Hotmart",
         event_type,
         status,
