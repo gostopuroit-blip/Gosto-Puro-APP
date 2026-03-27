@@ -170,15 +170,17 @@ export default function ShoppingList() {
     toast.success("Elementi completati rimossi");
   };
 
-  const selectAll = async () => {
-    await Promise.all(items.filter(i => !i.is_checked).map(i => base44.entities.ShoppingItem.update(i.id, { is_checked: true })));
-    setItems(prev => prev.map(i => ({ ...i, is_checked: true })));
+  const batchUpdate = async (targetItems, checked) => {
+    // Update UI immediately
+    setItems(prev => prev.map(i => targetItems.find(t => t.id === i.id) ? { ...i, is_checked: checked } : i));
+    // Update in batches of 3 to avoid rate limit
+    for (let i = 0; i < targetItems.length; i += 3) {
+      await Promise.all(targetItems.slice(i, i + 3).map(item => base44.entities.ShoppingItem.update(item.id, { is_checked: checked }).catch(() => null)));
+    }
   };
 
-  const deselectAll = async () => {
-    await Promise.all(items.filter(i => i.is_checked).map(i => base44.entities.ShoppingItem.update(i.id, { is_checked: false })));
-    setItems(prev => prev.map(i => ({ ...i, is_checked: false })));
-  };
+  const selectAll = () => batchUpdate(items.filter(i => !i.is_checked), true);
+  const deselectAll = () => batchUpdate(items.filter(i => i.is_checked), false);
 
   const handlePrint = () => {
     const displayItems = showOnlyMissing ? items.filter(i => !i.is_checked) : items;
