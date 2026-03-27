@@ -441,10 +441,9 @@ export default function Planner() {
               {recipes.
             filter((r) => {
               const matchSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
-              // Auto-filter by meal type
               const mealCategoryMap = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
-              const expectedCategory = replaceTarget ? mealCategoryMap[replaceTarget.meal] : null;
-              const matchCategory = expectedCategory ? r.category === expectedCategory : (r.category === "Colazione" || r.category === "Pranzo" || r.category === "Cena");
+              const expectedCategory = mealCategoryMap[replaceTarget?.meal];
+              const matchCategory = r.category === expectedCategory;
               const matchFolder = !selectedFolder || userRecipes.some(
                 (ur) => ur.recipe_id === r.id && ur.folder_ids?.includes(selectedFolder)
               );
