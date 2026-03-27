@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Check, Loader2, ShoppingCart, RefreshCw, Trash2 } from "lucide-react";
+import { Check, Loader2, ShoppingCart, RefreshCw, Trash2, Printer, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import PremiumGate from "@/components/PremiumGate";
@@ -21,6 +21,7 @@ export default function ShoppingList() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [user, setUser] = useState(null);
+  const [showOnlyMissing, setShowOnlyMissing] = useState(false);
 
   useEffect(() => {
     loadItems();
@@ -169,14 +170,59 @@ export default function ShoppingList() {
     toast.success("Elementi completati rimossi");
   };
 
+  const selectAll = async () => {
+    await Promise.all(items.filter(i => !i.is_checked).map(i => base44.entities.ShoppingItem.update(i.id, { is_checked: true })));
+    setItems(prev => prev.map(i => ({ ...i, is_checked: true })));
+  };
+
+  const deselectAll = async () => {
+    await Promise.all(items.filter(i => i.is_checked).map(i => base44.entities.ShoppingItem.update(i.id, { is_checked: false })));
+    setItems(prev => prev.map(i => ({ ...i, is_checked: false })));
+  };
+
+  const handlePrint = () => {
+    const displayItems = showOnlyMissing ? items.filter(i => !i.is_checked) : items;
+    const grouped = categoryOrder.reduce((acc, cat) => {
+      const catItems = displayItems.filter(i => i.category === cat);
+      if (catItems.length > 0) acc[cat] = catItems;
+      return acc;
+    }, {});
+
+    const html = `
+      <html><head><title>Lista della Spesa</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
+        h1 { font-size: 22px; margin-bottom: 16px; }
+        h2 { font-size: 14px; text-transform: uppercase; color: #555; margin: 16px 0 6px; letter-spacing: 1px; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .qty { color: #888; }
+      </style></head>
+      <body>
+        <h1>🛒 Lista della Spesa</h1>
+        ${Object.entries(grouped).map(([cat, catItems]) => `
+          <h2>${categoryIcons[cat] || "📦"} ${cat}</h2>
+          <ul>${catItems.map(i => `<li><span>${i.name}</span><span class="qty">${i.quantity || ""}</span></li>`).join("")}</ul>
+        `).join("")}
+      </body></html>
+    `;
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    win.print();
+  };
+
+  const displayItems = showOnlyMissing ? items.filter(i => !i.is_checked) : items;
+
   const groupedItems = categoryOrder.reduce((acc, cat) => {
-    const catItems = items.filter((i) => i.category === cat);
+    const catItems = displayItems.filter((i) => i.category === cat);
     if (catItems.length > 0) acc[cat] = catItems;
     return acc;
   }, {});
 
   const checkedCount = items.filter((i) => i.is_checked).length;
   const totalCount = items.length;
+  const missingCount = totalCount - checkedCount;
 
   if (loading) {
     return (
@@ -206,6 +252,11 @@ export default function ShoppingList() {
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
+            {totalCount > 0 && (
+              <Button size="sm" variant="outline" onClick={handlePrint} className="rounded-xl">
+                <Printer className="w-4 h-4" />
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={generateList}
@@ -213,10 +264,33 @@ export default function ShoppingList() {
               className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] gap-1.5"
             >
               <RefreshCw className={`w-4 h-4 ${generating ? "animate-spin" : ""}`} />
-              Aggiorna lista
+              Aggiorna
             </Button>
           </div>
         </div>
+
+        {/* Action row */}
+        {totalCount > 0 && (
+          <div className="flex gap-2 mt-3 flex-wrap">
+            <button onClick={selectAll} className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+              Seleziona tutto
+            </button>
+            <button onClick={deselectAll} className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+              Deseleziona tutto
+            </button>
+            <button
+              onClick={() => setShowOnlyMissing(!showOnlyMissing)}
+              className={`text-xs px-3 py-1.5 rounded-lg border transition flex items-center gap-1 ${
+                showOnlyMissing
+                  ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              <Filter className="w-3 h-3" />
+              Solo mancanti {showOnlyMissing && missingCount > 0 ? `(${missingCount})` : ""}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Progress */}

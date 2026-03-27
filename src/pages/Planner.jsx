@@ -384,7 +384,14 @@ export default function Planner() {
       <div className="fixed inset-0 bg-black/40 dark:bg-black/60 flex items-end z-50">
           <div className="w-full bg-white dark:bg-[#2D3F35] rounded-t-3xl p-4 h-[75vh] flex flex-col border-t border-gray-100 dark:border-[#3D5246]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900 dark:text-white">Scegli ricetta</h3>
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white">Scegli ricetta</h3>
+                {replaceTarget && (
+                  <p className="text-xs text-[#2D6A4F] font-medium mt-0.5">
+                    {{ colazione: "🥐 Colazione", pranzo: "🍽️ Pranzo", cena: "🍴 Cena" }[replaceTarget.meal]}
+                  </p>
+                )}
+              </div>
               <button onClick={() => setReplaceTarget(null)} className="text-gray-400 dark:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
@@ -434,7 +441,10 @@ export default function Planner() {
               {recipes.
             filter((r) => {
               const matchSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
-              const matchCategory = r.category === "Colazione" || r.category === "Pranzo" || r.category === "Cena";
+              // Auto-filter by meal type
+              const mealCategoryMap = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
+              const expectedCategory = replaceTarget ? mealCategoryMap[replaceTarget.meal] : null;
+              const matchCategory = expectedCategory ? r.category === expectedCategory : (r.category === "Colazione" || r.category === "Pranzo" || r.category === "Cena");
               const matchFolder = !selectedFolder || userRecipes.some(
                 (ur) => ur.recipe_id === r.id && ur.folder_ids?.includes(selectedFolder)
               );
