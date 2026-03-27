@@ -130,33 +130,21 @@ export function useSessionTracking() {
       doInit();
     }
 
+    // Track session_end only ONCE: on pagehide (tab close / navigate away).
+    // Do NOT fire on visibilitychange — mobile apps go background constantly
+    // which would create dozens of fake session_end events and inflate counts.
     const handleEnd = () => {
+      // Prevent double-firing (pagehide can fire after visibilitychange on some browsers)
+      if (sessionStorage.getItem("gp_session_ended")) return;
+      sessionStorage.setItem("gp_session_ended", "1");
       const duration = Math.round((Date.now() - startRef.current) / 1000);
       if (duration < 3) return;
-      // Use sendBeacon for reliability on mobile/PWA close
-      const user_email = sessionStorage.getItem("gp_user_email") || null;
-      const user_plan = sessionStorage.getItem("gp_user_plan") || "free";
-      const payload = JSON.stringify({
-        event_type: "session_end",
-        user_email,
-        user_plan,
-        session_id: getSessionId(),
-        date: todayStr(),
-        session_duration_seconds: duration,
-      });
-      // Fire via normal trackEvent as well (best effort)
       trackEvent("session_end", { session_duration_seconds: duration });
     };
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "hidden") handleEnd();
-    };
-
     window.addEventListener("pagehide", handleEnd);
-    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       window.removeEventListener("pagehide", handleEnd);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 }

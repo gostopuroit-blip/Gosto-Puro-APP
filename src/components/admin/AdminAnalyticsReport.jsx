@@ -38,9 +38,6 @@ export default function AdminAnalyticsReport() {
     const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
     const ev = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
 
-    // Use session_id as fallback when user_email is not yet cached
-    const uid = (e) => e.user_email || e.session_id;
-
     const sessionStarts = ev.filter(e => e.event_type === "session_start");
     const sessionEnds = ev.filter(e => e.event_type === "session_end" && e.session_duration_seconds > 0);
     const recipeViews = ev.filter(e => e.event_type === "recipe_view");
@@ -48,9 +45,23 @@ export default function AdminAnalyticsReport() {
     const planners = ev.filter(e => e.event_type === "planner_created");
     const utmVisits = ev.filter(e => e.event_type === "utm_visit");
 
-    const uniqueUsers = new Set(sessionStarts.filter(e => uid(e)).map(uid));
-    const freeUsers = new Set(sessionStarts.filter(e => e.user_plan === "free" && uid(e)).map(uid));
-    const premiumUsers = new Set(sessionStarts.filter(e => e.user_plan === "premium" && uid(e)).map(uid));
+    // Count unique users: prefer email (authenticated). Anonymous sessions are secondary.
+    // To avoid double-counting, if a session has an email, use email; otherwise session_id.
+    // Deduplicate: if the same session_id later got an email, prefer the email.
+    const sessionEmailMap = {};
+    ev.forEach(e => { if (e.session_id && e.user_email) sessionEmailMap[e.session_id] = e.user_email; });
+    const resolvedUid = (e) => e.user_email || sessionEmailMap[e.session_id] || e.session_id;
+
+    const uniqueUsers = new Set(sessionStarts.filter(e => resolvedUid(e)).map(resolvedUid));
+    // Free/premium: only count users where we have a confirmed plan (avoid "free" default noise)
+    const premiumUsers = new Set(
+      ev.filter(e => e.user_plan === "premium" && e.user_email).map(e => e.user_email)
+    );
+    // Free = authenticated users NOT in premium set
+    const authenticatedUsers = new Set(
+      ev.filter(e => e.user_email).map(e => e.user_email)
+    );
+    const freeUsers = new Set([...authenticatedUsers].filter(email => !premiumUsers.has(email)));
 
     const durations = sessionEnds.map(e => e.session_duration_seconds);
     const avgDuration = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
@@ -71,8 +82,9 @@ export default function AdminAnalyticsReport() {
     const topUtm = Object.entries(utmBySource).sort((a, b) => b[1] - a[1]);
 
     const sessionsByUser = {};
-    sessionStarts.forEach(e => { const k = uid(e); if (k) sessionsByUser[k] = (sessionsByUser[k] || 0) + 1; });
-    const returningUsers = Object.values(sessionsByUser).filter(c => c > 1).length;
+    sessionStarts.forEach(e => { const k = resolvedUid(e); if (k) sessionsByUser[k] = (sessionsByUser[k] || 0) + 1; });
+    // Only count returning users among authenticated ones (session_id-only is unreliable across visits)
+    const returningUsers = Object.entries(sessionsByUser).filter(([k, c]) => c > 1 && k.includes("@")).length;
 
     // Top ocasiões clicadas
     const occasionClicks = ev.filter(e => e.event_type === "occasion_click");
@@ -83,13 +95,17 @@ export default function AdminAnalyticsReport() {
     });
     const topOccasions = Object.entries(occasionCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
-    // Horários de pico (por hora do dia)
+    // Horários de pico — usa horário de Brasília (UTC-3)
+    const toLocalHour = (isoStr) => {
+      if (!isoStr) return null;
+      const d = new Date(isoStr);
+      // getHours() is local browser time — but this runs on admin's browser which is also BR
+      return d.getHours();
+    };
     const hourCounts = {};
     sessionStarts.forEach(e => {
-      if (e.created_date) {
-        const hour = new Date(e.created_date).getHours();
-        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
-      }
+      const h = toLocalHour(e.created_date);
+      if (h !== null) hourCounts[h] = (hourCounts[h] || 0) + 1;
     });
     const peakHours = Object.entries(hourCounts)
       .map(([h, c]) => [parseInt(h), c])
@@ -511,7 +527,7 @@ Gosto Puro — Relatório gerado automaticamente
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <KpiCard emoji="📱" label="Sessões abertas" value={report.totalSessions} sub="vezes que o app foi aberto" color="green" />
-            <KpiCard emoji="👤" label="Usuários ativos" value={report.uniqueUsers} sub={`${report.premiumUsers} Premium · ${report.freeUsers} Free`} color="blue" />
+            <KpiCard emoji="👤" label="Usuários ativos" value={report.uniqueUsers} sub={`${report.premiumUsers} Premium · ${report.freeUsers} Free (logados)`} color="blue" />
             <KpiCard emoji="↩️" label="Voltaram ao app" value={`${report.uniqueUsers > 0 ? Math.round((report.returningUsers / report.uniqueUsers) * 100) : 0}%`} sub={`${report.returningUsers} de ${report.uniqueUsers} usuários`} color="purple" />
             <KpiCard emoji="⏱" label="Tempo médio/sessão" value={fmtDuration(report.avgDuration)} sub="por visita ao app" color="amber" />
           </div>
