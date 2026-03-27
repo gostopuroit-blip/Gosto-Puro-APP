@@ -338,6 +338,8 @@ export default function Planner() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setReplaceTarget({ dayIndex, meal });
+                              setSelectedFolder(null);
+                              setSearchQuery("");
                             }}
                             className="text-[#2D6A4F] dark:text-[#40916C] hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition">
                             <Shuffle className="w-4 h-4" />
@@ -406,17 +408,37 @@ export default function Planner() {
               className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-[#3D5246] dark:bg-[#1A2B20] dark:text-white text-sm" />
             </div>
 
-            {/* Folder filter */}
+            {/* Filter chips: Tutte + category chip + folders carousel */}
             <div className="flex gap-2 overflow-x-auto hide-scrollbar mb-3 pb-1">
+              {/* Tutte — remove category filter */}
               <button
                 onClick={() => setSelectedFolder("all")}
-                className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
                   selectedFolder === "all"
                     ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
                     : "bg-gray-50 dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#3D5246]"
                 }`}>
                 Tutte
               </button>
+
+              {/* Category chip (active by default) */}
+              {replaceTarget && (() => {
+                const mealCategoryMap = { colazione: "🥐 Colazione", pranzo: "🍽️ Pranzo", cena: "🍴 Cena" };
+                const label = mealCategoryMap[replaceTarget.meal];
+                return (
+                  <button
+                    onClick={() => setSelectedFolder(null)}
+                    className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                      selectedFolder === null
+                        ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                        : "bg-gray-50 dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#3D5246]"
+                    }`}>
+                    {label}
+                  </button>
+                );
+              })()}
+
+              {/* Folder chips */}
               {folders.map((folder) => {
                 const folderRecipeIds = new Set(
                   userRecipes.filter((ur) => ur.folder_ids?.includes(folder.id)).map((ur) => ur.recipe_id)
@@ -426,7 +448,7 @@ export default function Planner() {
                   <button
                     key={folder.id}
                     onClick={() => setSelectedFolder(folder.id === selectedFolder ? null : folder.id)}
-                    className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                    className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
                       selectedFolder === folder.id
                         ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
                         : "bg-gray-50 dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#3D5246]"
