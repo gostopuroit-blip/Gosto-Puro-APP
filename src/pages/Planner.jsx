@@ -409,9 +409,9 @@ export default function Planner() {
             {/* Folder filter */}
             <div className="flex gap-2 overflow-x-auto hide-scrollbar mb-3 pb-1">
               <button
-                onClick={() => setSelectedFolder(null)}
+                onClick={() => setSelectedFolder("all")}
                 className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
-                  selectedFolder === null
+                  selectedFolder === "all"
                     ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
                     : "bg-gray-50 dark:bg-[#1A2B20] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#3D5246]"
                 }`}>
@@ -443,8 +443,10 @@ export default function Planner() {
               const matchSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
               const mealCategoryMap = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
               const expectedCategory = mealCategoryMap[replaceTarget?.meal];
-              const matchCategory = r.category === expectedCategory;
-              const matchFolder = !selectedFolder || userRecipes.some(
+              // Se selectedFolder === null mas há categoria esperada, filtra por categoria
+              // Se selectedFolder === "all", mostra tudo (sem filtro de categoria)
+              const matchCategory = selectedFolder === "all" ? true : r.category === expectedCategory;
+              const matchFolder = !selectedFolder || selectedFolder === "all" || userRecipes.some(
                 (ur) => ur.recipe_id === r.id && ur.folder_ids?.includes(selectedFolder)
               );
               return matchSearch && matchCategory && matchFolder;
