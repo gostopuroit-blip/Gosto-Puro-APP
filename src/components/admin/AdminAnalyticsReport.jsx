@@ -74,6 +74,41 @@ export default function AdminAnalyticsReport() {
     sessionStarts.forEach(e => { const k = uid(e); if (k) sessionsByUser[k] = (sessionsByUser[k] || 0) + 1; });
     const returningUsers = Object.values(sessionsByUser).filter(c => c > 1).length;
 
+    // Top ocasiões clicadas
+    const occasionClicks = ev.filter(e => e.event_type === "occasion_click");
+    const occasionCounts = {};
+    occasionClicks.forEach(e => {
+      const label = e.occasion_label || "desconhecida";
+      occasionCounts[label] = (occasionCounts[label] || 0) + 1;
+    });
+    const topOccasions = Object.entries(occasionCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    // Horários de pico (por hora do dia)
+    const hourCounts = {};
+    sessionStarts.forEach(e => {
+      if (e.created_date) {
+        const hour = new Date(e.created_date).getHours();
+        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      }
+    });
+    const peakHours = Object.entries(hourCounts)
+      .map(([h, c]) => [parseInt(h), c])
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    // Acessos por dia da semana
+    const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const dayCounts = {};
+    sessionStarts.forEach(e => {
+      if (e.created_date) {
+        const day = new Date(e.created_date).getDay();
+        dayCounts[day] = (dayCounts[day] || 0) + 1;
+      }
+    });
+    const peakDays = Object.entries(dayCounts)
+      .map(([d, c]) => [dayNames[parseInt(d)], c])
+      .sort((a, b) => b[1] - a[1]);
+
     setReport({
       period,
       dateRange: `${cutoff} até ${todayStr()}`,
@@ -89,6 +124,9 @@ export default function AdminAnalyticsReport() {
       topRecipes,
       topSaved,
       topUtm,
+      topOccasions,
+      peakHours,
+      peakDays,
     });
     setLoading(false);
   };
@@ -171,6 +209,10 @@ Nos últimos ${r.period} dias, o Gosto Puro teve:
 ${r.topRecipes.length > 0 ? `🏆 TOP 5 RECEITAS MAIS VISTAS:\n${r.topRecipes.map(([t, c], i) => `   ${i + 1}. ${t} (${c} views)`).join("\n")}` : ""}
 
 ${r.topSaved.length > 0 ? `❤️ TOP 5 RECEITAS MAIS SALVAS:\n${r.topSaved.map(([t, c], i) => `   ${i + 1}. ${t} (${c} saves)`).join("\n")}` : ""}
+
+${r.topOccasions?.length > 0 ? `🍽️ OCASIÕES MAIS CLICADAS:\n${r.topOccasions.map(([l, c], i) => `   ${i + 1}. ${l} (${c} cliques)`).join("\n")}` : ""}
+
+${r.peakHours?.length > 0 ? `⏰ HORÁRIOS DE PICO:\n${r.peakHours.map(([h, c]) => `   ${String(h).padStart(2,"0")}h: ${c} sessões`).join("\n")}` : ""}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔗 ORIGEM DO TRÁFEGO
@@ -409,9 +451,11 @@ Gosto Puro — Relatório gerado automaticamente
       `- ${r.premiumUsers} assinantes Premium (${premiumRate}% da base ativa) e ${r.freeUsers} usuarios no plano Free.`,
       `- Taxa de retorno: ${retentionRate}% — ${r.returningUsers} usuarios voltaram mais de uma vez.`,
       `- ${r.recipeViews} views de receitas, ${r.recipeSaves} salvas (${saveRate}% de conversao) e ${r.planners} planners criados.`,
+      r.topOccasions?.length > 0 ? `- Ocasiao mais clicada: ${r.topOccasions[0][0]} (${r.topOccasions[0][1]} cliques).` : null,
+      r.peakHours?.length > 0 ? `- Horario de pico: ${String(r.peakHours[0][0]).padStart(2,"0")}h (${r.peakHours[0][1]} sessoes). Dia mais ativo: ${r.peakDays?.[0]?.[0] || "-"}.` : null,
       `- Tempo medio por sessao: ${fmtDuration(r.avgDuration)}.`,
     ];
-    summaryLines.forEach((l, i) => {
+    summaryLines.filter(Boolean).forEach((l, i) => {
       doc.text(l, pad + 5, y + 14 + i * 5, { maxWidth: W - pad * 2 - 8 });
     });
     y += boxH + 4;
@@ -478,28 +522,112 @@ Gosto Puro — Relatório gerado automaticamente
             <KpiCard emoji="📅" label="Planners criados" value={report.planners} sub="planos de refeição" color="blue" />
           </div>
 
-          {report.topRecipes.length > 0 && (
-            <div className="bg-white rounded-2xl p-4 border border-gray-100">
-              <p className="text-xs font-bold text-gray-700 mb-3">🏆 Receitas mais vistas no período</p>
-              <div className="space-y-2">
-                {report.topRecipes.map(([title, count], i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-300 w-4">{i + 1}</span>
-                    <div className="flex-1">
-                      <div className="flex justify-between mb-0.5">
-                        <p className="text-xs text-gray-700 truncate">{title}</p>
-                        <span className="text-xs font-bold text-[#2D6A4F] ml-2">{count}</span>
-                      </div>
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="bg-[#2D6A4F] h-1.5 rounded-full" style={{ width: `${Math.round((count / report.topRecipes[0][1]) * 100)}%` }} />
+          {/* TOP RECEITAS MAIS VISTAS + SALVAS lado a lado */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {report.topRecipes.length > 0 && (
+              <div className="bg-white rounded-2xl p-4 border border-gray-100">
+                <p className="text-xs font-bold text-gray-700 mb-3">🏆 Receitas mais vistas</p>
+                <div className="space-y-2">
+                  {report.topRecipes.map(([title, count], i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-300 w-4">{i + 1}</span>
+                      <div className="flex-1">
+                        <div className="flex justify-between mb-0.5">
+                          <p className="text-xs text-gray-700 truncate">{title}</p>
+                          <span className="text-xs font-bold text-[#2D6A4F] ml-2">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-[#2D6A4F] h-1.5 rounded-full" style={{ width: `${Math.round((count / report.topRecipes[0][1]) * 100)}%` }} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
+            {report.topSaved.length > 0 && (
+              <div className="bg-white rounded-2xl p-4 border border-gray-100">
+                <p className="text-xs font-bold text-gray-700 mb-3">❤️ Receitas mais salvas</p>
+                <div className="space-y-2">
+                  {report.topSaved.map(([title, count], i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-300 w-4">{i + 1}</span>
+                      <div className="flex-1">
+                        <div className="flex justify-between mb-0.5">
+                          <p className="text-xs text-gray-700 truncate">{title}</p>
+                          <span className="text-xs font-bold text-orange-500 ml-2">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-orange-400 h-1.5 rounded-full" style={{ width: `${Math.round((count / report.topSaved[0][1]) * 100)}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* OCASIÕES + HORÁRIOS lado a lado */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {report.topOccasions.length > 0 && (
+              <div className="bg-white rounded-2xl p-4 border border-gray-100">
+                <p className="text-xs font-bold text-gray-700 mb-3">🍽️ Ocasiões mais clicadas</p>
+                <div className="space-y-2">
+                  {report.topOccasions.map(([label, count], i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-300 w-4">{i + 1}</span>
+                      <div className="flex-1">
+                        <div className="flex justify-between mb-0.5">
+                          <p className="text-xs text-gray-700 truncate">{label}</p>
+                          <span className="text-xs font-bold text-purple-600 ml-2">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-purple-400 h-1.5 rounded-full" style={{ width: `${Math.round((count / report.topOccasions[0][1]) * 100)}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white rounded-2xl p-4 border border-gray-100">
+              <p className="text-xs font-bold text-gray-700 mb-3">⏰ Horários de pico de acesso</p>
+              {report.peakHours.length === 0 ? (
+                <p className="text-[11px] text-gray-400">Sem dados suficientes no período.</p>
+              ) : (
+                <div className="space-y-2">
+                  {report.peakHours.map(([hour, count], i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-amber-500 w-12">{String(hour).padStart(2, "0")}h</span>
+                      <div className="flex-1">
+                        <div className="w-full bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-amber-400 h-1.5 rounded-full" style={{ width: `${Math.round((count / report.peakHours[0][1]) * 100)}%` }} />
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-gray-500">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {report.peakDays.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-[11px] font-bold text-gray-500 mb-2">Dias da semana</p>
+                  <div className="flex gap-1 flex-wrap">
+                    {report.peakDays.map(([day, count], i) => (
+                      <div key={i} className={`px-2 py-1 rounded-lg text-[10px] font-bold ${i === 0 ? "bg-amber-100 text-amber-700" : "bg-gray-50 text-gray-500"}`}>
+                        {day} · {count}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ORIGEM DO TRÁFEGO */}
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
             <p className="text-xs font-bold text-gray-700 mb-3">🔗 De onde vieram os usuários</p>
             {report.topUtm.length === 0 ? (
@@ -516,12 +644,16 @@ Gosto Puro — Relatório gerado automaticamente
             )}
           </div>
 
+          {/* RESUMO EXECUTIVO */}
           <div className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] rounded-2xl p-4 text-white">
             <p className="text-xs font-bold mb-2 opacity-80 uppercase tracking-wide">💡 Resumo para a reunião</p>
             <p className="text-sm leading-relaxed">
-              Nos últimos <strong>{report.period} dias</strong>, o Gosto Puro teve <strong>{report.uniqueUsers} usuários ativos</strong>, dos quais <strong>{report.premiumUsers} são assinantes Premium</strong>.
-              {report.returningUsers > 0 && <> <strong>{report.returningUsers} pessoas voltaram ao app</strong> mais de uma vez.</>}
-              {" "}As receitas foram visualizadas <strong>{report.recipeViews} vezes</strong> no total, e os usuários ficaram em média <strong>{fmtDuration(report.avgDuration)} por sessão</strong>.
+              Nos últimos <strong>{report.period} dias</strong>, o Gosto Puro teve <strong>{report.uniqueUsers} usuários ativos</strong>, dos quais <strong>{report.premiumUsers} são assinantes Premium</strong>.{" "}
+              {report.returningUsers > 0 && <><strong>{report.returningUsers} pessoas voltaram ao app</strong> mais de uma vez. </>}
+              As receitas foram visualizadas <strong>{report.recipeViews} vezes</strong>, com <strong>{report.recipeSaves} salvas</strong>.{" "}
+              {report.topOccasions.length > 0 && <>A ocasião mais buscada foi <strong>{report.topOccasions[0][0]}</strong>. </>}
+              {report.peakHours.length > 0 && <>O horário de maior acesso é às <strong>{String(report.peakHours[0][0]).padStart(2, "0")}h</strong>. </>}
+              Os usuários ficaram em média <strong>{fmtDuration(report.avgDuration)} por sessão</strong>.
             </p>
           </div>
         </>
