@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus } from "lucide-react";
+import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
@@ -135,6 +135,45 @@ export default function RecipeDetail() {
 
   const isPremium = user?.plan === "premium" || user?.role === "admin";
 
+  const handlePrint = () => {
+    const ratio = servings / (recipe.servings || 4);
+    const ingredientsList = (recipe.ingredients || []).map(ing => {
+      const qty = scaleQty(ing.quantity, ratio);
+      return `<li>${ing.name}${qty ? ` — <strong>${qty}</strong>` : ""}</li>`;
+    }).join("");
+    const stepsList = (recipe.instructions || []).map((step, i) =>
+      `<li><strong>${i + 1}.</strong> ${step}</li>`
+    ).join("");
+    const html = `
+      <html><head><title>${recipe.title}</title>
+      <style>
+        body { font-family: Georgia, serif; max-width: 680px; margin: 40px auto; padding: 0 20px; color: #111; }
+        h1 { font-size: 28px; margin-bottom: 4px; }
+        .meta { color: #666; font-size: 14px; margin-bottom: 20px; }
+        h2 { font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin-top: 28px; }
+        ul, ol { padding-left: 20px; line-height: 2; }
+        li { margin-bottom: 4px; font-size: 15px; }
+        .calories { background: #fff3e0; padding: 8px 14px; border-radius: 8px; font-size: 14px; margin-top: 12px; display: inline-block; }
+        @media print { body { margin: 20px; } }
+      </style></head>
+      <body>
+        <h1>${recipe.title}</h1>
+        <p class="meta">${recipe.category} • ${recipe.difficulty || "Facile"} • ${recipe.prep_time} min • ${servings} ${servings === 1 ? "porzione" : "porzioni"}</p>
+        <p>${recipe.description || ""}</p>
+        ${recipe.calories ? `<div class="calories">🔥 ${recipe.calories} kcal/porzione — Totale: ${Math.round(recipe.calories * servings)} kcal</div>` : ""}
+        <h2>Ingredienti</h2>
+        <ul>${ingredientsList}</ul>
+        <h2>Preparazione</h2>
+        <ol style="list-style:none;padding-left:0">${stepsList}</ol>
+      </body></html>
+    `;
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
+  };
+
   const handleSaveClick = () => {
     if (!isPremium && !userRecipe?.is_saved && savedCount >= FREE_SAVE_LIMIT) {
       toast.error(`Piano Free: puoi salvare solo ${FREE_SAVE_LIMIT} ricette. Passa a Premium per salvarne di più! ✨`);
@@ -221,6 +260,12 @@ export default function RecipeDetail() {
           className="absolute top-12 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5 text-gray-800" />
+        </button>
+        <button
+          onClick={handlePrint}
+          className="absolute top-12 right-16 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
+        >
+          <Printer className="w-5 h-5 text-gray-600" />
         </button>
         <button
           onClick={handleSaveClick}
