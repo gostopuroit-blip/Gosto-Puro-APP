@@ -262,12 +262,6 @@ export default function RecipeDetail() {
           <ArrowLeft className="w-5 h-5 text-gray-800" />
         </button>
         <button
-          onClick={handlePrint}
-          className="absolute top-12 right-16 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
-        >
-          <Printer className="w-5 h-5 text-gray-600" />
-        </button>
-        <button
           onClick={handleSaveClick}
           className="absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
         >
@@ -406,6 +400,14 @@ export default function RecipeDetail() {
         >
           <Bookmark className="w-5 h-5 mr-2" />
           {userRecipe?.is_saved ? "Salvata ✓" : "Salvare"}
+        </Button>
+        <Button
+          onClick={handlePrint}
+          variant="outline"
+          className="w-full py-6 rounded-2xl border-2 font-bold text-sm"
+        >
+          <Printer className="w-5 h-5 mr-2" />
+          Stampa ricetta
         </Button>
       </div>
 
