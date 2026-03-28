@@ -59,8 +59,8 @@ Deno.serve(async (req) => {
   };
 
   const findUser = async (email) => {
-    const users = await base44.asServiceRole.entities.User.list("-created_date", 5000);
-    return users.find(u => u.email?.toLowerCase()?.trim() === email) || null;
+    const users = await base44.asServiceRole.entities.User.filter({ email }, "-created_date", 1);
+    return (Array.isArray(users) && users.length > 0) ? users[0] : null;
   };
 
   // --- Read ebook product ID from AppConfig ---
