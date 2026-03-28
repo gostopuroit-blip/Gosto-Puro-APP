@@ -16,8 +16,16 @@ export default function AdminRecipeEngagement() {
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
     try {
-      const data = await base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 3000);
-      setEvents(data || []);
+      let all = [];
+      let skip = 0;
+      while (true) {
+        const batch = await base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 500, skip).catch(() => []);
+        all = all.concat(batch);
+        if (batch.length < 500) break;
+        skip += 500;
+        if (skip > 10000) break;
+      }
+      setEvents(all);
     } catch { setEvents([]); }
     setLoading(false);
   };
