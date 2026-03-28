@@ -1,8 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// Product IDs
+// Product IDs (assinatura premium)
 const PRODUCT_LIFETIME = "7079227";
 const PRODUCT_SUBSCRIPTION = "6991197";
+// Todos os outros produtos são tratados como e-book
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -63,13 +64,6 @@ Deno.serve(async (req) => {
     return (Array.isArray(users) && users.length > 0) ? users[0] : null;
   };
 
-  // --- Read ebook product ID from AppConfig ---
-  let PRODUCT_EBOOK = null;
-  try {
-    const configs = await base44.asServiceRole.entities.AppConfig.filter({ key: "ebook_product_id" }, "-created_date", 1);
-    if (configs && configs.length > 0) PRODUCT_EBOOK = configs[0].value?.trim() || null;
-  } catch (_) {}
-
   // --- Ebook purchase handler ---
   const handleEbookPurchase = async () => {
     if (!email) return;
@@ -111,12 +105,11 @@ Deno.serve(async (req) => {
   const CANCEL_EVENTS = ["SUBSCRIPTION_CANCELLATION", "PURCHASE_CANCELLED"];
 
   try {
-    // Check if this is an ebook purchase (runs before the main flow)
-    if (PRODUCT_EBOOK && productId === PRODUCT_EBOOK && PURCHASE_EVENTS.includes(event)) {
-      return await handleEbookPurchase();
-    }
-
     if (PURCHASE_EVENTS.includes(event)) {
+      // Se não é produto de assinatura conhecido, trata como e-book
+      if (productId !== PRODUCT_LIFETIME && productId !== PRODUCT_SUBSCRIPTION) {
+        return await handleEbookPurchase();
+      }
       if (!email) {
         await logEvent(event, "error", "", rawBody, "No buyer email");
         return Response.json({ error: "No email" }, { status: 400 });
