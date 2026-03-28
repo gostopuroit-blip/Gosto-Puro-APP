@@ -19,8 +19,9 @@ export default function PremiumConversionsChart() {
   const [selectedDays, setSelectedDays] = useState(30);
 
   useEffect(() => {
-    base44.functions.invoke('adminGetUsers').then((res) => {
-      setUsers(Array.isArray(res.data) ? res.data : []);
+    base44.functions.invoke('adminGetUsersV2').then((res) => {
+      const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+      setUsers(Array.isArray(raw) ? raw : []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
