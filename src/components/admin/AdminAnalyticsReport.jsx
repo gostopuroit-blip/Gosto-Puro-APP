@@ -33,7 +33,7 @@ export default function AdminAnalyticsReport() {
       base44.entities.AppAnalytics.filter({ date: { $gte: cutoff } }, "-created_date", 2000).catch(() => []),
       base44.functions.invoke('adminGetUsers').catch(() => ({ data: [] })),
     ]);
-    const allUsers = allUsersRes.data || [];
+    const allUsers = Array.isArray(allUsersRes.data) ? allUsersRes.data : [];
 
     const adminEmails = new Set(allUsers.filter(u => u.role === "admin").map(u => u.email));
     const ev = events.filter(e => !e.user_email || !adminEmails.has(e.user_email));
