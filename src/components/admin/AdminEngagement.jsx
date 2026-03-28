@@ -57,37 +57,31 @@ export default function AdminEngagement() {
     const cutoffStr = cutoff.toISOString().slice(0, 10);
 
     try {
-      // Fetch events and users in parallel
-      // Fetch ALL historical events with pagination (no limit)
-      const fetchAllEvents = async () => {
+      // Fetch events with pagination to avoid limits
+      const fetchEventsByPeriod = async (filterDate) => {
         let all = [];
         let skip = 0;
         const batchSize = 500;
-        let iterations = 0;
-        while (iterations < 100) { // max 50k events
-          const batch = await base44.entities.AppAnalytics.list("-created_date", batchSize, skip).catch(() => []);
+        while (true) {
+          const query = filterDate ? { date: { $gte: filterDate } } : {};
+          const batch = await base44.entities.AppAnalytics.filter(query, "-created_date", batchSize, skip).catch(() => []);
           all = all.concat(batch);
           if (batch.length < batchSize) break;
           skip += batchSize;
-          iterations++;
+          if (skip > 10000) break; // safety cap
         }
         return all;
       };
 
-      const [eventsResult, allTimeEventsResult, usersResult] = await Promise.all([
-        days === 0
-          ? fetchAllEvents()
-          : base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 2000).catch(() => []),
-        days !== 0
-          ? fetchAllEvents()
-          : Promise.resolve(null), // if already fetching all, reuse
+      const [eventsResult, usersResult] = await Promise.all([
+        fetchEventsByPeriod(days === 0 ? null : cutoffStr),
         base44.functions.invoke('adminGetUsersV2').then(res => {
           const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
           return Array.isArray(raw) ? raw : [];
         }).catch(() => []),
       ]);
       setEvents(eventsResult || []);
-      setAllTimeEvents(allTimeEventsResult !== null ? allTimeEventsResult : eventsResult || []);
+      setAllTimeEvents(eventsResult || []); // same data — allTime only used for TopUsers ranking
       setAllUsers(usersResult || []);
     } catch {
       setEvents([]);
