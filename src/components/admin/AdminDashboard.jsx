@@ -27,7 +27,7 @@ export default function AdminDashboard({ onNavigate }) {
     let usersResult = [];
     try {
       const res = await base44.functions.invoke('adminGetUsers');
-      usersResult = res.data || [];
+      usersResult = Array.isArray(res.data) ? res.data : [];
     } catch {}
 
     const [webhooks] = await Promise.all([
