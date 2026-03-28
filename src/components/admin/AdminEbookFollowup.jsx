@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, RefreshCw, Send, BookOpen, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCw, Send, BookOpen, CheckCircle, Clock, AlertCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 
 function fmt(isoStr) {
@@ -12,15 +12,42 @@ export default function AdminEbookFollowup() {
   const [triggers, setTriggers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
-  const [filter, setFilter] = useState("all"); // all | pending | sent
+  const [filter, setFilter] = useState("all");
+  const [productId, setProductId] = useState("");
+  const [productIdRecord, setProductIdRecord] = useState(null);
+  const [savingConfig, setSavingConfig] = useState(false);
 
   useEffect(() => { load(); }, []);
 
   const load = async () => {
     setLoading(true);
-    const data = await base44.entities.EbookPurchaseTrigger.list("-purchase_approved_at", 200).catch(() => []);
+    const [data, configs] = await Promise.all([
+      base44.entities.EbookPurchaseTrigger.list("-purchase_approved_at", 200).catch(() => []),
+      base44.entities.AppConfig.filter({ key: "ebook_product_id" }, "-created_date", 1).catch(() => []),
+    ]);
     setTriggers(data);
+    if (configs && configs.length > 0) {
+      setProductIdRecord(configs[0]);
+      setProductId(configs[0].value || "");
+    }
     setLoading(false);
+  };
+
+  const saveProductId = async () => {
+    if (!productId.trim()) { toast.error("Digite o ID do produto"); return; }
+    setSavingConfig(true);
+    try {
+      if (productIdRecord) {
+        await base44.entities.AppConfig.update(productIdRecord.id, { value: productId.trim() });
+      } else {
+        const rec = await base44.entities.AppConfig.create({ key: "ebook_product_id", value: productId.trim(), label: "ID do produto e-book na Hotmart" });
+        setProductIdRecord(rec);
+      }
+      toast.success("✅ ID do produto salvo!");
+    } catch (e) {
+      toast.error("Erro: " + e.message);
+    }
+    setSavingConfig(false);
   };
 
   const runNow = async () => {
@@ -88,15 +115,35 @@ export default function AdminEbookFollowup() {
         </div>
       </div>
 
-      {/* Info sobre produto */}
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
-        <p className="text-xs font-bold text-blue-800 mb-1">⚙️ Configuração necessária</p>
-        <p className="text-[11px] text-blue-700 leading-relaxed">
-          1. No arquivo <code className="bg-blue-100 px-1 rounded">functions/hotmartWebhook.js</code>, substitua <code className="bg-blue-100 px-1 rounded">EBOOK_PRODUCT_ID_AQUI</code> pelo ID real do produto e-book na Hotmart.<br />
-          2. Crie um Email Template com o nome exato <strong>"Ebook Followup"</strong> na aba Email Templates.
-          Use <code className="bg-blue-100 px-1 rounded">{'{{USER_NAME}}'}</code> e <code className="bg-blue-100 px-1 rounded">{'{{USER_EMAIL}}'}</code> no template.<br />
-          3. O disparo automático roda a cada hora via automação.
-        </p>
+      {/* Config: ID do produto */}
+      <div className="bg-white rounded-2xl p-4 border border-gray-100 space-y-3">
+        <div>
+          <p className="text-sm font-bold text-gray-800">⚙️ ID do produto e-book (Hotmart)</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">Cole aqui o ID do produto e-book que aparece no painel da Hotmart (ex: 1234567)</p>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={productId}
+            onChange={e => setProductId(e.target.value)}
+            placeholder="Ex: 1234567"
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
+          />
+          <button
+            onClick={saveProductId}
+            disabled={savingConfig}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#2D6A4F] text-white rounded-xl text-sm font-semibold hover:bg-[#245a42] transition-all disabled:opacity-50"
+          >
+            {savingConfig ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Salvar
+          </button>
+        </div>
+        {productIdRecord && (
+          <p className="text-[11px] text-green-600">✅ Produto configurado: <strong>{productId}</strong></p>
+        )}
+        <div className="bg-amber-50 rounded-xl p-3">
+          <p className="text-[11px] text-amber-700">Crie também um Email Template com o nome exato <strong>"Ebook Followup"</strong> na aba Email Templates. Use <code className="bg-amber-100 px-1 rounded">{'{{USER_NAME}}'}</code> e <code className="bg-amber-100 px-1 rounded">{'{{USER_EMAIL}}'}</code>.</p>
+        </div>
       </div>
 
       {/* Filter */}

@@ -3,8 +3,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 // Product IDs
 const PRODUCT_LIFETIME = "7079227";
 const PRODUCT_SUBSCRIPTION = "6991197";
-// Ebook product ID — altere para o ID real do seu ebook na Hotmart
-const PRODUCT_EBOOK = "EBOOK_PRODUCT_ID_AQUI";
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -65,6 +63,13 @@ Deno.serve(async (req) => {
     return users.find(u => u.email?.toLowerCase()?.trim() === email) || null;
   };
 
+  // --- Read ebook product ID from AppConfig ---
+  let PRODUCT_EBOOK = null;
+  try {
+    const configs = await base44.asServiceRole.entities.AppConfig.filter({ key: "ebook_product_id" }, "-created_date", 1);
+    if (configs && configs.length > 0) PRODUCT_EBOOK = configs[0].value?.trim() || null;
+  } catch (_) {}
+
   // --- Ebook purchase handler ---
   const handleEbookPurchase = async () => {
     if (!email) return;
@@ -107,7 +112,7 @@ Deno.serve(async (req) => {
 
   try {
     // Check if this is an ebook purchase (runs before the main flow)
-    if (productId === PRODUCT_EBOOK && PURCHASE_EVENTS.includes(event)) {
+    if (PRODUCT_EBOOK && productId === PRODUCT_EBOOK && PURCHASE_EVENTS.includes(event)) {
       return await handleEbookPurchase();
     }
 

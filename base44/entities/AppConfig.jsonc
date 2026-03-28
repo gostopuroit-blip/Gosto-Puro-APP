@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Config key (unique)"
+    },
+    "value": {
+      "type": "string",
+      "description": "Config value"
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label"
+    }
+  },
+  "required": [
+    "key",
+    "value"
+  ],
+  "name": "AppConfig",
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
