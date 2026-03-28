@@ -31,7 +31,10 @@ export default function AdminAnalyticsReport() {
 
     const [events, allUsersRes] = await Promise.all([
       base44.entities.AppAnalytics.filter({ date: { $gte: cutoff } }, "-created_date", 2000).catch(() => []),
-      base44.functions.invoke('adminGetUsers').catch(() => ({ data: [] })),
+      base44.functions.invoke('adminGetUsers').catch(() => ({ data: [] })).then(res => {
+        const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+        return { data: Array.isArray(raw) ? raw : [] };
+      }),
     ]);
     const allUsers = Array.isArray(allUsersRes.data) ? allUsersRes.data : [];
 

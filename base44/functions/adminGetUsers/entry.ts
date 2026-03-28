@@ -10,7 +10,8 @@ Deno.serve(async (req) => {
     }
 
     const users = await base44.asServiceRole.entities.User.list('-created_date', 500);
-    return Response.json(users);
+    const usersArray = Array.isArray(users) ? users : [];
+    return Response.json(usersArray);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

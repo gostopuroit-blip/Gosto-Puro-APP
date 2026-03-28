@@ -16,7 +16,8 @@ export default function AdminUsers() {
   const load = async () => {
     try {
       const res = await base44.functions.invoke('adminGetUsers');
-      setUsers(Array.isArray(res.data) ? res.data : []);
+      const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+      setUsers(Array.isArray(raw) ? raw : []);
     } catch (e) {
       setError("Errore nel caricamento degli utenti.");
     } finally {

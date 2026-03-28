@@ -81,7 +81,10 @@ export default function AdminEngagement() {
         days !== 0
           ? fetchAllEvents()
           : Promise.resolve(null), // if already fetching all, reuse
-        base44.functions.invoke('adminGetUsers').then(res => Array.isArray(res.data) ? res.data : []).catch(() => []),
+        base44.functions.invoke('adminGetUsers').then(res => {
+          const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+          return Array.isArray(raw) ? raw : [];
+        }).catch(() => []),
       ]);
       setEvents(eventsResult || []);
       setAllTimeEvents(allTimeEventsResult !== null ? allTimeEventsResult : eventsResult || []);
