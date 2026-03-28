@@ -1,5 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+// v2 - fixed array return
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -10,8 +11,10 @@ Deno.serve(async (req) => {
     }
 
     const users = await base44.asServiceRole.entities.User.list('-created_date', 500);
-    const usersArray = Array.isArray(users) ? users : [];
-    return Response.json(usersArray);
+    const result = Array.isArray(users) ? users : [];
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
