@@ -3,6 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 // Product IDs
 const PRODUCT_LIFETIME = "7079227";
 const PRODUCT_SUBSCRIPTION = "6991197";
+// Ebook product ID — altere para o ID real do seu ebook na Hotmart
+const PRODUCT_EBOOK = "EBOOK_PRODUCT_ID_AQUI";
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -63,11 +65,52 @@ Deno.serve(async (req) => {
     return users.find(u => u.email?.toLowerCase()?.trim() === email) || null;
   };
 
+  // --- Ebook purchase handler ---
+  const handleEbookPurchase = async () => {
+    if (!email) return;
+    const transactionId = body.data?.purchase?.transaction || body.data?.purchase?.order_date || `${email}-${Date.now()}`;
+    const transactionStr = String(transactionId);
+
+    // Evitar duplicidade
+    const existing = await base44.asServiceRole.entities.EbookPurchaseTrigger.filter(
+      { hotmart_transaction_id: transactionStr },
+      "-created_date",
+      1
+    ).catch(() => []);
+
+    if (existing && existing.length > 0) {
+      await logEvent(event, "success", email, rawBody, "Ebook duplicate — ignored");
+      return Response.json({ success: true, action: "ebook_duplicate_ignored", email });
+    }
+
+    const approvedAt = new Date().toISOString();
+    const triggerAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+
+    await base44.asServiceRole.entities.EbookPurchaseTrigger.create({
+      user_email: email,
+      user_name: buyer.name || buyer.full_name || "",
+      hotmart_product_id: productId,
+      hotmart_transaction_id: transactionStr,
+      purchase_status: "approved",
+      purchase_approved_at: approvedAt,
+      email_trigger_at: triggerAt,
+      followup_email_sent: false,
+    });
+
+    await logEvent(event, "success", email, rawBody, "Ebook purchase registered — followup scheduled 48h");
+    return Response.json({ success: true, action: "ebook_purchase_registered", email, trigger_at: triggerAt });
+  };
+
   const PURCHASE_EVENTS = ["PURCHASE_APPROVED", "SUBSCRIPTION_REACTIVATED", "PURCHASE_REACTIVATED"];
   const REVOKE_EVENTS = ["PURCHASE_REFUNDED", "PURCHASE_REVERSED", "PURCHASE_CHARGEBACK"];
   const CANCEL_EVENTS = ["SUBSCRIPTION_CANCELLATION", "PURCHASE_CANCELLED"];
 
   try {
+    // Check if this is an ebook purchase (runs before the main flow)
+    if (productId === PRODUCT_EBOOK && PURCHASE_EVENTS.includes(event)) {
+      return await handleEbookPurchase();
+    }
+
     if (PURCHASE_EVENTS.includes(event)) {
       if (!email) {
         await logEvent(event, "error", "", rawBody, "No buyer email");

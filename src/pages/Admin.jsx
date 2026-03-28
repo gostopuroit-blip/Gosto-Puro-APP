@@ -13,9 +13,10 @@ import AdminRecipeEngagement from "@/components/admin/AdminRecipeEngagement";
 import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
 import AdminAnalyticsReport from "@/components/admin/AdminAnalyticsReport";
 import AdminUTMGenerator from "@/components/admin/AdminUTMGenerator";
+import AdminEbookFollowup from "@/components/admin/AdminEbookFollowup";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2 } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
@@ -30,6 +31,7 @@ const tabs = [
   { key: "notifiche",    label: "Notificações",    icon: Bell },
   { key: "permessi",     label: "Permissões",      icon: Lock },
   { key: "webhooks",     label: "Webhooks",        icon: Webhook },
+  { key: "ebook",          label: "E-book Followup",  icon: BookOpen },
   { key: "impostazioni", label: "Configurações",   icon: Settings },
 ];
 
@@ -143,6 +145,7 @@ function AdminContent() {
           {activeTab === "notifiche"    && <AdminNotifications />}
           {activeTab === "permessi"     && <AdminPermissions />}
           {activeTab === "webhooks"     && <AdminWebhooks />}
+          {activeTab === "ebook"          && <AdminEbookFollowup />}
           {activeTab === "impostazioni" && <AdminSettings />}
         </main>
       </div>
