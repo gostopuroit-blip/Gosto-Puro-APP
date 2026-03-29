@@ -11,11 +11,13 @@ export default function AdminPremiumIntelligence() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("nao_comprou");
+  const [days, setDays] = useState(30);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [days]);
 
   const load = async () => {
     setLoading(true);
+    const since = new Date(Date.now() - days * 86400000).toISOString();
     const [analytics, usersRes, pending, webhooks] = await Promise.all([
       base44.entities.AppAnalytics.filter({ event_type: "premium_click" }, "-created_date", 500).catch(() => []),
       base44.functions.invoke("adminGetUsersV2").catch(() => ({ data: [] })),
@@ -26,9 +28,12 @@ export default function AdminPremiumIntelligence() {
     const raw = typeof usersRes.data === "string" ? JSON.parse(usersRes.data) : usersRes.data;
     const users = Array.isArray(raw) ? raw : [];
 
+    // Filtrar cliques pelo período selecionado
+    const filteredAnalytics = analytics.filter(ev => ev.created_date >= since);
+
     // Cliques no botão upgrade
     const clicksByEmail = {};
-    for (const ev of analytics) {
+    for (const ev of filteredAnalytics) {
       const email = ev.user_email || "anônimo";
       if (!clicksByEmail[email]) clicksByEmail[email] = { email, count: 0, last_click: ev.created_date, source: ev.source };
       clicksByEmail[email].count++;
@@ -82,9 +87,19 @@ export default function AdminPremiumIntelligence() {
           <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2"><TrendingUp className="w-4 h-4" /> Inteligência Premium</h2>
           <p className="text-[11px] text-gray-400">Quem clicou, comprou, entrou ou não entrou</p>
         </div>
-        <button onClick={load} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-600">
-          <RefreshCw className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1">
+            {[7, 30, 90].map(d => (
+              <button key={d} onClick={() => setDays(d)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${days === d ? "bg-white text-gray-800 shadow-sm" : "text-gray-400"}`}>
+                {d}d
+              </button>
+            ))}
+          </div>
+          <button onClick={load} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-600">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Summary cards */}
