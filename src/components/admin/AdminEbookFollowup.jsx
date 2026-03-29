@@ -63,6 +63,18 @@ export default function AdminEbookFollowup() {
     setRunning(false);
   };
 
+  const [sendingTest, setSendingTest] = useState(false);
+  const sendTest = async () => {
+    setSendingTest(true);
+    try {
+      await base44.functions.invoke("ebookFollowupTest", { to_email: "fernandesbrandom@gmail.com", user_name: "Brandon" });
+      toast.success("✅ Email de teste enviado para fernandesbrandom@gmail.com!");
+    } catch (e) {
+      toast.error("Erro: " + e.message);
+    }
+    setSendingTest(false);
+  };
+
   const now = new Date();
   const filtered = triggers.filter(t => {
     if (filter === "pending") return !t.followup_email_sent;
@@ -87,6 +99,14 @@ export default function AdminEbookFollowup() {
         <div className="flex gap-2">
           <button onClick={load} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-600">
             <RefreshCw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={sendTest}
+            disabled={sendingTest}
+            className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-all disabled:opacity-50"
+          >
+            {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+            Enviar teste
           </button>
           <button
             onClick={runNow}
