@@ -10,7 +10,7 @@ function fmt(isoStr) {
 export default function AdminPremiumIntelligence() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("clicks"); // clicks | comprou_entrou | comprou_nao_entrou | pending
+  const [tab, setTab] = useState("nao_comprou");
 
   useEffect(() => { load(); }, []);
 
@@ -39,6 +39,10 @@ export default function AdminPremiumIntelligence() {
     }
     const clicks = Object.values(clicksByEmail).sort((a, b) => b.count - a.count);
 
+    // Clicaram mas NÃO compraram = clicaram e não são premium
+    const premiumEmails = new Set(users.filter(u => u.plan === "premium").map(u => u.email));
+    const clicouNaoComprou = clicks.filter(c => c.email !== "anônimo" && !premiumEmails.has(c.email));
+
     // Usuários premium — separar automático (hotmart_product_id preenchido) vs manual
     const premiumUsers = users.filter(u => u.plan === "premium");
     const premiumAuto = premiumUsers.filter(u => u.hotmart_product_id); // veio via webhook
@@ -48,20 +52,22 @@ export default function AdminPremiumIntelligence() {
     // Ou: veio webhook mas o usuário não tem registro
     const comprouNaoEntrou = pending;
 
-    setData({ clicks, premiumAuto, premiumManual, comprouNaoEntrou, totalPremium: premiumUsers.length });
+    setData({ clicks, clicouNaoComprou, premiumAuto, premiumManual, comprouNaoEntrou, totalPremium: premiumUsers.length });
     setLoading(false);
   };
 
   if (loading) return <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-[#2D6A4F]" /></div>;
 
   const tabs = [
-    { key: "clicks", label: "Clicaram Upgrade", icon: MousePointerClick, count: data.clicks.length, color: "blue" },
+    { key: "nao_comprou", label: "Clicou, não comprou", icon: ShoppingCart, count: data.clicouNaoComprou.length, color: "orange" },
+    { key: "clicks", label: "Todos os cliques", icon: MousePointerClick, count: data.clicks.length, color: "blue" },
     { key: "auto", label: "Comprou + Entrou", icon: UserCheck, count: data.premiumAuto.length, color: "green" },
     { key: "manual", label: "Premium Manual", icon: Crown, count: data.premiumManual.length, color: "purple" },
     { key: "nao_entrou", label: "Comprou + Não entrou", icon: UserX, count: data.comprouNaoEntrou.length, color: "red" },
   ];
 
   const colorMap = {
+    orange: { bg: "bg-orange-50", text: "text-orange-700", active: "bg-orange-500 text-white", badge: "bg-orange-100 text-orange-700" },
     blue: { bg: "bg-blue-50", text: "text-blue-700", active: "bg-blue-600 text-white", badge: "bg-blue-100 text-blue-700" },
     green: { bg: "bg-green-50", text: "text-green-700", active: "bg-green-600 text-white", badge: "bg-green-100 text-green-700" },
     purple: { bg: "bg-purple-50", text: "text-purple-700", active: "bg-purple-600 text-white", badge: "bg-purple-100 text-purple-700" },
@@ -103,7 +109,33 @@ export default function AdminPremiumIntelligence() {
 
       {/* Content */}
       <div className="space-y-2">
-        {/* CLICARAM NO UPGRADE */}
+
+        {/* CLICOU MAS NÃO COMPROU */}
+        {tab === "nao_comprou" && (
+          <>
+            <div className="bg-orange-50 rounded-xl p-3 text-[11px] text-orange-700">
+              🛒 Esses usuários clicaram no botão de upgrade mas <strong>ainda não são premium</strong>. Possíveis interessados que abandonaram o checkout.
+            </div>
+            {data.clicouNaoComprou.length === 0 ? (
+              <EmptyState msg="Nenhum abandono registrado. Todos que clicaram compraram!" />
+            ) : data.clicouNaoComprou.map((c, i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 border border-orange-100">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-800 truncate">{c.email}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Último clique: {fmt(c.last_click)}</p>
+                    {c.source && <p className="text-[10px] text-gray-300">Origem: {c.source}</p>}
+                  </div>
+                  <span className="bg-orange-100 text-orange-700 text-[11px] font-bold px-2 py-1 rounded-full flex-shrink-0">
+                    {c.count}x clique{c.count > 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* TODOS OS CLIQUES */}
         {tab === "clicks" && (
           <>
             {data.clicks.length === 0 ? (
