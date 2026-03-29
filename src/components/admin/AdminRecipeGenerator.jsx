@@ -450,6 +450,12 @@ Difficoltà valide: Facile, Media, Difficile.`;
       }
     }
 
+    // Peperonata detection
+    const hasPeperonata = allText.includes("peperonata");
+    const peperonataVisual = hasPeperonata
+      ? `CRITICAL PEPERONATA RULE: The peperonata MUST show clearly distinct and visible chunky pieces of YELLOW bell peppers, RED bell peppers AND tomato chunks — the tomatoes must appear as recognizable pieces, NOT dissolved or invisible in the sauce. Peppers should be sliced in strips, soft and caramelized. The dish must look like a colorful mix of yellow, red and orange-red tomato pieces clearly identifiable. No mushy or monochrome sauce appearance. Grill marks must be visible on the chicken if present alongside.`
+      : ``;
+
     const base = `Professional realistic food photography of ${title}, Italian ${occ.categoria_principale || "food"},`;
     const ingredients = mainIngredients ? `featuring ${mainIngredients},` : "";
     const modifiers = occ.image_modifiers?.join(", ") || "";
@@ -462,7 +468,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
 
     const fixed = `no steam, no floating ingredients, no dramatic splash, no human presence, no hands, no over styling, no unrealistic effects, clean simple composition, high resolution, CRITICAL: NO visible labels, NO readable text on bottles or packaging, NO branded products, NO olive oil bottles with labels, all containers must be plain unlabeled or blurred, artisanal Italian kitchen aesthetic`;
     
-    return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${pastaVisual} ${fishVisual} ${lemonRule} ${modifiers}, ${fixed}.`;
+    return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${pastaVisual} ${fishVisual} ${peperonataVisual} ${lemonRule} ${modifiers}, ${fixed}.`;
   };
 
   const handleGenerate = async () => {
