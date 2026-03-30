@@ -284,7 +284,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           {loadingComments ? (
             <p className="text-xs text-gray-400 text-center py-2">Caricamento...</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-80 overflow-y-auto">
               {comments.map((c) => (
                 <div key={c.id} className="flex gap-2">
                   {c.user_photo ? (
