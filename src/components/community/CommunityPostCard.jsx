@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Share2 } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed } from "lucide-react";
+import PollCard from "./PollCard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 import FollowButton from "./FollowButton";
+import PostActionsMenu from "./PostActionsMenu";
 
 const POST_TYPE_META = {
   tip: { label: "Dica", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
@@ -22,8 +24,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [showShare, setShowShare] = useState(false);
+  const [poll, setPoll] = useState(null);
   const shareRef = useRef(null);
+
+  // Load poll if post_type is poll
+  useState(() => {
+    if (post.post_type === "poll") {
+      base44.entities.Poll.filter({ post_id: post.id }, "-created_date", 1).then((data) => {
+        if (data[0]) setPoll(data[0]);
+      }).catch(() => {});
+    }
+  });
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
@@ -31,21 +42,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const isBlurred = post.is_premium && !isPremiumUser;
   const isVerified = post.is_expert; // só admin/expert têm is_expert=true
 
-  // Fechar share ao clicar fora
-  useEffect(() => {
-    if (!showShare) return;
-    const handler = (e) => {
-      if (shareRef.current && !shareRef.current.contains(e.target)) {
-        setShowShare(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
-    return () => {
-      document.removeEventListener("mousedown", handler);
-      document.removeEventListener("touchstart", handler);
-    };
-  }, [showShare]);
+
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
@@ -111,22 +108,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     toast.success("Post eliminato");
   };
 
-  const copyToClipboard = (text) => {
-    const el = document.createElement("textarea");
-    el.value = text;
-    el.style.position = "fixed";
-    el.style.opacity = "0";
-    document.body.appendChild(el);
-    el.focus();
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-  };
 
-  const handleShare = (fn) => {
-    setShowShare(false);
-    fn();
-  };
 
   const avatar = post.user_photo;
   const initials = (post.user_name || "U").charAt(0).toUpperCase();
@@ -239,6 +221,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         )}
       </div>
 
+      {/* Poll */}
+      {post.post_type === "poll" && poll && (
+        <div className="px-4 pb-2">
+          <PollCard poll={poll} currentUser={currentUser} onUpdate={setPoll} />
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex items-center gap-4 px-4 py-3">
         <button onClick={handleLike} className="flex items-center gap-1.5 text-sm font-medium transition">
@@ -253,47 +242,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
         </button>
-
-        {/* Share button — state-controlled, não hover */}
-        <div className="ml-auto relative" ref={shareRef}>
-          <button
-            onClick={() => setShowShare((v) => !v)}
-            className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-[#2D6A4F] transition p-1"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
-          {showShare && (
-            <div className="absolute bottom-10 right-0 flex flex-col gap-1 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl p-2 z-50 w-44">
-              <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
-                onClick={() => handleShare(() => {
-                  copyToClipboard(post.image_url || window.location.href);
-                  toast.success("Link copiato! Incollalo su Instagram");
-                })}
-              >📸 Instagram</button>
-              <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
-                onClick={() => handleShare(() => {
-                  copyToClipboard(post.image_url || window.location.href);
-                  toast.success("Link copiato! Incollalo su TikTok");
-                })}
-              >🎵 TikTok</button>
-              <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
-                onClick={() => handleShare(() => {
-                  const url = encodeURIComponent(window.location.href);
-                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
-                })}
-              >📘 Facebook</button>
-              <button
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left w-full"
-                onClick={() => handleShare(() => {
-                  copyToClipboard(window.location.href);
-                  toast.success("Link copiato!");
-                })}
-              >🔗 Copia link</button>
-            </div>
-          )}
+        <div className="ml-auto">
+          <PostActionsMenu post={post} currentUser={currentUser} />
         </div>
       </div>
 

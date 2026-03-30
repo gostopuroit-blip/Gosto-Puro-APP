@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock } from "lucide-react";
+import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -8,6 +8,7 @@ const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
   { value: "tip", label: "Dica", icon: Lightbulb, color: "text-amber-500" },
   { value: "recipe", label: "Ricetta", icon: UtensilsCrossed, color: "text-[#2D6A4F]" },
+  { value: "poll", label: "Sondaggio", icon: BarChart2, color: "text-indigo-500" },
   { value: "premium_content", label: "Premium", icon: Lock, color: "text-purple-500", expertOnly: true },
 ];
 
@@ -20,6 +21,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const [postType, setPostType] = useState("image_post");
   const [isPremium, setIsPremium] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Poll state
+  const [pollOptions, setPollOptions] = useState(["", ""]);
 
   const isExpertOrAdmin = currentUser?.role === "expert" || currentUser?.role === "admin";
 
@@ -32,6 +35,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
   const handleSubmit = async () => {
     if (!content.trim()) return toast.error("Scrivi qualcosa!");
+    if (postType === "poll") {
+      const validOpts = pollOptions.filter((o) => o.trim());
+      if (validOpts.length < 2) return toast.error("Aggiungi almeno 2 opzioni per il sondaggio");
+    }
     setUploading(true);
 
     try {
@@ -59,6 +66,29 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         is_expert: isExpertOrAdmin,
         status: "active",
       });
+
+      // Create poll if needed
+      if (postType === "poll") {
+        const validOpts = pollOptions.filter((o) => o.trim());
+        await base44.entities.Poll.create({
+          user_email: currentUser?.email,
+          question: title.trim() || content.trim(),
+          options: validOpts.map((o, i) => ({ id: `opt_${i}`, text: o.trim(), votes_count: 0, voters: [] })),
+          total_votes: 0,
+          post_id: post.id,
+          status: "active",
+        });
+      }
+
+      // Update hashtags
+      for (const tag of tagList) {
+        const existing = await base44.entities.Hashtag.filter({ name: tag }, "-created_date", 1).catch(() => []);
+        if (existing.length > 0) {
+          await base44.entities.Hashtag.update(existing[0].id, { posts_count: (existing[0].posts_count || 0) + 1 }).catch(() => {});
+        } else {
+          await base44.entities.Hashtag.create({ name: tag, posts_count: 1, category: "food" }).catch(() => {});
+        }
+      }
 
       toast.success("Post pubblicato!");
       onCreated(post);
@@ -148,6 +178,33 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             rows={4}
             className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-gray-800 dark:text-white outline-none resize-none"
           />
+
+          {/* Poll options */}
+          {postType === "poll" && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Opzioni del sondaggio</p>
+              {pollOptions.map((opt, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    value={opt}
+                    onChange={(e) => { const n = [...pollOptions]; n[i] = e.target.value; setPollOptions(n); }}
+                    placeholder={`Opzione ${i + 1}`}
+                    className="flex-1 text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-gray-800 dark:text-white outline-none"
+                  />
+                  {pollOptions.length > 2 && (
+                    <button onClick={() => setPollOptions(pollOptions.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 p-1">
+                      <Minus className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {pollOptions.length < 5 && (
+                <button onClick={() => setPollOptions([...pollOptions, ""])} className="flex items-center gap-1.5 text-xs text-[#2D6A4F] font-semibold">
+                  <Plus className="w-3.5 h-3.5" /> Aggiungi opzione
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Tags */}
           <input

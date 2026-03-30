@@ -7,6 +7,9 @@ import { createPageUrl } from "@/utils";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import NewPostModal from "@/components/community/NewPostModal";
 import SuggestedUsers from "@/components/community/SuggestedUsers";
+import StoriesBar from "@/components/community/StoriesBar";
+import NotificationBell from "@/components/community/NotificationBell";
+import TrendingHashtags from "@/components/community/TrendingHashtags";
 
 // Algoritmo de recomendação: posts de quem você segue aparecem no topo,
 // depois posts de experts/admin, depois mais curtidos, depois os mais recentes
@@ -37,6 +40,7 @@ export default function Community() {
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "following"
+  const [hashtagFilter, setHashtagFilter] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -75,10 +79,16 @@ export default function Community() {
     setPosts((prev) => [post, ...prev]);
   };
 
-  // Filtra e ordena conforme a aba ativa
-  const displayedPosts = activeTab === "following"
-    ? rankPosts(posts.filter((p) => followedEmails.has(p.created_by)), followedEmails)
-    : rankPosts(posts, followedEmails);
+  // Filtra e ordena conforme a aba ativa e hashtag
+  const displayedPosts = (() => {
+    let filtered = activeTab === "following"
+      ? posts.filter((p) => followedEmails.has(p.created_by))
+      : posts;
+    if (hashtagFilter) {
+      filtered = filtered.filter((p) => p.tags?.includes(hashtagFilter));
+    }
+    return rankPosts(filtered, followedEmails);
+  })();
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">
@@ -94,13 +104,19 @@ export default function Community() {
               <h1 className="font-bold text-gray-900 dark:text-white text-lg">Comunità</h1>
             </div>
           </div>
-          <Button
-            size="sm"
-            onClick={() => setShowNewPost(true)}
-            className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
-            <Plus className="w-4 h-4" />
-            Post
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/Groups" className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#2A2A2A] px-2.5 py-1.5 rounded-xl flex items-center gap-1">
+              <Users className="w-3.5 h-3.5" /> Gruppi
+            </Link>
+            {user && <NotificationBell currentUser={user} />}
+            <Button
+              size="sm"
+              onClick={() => setShowNewPost(true)}
+              className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
+              <Plus className="w-4 h-4" />
+              Post
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -126,6 +142,11 @@ export default function Community() {
             Seguiti {followedEmails.size > 0 && <span className="text-[10px] bg-[#2D6A4F] text-white rounded-full px-1.5 py-0.5 ml-1">{followedEmails.size}</span>}
           </button>
         </div>
+      </div>
+
+      {/* Stories */}
+      <div className="max-w-lg mx-auto border-b border-gray-100 dark:border-[#2A2A2A]">
+        <StoriesBar currentUser={user} />
       </div>
 
       {/* My profile strip */}
@@ -167,12 +188,23 @@ export default function Community() {
         ) : (
           <>
             {/* Sugestões — só na aba "Per te" */}
-            {activeTab === "for_you" && (
-              <SuggestedUsers
-                currentUser={user}
-                followedEmails={followedEmails}
-                onFollowChange={handleFollowChange}
-              />
+            {activeTab === "for_you" && !hashtagFilter && (
+              <>
+                <SuggestedUsers
+                  currentUser={user}
+                  followedEmails={followedEmails}
+                  onFollowChange={handleFollowChange}
+                />
+                <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} />
+              </>
+            )}
+
+            {/* Hashtag filter active */}
+            {hashtagFilter && (
+              <div className="flex items-center gap-2 bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 rounded-xl px-3 py-2">
+                <span className="text-sm text-[#2D6A4F] font-semibold">#{hashtagFilter}</span>
+                <button onClick={() => setHashtagFilter(null)} className="ml-auto text-gray-400 text-xs">✕ Rimuovi filtro</button>
+              </div>
             )}
 
             {displayedPosts.length === 0 ? (
