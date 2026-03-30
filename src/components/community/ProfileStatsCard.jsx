@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
-export default function ProfileStatsCard({ userEmail, onPostClick }) {
+export default function ProfileStatsCard({ userEmail, onPostClick, onFollowerClick, onFollowingClick, followerCount, followingCount }) {
   const [stats, setStats] = useState({
     posts: 0,
     totalLikes: 0,
-    totalComments: 0,
-    followers: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -16,48 +14,63 @@ export default function ProfileStatsCard({ userEmail, onPostClick }) {
 
   const loadStats = async () => {
     try {
-      const [postsData, followersData] = await Promise.all([
-        base44.entities.CommunityPost.filter(
-          { user_email: userEmail, status: "active" },
-          "-created_date",
-          500
-        ),
-        base44.entities.UserFollow.filter(
-          { following_email: userEmail },
-          "-created_date",
-          1000
-        ),
-      ]);
+      const postsData = await base44.entities.CommunityPost.filter(
+        { user_email: userEmail, status: "active" },
+        "-created_date",
+        500
+      );
 
       const totalLikes = postsData.reduce((sum, p) => sum + (p.likes_count || 0), 0);
-      const totalComments = postsData.reduce((sum, p) => sum + (p.comments_count || 0), 0);
 
       setStats({
         posts: postsData.length,
         totalLikes,
-        totalComments,
-        followers: followersData.length,
       });
     } catch {
-      setStats({ posts: 0, totalLikes: 0, totalComments: 0, followers: 0 });
+      setStats({ posts: 0, totalLikes: 0 });
     } finally {
       setLoading(false);
     }
   };
 
-  const StatItem = ({ icon, value, label }) => (
-    <div className="flex-1 flex flex-col items-center">
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{icon}</p>
-      <p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">{label}</p>
-    </div>
-  );
-
   return (
-    <button onClick={onPostClick} className="flex-1 flex flex-col items-center cursor-pointer">
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">📝</p>
-      <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.posts}</p>
-      <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
-    </button>
+    <div className="flex items-center justify-between">
+      {/* Post */}
+      <button onClick={onPostClick} className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
+        <p className="text-base mb-0.5">📝</p>
+        <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{stats.posts}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
+      </button>
+
+      {/* Separator */}
+      <div className="h-10 w-px bg-gray-200 dark:bg-[#2A2A2A]"></div>
+
+      {/* Mi piace ricevuti */}
+      <button className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
+        <p className="text-base mb-0.5">❤️</p>
+        <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{stats.totalLikes}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Mi piace</p>
+      </button>
+
+      {/* Separator */}
+      <div className="h-10 w-px bg-gray-200 dark:bg-[#2A2A2A]"></div>
+
+      {/* Follower */}
+      <button onClick={onFollowerClick} className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
+        <p className="text-base mb-0.5">👥</p>
+        <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{followerCount || 0}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Follower</p>
+      </button>
+
+      {/* Separator */}
+      <div className="h-10 w-px bg-gray-200 dark:bg-[#2A2A2A]"></div>
+
+      {/* Seguiti */}
+      <button onClick={onFollowingClick} className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
+        <p className="text-base mb-0.5">👤</p>
+        <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{followingCount || 0}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Seguiti</p>
+      </button>
+    </div>
   );
 }
