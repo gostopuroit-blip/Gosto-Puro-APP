@@ -5,6 +5,8 @@ import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
+import VideoPlayer from "./VideoPlayer";
+import VideoLightbox from "./VideoLightbox";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -27,6 +29,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const [showModal, setShowModal] = useState(false);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [lightboxStartIdx, setLightboxStartIdx] = useState(0);
+  const [showVideoLightbox, setShowVideoLightbox] = useState(false);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -216,8 +219,33 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         </div>
       </div>
 
+      {/* Video */}
+      {post.video_url && post.media_type === "video" && (
+        <div
+          className={`w-full bg-gray-100 dark:bg-[#111] relative ${isBlurred ? "overflow-hidden" : ""}`}
+        >
+          {isBlurred ? (
+            <div className="w-full aspect-video bg-black/50 flex flex-col items-center justify-center gap-2">
+              <Lock className="w-8 h-8 text-white" />
+              <p className="text-white font-bold text-sm">Contenuto Premium</p>
+              <p className="text-white/80 text-xs">Abbonati per vedere</p>
+            </div>
+          ) : (
+            <div onClick={() => setShowVideoLightbox(true)}>
+              <VideoPlayer
+                src={post.video_url}
+                autoplay={true}
+                muted={true}
+                onFullscreen={() => setShowVideoLightbox(true)}
+                showIcon={true}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Image or Images Carousel */}
-      {(post.image_url || post.images?.length > 0) && (
+      {(post.image_url || post.images?.length > 0) && !post.video_url && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
           onClick={() => {
@@ -328,6 +356,14 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           images={post.images && post.images.length > 0 ? post.images : [post.image_url]}
           startIndex={lightboxStartIdx}
           onClose={() => setShowImageLightbox(false)}
+        />
+      )}
+
+      {/* Video lightbox */}
+      {showVideoLightbox && (
+        <VideoLightbox
+          videoUrl={post.video_url}
+          onClose={() => setShowVideoLightbox(false)}
         />
       )}
 

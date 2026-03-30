@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera } from "lucide-react";
+import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -17,11 +17,14 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const [title, setTitle] = useState("");
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreviews, setVideoPreviews] = useState(null);
   const [tags, setTags] = useState("");
   const [postType, setPostType] = useState("image_post");
   const [isPremium, setIsPremium] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [fileSizeWarning, setFileSizeWarning] = useState(null);
 
   // Poll state
   const [pollOptions, setPollOptions] = useState(["", ""]);
@@ -87,6 +90,22 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
     setImagePreviews([...imagePreviews, ...newPreviews]);
   };
 
+  const handleVideo = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      setFileSizeWarning("Il file è più grande di 100MB");
+      return;
+    }
+    setFileSizeWarning(null);
+
+    setVideoFile(file);
+    const preview = URL.createObjectURL(file);
+    setVideoPreviews(preview);
+  };
+
   const removeImage = (index) => {
     setImageFiles(imageFiles.filter((_, i) => i !== index));
     setImagePreviews(imagePreviews.filter((_, i) => i !== index));
@@ -120,18 +139,28 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       const validOpts = pollOptions.filter((o) => o.trim());
       if (validOpts.length < 2) return toast.error("Aggiungi almeno 2 opzioni per il sondaggio");
     }
+    if (fileSizeWarning) return toast.error(fileSizeWarning);
     setUploading(true);
 
     try {
       let image_url = null;
       let images = [];
-      if (imagePreviews.length > 0) {
+      let video_url = null;
+      let media_type = null;
+
+      // Upload video if present
+      if (videoFile) {
+        const res = await base44.integrations.Core.UploadFile({ file: videoFile });
+        video_url = res.file_url;
+        media_type = "video";
+      } else if (imagePreviews.length > 0) {
         // Upload all images and save URLs
         const uploadPromises = imageFiles.map((file) =>
           base44.integrations.Core.UploadFile({ file }).then((res) => res.file_url)
         );
         images = await Promise.all(uploadPromises);
         image_url = images[0]; // First image as primary
+        media_type = "image";
       }
 
       // Extract hashtags from content BEFORE creating post
@@ -150,6 +179,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         title: title.trim() || null,
         image_url,
         images: images.length > 0 ? images : [],
+        video_url,
+        media_type,
         tags: allTags,
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
@@ -230,8 +261,27 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             />
           )}
 
+          {/* Video preview */}
+          {videoPreviews && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Anteprima del video</p>
+              <div className="relative rounded-2xl overflow-hidden aspect-video w-full bg-black">
+                <video src={videoPreviews} className="w-full h-full object-cover" />
+                <button
+                  onClick={() => { setVideoFile(null); setVideoPreviews(null); }}
+                  className="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full p-2 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              {fileSizeWarning && (
+                <p className="text-xs text-red-500 font-medium">{fileSizeWarning}</p>
+              )}
+            </div>
+          )}
+
           {/* Image preview with clear controls */}
-          {imagePreviews.length > 0 && (
+          {imagePreviews.length > 0 && !videoFile && (
             <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Anteprima della foto</p>
               <div className="relative rounded-2xl overflow-hidden aspect-video w-full bg-black">
@@ -288,16 +338,27 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             </div>
           )}
 
-          {/* Image upload */}
-          {imagePreviews.length === 0 && (
-            <label className="block">
-              <div className="border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-32 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#2D6A4F] transition">
-                <Camera className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Carica la tua foto</p>
-                <p className="text-xs text-gray-400">Fino a 5 foto</p>
-              </div>
-              <input type="file" accept="image/*" className="hidden" onChange={handleImages} multiple />
-            </label>
+          {/* Media upload */}
+          {imagePreviews.length === 0 && !videoFile && (
+            <div className="space-y-2">
+              <label className="block">
+                <div className="border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-32 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#2D6A4F] transition">
+                  <Camera className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Carica foto o video</p>
+                  <p className="text-xs text-gray-400">Fino a 5 foto o 1 video (max 100MB)</p>
+                </div>
+                <input type="file" accept="image/*" className="hidden" onChange={handleImages} multiple />
+              </label>
+              <label className="block">
+                <div className="border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-20 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#2D6A4F] transition">
+                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm10 3V7a1 1 0 10-2 0v2H7a1 1 0 100 2h3v2a1 1 0 102 0v-2h3a1 1 0 100-2h-3z" />
+                  </svg>
+                  <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Carica un video</p>
+                </div>
+                <input type="file" accept="video/mp4,video/quicktime,video/webm" className="hidden" onChange={handleVideo} />
+              </label>
+            </div>
           )}
 
           {/* Text */}

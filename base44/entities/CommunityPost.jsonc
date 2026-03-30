@@ -21,13 +21,33 @@
       "type": "string",
       "description": "Post image URL"
     },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of image URLs"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "Post video URL (mp4, mov, webm)"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video"
+      ],
+      "description": "Media type if present"
+    },
     "post_type": {
       "type": "string",
       "enum": [
         "image_post",
         "tip",
         "recipe",
-        "premium_content"
+        "premium_content",
+        "poll"
       ],
       "default": "image_post",
       "description": "Type of post"

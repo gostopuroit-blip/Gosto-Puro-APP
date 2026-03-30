@@ -9,23 +9,35 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
   const [progress, setProgress] = useState(0);
   const [localStories, setLocalStories] = useState(stories);
   const [isPaused, setIsPaused] = useState(false);
+  const [videoDuration, setVideoDuration] = useState(null);
   const intervalRef = useRef(null);
+  const videoRef = useRef(null);
   const DURATION = 5000;
 
   const story = localStories[idx];
 
   useEffect(() => {
-    if (isPaused) return;
+    setVideoDuration(null);
     setProgress(0);
+  }, [idx]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const story = localStories[idx];
+    const isVideo = story?.media_type === "video";
+    const duration = isVideo && videoDuration ? videoDuration * 1000 : DURATION;
+    
     intervalRef.current = setInterval(() => {
       setProgress((p) => {
         if (p >= 100) {
           next();
           return 0;
         }
-        return p + (100 / (DURATION / 100));
+        return p + (100 / (duration / 100));
       });
     }, 100);
+
     // Register view
     if (story && currentUser && !story.viewers?.includes(currentUser.email)) {
       const newViewers = [...(story.viewers || []), currentUser.email];
@@ -34,8 +46,9 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
         views_count: newViewers.length,
       }).catch(() => {});
     }
+
     return () => clearInterval(intervalRef.current);
-  }, [idx, isPaused]);
+  }, [idx, isPaused, videoDuration]);
 
   const next = () => {
    setIsPaused(false);
@@ -101,7 +114,15 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
         {/* Media */}
         <div className="flex-1 flex items-center justify-center bg-black" onClick={togglePause}>
           {story.media_type === "video" ? (
-            <video src={story.media_url} className="w-full h-full object-contain" controls />
+            <video
+              ref={videoRef}
+              src={story.media_url}
+              autoPlay
+              muted
+              className="w-full h-full object-contain"
+              onLoadedMetadata={(e) => setVideoDuration(e.target.duration)}
+              onEnded={next}
+            />
           ) : (
             <img src={story.media_url} alt="" className="w-full h-full object-contain" />
           )}
@@ -241,14 +262,17 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
 
           {/* Preview corrente */}
           <div className="relative rounded-2xl overflow-hidden bg-black h-48">
-            {previews[currentPreviewIdx].startsWith("blob") || files[currentPreviewIdx].type.startsWith("image") ? (
-              <img src={previews[currentPreviewIdx]} alt="" className="w-full h-full object-contain" />
+            {files[currentPreviewIdx].type.startsWith("video") ? (
+              <video src={previews[currentPreviewIdx]} className="w-full h-full object-contain" autoPlay muted />
             ) : (
-              <video src={previews[currentPreviewIdx]} className="w-full h-full object-contain" controls />
+              <img src={previews[currentPreviewIdx]} alt="" className="w-full h-full object-contain" />
+            )}
+            {files[currentPreviewIdx].type.startsWith("video") && (
+              <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs font-medium">🎥 Video</div>
             )}
             <button
               onClick={() => removeFile(currentPreviewIdx)}
-              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 mr-12"
             >
               <X className="w-4 h-4" />
             </button>
