@@ -52,7 +52,7 @@ export default function Recipes() {
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const FREE_OCCASIONS = ["Occasioni Speciali", "Stile di Vita e Salute", "Dolci", "Leggera"];
+  const FREE_OCCASIONS = ["Occasioni Speciali", "Stile di Vita e Salute", "Dolci", "Leggera", "Con amici", "Festeggiare", "Romantico", "Famiglia", "Fitness", "Detox"];
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   const filteredRecipes = useMemo(() => {
