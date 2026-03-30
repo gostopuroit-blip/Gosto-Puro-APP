@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { BadgeCheck, ArrowLeft, Loader2, Lock, Grid3X3, Edit3, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import UserAvatar from "@/components/UserAvatar";
 
 
 import CommunityPostCard from "@/components/community/CommunityPostCard";
@@ -115,13 +116,9 @@ export default function ExpertProfile() {
         {/* Profile card */}
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-start gap-4">
-            {expert?.photo ? (
-              <img src={expert.photo} alt="" className="w-20 h-20 rounded-full object-cover border-2 border-[#2D6A4F]" />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center text-white font-bold text-2xl border-2 border-[#2D6A4F]">
-                {(expert?.name || "U").charAt(0).toUpperCase()}
-              </div>
-            )}
+            <div className="border-2 border-[#2D6A4F] rounded-full">
+              <UserAvatar photoUrl={expert?.photo} userName={expert?.name} size="xl" />
+            </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg">{expert?.name}</h2>

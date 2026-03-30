@@ -203,21 +203,22 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         media_type = "image";
       }
 
-      // Extract hashtags from content BEFORE creating post
-      const contentTags = extractHashtags(content);
-      const allTags = Array.from(new Set([...hashtags, ...contentTags]));
+      // Extract hashtags from content and field
+      const extractedTags = (content.match(/#(\w+)/g) || []).map(t => t.replace('#', ''));
+      const allTags = [...new Set([...hashtags, ...extractedTags])];
+      console.log("Tags to save:", allTags, "Field tags:", hashtags, "Content tags:", extractedTags);
 
       // Extract mention emails from content
       const mentionEmails = await extractMentionEmails(content, base44);
 
-      // Get fresh user data to ensure photo_url is not null
+      // Get fresh user data to ensure photo_url is set
       const freshUser = await base44.auth.me().catch(() => currentUser);
       const photoUrl = freshUser?.photo_url || currentUser?.photo_url || null;
 
       const post = await base44.entities.CommunityPost.create({
         user_email: currentUser?.email,
         user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
-        user_photo: photoUrl,
+        user_photo: photoUrl || null,
         content: content.trim(),
         title: title.trim() || null,
         image_url,

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, X, ChevronLeft, ChevronRight, Loader2, Heart } from "lucide-react";
 import { toast } from "sonner";
+import UserAvatar from "../UserAvatar";
 
 // Story viewer modal
 function StoryViewer({ stories, startIndex, currentUser, onClose }) {
@@ -96,13 +97,9 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
         {/* Header */}
         <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-between px-3">
           <div className="flex items-center gap-2">
-            {story.user_photo ? (
-              <img src={story.user_photo} alt="" className="w-9 h-9 rounded-full object-cover border-2 border-white" style={{ imageRendering: "auto" }} />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold border-2 border-white">
-                {(story.user_name || "U").charAt(0)}
-              </div>
-            )}
+            <div className="border-2 border-white rounded-full">
+              <UserAvatar photoUrl={story.user_photo} userName={story.user_name} size="md" />
+            </div>
             <div>
               <p className="text-white text-xs font-semibold">{story.user_name || "Utente"}</p>
               {isOwner && <p className="text-white/70 text-[10px]">{story.views_count || 0} visualizzazioni</p>}
@@ -377,13 +374,9 @@ export default function StoriesBar({ currentUser }) {
             <div className="relative w-14 h-14">
               {hasMyStory ? (
                 <div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]">
-                  {currentUser.photo_url ? (
-                    <img src={currentUser.photo_url} alt="" className="w-full h-full rounded-full object-cover border-[2.5px] border-white dark:border-[#0F0F0F]" style={{ imageRendering: "auto" }} />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-[2.5px] border-white dark:border-[#0F0F0F]">
-                      {(currentUser.full_name || currentUser.email || "U").charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <div className="border-[2.5px] border-white dark:border-[#0F0F0F] rounded-full overflow-hidden">
+                    <UserAvatar photoUrl={currentUser.photo_url} userName={currentUser.full_name || currentUser.email} size="lg" />
+                  </div>
                 </div>
               ) : (
                 <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-[#2A2A2A] border-2 border-dashed border-gray-300 dark:border-[#444] flex items-center justify-center">
@@ -411,13 +404,9 @@ export default function StoriesBar({ currentUser }) {
              <button key={g.email} onClick={() => openGroup(i)} className="flex-shrink-0 flex flex-col items-center gap-1">
                <div className="relative">
                  <div className={`w-14 h-14 rounded-full p-[2px] ${seen ? "bg-gray-300 dark:bg-[#555]" : "bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]"}`}>
-                   {g.user_photo ? (
-                     <img src={g.user_photo} alt="" className="w-full h-full rounded-full object-cover border-[2.5px] border-white dark:border-[#0F0F0F]" style={{ imageRendering: "auto" }} />
-                   ) : (
-                     <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-[2.5px] border-white dark:border-[#0F0F0F]">
-                       {(g.user_name || "U").charAt(0)}
-                     </div>
-                   )}
+                   <div className="border-[2.5px] border-white dark:border-[#0F0F0F] rounded-full overflow-hidden">
+                     <UserAvatar photoUrl={g.user_photo} userName={g.user_name} size="lg" />
+                   </div>
                  </div>
                  {/* Story count indicator */}
                  {storyCount > 0 && (

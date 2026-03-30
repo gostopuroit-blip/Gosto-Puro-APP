@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import CommentItem from "./CommentItem";
+import UserAvatar from "../UserAvatar";
 
 export default function PostDetailModal({ post, currentUser, onClose, onUpdate }) {
   const [comments, setComments] = useState([]);
@@ -107,13 +108,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
             onClick={onClose}
             className="flex items-center gap-3 flex-1 min-w-0"
           >
-            {avatar ? (
-              <img src={avatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                {initials}
-              </div>
-            )}
+            <UserAvatar photoUrl={avatar} userName={localPost.user_name} size="md" />
             <div className="min-w-0">
               <div className="flex items-center gap-1">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
@@ -229,13 +224,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
               </div>
             )}
             <div className="flex items-center gap-2 px-4 py-3">
-              {currentUser.photo_url ? (
-                <img src={currentUser.photo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {(currentUser.full_name || "U").charAt(0).toUpperCase()}
-                </div>
-              )}
+              <UserAvatar photoUrl={currentUser.photo_url} userName={currentUser.full_name} size="sm" />
               <input
                 ref={inputRef}
                 value={newComment}

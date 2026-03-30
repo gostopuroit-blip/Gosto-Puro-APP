@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2 } from "lucide-react";
+import UserAvatar from "../UserAvatar";
 import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
@@ -178,13 +179,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           to={`/ExpertProfile?id=${post.created_by}`}
           className="flex items-center gap-3 flex-1 min-w-0"
         >
-          {avatar ? (
-            <img src={avatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-              {initials}
-            </div>
-          )}
+          <UserAvatar photoUrl={avatar} userName={post.user_name} size="md" />
           <div className="min-w-0">
             <div className="flex items-center gap-1">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
@@ -423,13 +418,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             <div className="space-y-3 max-h-80 overflow-y-auto">
               {comments.map((c) => (
                 <div key={c.id} className="flex gap-2">
-                  {c.user_photo ? (
-                    <img src={c.user_photo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                      {(c.user_name || "U").charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <UserAvatar photoUrl={c.user_photo} userName={c.user_name} size="sm" />
                   <div className="bg-gray-50 dark:bg-[#111] rounded-xl px-3 py-2 flex-1">
                     <div className="flex items-center gap-1">
                       <p className="text-xs font-semibold text-gray-900 dark:text-white">

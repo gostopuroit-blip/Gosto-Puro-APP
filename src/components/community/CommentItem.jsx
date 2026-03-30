@@ -2,6 +2,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Heart, Trash2, Flag, MessageCircle, BadgeCheck, X } from "lucide-react";
 import { toast } from "sonner";
+import UserAvatar from "../UserAvatar";
 
 const REPORT_REASONS = [
   { value: "spam", label: "Spam" },
@@ -95,13 +96,7 @@ export default function CommentItem({
   return (
     <>
       <div className="flex gap-2">
-        {comment.user_photo ? (
-          <img src={comment.user_photo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
-        ) : (
-          <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {(comment.user_name || "U").charAt(0).toUpperCase()}
-          </div>
-        )}
+        <UserAvatar photoUrl={comment.user_photo} userName={comment.user_name} size="sm" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
             <p className="text-xs font-semibold text-gray-900 dark:text-white">
