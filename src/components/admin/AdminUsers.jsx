@@ -26,11 +26,18 @@ export default function AdminUsers() {
   };
 
   const update = async (userId, data, label) => {
-    setUpdating(userId + Object.keys(data)[0]);
-    await base44.functions.invoke('adminUpdateUser', { userId, data });
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, ...data } : u));
-    toast.success(label);
-    setUpdating(null);
+    const key = userId + Object.keys(data)[0];
+    setUpdating(key);
+    try {
+      const res = await base44.functions.invoke('adminUpdateUser', { userId, data });
+      if (res.data?.error) throw new Error(res.data.error);
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, ...data } : u));
+      toast.success(label);
+    } catch (e) {
+      toast.error("Errore: " + (e.message || "Operazione fallita"));
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const [cleaning, setCleaning] = useState(false);
