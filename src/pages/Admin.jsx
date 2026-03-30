@@ -17,9 +17,10 @@ import AdminEbookFollowup from "@/components/admin/AdminEbookFollowup";
 import AdminPremiumIntelligence from "@/components/admin/AdminPremiumIntelligence";
 import AdminModeration from "@/components/admin/AdminModeration";
 import AdminCommunity from "@/components/admin/AdminCommunity";
+import AdminBaseFreeRecipes from "@/components/admin/AdminBaseFreeRecipes";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare, Gift } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
@@ -32,6 +33,7 @@ const tabs = [
   { key: "utenti",       label: "Utenti",        icon: Users },
   { key: "ricette",      label: "Ricette",        icon: UtensilsCrossed },
   { key: "genera",       label: "Genera con IA",    icon: Sparkles },
+  { key: "base_free",    label: "Ricette Base",   icon: Gift },
   { key: "emails",       label: "Template Email",  icon: Mail },
   { key: "notifiche",    label: "Notifiche",    icon: Bell },
   { key: "permessi",     label: "Permessi",      icon: Lock },
@@ -149,6 +151,7 @@ function AdminContent() {
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
+          {activeTab === "base_free"    && <AdminBaseFreeRecipes />}
           {activeTab === "emails"       && <AdminEmailTemplates />}
           {activeTab === "notifiche"    && <AdminNotifications />}
           {activeTab === "permessi"     && <AdminPermissions />}
