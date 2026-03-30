@@ -121,6 +121,11 @@ export default function Recipes() {
     navigate({ search: params.toString() }, { replace: true });
   };
 
+  const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
+  const FREE_OCCASIONS = ["Occasioni Speciali", "Stile di Vita e Salute", "Dolci", "Leggera"];
+  const FREE_LIMIT_PER_CATEGORY = 9; // 9 recipes per category/occasion (most recent)
+  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
+
   const toggleFilter = (filterKey) => {
     setActiveFilters((prev) => {
       const newFilters = new Set(prev);
@@ -133,11 +138,6 @@ export default function Recipes() {
     });
     goToPage(1);
   };
-
-  const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const FREE_OCCASIONS = ["Occasioni Speciali", "Stile di Vita e Salute", "Dolci", "Leggera"];
-  const FREE_LIMIT_PER_CATEGORY = 9; // 9 recipes per category/occasion (most recent)
-  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   // Unlock only 9 recipes per Colazione/Pranzo/Cena/Occasions/Lifestyles — rest locked for free users
   // Instagram recipes always locked for free users
