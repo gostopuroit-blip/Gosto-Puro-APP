@@ -8,7 +8,6 @@ import { toast } from "sonner";
 export default function EditProfileModal({ user, onClose, onSave }) {
   const [displayName, setDisplayName] = useState(user?.display_name || user?.full_name || "");
   const [bio, setBio] = useState(user?.bio || "");
-  const [dietaryRestrictions, setDietaryRestrictions] = useState(user?.dietary_restrictions || "");
   const [photoPreview, setPhotoPreview] = useState(user?.photo_url || "");
   const [photoFile, setPhotoFile] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -58,7 +57,6 @@ export default function EditProfileModal({ user, onClose, onSave }) {
       await base44.auth.updateMe({
         display_name: displayName.trim(),
         bio: bio.trim(),
-        dietary_restrictions: dietaryRestrictions.trim(),
         photo_url: photoPreview,
       });
       toast.success("Profilo aggiornato! ✅");
@@ -167,21 +165,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Dietary Restrictions */}
-          <div>
-            <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-              Restrizioni Alimentari
-            </label>
-            <Input
-              type="text"
-              placeholder="Es. Vegetariano, Senza lattosio, Gluten-free"
-              value={dietaryRestrictions}
-              onChange={(e) => setDietaryRestrictions(e.target.value)}
-              maxLength={100}
-              className="mt-2 h-10 text-sm rounded-lg border-gray-200 dark:bg-[#111] dark:border-[#2A2A2A] dark:text-white"
-            />
-            <p className="text-[10px] text-gray-400 mt-1">Aiuta a filtrare le ricette adatte a te</p>
-          </div>
+
         </div>
 
         {/* Footer */}
