@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import Community from './pages/Community';
 import WhatToCook from './pages/WhatToCook';
 import ExpertProfile from './pages/ExpertProfile';
+import HashtagPage from './pages/HashtagPage';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       <Route path="/Community" element={<LayoutWrapper currentPageName="Community"><Community /></LayoutWrapper>} />
       <Route path="/WhatToCook" element={<LayoutWrapper currentPageName="WhatToCook"><WhatToCook /></LayoutWrapper>} />
       <Route path="/ExpertProfile" element={<LayoutWrapper currentPageName="ExpertProfile"><ExpertProfile /></LayoutWrapper>} />
+      <Route path="/Hashtag" element={<LayoutWrapper currentPageName="Hashtag"><HashtagPage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

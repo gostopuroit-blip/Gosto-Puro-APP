@@ -5,7 +5,7 @@ import PollCard from "./PollCard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 import FollowButton from "./FollowButton";
 import PostActionsMenu from "./PostActionsMenu";
@@ -18,6 +18,7 @@ const POST_TYPE_META = {
 };
 
 export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange, onHashtagFilter }) {
+  const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [comments, setComments] = useState([]);
@@ -235,7 +236,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             {post.tags.map((tag) => (
               <button
                 key={tag}
-                onClick={() => onHashtagFilter?.(tag)}
+                onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(tag)}`)}
                 className="flex items-center gap-0.5 text-xs text-[#2D6A4F] font-medium hover:underline transition"
               >
                 <Hash className="w-2.5 h-2.5" />
