@@ -52,9 +52,9 @@ export default function Recipes() {
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo"];
+  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci"];
   const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano"];
-  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
+  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   const filteredRecipes = useMemo(() => {
@@ -141,30 +141,30 @@ export default function Recipes() {
     goToPage(1);
   };
 
-  // Determine if current view is speciale/stile_vita (9 most ancient recipes free)
+  // Determine if current view is speciale/stile_vita (9 most recent recipes free)
   // or regular categories (3 most recent recipes free)
   const isSpecialView = activeTags.occasion && (SPECIAL_OCCASIONS.includes(activeTags.occasion) || LIFESTYLE_TAGS.includes(activeTags.occasion));
 
-  // Unlock recipes: 9 most ancient for speciale/stile_vita, 3 most recent for categories
+  // Unlock recipes: 9 most recent for speciale/stile_vita, 3 most recent for categories
   const unlockedIds = useMemo(() => {
     if (isPremium) return null;
     const ids = new Set();
 
     if (isSpecialView) {
-      // For speciale/stile_vita: unlock 9 OLDEST recipes
+      // For speciale/stile_vita: unlock 9 MOST RECENT recipes
       const activeTag = activeTags.occasion || activeTags.lifestyle;
       const relevantRecipes = recipes.filter(
         (r) =>
           (r.occasions && r.occasions.includes(activeTag)) ||
           (r.lifestyle && r.lifestyle.includes(activeTag))
       );
-      // Sort by created_date ASC to get oldest first
-      relevantRecipes.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      // Sort by created_date DESC to get most recent first
+      relevantRecipes.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
       for (let i = 0; i < Math.min(9, relevantRecipes.length); i++) {
         ids.add(relevantRecipes[i].id);
       }
     } else {
-      // For regular categories: unlock 3 NEWEST recipes per category
+      // For regular categories: unlock 3 MOST RECENT recipes per category
       const countPerCat = {};
       // Sort by created_date DESC to get most recent first
       const sorted = [...recipes].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
