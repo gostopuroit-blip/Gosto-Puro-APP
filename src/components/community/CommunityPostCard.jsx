@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2 } from "lucide-react";
 import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import { toast } from "sonner";
@@ -27,14 +27,20 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [poll, setPoll] = useState(null);
+  const [repostCount, setRepostCount] = useState(0);
 
-  // Load poll if post_type is poll
+  // Load poll if post_type is poll and repost count
   useEffect(() => {
     if (post.post_type === "poll") {
       base44.entities.Poll.filter({ post_id: post.id }, "-created_date", 1).then((data) => {
         if (data[0]) setPoll(data[0]);
       }).catch(() => {});
     }
+
+    // Load repost count
+    base44.entities.PostShare.filter({ original_post_id: post.id, share_type: "repost" }, "-created_date", 500).then((data) => {
+      setRepostCount(data.length);
+    }).catch(() => {});
   }, [post.id, post.post_type]);
 
   const isLiked = post.likes?.includes(currentUser?.email);
@@ -274,10 +280,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
         </button>
+        {repostCount > 0 && (
+          <button className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
+            <Repeat2 className="w-5 h-5" />
+            <span>{repostCount}</span>
+          </button>
+        )}
         <div className="ml-auto">
           <PostActionsMenu
             post={post}
             currentUser={currentUser}
+            onPostShared={() => setRepostCount((prev) => prev + 1)}
             onDelete={async (p) => {
               if (!confirm("Excluir este post?")) return;
               await base44.entities.CommunityPost.delete(p.id);

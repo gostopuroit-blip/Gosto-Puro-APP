@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   MoreHorizontal, Flag, UserX, Share2, Copy, Facebook,
-  Instagram, Music2, Link, Pencil, Trash2
+  Instagram, Music2, Link, Pencil, Trash2, Repeat2
 } from "lucide-react";
 import { toast } from "sonner";
+import RepostModal from "./RepostModal";
 
 const REPORT_REASONS = [
   { value: "spam", label: "Spam" },
@@ -77,6 +78,7 @@ function ReportModal({ post, currentUser, onClose }) {
 export default function PostActionsMenu({ post, currentUser, onPostShared, onEdit, onDelete }) {
   const [open, setOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showRepostModal, setShowRepostModal] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -99,28 +101,16 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
     setOpen(false);
   };
 
-  const handleRepost = async () => {
-    if (!currentUser) return;
-    await base44.entities.PostShare.create({
-      sharer_email: currentUser.email,
-      original_post_id: post.id,
-      share_type: "repost",
-    });
-    if (post.created_by && post.created_by !== currentUser.email) {
-      await base44.entities.Notification.create({
-        recipient_email: post.created_by,
-        sender_email: currentUser.email,
-        sender_name: currentUser.full_name || currentUser.email.split("@")[0],
-        sender_photo: currentUser.photo_url || null,
-        type: "share",
-        message: `${currentUser.full_name || currentUser.email.split("@")[0]} ha condiviso il tuo post`,
-        reference_id: post.id,
-        reference_type: "post",
-        is_read: false,
-      }).catch(() => {});
+  const handleRepostClick = () => {
+    if (!currentUser) {
+      toast.error("Fai login per repostare");
+      return;
     }
-    toast.success("Post ricondiviso!");
-    onPostShared?.();
+    if (post.created_by === currentUser.email) {
+      toast.error("Non puoi repostare il tuo post");
+      return;
+    }
+    setShowRepostModal(true);
     setOpen(false);
   };
 
@@ -185,7 +175,9 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
             )}
 
             {/* Share actions */}
-            <MenuItem icon={Share2} label="Ricondividi" onClick={handleRepost} />
+            {post.created_by !== currentUser?.email && (
+              <MenuItem icon={Repeat2} label="🔁 Repostare" onClick={handleRepostClick} />
+            )}
             <MenuItem icon={Link} label="Copia link" onClick={copyLink} />
             <MenuItem icon={Facebook} label="Condividi su Facebook" onClick={shareOnFacebook} />
             <MenuItem icon={Music2} label="Condividi su TikTok" onClick={shareOnTikTok} />
@@ -205,6 +197,15 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
 
       {showReport && currentUser && (
         <ReportModal post={post} currentUser={currentUser} onClose={() => setShowReport(false)} />
+      )}
+
+      {showRepostModal && currentUser && (
+        <RepostModal
+          post={post}
+          currentUser={currentUser}
+          onClose={() => setShowRepostModal(false)}
+          onReposted={() => onPostShared?.()}
+        />
       )}
     </>
   );

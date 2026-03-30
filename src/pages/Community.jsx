@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
+import RepostCard from "@/components/community/RepostCard";
 import NewPostModal from "@/components/community/NewPostModal";
 import SuggestedUsers from "@/components/community/SuggestedUsers";
 import StoriesBar from "@/components/community/StoriesBar";
 import NotificationBell from "@/components/community/NotificationBell";
 import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
+import FollowButton from "@/components/community/FollowButton";
 
 // Algoritmo de recomendação: posts fixados no topo,
 // depois posts de quem você segue, experts/admin, mais curtidos, depois os mais recentes
@@ -48,19 +50,22 @@ export default function Community() {
   const [hashtagFilter, setHashtagFilter] = useState(null);
   const [postTypeFilter, setPostTypeFilter] = useState(null);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [reposts, setReposts] = useState([]);
 
   useEffect(() => {
     const init = async () => {
       const u = await base44.auth.me().catch(() => null);
       setUser(u);
-      const [postsData, followData, usersData] = await Promise.all([
+      const [postsData, followData, usersData, repostsData] = await Promise.all([
         base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 60),
         u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200) : Promise.resolve([]),
         base44.entities.User.list("-created_date", 100),
+        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60),
       ]);
       const followed = new Set(followData.map((f) => f.following_email));
       setFollowedEmails(followed);
       setPosts(postsData);
+      setReposts(repostsData);
       
       // Get suggested users not yet followed
       const suggested = usersData.filter((usr) => 
@@ -94,6 +99,10 @@ export default function Community() {
     setPosts((prev) => [post, ...prev]);
   };
 
+  const handleRepostDeleted = (repostId) => {
+    setReposts((prev) => prev.filter((r) => r.id !== repostId));
+  };
+
   // Filtra e ordena conforme a aba ativa, hashtag e tipo de post
   const displayedPosts = (() => {
     let filtered = activeTab === "following"
@@ -107,6 +116,25 @@ export default function Community() {
     }
     return rankPosts(filtered, followedEmails);
   })();
+
+  // Filtra reposts conforme filtros
+  const displayedReposts = (() => {
+    let filtered = reposts;
+    if (activeTab === "following") {
+      filtered = filtered.filter((r) => followedEmails.has(r.sharer_email));
+    }
+    if (hashtagFilter || postTypeFilter) {
+      // Skip reposts quando há filtros específicos
+      return [];
+    }
+    return filtered;
+  })();
+
+  // Mescla posts e reposts ordenados por data
+  const allContent = [
+    ...displayedPosts.map((p) => ({ type: "post", data: p, date: new Date(p.created_date) })),
+    ...displayedReposts.map((r) => ({ type: "repost", data: r, date: new Date(r.created_date) })),
+  ].sort((a, b) => b.date - a.date);
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">
@@ -300,18 +328,61 @@ export default function Community() {
                   </>
                 )}
               </div>
+            ) : allContent.length === 0 ? (
+              <div className="text-center py-20">
+                {activeTab === "following" ? (
+                  <>
+                    <p className="text-4xl mb-4">👥</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post da seguiti</p>
+                    <p className="text-sm text-gray-400">Segui altri utenti per vedere i loro post qui</p>
+                  </>
+                ) : hashtagFilter ? (
+                  <>
+                    <p className="text-4xl mb-4">🔍</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post con #{hashtagFilter}</p>
+                    <p className="text-sm text-gray-400">Prova un altro hashtag</p>
+                  </>
+                ) : postTypeFilter ? (
+                  <>
+                    <p className="text-4xl mb-4">📭</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post di questo tipo</p>
+                    <p className="text-sm text-gray-400">Prova un altro filtro</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-5xl mb-4">🍳</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post ancora</p>
+                    <p className="text-sm text-gray-400 mb-6">Sii il primo a condividere qualcosa!</p>
+                    <Button onClick={() => setShowNewPost(true)} className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl">
+                      Crea il primo post
+                    </Button>
+                  </>
+                )}
+              </div>
             ) : (
-              displayedPosts.map((post) => (
-                <CommunityPostCard
-                  key={post.id}
-                  post={post}
-                  currentUser={user}
-                  followedEmails={followedEmails}
-                  onFollowChange={handleFollowChange}
-                  onUpdate={(updated) => handlePostUpdate(updated, post.id)}
-                  onHashtagFilter={(tag) => setHashtagFilter(tag)}
-                />
-              ))
+              allContent.map((item) =>
+                item.type === "post" ? (
+                  <CommunityPostCard
+                    key={item.data.id}
+                    post={item.data}
+                    currentUser={user}
+                    followedEmails={followedEmails}
+                    onFollowChange={handleFollowChange}
+                    onUpdate={(updated) => handlePostUpdate(updated, item.data.id)}
+                    onHashtagFilter={(tag) => setHashtagFilter(tag)}
+                  />
+                ) : (
+                  <RepostCard
+                    key={item.data.id}
+                    repost={item.data}
+                    currentUser={user}
+                    followedEmails={followedEmails}
+                    onFollowChange={handleFollowChange}
+                    onUpdate={(updated) => handlePostUpdate(updated, item.data.original_post_id)}
+                    onHashtagFilter={(tag) => setHashtagFilter(tag)}
+                  />
+                )
+              )
             )}
           </>
         )}
