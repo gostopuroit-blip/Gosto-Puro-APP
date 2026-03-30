@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2 } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2 } from "lucide-react";
 import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
@@ -16,6 +16,7 @@ const POST_TYPE_META = {
   tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
   recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
   premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
+  poll: { label: "Sondaggio", icon: BarChart2, color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" },
   image_post: null,
 };
 

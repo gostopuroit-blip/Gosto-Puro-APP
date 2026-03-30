@@ -3,32 +3,40 @@ import { base44 } from "@/api/base44Client";
 import { BarChart2, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { it } from "date-fns/locale";
 
 export default function PollCard({ poll, currentUser, onUpdate }) {
   const [voting, setVoting] = useState(false);
 
+  if (!poll) return null;
+
   const isExpired = poll.expires_at && new Date(poll.expires_at) < new Date();
   const userVotedOption = poll.options?.find((o) => o.voters?.includes(currentUser?.email));
   const hasVoted = !!userVotedOption;
-  const showResults = hasVoted || isExpired || poll.user_email === currentUser?.email;
+  const showResults = hasVoted || isExpired || poll.created_by === currentUser?.email;
 
   const handleVote = async (optionId) => {
     if (!currentUser) return toast.error("Fai login per votare");
     if (hasVoted || isExpired || voting) return;
     setVoting(true);
 
-    const newOptions = poll.options.map((o) => {
-      if (o.id === optionId) {
-        return { ...o, votes_count: (o.votes_count || 0) + 1, voters: [...(o.voters || []), currentUser.email] };
-      }
-      return o;
-    });
-    const newTotal = (poll.total_votes || 0) + 1;
+    try {
+      const newOptions = poll.options.map((o) => {
+        if (o.id === optionId) {
+          return { ...o, votes_count: (o.votes_count || 0) + 1, voters: [...(o.voters || []), currentUser.email] };
+        }
+        return o;
+      });
+      const newTotal = (poll.total_votes || 0) + 1;
 
-    await base44.entities.Poll.update(poll.id, { options: newOptions, total_votes: newTotal });
-    onUpdate?.({ ...poll, options: newOptions, total_votes: newTotal });
-    setVoting(false);
+      await base44.entities.Poll.update(poll.id, { options: newOptions, total_votes: newTotal });
+      onUpdate?.({ ...poll, options: newOptions, total_votes: newTotal });
+    } catch (err) {
+      toast.error("Errore nel voto. Riprova.");
+      console.error(err);
+    } finally {
+      setVoting(false);
+    }
   };
 
   return (
@@ -90,7 +98,7 @@ export default function PollCard({ poll, currentUser, onUpdate }) {
         </p>
         {poll.expires_at && !isExpired && (
           <p className="text-gray-400">
-            Scade {formatDistanceToNow(new Date(poll.expires_at), { addSuffix: true, locale: ptBR })}
+            Scade {formatDistanceToNow(new Date(poll.expires_at), { addSuffix: true, locale: it })}
           </p>
         )}
       </div>
