@@ -86,7 +86,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
         <X className="w-5 h-5" />
       </button>
 
-      <div className="flex flex-col h-full max-w-lg mx-auto w-full bg-white dark:bg-[#0F0F0F] overflow-hidden">
+      <div className="flex flex-col max-w-lg mx-auto w-full bg-white dark:bg-[#0F0F0F] overflow-hidden" style={{ height: "calc(100% - 64px)" }}>
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
           <Link to={`/ExpertProfile?id=${post.created_by}`} onClick={onClose} className="flex items-center gap-3 flex-1 min-w-0">
