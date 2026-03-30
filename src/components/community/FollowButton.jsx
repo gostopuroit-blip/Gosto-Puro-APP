@@ -38,6 +38,15 @@ export default function FollowButton({ targetEmail, currentUser, onFollowChange 
         follower_email: currentUser.email,
         following_email: targetEmail,
       });
+      
+      // Create follow notification
+      await base44.functions.invoke('createFollowNotification', {
+        followed_email: targetEmail,
+        follower_email: currentUser.email,
+        follower_name: currentUser.full_name || currentUser.email?.split("@")[0],
+        follower_photo: currentUser.photo_url || null,
+      }).catch(() => {});
+      
       setFollowRecord(rec);
       toast.success("Stai seguendo!");
       onFollowChange?.(true);

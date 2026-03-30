@@ -53,6 +53,18 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       likes: newLikes,
       likes_count: newLikes.length,
     });
+    
+    // Create notification if user just liked the post (not unliking)
+    if (!isLiked && post.created_by !== currentUser?.email) {
+      await base44.functions.invoke('createLikeNotification', {
+        post_id: post.id,
+        post_author_email: post.created_by,
+        liker_email: currentUser?.email,
+        liker_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+        liker_photo: currentUser?.photo_url || null,
+      }).catch(() => {});
+    }
+    
     onUpdate({ ...post, likes: newLikes, likes_count: newLikes.length });
   };
 
@@ -83,6 +95,18 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     await base44.entities.CommunityPost.update(post.id, {
       comments_count: (post.comments_count || 0) + 1,
     });
+    
+    // Create notification if commenting on someone else's post
+    if (post.created_by !== currentUser?.email) {
+      await base44.functions.invoke('createCommentNotification', {
+        post_id: post.id,
+        post_author_email: post.created_by,
+        comment_author_email: currentUser?.email,
+        comment_author_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+        comment_author_photo: currentUser?.photo_url || null,
+      }).catch(() => {});
+    }
+    
     onUpdate({ ...post, comments_count: (post.comments_count || 0) + 1 });
     setComments([created, ...comments]);
     setNewComment("");
