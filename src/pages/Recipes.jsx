@@ -186,10 +186,10 @@ export default function Recipes() {
     return ids;
   }, [recipes, isPremium]);
 
-  // Reorder recipes: unlocked first, then locked (for FREE_OCCASIONS only)
+  // Reorder recipes: unlocked first, then locked (for FREE_OCCASIONS and FREE_CATEGORIES)
   const orderedRecipes = useMemo(() => {
     const activeOccasion = activeTags.occasion;
-    const isFreeOccasion = activeOccasion && FREE_OCCASIONS.includes(activeOccasion);
+    const isFreeOccasion = activeOccasion && (FREE_OCCASIONS.includes(activeOccasion) || FREE_CATEGORIES.includes(activeOccasion));
     
     if (!isFreeOccasion || isPremium) return filteredRecipes;
     
