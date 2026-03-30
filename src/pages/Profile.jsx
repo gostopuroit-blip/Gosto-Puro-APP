@@ -9,9 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 import { trackEvent } from "@/components/useAnalytics";
-import SavedPostsTab from "@/components/community/SavedPostsTab";
-import ProfileStatsCard from "@/components/community/ProfileStatsCard";
-import UserPostsTab from "@/components/community/UserPostsTab";
+
 
 
 
@@ -28,7 +26,6 @@ export default function Profile() {
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
   const [installPrompt, setInstallPrompt] = useState(() => window.__pwaInstallPrompt || null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile"); // profile | saved | posts
 
   useEffect(() => {
     // Check if already installed
@@ -249,58 +246,11 @@ export default function Profile() {
           {user && <PremiumBadge user={user} />}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-3 mt-4">
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
-              activeTab === "profile"
-                ? "bg-[#2D6A4F] text-white"
-                : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
-            }`}
-          >
-            Profilo
-          </button>
-          <button
-            onClick={() => setActiveTab("posts")}
-            className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
-              activeTab === "posts"
-                ? "bg-[#2D6A4F] text-white"
-                : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
-            }`}
-          >
-            📝 Post
-          </button>
-          <button
-            onClick={() => setActiveTab("saved")}
-            className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
-              activeTab === "saved"
-                ? "bg-[#2D6A4F] text-white"
-                : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
-            }`}
-          >
-            <Bookmark className="w-4 h-4" />
-            Salvati
-          </button>
-        </div>
+
       </div>
 
-      {/* Posts tab */}
-      {activeTab === "posts" && user && (
-        <div className="px-5 py-6">
-          <UserPostsTab userEmail={user.email} currentUser={user} />
-        </div>
-      )}
-
-      {/* Saved posts tab */}
-      {activeTab === "saved" && user && (
-        <div className="px-5">
-          <SavedPostsTab currentUser={user} />
-        </div>
-      )}
-
       {/* Profile tab */}
-      {activeTab === "profile" && (
+      {(
         <>
           {/* Avatar + Name */}
           <div className="px-5 mt-4">
@@ -350,16 +300,11 @@ export default function Profile() {
                </div>
              </div>
 
-             {/* Stats */}
-             {user && (
-               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A2A]">
-                 <ProfileStatsCard userEmail={user.email} />
-               </div>
-             )}
-            </div>
-            </div>
 
-      {/* Notifications */}
+            </div>
+             </div>
+
+            {/* Notifications */}
       {notifStatus !== "unsupported" && (
         <div className="px-5 mt-4">
           <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-between">
