@@ -23,22 +23,22 @@ import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCross
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
-  { key: "community",    label: "Comunidade",     icon: MessageSquare },
-  { key: "moderacao",    label: "Moderação",      icon: Shield },
+  { key: "community",    label: "Comunità",     icon: MessageSquare },
+  { key: "moderacao",    label: "Moderazione",      icon: Shield },
   { key: "engagement",   label: "Analytics",       icon: TrendingUp },
   { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
-  { key: "report",         label: "Relatório",         icon: FileBarChart },
-  { key: "utm",            label: "Links UTM",          icon: Link2 },
-  { key: "utenti",       label: "Usuários",        icon: Users },
-  { key: "ricette",      label: "Receitas",        icon: UtensilsCrossed },
-  { key: "genera",       label: "Gerar com IA",    icon: Sparkles },
-  { key: "emails",       label: "Email Templates",  icon: Mail },
-  { key: "notifiche",    label: "Notificações",    icon: Bell },
-  { key: "permessi",     label: "Permissões",      icon: Lock },
-  { key: "webhooks",     label: "Webhooks",        icon: Webhook },
+  { key: "report",         label: "Rapporto",         icon: FileBarChart },
+  { key: "utm",            label: "Link UTM",          icon: Link2 },
+  { key: "utenti",       label: "Utenti",        icon: Users },
+  { key: "ricette",      label: "Ricette",        icon: UtensilsCrossed },
+  { key: "genera",       label: "Genera con IA",    icon: Sparkles },
+  { key: "emails",       label: "Template Email",  icon: Mail },
+  { key: "notifiche",    label: "Notifiche",    icon: Bell },
+  { key: "permessi",     label: "Permessi",      icon: Lock },
+  { key: "webhooks",     label: "Webhook",        icon: Webhook },
   { key: "ebook",          label: "E-book Followup",  icon: BookOpen },
-  { key: "premium_intel", label: "Intel Premium",    icon: Crown },
-  { key: "impostazioni", label: "Configurações",   icon: Settings },
+  { key: "premium_intel", label: "Intelligence Premium",    icon: Crown },
+  { key: "impostazioni", label: "Impostazioni",   icon: Settings },
 ];
 
 function AdminContent() {
@@ -57,7 +57,7 @@ function AdminContent() {
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg">👑</span>
-            <span className="font-bold text-gray-900 text-sm">Painel Admin</span>
+            <span className="font-bold text-gray-900 text-sm">Pannello Admin</span>
           </div>
           <p className="text-[10px] text-gray-400">Gosto Puro</p>
         </div>
@@ -92,7 +92,7 @@ function AdminContent() {
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Voltar ao app
+            Torna all'app
           </Link>
         </div>
       </aside>
@@ -112,7 +112,7 @@ function AdminContent() {
             </Link>
             <div>
               <h1 className="text-base font-bold text-gray-900">{activeLabel}</h1>
-              <p className="text-[11px] text-gray-400 hidden md:block">Painel administrativo · Gosto Puro</p>
+              <p className="text-[11px] text-gray-400 hidden md:block">Pannello amministrativo · Gosto Puro</p>
             </div>
           </div>
           {/* Mobile tab pills */}

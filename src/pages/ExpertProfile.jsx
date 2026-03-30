@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
+import PostDetailModal from "@/components/community/PostDetailModal";
 import FollowButton from "@/components/community/FollowButton";
 
 export default function ExpertProfile() {
@@ -16,6 +17,7 @@ export default function ExpertProfile() {
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
@@ -200,7 +202,7 @@ export default function ExpertProfile() {
             }`}
           >
             <Grid3X3 className="w-4 h-4" />
-            Griglia
+            Galleria
           </button>
         </div>
 
@@ -225,7 +227,7 @@ export default function ExpertProfile() {
           /* Grid view */
           <div className="grid grid-cols-3 gap-0.5 pb-24">
             {posts.map((post) => (
-              <div key={post.id} className="relative aspect-square bg-gray-100 dark:bg-[#1A1A1A] overflow-hidden">
+              <button key={post.id} onClick={() => setSelectedPost(post)} className="relative aspect-square bg-gray-100 dark:bg-[#1A1A1A] overflow-hidden hover:opacity-80 transition">
                 {post.image_url ? (
                   <img
                     src={post.image_url}
@@ -246,7 +248,7 @@ export default function ExpertProfile() {
                   <Heart className="w-2.5 h-2.5 text-white fill-white" />
                   <span className="text-white text-[9px] font-bold">{post.likes_count || 0}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
