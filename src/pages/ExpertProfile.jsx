@@ -161,6 +161,18 @@ export default function ExpertProfile() {
               <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A]">
                 <ProfileStatsCard userEmail={expertEmail} />
               </div>
+
+              {/* Followers/Following buttons */}
+              <div className="flex gap-4 mt-3">
+                <button onClick={() => setShowFollowersModal(true)} className="text-center hover:opacity-75 transition flex-1 py-2 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#111]">
+                  <p className="font-bold text-gray-900 dark:text-white text-base">{followersCount}</p>
+                  <p className="text-xs text-gray-400">Follower</p>
+                </button>
+                <button onClick={() => setShowFollowingModal(true)} className="text-center hover:opacity-75 transition flex-1 py-2 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#111]">
+                  <p className="font-bold text-gray-900 dark:text-white text-base">{followingCount}</p>
+                  <p className="text-xs text-gray-400">Seguiti</p>
+                </button>
+              </div>
             </div>
           </div>
 
