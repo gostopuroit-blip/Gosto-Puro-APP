@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 
-export default function ProfileStatsCard({ userEmail }) {
+export default function ProfileStatsCard({ userEmail, onPostClick }) {
   const [stats, setStats] = useState({
     posts: 0,
     totalLikes: 0,
@@ -54,12 +54,10 @@ export default function ProfileStatsCard({ userEmail }) {
   );
 
   return (
-    <div className="flex gap-3">
-      <div className="flex-1 flex flex-col items-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">📝</p>
-        <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.posts}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
-      </div>
-    </div>
+    <button onClick={onPostClick} className="flex-1 flex flex-col items-center py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-[#111] transition">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">📝</p>
+      <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.posts}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
+    </button>
   );
 }
