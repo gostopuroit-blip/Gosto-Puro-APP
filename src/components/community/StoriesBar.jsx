@@ -288,11 +288,11 @@ export default function StoriesBar({ currentUser }) {
           const seen = g.stories.every((s) => s.viewers?.includes(currentUser?.email));
           return (
             <button key={g.email} onClick={() => openGroup(i)} className="flex-shrink-0 flex flex-col items-center gap-1">
-              <div className={`w-14 h-14 rounded-full p-0.5 ${seen ? "bg-gray-200 dark:bg-[#333]" : "bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]"}`}>
+              <div className={`w-14 h-14 rounded-full p-[2px] ${seen ? "bg-gray-200 dark:bg-[#333]" : "bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]"}`}>
                 {g.user_photo ? (
-                  <img src={g.user_photo} alt="" className="w-full h-full rounded-full object-cover border-2 border-white dark:border-[#0F0F0F]" />
+                  <img src={g.user_photo} alt="" className="w-full h-full rounded-full object-cover border-[2.5px] border-white dark:border-[#0F0F0F]" style={{ imageRendering: "auto" }} />
                 ) : (
-                  <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-2 border-white dark:border-[#0F0F0F]">
+                  <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-[2.5px] border-white dark:border-[#0F0F0F]">
                     {(g.user_name || "U").charAt(0)}
                   </div>
                 )}
