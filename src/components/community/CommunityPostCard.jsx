@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed } from "lucide-react";
 import PollCard from "./PollCard";
@@ -17,37 +17,94 @@ const POST_TYPE_META = {
   image_post: null,
 };
 
-export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange, onHashtagClick }) {
+export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange }) {
+  const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [imgIdx, setImgIdx] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [poll, setPoll] = useState(null);
 
-  // Build image array (first image + extra_images)
-  const images = [
-    ...(post.image_url ? [post.image_url] : []),
-    ...(post.extra_images || []),
-  ];
-
-  useEffect(() => {
+  // Load poll if post_type is poll
+  useState(() => {
     if (post.post_type === "poll") {
       base44.entities.Poll.filter({ post_id: post.id }, "-created_date", 1).then((data) => {
         if (data[0]) setPoll(data[0]);
       }).catch(() => {});
     }
-  }, [post.id]);
+  });
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "admin";
   const isBlurred = post.is_premium && !isPremiumUser;
-  const isVerified = post.is_expert;
+  const isVerified = post.is_expert; // só admin/expert têm is_expert=true
+
+
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
     const likes = post.likes || [];
-    const newLikes = isLiked ? likes.filter((e) => e !== currentUser?.email) : [...likes, currentUser?.email];
-    await base44.entities.CommunityPost.update(post.id, { likes: newLikes, likes_count: newLikes.length });
+    const newLikes = isLiked
+      ? likes.filter((e) => e !== currentUser?.email)
+      : [...likes, currentUser?.email];
+    await base44.entities.CommunityPost.update(post.id, {
+      likes: newLikes,
+      likes_count: newLikes.length,
+    });
     onUpdate({ ...post, likes: newLikes, likes_count: newLikes.length });
+  };
+
+  const loadComments = async () => {
+    setLoadingComments(true);
+    const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50);
+    setComments(data);
+    setLoadingComments(false);
+  };
+
+  const toggleComments = () => {
+    if (!showComments) loadComments();
+    setShowComments(!showComments);
+  };
+
+  const submitComment = async () => {
+    if (!newComment.trim()) return;
+    if (!currentUser) return toast.error("Fai login per commentare");
+    setSubmitting(true);
+    const created = await base44.entities.CommunityComment.create({
+      post_id: post.id,
+      user_email: currentUser?.email,
+      user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+      user_photo: currentUser?.photo_url || null,
+      content: newComment.trim(),
+      is_expert: currentUser?.role === "expert" || currentUser?.role === "admin",
+    });
+    await base44.entities.CommunityPost.update(post.id, {
+      comments_count: (post.comments_count || 0) + 1,
+    });
+    onUpdate({ ...post, comments_count: (post.comments_count || 0) + 1 });
+    setComments([created, ...comments]);
+    setNewComment("");
+    setSubmitting(false);
+  };
+
+  const deleteComment = async (commentId) => {
+    if (!confirm("Eliminare questo commento?")) return;
+    await base44.entities.CommunityComment.delete(commentId);
+    setComments(comments.filter((c) => c.id !== commentId));
+    await base44.entities.CommunityPost.update(post.id, {
+      comments_count: Math.max(0, (post.comments_count || 1) - 1),
+    });
+    onUpdate({ ...post, comments_count: Math.max(0, (post.comments_count || 1) - 1) });
+    toast.success("Commento eliminato");
+  };
+
+  const deletePost = async () => {
+    if (!confirm("Eliminar questo post?")) return;
+    await base44.entities.CommunityPost.delete(post.id);
+    onUpdate(null);
+    toast.success("Post eliminato");
   };
 
 
@@ -114,22 +171,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         </div>
       </div>
 
-      {/* Images with carousel */}
-      {images.length > 0 && (
+      {/* Image */}
+      {post.image_url && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
           onClick={() => !isBlurred && setShowModal(true)}
         >
           <img
-            src={images[imgIdx]}
+            src={post.image_url}
             alt=""
-            className={`w-full object-cover aspect-square ${isBlurred ? "blur-xl scale-110" : ""}`}
+            className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
           />
-          {images.length > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black/60 rounded-full px-2 py-1">
-              <p className="text-white text-xs font-semibold">{imgIdx + 1}/{images.length}</p>
-            </div>
-          )}
           {isBlurred && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               <Lock className="w-8 h-8 text-white" />
@@ -157,12 +209,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {post.tags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => onHashtagClick?.(tag)}
-                className="text-xs text-[#2D6A4F] font-medium hover:underline">
-                #{tag}
-              </button>
+              <span key={tag} className="text-xs text-[#2D6A4F] font-medium">#{tag}</span>
             ))}
           </div>
         )}
@@ -184,7 +231,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           </span>
         </button>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={toggleComments}
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition hover:text-[#2D6A4F]">
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
@@ -206,14 +253,70 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {/* Post detail modal */}
       {showModal && (
         <PostDetailModal
-          post={{ ...post, image_url: images[0] || null, extra_images: images.slice(1) }}
+          post={post}
           currentUser={currentUser}
           onClose={() => setShowModal(false)}
           onUpdate={(updated) => { onUpdate(updated); }}
         />
       )}
 
-
+      {/* Comments */}
+      {showComments && (
+        <div className="border-t border-gray-100 dark:border-[#2A2A2A] px-4 pb-3">
+          {currentUser && (
+            <div className="flex items-center gap-2 py-3">
+              <input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submitComment()}
+                placeholder="Aggiungi un commento..."
+                className="flex-1 text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-gray-800 dark:text-white outline-none"
+              />
+              <button
+                onClick={submitComment}
+                disabled={submitting || !newComment.trim()}
+                className="text-[#2D6A4F] disabled:opacity-40 p-1"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+          {loadingComments ? (
+            <p className="text-xs text-gray-400 text-center py-2">Caricamento...</p>
+          ) : (
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {comments.map((c) => (
+                <div key={c.id} className="flex gap-2">
+                  {c.user_photo ? (
+                    <img src={c.user_photo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {(c.user_name || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="bg-gray-50 dark:bg-[#111] rounded-xl px-3 py-2 flex-1">
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                        {c.user_name || "Utente"}
+                      </p>
+                      {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
+                      {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
+                        <button
+                          onClick={() => deleteComment(c.id)}
+                          className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
