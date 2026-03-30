@@ -10,6 +10,7 @@ import EditProfileModal from "@/components/EditProfileModal";
 import FollowButton from "@/components/community/FollowButton";
 import FollowersModal from "@/components/community/FollowersModal";
 import FollowingModal from "@/components/community/FollowingModal";
+import ProfileStatsCard from "@/components/community/ProfileStatsCard";
 
 export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
@@ -157,25 +158,8 @@ export default function ExpertProfile() {
               </div>
 
               {/* Stats */}
-              <div className="flex gap-4">
-                <div className="text-center">
-                  <p className="font-bold text-gray-900 dark:text-white text-base">{posts.length}</p>
-                  <p className="text-xs text-gray-400">Post</p>
-                </div>
-                <button onClick={() => setShowFollowersModal(true)} className="text-center hover:opacity-75 transition">
-                  <p className="font-bold text-gray-900 dark:text-white text-base">{followersCount}</p>
-                  <p className="text-xs text-gray-400">Follower</p>
-                </button>
-                <button onClick={() => setShowFollowingModal(true)} className="text-center hover:opacity-75 transition">
-                  <p className="font-bold text-gray-900 dark:text-white text-base">{followingCount}</p>
-                  <p className="text-xs text-gray-400">Seguiti</p>
-                </button>
-                {premiumCount > 0 && (
-                  <div className="text-center">
-                    <p className="font-bold text-purple-600 text-base">{premiumCount}</p>
-                    <p className="text-xs text-gray-400">Premium</p>
-                  </div>
-                )}
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A]">
+                <ProfileStatsCard userEmail={expertEmail} />
               </div>
             </div>
           </div>

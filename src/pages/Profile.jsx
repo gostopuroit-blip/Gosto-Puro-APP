@@ -10,6 +10,8 @@ import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 import { trackEvent } from "@/components/useAnalytics";
 import SavedPostsTab from "@/components/community/SavedPostsTab";
+import ProfileStatsCard from "@/components/community/ProfileStatsCard";
+import UserPostsTab from "@/components/community/UserPostsTab";
 
 
 
@@ -26,7 +28,7 @@ export default function Profile() {
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
   const [installPrompt, setInstallPrompt] = useState(() => window.__pwaInstallPrompt || null);
   const [isInstalled, setIsInstalled] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile"); // profile | saved
+  const [activeTab, setActiveTab] = useState("profile"); // profile | saved | posts
 
   useEffect(() => {
     // Check if already installed
@@ -260,6 +262,16 @@ export default function Profile() {
             Profilo
           </button>
           <button
+            onClick={() => setActiveTab("posts")}
+            className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
+              activeTab === "posts"
+                ? "bg-[#2D6A4F] text-white"
+                : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            📝 Post
+          </button>
+          <button
             onClick={() => setActiveTab("saved")}
             className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
               activeTab === "saved"
@@ -272,6 +284,13 @@ export default function Profile() {
           </button>
         </div>
       </div>
+
+      {/* Posts tab */}
+      {activeTab === "posts" && user && (
+        <div className="px-5 py-6">
+          <UserPostsTab userEmail={user.email} currentUser={user} />
+        </div>
+      )}
 
       {/* Saved posts tab */}
       {activeTab === "saved" && user && (
@@ -306,32 +325,39 @@ export default function Profile() {
               </label>
             </div>
             {/* Name + Age */}
-            <div className="flex-1 space-y-2">
-              <div>
-                <label className="text-[13px] text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
-                <Input
-                  type="text"
-                  placeholder="Es. il tuo nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white text-gray-900"
-                />
-                <p className="text-[13px] text-gray-600 dark:text-gray-400">{user?.email}</p>
-              </div>
-              <div>
-                <label className="text-[13px] text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wider">Età</label>
-                <Input
-                  type="number"
-                  placeholder="Es. 28"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white w-24 text-gray-900"
-                />
-              </div>
+               <div className="flex-1 space-y-2">
+                 <div>
+                   <label className="text-[13px] text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wider">Nome</label>
+                   <Input
+                     type="text"
+                     placeholder="Es. il tuo nome"
+                     value={name}
+                     onChange={(e) => setName(e.target.value)}
+                     className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white text-gray-900"
+                   />
+                   <p className="text-[13px] text-gray-600 dark:text-gray-400">{user?.email}</p>
+                 </div>
+                 <div>
+                   <label className="text-[13px] text-gray-600 dark:text-gray-400 font-semibold uppercase tracking-wider">Età</label>
+                   <Input
+                     type="number"
+                     placeholder="Es. 28"
+                     value={age}
+                     onChange={(e) => setAge(e.target.value)}
+                     className="mt-1 h-8 text-sm rounded-xl border-gray-100 dark:bg-[#1A2B20] dark:border-[#3D5246] dark:text-white w-24 text-gray-900"
+                   />
+                 </div>
+               </div>
+             </div>
+
+             {/* Stats */}
+             {user && (
+               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+                 <ProfileStatsCard userEmail={user.email} />
+               </div>
+             )}
             </div>
-          </div>
-        </div>
-      </div>
+            </div>
 
       {/* Notifications */}
       {notifStatus !== "unsupported" && (
