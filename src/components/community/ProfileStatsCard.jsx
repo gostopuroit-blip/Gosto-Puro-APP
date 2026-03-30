@@ -54,10 +54,12 @@ export default function ProfileStatsCard({ userEmail }) {
   );
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <StatItem icon="📝" value={stats.posts} label="Post" />
-      <StatItem icon="💬" value={stats.totalComments} label="Commenti" />
-      <StatItem icon="👥" value={stats.followers} label="Follower" />
+    <div className="flex gap-3">
+      <div className="flex-1 flex flex-col items-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">📝</p>
+        <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.posts}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BadgeCheck, ArrowLeft, Loader2, Heart, MessageCircle, Lock, Grid3X3, Edit3 } from "lucide-react";
+import { BadgeCheck, ArrowLeft, Loader2, Lock, Grid3X3, Edit3, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -162,13 +162,15 @@ export default function ExpertProfile() {
                 <ProfileStatsCard userEmail={expertEmail} />
               </div>
 
-              {/* Followers/Following buttons */}
+              {/* Followers/Following buttons - moved to stats section */}
               <div className="flex gap-3 mt-3">
-                <button onClick={() => setShowFollowersModal(true)} className="flex-1 py-2.5 px-3 rounded-xl bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition text-center">
+                <button onClick={() => setShowFollowersModal(true)} className="flex-1 py-2.5 px-3 rounded-xl bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition flex flex-col items-center">
+                  <Users className="w-4 h-4 text-[#2D6A4F] mb-1" />
                   <p className="font-bold text-gray-900 dark:text-white text-sm">{followersCount}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Follower</p>
                 </button>
-                <button onClick={() => setShowFollowingModal(true)} className="flex-1 py-2.5 px-3 rounded-xl bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition text-center">
+                <button onClick={() => setShowFollowingModal(true)} className="flex-1 py-2.5 px-3 rounded-xl bg-[#2D6A4F]/10 border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition flex flex-col items-center">
+                  <Users className="w-4 h-4 text-[#2D6A4F] mb-1" />
                   <p className="font-bold text-gray-900 dark:text-white text-sm">{followingCount}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Seguiti</p>
                 </button>
@@ -200,7 +202,6 @@ export default function ExpertProfile() {
                 : "border-transparent text-gray-400"
             }`}
           >
-            <MessageCircle className="w-4 h-4" />
             Feed
           </button>
           <button
