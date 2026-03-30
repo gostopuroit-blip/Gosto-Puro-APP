@@ -105,9 +105,6 @@ export default function Community() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/Groups" className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-[#2A2A2A] px-2.5 py-1.5 rounded-xl flex items-center gap-1">
-              <Users className="w-3.5 h-3.5" /> Gruppi
-            </Link>
             {user && <NotificationBell currentUser={user} />}
             <Button
               size="sm"
