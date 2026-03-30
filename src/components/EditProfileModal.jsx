@@ -71,8 +71,8 @@ export default function EditProfileModal({ user, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-hidden">
-      <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl w-full max-w-md shadow-xl max-h-[95vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 pb-28 overflow-y-auto">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl w-full max-w-md shadow-xl flex flex-col my-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Modifica Profilo</h2>
