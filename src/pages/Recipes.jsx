@@ -52,7 +52,9 @@ export default function Recipes() {
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Capodanno", "Natale", "Dal mondo", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
+  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo"];
+  const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano"];
+  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   const filteredRecipes = useMemo(() => {
@@ -126,88 +128,67 @@ export default function Recipes() {
     navigate({ search: params.toString() }, { replace: true });
   };
 
-   const toggleFilter = (filterKey) => {
-     setActiveFilters((prev) => {
-       const newFilters = new Set(prev);
-       if (newFilters.has(filterKey)) {
-         newFilters.delete(filterKey);
-       } else {
-         newFilters.add(filterKey);
-       }
-       return newFilters;
-     });
-     goToPage(1);
-   };
+  const toggleFilter = (filterKey) => {
+    setActiveFilters((prev) => {
+      const newFilters = new Set(prev);
+      if (newFilters.has(filterKey)) {
+        newFilters.delete(filterKey);
+      } else {
+        newFilters.add(filterKey);
+      }
+      return newFilters;
+    });
+    goToPage(1);
+  };
 
-  // Unlock 3 recipes for categories (Colazione/Pranzo/Cena), 9 for occasions (Occasioni Speciali, etc)
-  // Instagram recipes always locked for free users
+  // Determine if current view is speciale/stile_vita (9 most ancient recipes free)
+  // or regular categories (3 most recent recipes free)
+  const isSpecialView = activeTags.occasion && (SPECIAL_OCCASIONS.includes(activeTags.occasion) || LIFESTYLE_TAGS.includes(activeTags.occasion));
+
+  // Unlock recipes: 9 most ancient for speciale/stile_vita, 3 most recent for categories
   const unlockedIds = useMemo(() => {
     if (isPremium) return null;
-    const countPerTag = {};
     const ids = new Set();
 
-    // Sort by created_date DESC to get most recent first
-    const sorted = [...recipes].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-
-    for (const r of sorted) {
-      const cat = r.category || "";
-      const isInstagram = (r.occasions || []).includes("Instagram") || (r.lifestyle || []).includes("Instagram");
-      if (isInstagram) continue; // always locked for free
-
-      // Check categories — 3 recipes limit
-      if (FREE_CATEGORIES.includes(cat)) {
-        if (!countPerTag[cat]) countPerTag[cat] = 0;
-        if (countPerTag[cat] < 3) {
-          ids.add(r.id);
-          countPerTag[cat]++;
-        }
+    if (isSpecialView) {
+      // For speciale/stile_vita: unlock 9 OLDEST recipes
+      const activeTag = activeTags.occasion || activeTags.lifestyle;
+      const relevantRecipes = recipes.filter(
+        (r) =>
+          (r.occasions && r.occasions.includes(activeTag)) ||
+          (r.lifestyle && r.lifestyle.includes(activeTag))
+      );
+      // Sort by created_date ASC to get oldest first
+      relevantRecipes.sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+      for (let i = 0; i < Math.min(9, relevantRecipes.length); i++) {
+        ids.add(relevantRecipes[i].id);
       }
+    } else {
+      // For regular categories: unlock 3 NEWEST recipes per category
+      const countPerCat = {};
+      // Sort by created_date DESC to get most recent first
+      const sorted = [...recipes].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-      // Check occasions — 9 recipes limit
-      if (r.occasions) {
-        for (const occ of r.occasions) {
-          if (FREE_OCCASIONS.includes(occ)) {
-            if (!countPerTag[occ]) countPerTag[occ] = 0;
-            if (countPerTag[occ] < 9) {
-              ids.add(r.id);
-              countPerTag[occ]++;
-            }
-          }
-        }
-      }
+      for (const r of sorted) {
+        const cat = r.category || "";
+        const isInstagram = (r.occasions || []).includes("Instagram") || (r.lifestyle || []).includes("Instagram");
+        if (isInstagram) continue; // always locked for free
 
-      // Check lifestyles — 9 recipes limit
-      if (r.lifestyle) {
-        for (const life of r.lifestyle) {
-          if (FREE_OCCASIONS.includes(life)) {
-            if (!countPerTag[life]) countPerTag[life] = 0;
-            if (countPerTag[life] < 9) {
-              ids.add(r.id);
-              countPerTag[life]++;
-            }
+        // Check categories — 3 recipes limit
+        if (FREE_CATEGORIES.includes(cat)) {
+          if (!countPerCat[cat]) countPerCat[cat] = 0;
+          if (countPerCat[cat] < 3) {
+            ids.add(r.id);
+            countPerCat[cat]++;
           }
         }
       }
     }
     return ids;
-  }, [recipes, isPremium]);
+  }, [recipes, isPremium, isSpecialView, activeTags]);
 
-  // Reorder recipes: unlocked first, then locked (for FREE_OCCASIONS and FREE_CATEGORIES)
-  const orderedRecipes = useMemo(() => {
-    const activeOccasion = activeTags.occasion;
-    const isFreeOccasion = activeOccasion && (FREE_OCCASIONS.includes(activeOccasion) || FREE_CATEGORIES.includes(activeOccasion));
-    
-    if (!isFreeOccasion || isPremium) return filteredRecipes;
-    
-    // Sort: unlocked recipes first, then locked
-    return [...filteredRecipes].sort((a, b) => {
-      const aUnlocked = unlockedIds.has(a.id);
-      const bUnlocked = unlockedIds.has(b.id);
-      if (aUnlocked && !bUnlocked) return -1;
-      if (!aUnlocked && bUnlocked) return 1;
-      return 0;
-    });
-  }, [filteredRecipes, activeTags.occasion, isPremium, unlockedIds]);
+  // Keep filteredRecipes in natural order (most recent first)
+  const orderedRecipes = filteredRecipes;
 
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
