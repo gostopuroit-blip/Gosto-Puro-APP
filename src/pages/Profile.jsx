@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users } from "lucide-react";
+import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -376,6 +376,51 @@ export default function Profile() {
       </div>
 
 
+
+      {/* Support Cards */}
+      <div className="px-5 mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Card - Supporto Account */}
+        <a
+          href="https://wa.me/393793246752"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-gradient-to-br from-green-50 dark:from-green-950/20 to-emerald-50 dark:to-emerald-950/20 rounded-2xl p-5 border border-green-100 dark:border-green-900/40 shadow-sm hover:shadow-md hover:scale-105 transition-all"
+        >
+          <div className="flex flex-col h-full">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="text-xl">💎</span>
+              </div>
+            </div>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Supporto Account</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 flex-1">Per domande su abbonamenti, piano Premium e gestione account</p>
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold text-xs">
+              <MessageCircle className="w-4 h-4" />
+              Contattaci su WhatsApp
+            </div>
+          </div>
+        </a>
+
+        {/* Card - Supporto Tecnico */}
+        <a
+          href="mailto:supporto@gostopuro.it"
+          className="bg-gradient-to-br from-blue-50 dark:from-blue-950/20 to-cyan-50 dark:to-cyan-950/20 rounded-2xl p-5 border border-blue-100 dark:border-blue-900/40 shadow-sm hover:shadow-md hover:scale-105 transition-all"
+        >
+          <div className="flex flex-col h-full">
+            <div className="flex items-start justify-between mb-3">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="text-xl">🛠️</span>
+              </div>
+            </div>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Supporto Tecnico</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 flex-1">Per segnalare bug, problemi tecnici o domande sull'app</p>
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-xs">
+              <Mail className="w-4 h-4" />
+              Invia un'email
+            </div>
+          </div>
+        </a>
+      </div>
 
       {/* Save Button */}
       <div className="px-5 mt-8">
