@@ -26,6 +26,7 @@ export default function Recipes() {
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
+  const [unlockedConfig, setUnlockedConfig] = useState(null);
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -42,7 +43,21 @@ export default function Recipes() {
   useEffect(() => {
     loadRecipes();
     base44.auth.me().then(setUser).catch(() => setUser(null));
+    loadUnlockedConfig();
   }, []);
+
+  const loadUnlockedConfig = async () => {
+    try {
+      const config = await base44.entities.AppConfig.filter({ key: "base_free_unlocked_ids" });
+      if (config.length > 0) {
+        const parsed = JSON.parse(config[0].value);
+        setUnlockedConfig(parsed);
+      }
+    } catch (error) {
+      console.error("Failed to load unlocked config:", error);
+      setUnlockedConfig({});
+    }
+  };
 
   const loadRecipes = async () => {
     const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000);
@@ -141,51 +156,26 @@ export default function Recipes() {
     goToPage(1);
   };
 
-  // Determine if current view is speciale/stile_vita (9 most recent recipes free)
-  // or regular categories (3 most recent recipes free)
+  // Determine if current view is speciale/stile_vita
   const isSpecialView = activeTags.occasion && (SPECIAL_OCCASIONS.includes(activeTags.occasion) || LIFESTYLE_TAGS.includes(activeTags.occasion));
 
-  // Unlock recipes: 9 most recent for speciale/stile_vita, 3 most recent for categories
+  // Unlock recipes based on static AppConfig
   const unlockedIds = useMemo(() => {
-    if (isPremium) return null;
+    if (isPremium || !unlockedConfig) return null;
+    
     const ids = new Set();
+    const activeTag = activeTags.occasion || activeTags.lifestyle;
 
-    if (isSpecialView) {
-      // For speciale/stile_vita: unlock 9 MOST RECENT recipes
-      const activeTag = activeTags.occasion || activeTags.lifestyle;
-      const relevantRecipes = recipes.filter(
-        (r) =>
-          (r.occasions && r.occasions.includes(activeTag)) ||
-          (r.lifestyle && r.lifestyle.includes(activeTag))
-      );
-      // Sort by created_date DESC to get most recent first
-      relevantRecipes.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-      for (let i = 0; i < Math.min(9, relevantRecipes.length); i++) {
-        ids.add(relevantRecipes[i].id);
-      }
-    } else {
-      // For regular categories: unlock 3 MOST RECENT recipes per category
-      const countPerCat = {};
-      // Sort by created_date DESC to get most recent first
-      const sorted = [...recipes].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-
-      for (const r of sorted) {
-        const cat = r.category || "";
-        const isInstagram = (r.occasions || []).includes("Instagram") || (r.lifestyle || []).includes("Instagram");
-        if (isInstagram) continue; // always locked for free
-
-        // Check categories — 3 recipes limit
-        if (FREE_CATEGORIES.includes(cat)) {
-          if (!countPerCat[cat]) countPerCat[cat] = 0;
-          if (countPerCat[cat] < 3) {
-            ids.add(r.id);
-            countPerCat[cat]++;
-          }
-        }
-      }
+    if (isSpecialView && activeTag && unlockedConfig[activeTag]) {
+      // Use static list from AppConfig for speciale/stile_vita
+      unlockedConfig[activeTag].forEach((id) => ids.add(id));
+    } else if (!isSpecialView && activeTag && FREE_CATEGORIES.includes(activeTag) && unlockedConfig[activeTag]) {
+      // Use static list from AppConfig for categories
+      unlockedConfig[activeTag].forEach((id) => ids.add(id));
     }
+    
     return ids;
-  }, [recipes, isPremium, isSpecialView, activeTags]);
+  }, [unlockedConfig, isPremium, isSpecialView, activeTags]);
 
   // Keep filteredRecipes in natural order (most recent first)
   const orderedRecipes = filteredRecipes;
