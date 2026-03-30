@@ -195,35 +195,18 @@ export default function Home() {
       <div className="px-5 mt-2">
         <SectionHeader title="Occasioni del giorno" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
-          {dailyOccasions.map((occ) => {
-            const locked = !isPremium && !FREE_OCCASIONS.includes(occ.label);
-            if (locked) {
-              return (
-                <a key={occ.label} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer"
-                  className="flex-shrink-0 flex flex-col items-center gap-2">
-                  <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
-                    <img src={occ.img} alt={occ.label} className="w-full h-full object-cover blur-sm opacity-40" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-amber-500" />
-                    </div>
-                  </div>
-                  <span className="text-[13px] font-semibold text-gray-400 text-center">{occ.label}</span>
-                </a>
-              );
-            }
-            return (
-              <Link
-                key={occ.label}
-                to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
-                onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
-                className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
-                  <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
-                </div>
-                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
-              </Link>
-            );
-          })}
+          {dailyOccasions.map((occ) => (
+            <Link
+              key={occ.label}
+              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+              onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
+              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+                <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+              </div>
+              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -232,65 +215,57 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
-        <div className="relative">
-          <div
-              ref={carouselRef}
-              className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth"
-              onScroll={(e) => {
-                const idx = Math.round(e.target.scrollLeft / cardWidth);
-                setCarouselIndex(idx);
-              }}>
+        {isPremium ? (
+          <div className="relative">
+            <div
+                ref={carouselRef}
+                className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth"
+                onScroll={(e) => {
+                  const idx = Math.round(e.target.scrollLeft / cardWidth);
+                  setCarouselIndex(idx);
+                }}>
 
-            {topRecipes.map((recipe, index) => {
-               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
-               if (isLocked) {
-                 return (
-                   <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
-                     <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-100">
-                       <img
-                         src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                         alt={recipe.title}
-                         loading="lazy"
-                         decoding="async"
-                         className="w-full h-full object-cover blur-sm opacity-40"
-                       />
-                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-                         <div className="w-9 h-9 bg-white/90 rounded-xl flex items-center justify-center shadow">
-                           <Lock className="w-4 h-4 text-amber-500" />
-                         </div>
-                         <span className="text-white text-[11px] font-bold bg-black/50 px-2 py-0.5 rounded-md">Ricetta Premium</span>
-                         <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow">
-                           <Crown className="w-3 h-3" /> Sblocca Premium
-                         </span>
-                       </div>
-                     </div>
-                     <p className="text-[13px] font-semibold text-gray-400 mt-2 line-clamp-2 blur-[2px] select-none">{recipe.title}</p>
-                   </a>
-                 );
-               }
-               return <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />;
-             })}
-          </div>
-          {/* Dots */}
-          {topRecipes.length > 0 &&
-            <div className="flex justify-center gap-1.5 mt-3">
-              {topRecipes.map((_, i) =>
-              <button
-                key={i}
-                onClick={() => {
-                  carouselRef.current?.scrollTo({ left: i * cardWidth, behavior: "smooth" });
-                  setCarouselIndex(i);
-                }}
-                className={`rounded-full transition-all duration-200 ${
-                i === carouselIndex ?
-                "w-4 h-1.5 bg-[#2D6A4F] dark:bg-[#40916C]" :
-                "w-1.5 h-1.5 bg-gray-300 dark:bg-[#2D4A38]"}`
-                } />
-
-              )}
+              {topRecipes.map((recipe, index) => {
+                 return <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />;
+               })}
             </div>
-            }
-        </div>
+            {/* Dots */}
+            {topRecipes.length > 0 &&
+              <div className="flex justify-center gap-1.5 mt-3">
+                {topRecipes.map((_, i) =>
+                <button
+                  key={i}
+                  onClick={() => {
+                    carouselRef.current?.scrollTo({ left: i * cardWidth, behavior: "smooth" });
+                    setCarouselIndex(i);
+                  }}
+                  className={`rounded-full transition-all duration-200 ${
+                  i === carouselIndex ?
+                  "w-4 h-1.5 bg-[#2D6A4F] dark:bg-[#40916C]" :
+                  "w-1.5 h-1.5 bg-gray-300 dark:bg-[#2D4A38]"}`
+                  } />
+
+                )}
+              </div>
+              }
+          </div>
+        ) : (
+          <a href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer"
+            className="mx-5 block relative rounded-3xl overflow-hidden h-40 bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-950/40 dark:to-amber-900/20 border border-amber-200 dark:border-amber-800/40">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-950/60 rounded-2xl flex items-center justify-center">
+                <Lock className="w-6 h-6 text-amber-500" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-bold text-gray-900 dark:text-amber-300">Sezione Premium</p>
+                <p className="text-xs text-gray-600 dark:text-amber-200 mt-1">Sblocca tutte le ricette più preparate</p>
+              </div>
+              <span className="bg-amber-500 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1">
+                <Crown className="w-3 h-3" /> Sblocca Premium
+              </span>
+            </div>
+          </a>
+        )}
       </div>
 
       {/* Special Occasions — carousel */}
