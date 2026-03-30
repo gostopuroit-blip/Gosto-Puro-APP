@@ -25,7 +25,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [poll, setPoll] = useState(null);
-  const shareRef = useRef(null);
 
   // Load poll if post_type is poll
   useState(() => {
@@ -169,11 +168,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
               onFollowChange={(following) => onFollowChange?.(post.created_by, following)}
             />
           )}
-          {(isOwner || currentUser?.role === "admin") && (
-            <button onClick={deletePost} className="text-gray-300 hover:text-red-500 transition p-1">
-              <Trash2 className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </div>
 
@@ -243,7 +237,16 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <span>{post.comments_count || 0}</span>
         </button>
         <div className="ml-auto">
-          <PostActionsMenu post={post} currentUser={currentUser} />
+          <PostActionsMenu
+            post={post}
+            currentUser={currentUser}
+            onDelete={async (p) => {
+              if (!confirm("Excluir este post?")) return;
+              await base44.entities.CommunityPost.delete(p.id);
+              onUpdate(null);
+              toast.success("Post excluído");
+            }}
+          />
         </div>
       </div>
 

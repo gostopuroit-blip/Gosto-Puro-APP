@@ -1,15 +1,19 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { MoreHorizontal, Flag, UserX, Share2, Copy, ExternalLink } from "lucide-react";
+import {
+  MoreHorizontal, Flag, UserX, Share2, Copy, Facebook,
+  Instagram, Music2, Link, Pencil, Trash2
+} from "lucide-react";
 import { toast } from "sonner";
 
 const REPORT_REASONS = [
   { value: "spam", label: "Spam" },
-  { value: "inappropriate", label: "Contenuto inappropriato" },
-  { value: "hate_speech", label: "Incitamento all'odio" },
-  { value: "violence", label: "Violenza" },
-  { value: "misinformation", label: "Disinformazione" },
-  { value: "other", label: "Altro" },
+  { value: "inappropriate", label: "Conteúdo inapropriado" },
+  { value: "hate_speech", label: "Discurso de ódio" },
+  { value: "violence", label: "Violência" },
+  { value: "nudity", label: "Nudez" },
+  { value: "misinformation", label: "Desinformação" },
+  { value: "other", label: "Outro" },
 ];
 
 function ReportModal({ post, currentUser, onClose }) {
@@ -18,7 +22,7 @@ function ReportModal({ post, currentUser, onClose }) {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
-    if (!reason) return toast.error("Seleziona un motivo");
+    if (!reason) return toast.error("Selecione um motivo");
     setSending(true);
     await base44.entities.PostReport.create({
       reporter_email: currentUser.email,
@@ -28,15 +32,15 @@ function ReportModal({ post, currentUser, onClose }) {
       details: details.trim() || undefined,
       status: "pending",
     });
-    toast.success("Segnalazione inviata. Grazie!");
+    toast.success("Denúncia enviada. Obrigado!");
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex items-end justify-center" onClick={onClose}>
-      <div className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg p-5 pb-8" onClick={(e) => e.stopPropagation()}>
         <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Flag className="w-4 h-4 text-red-500" /> Segnala post
+          <Flag className="w-4 h-4 text-red-500" /> Reportar post
         </h3>
         <div className="space-y-2 mb-4">
           {REPORT_REASONS.map((r) => (
@@ -56,13 +60,13 @@ function ReportModal({ post, currentUser, onClose }) {
         <textarea
           value={details}
           onChange={(e) => setDetails(e.target.value)}
-          placeholder="Dettagli aggiuntivi (opzionale)..."
+          placeholder="Detalhes adicionais (opcional)..."
           className="w-full bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-sm text-gray-800 dark:text-white outline-none resize-none h-20 mb-4"
         />
         <div className="flex gap-2">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500">Annulla</button>
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500">Cancelar</button>
           <button onClick={submit} disabled={sending} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold disabled:opacity-50">
-            {sending ? "Invio..." : "Segnala"}
+            {sending ? "Enviando..." : "Reportar"}
           </button>
         </div>
       </div>
@@ -70,7 +74,7 @@ function ReportModal({ post, currentUser, onClose }) {
   );
 }
 
-export default function PostActionsMenu({ post, currentUser, onPostShared }) {
+export default function PostActionsMenu({ post, currentUser, onPostShared, onEdit, onDelete }) {
   const [open, setOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const ref = useRef(null);
@@ -83,13 +87,15 @@ export default function PostActionsMenu({ post, currentUser, onPostShared }) {
     return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
   }, [open]);
 
+  const postUrl = `${window.location.origin}/Community`;
+
   const handleBlock = async () => {
     if (!currentUser || post.created_by === currentUser.email) return;
     await base44.entities.UserBlock.create({
       blocker_email: currentUser.email,
       blocked_email: post.created_by,
     });
-    toast.success("Utente bloccato");
+    toast.success("Usuário bloqueado");
     setOpen(false);
   };
 
@@ -100,7 +106,6 @@ export default function PostActionsMenu({ post, currentUser, onPostShared }) {
       original_post_id: post.id,
       share_type: "repost",
     });
-    // Notify original author
     if (post.created_by && post.created_by !== currentUser.email) {
       await base44.entities.Notification.create({
         recipient_email: post.created_by,
@@ -108,24 +113,56 @@ export default function PostActionsMenu({ post, currentUser, onPostShared }) {
         sender_name: currentUser.full_name || currentUser.email.split("@")[0],
         sender_photo: currentUser.photo_url || null,
         type: "share",
-        message: `${currentUser.full_name || currentUser.email.split("@")[0]} ha ricondiviso il tuo post`,
+        message: `${currentUser.full_name || currentUser.email.split("@")[0]} compartilhou seu post`,
         reference_id: post.id,
         reference_type: "post",
         is_read: false,
       }).catch(() => {});
     }
-    toast.success("Post ricondiviso!");
+    toast.success("Post compartilhado!");
     onPostShared?.();
     setOpen(false);
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(window.location.origin + "/Community").catch(() => {});
-    toast.success("Link copiato!");
+    navigator.clipboard.writeText(postUrl).catch(() => {});
+    toast.success("Link copiado!");
+    setOpen(false);
+  };
+
+  const shareOnFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`, "_blank");
+    setOpen(false);
+  };
+
+  const shareOnTikTok = () => {
+    // TikTok doesn't support direct URL sharing; opens TikTok create page
+    window.open("https://www.tiktok.com/upload", "_blank");
+    setOpen(false);
+  };
+
+  const shareOnInstagram = () => {
+    // Instagram doesn't support direct web sharing; opens Instagram
+    window.open("https://www.instagram.com/", "_blank");
     setOpen(false);
   };
 
   const isOwner = post.created_by === currentUser?.email;
+  const isAdmin = currentUser?.role === "admin";
+
+  const MenuItem = ({ icon: Icon, label, onClick, danger = false }) => (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition text-left ${
+        danger
+          ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111]"
+      }`}
+    >
+      <Icon className="w-4 h-4 flex-shrink-0" />
+      {label}
+    </button>
+  );
 
   return (
     <>
@@ -134,22 +171,32 @@ export default function PostActionsMenu({ post, currentUser, onPostShared }) {
           <MoreHorizontal className="w-5 h-5" />
         </button>
         {open && (
-          <div className="absolute right-0 top-8 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl z-40 w-48 overflow-hidden">
-            <button onClick={handleRepost} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left">
-              <Share2 className="w-4 h-4" /> Ricondividi
-            </button>
-            <button onClick={copyLink} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#111] transition text-left">
-              <Copy className="w-4 h-4" /> Copia link
-            </button>
+          <div className="absolute right-0 top-8 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl z-40 w-52 overflow-hidden">
+
+            {/* Owner actions */}
+            {(isOwner || isAdmin) && (
+              <>
+                {isOwner && onEdit && (
+                  <MenuItem icon={Pencil} label="Editar post" onClick={() => { onEdit(post); setOpen(false); }} />
+                )}
+                <MenuItem icon={Trash2} label="Excluir post" onClick={() => { onDelete?.(post); setOpen(false); }} danger />
+                <div className="border-t border-gray-100 dark:border-[#2A2A2A]" />
+              </>
+            )}
+
+            {/* Share actions */}
+            <MenuItem icon={Share2} label="Ricondividi" onClick={handleRepost} />
+            <MenuItem icon={Link} label="Copiar link" onClick={copyLink} />
+            <MenuItem icon={Facebook} label="Compartilhar no Facebook" onClick={shareOnFacebook} />
+            <MenuItem icon={Music2} label="Compartilhar no TikTok" onClick={shareOnTikTok} />
+            <MenuItem icon={Instagram} label="Compartilhar no Instagram" onClick={shareOnInstagram} />
+
+            {/* Report / Block — only for non-owners */}
             {!isOwner && currentUser && (
               <>
                 <div className="border-t border-gray-100 dark:border-[#2A2A2A]" />
-                <button onClick={() => { setShowReport(true); setOpen(false); }} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition text-left">
-                  <Flag className="w-4 h-4" /> Segnala
-                </button>
-                <button onClick={handleBlock} className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition text-left">
-                  <UserX className="w-4 h-4" /> Blocca utente
-                </button>
+                <MenuItem icon={Flag} label="Reportar post" onClick={() => { setShowReport(true); setOpen(false); }} danger />
+                <MenuItem icon={UserX} label="Bloquear usuário" onClick={handleBlock} danger />
               </>
             )}
           </div>
