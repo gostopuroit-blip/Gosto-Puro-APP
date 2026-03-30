@@ -67,9 +67,9 @@ export default function Recipes() {
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci"];
-  const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano"];
-  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
+  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero"];
+  const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Proteiche", "Senza zucchero"];
+  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   const filteredRecipes = useMemo(() => {
