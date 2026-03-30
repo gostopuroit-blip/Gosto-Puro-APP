@@ -35,27 +35,17 @@ export default function ProfileStatsCard({ userEmail, onPostClick, onFollowerCli
 
   return (
     <div className="flex items-center justify-between">
-      {/* Post */}
-      <button onClick={onPostClick} className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
+      {/* Post - não clicável */}
+      <div className="flex flex-col items-center">
         <p className="text-base mb-0.5">📝</p>
         <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{stats.posts}</p>
         <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
-      </button>
+      </div>
 
       {/* Separator */}
       <div className="h-10 w-px bg-gray-200 dark:bg-[#2A2A2A]"></div>
 
-      {/* Mi piace ricevuti */}
-      <button className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
-        <p className="text-base mb-0.5">❤️</p>
-        <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{stats.totalLikes}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">Mi piace</p>
-      </button>
-
-      {/* Separator */}
-      <div className="h-10 w-px bg-gray-200 dark:bg-[#2A2A2A]"></div>
-
-      {/* Follower */}
+      {/* Follower - clicável */}
       <button onClick={onFollowerClick} className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
         <p className="text-base mb-0.5">👥</p>
         <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{followerCount || 0}</p>
@@ -65,7 +55,7 @@ export default function ProfileStatsCard({ userEmail, onPostClick, onFollowerCli
       {/* Separator */}
       <div className="h-10 w-px bg-gray-200 dark:bg-[#2A2A2A]"></div>
 
-      {/* Seguiti */}
+      {/* Seguiti - clicável */}
       <button onClick={onFollowingClick} className="flex flex-col items-center cursor-pointer hover:opacity-70 transition">
         <p className="text-base mb-0.5">👤</p>
         <p className="text-lg font-bold text-[#2D6A4F] dark:text-[#40916C]">{followingCount || 0}</p>
