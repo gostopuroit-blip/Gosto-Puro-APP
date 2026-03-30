@@ -144,35 +144,41 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-end justify-center" onClick={onClose}>
-      <div className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg p-5" onClick={(e) => e.stopPropagation()}>
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4">Crea Story</h3>
-        {!preview ? (
-          <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-48 cursor-pointer">
-            <Plus className="w-8 h-8 text-gray-400 mb-2" />
-            <p className="text-sm text-gray-400">Tocca per scegliere un'immagine</p>
-            <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          </label>
-        ) : (
-          <div className="relative rounded-2xl overflow-hidden h-48 mb-3">
-            <img src={preview} alt="" className="w-full h-full object-cover" />
-            <button onClick={() => { setPreview(null); setFile(null); }} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1"><X className="w-4 h-4" /></button>
+      <div
+        className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg overflow-y-auto"
+        style={{ maxHeight: "90dvh", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-5 space-y-4">
+          <h3 className="font-bold text-gray-900 dark:text-white">Crea Story</h3>
+          {!preview ? (
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-48 cursor-pointer">
+              <Plus className="w-8 h-8 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-400">Tocca per scegliere un'immagine</p>
+              <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+            </label>
+          ) : (
+            <div className="relative rounded-2xl overflow-hidden h-48">
+              <img src={preview} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => { setPreview(null); setFile(null); }} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1"><X className="w-4 h-4" /></button>
+            </div>
+          )}
+          <input
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Aggiungi una didascalia..."
+            className="w-full bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-sm text-gray-800 dark:text-white outline-none"
+          />
+          <div className="flex gap-2">
+            <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500">Annulla</button>
+            <button
+              onClick={handleSubmit}
+              disabled={!file || uploading}
+              className="flex-1 py-3 rounded-xl bg-[#2D6A4F] text-white text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Pubblica"}
+            </button>
           </div>
-        )}
-        <input
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          placeholder="Aggiungi una didascalia..."
-          className="w-full mt-3 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-sm text-gray-800 dark:text-white outline-none"
-        />
-        <div className="flex gap-2 mt-4">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500">Annulla</button>
-          <button
-            onClick={handleSubmit}
-            disabled={!file || uploading}
-            className="flex-1 py-2.5 rounded-xl bg-[#2D6A4F] text-white text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Pubblica"}
-          </button>
         </div>
       </div>
     </div>
