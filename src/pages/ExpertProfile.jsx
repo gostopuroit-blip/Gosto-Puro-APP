@@ -8,6 +8,7 @@ import CommunityPostCard from "@/components/community/CommunityPostCard";
 import PostDetailModal from "@/components/community/PostDetailModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import FollowButton from "@/components/community/FollowButton";
+import FollowersModal from "@/components/community/FollowersModal";
 
 export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
@@ -20,6 +21,7 @@ export default function ExpertProfile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
@@ -158,10 +160,10 @@ export default function ExpertProfile() {
                   <p className="font-bold text-gray-900 dark:text-white text-base">{posts.length}</p>
                   <p className="text-xs text-gray-400">Post</p>
                 </div>
-                <div className="text-center">
+                <button onClick={() => setShowFollowersModal(true)} className="text-center hover:opacity-75 transition">
                   <p className="font-bold text-gray-900 dark:text-white text-base">{followersCount}</p>
                   <p className="text-xs text-gray-400">Follower</p>
-                </div>
+                </button>
                 <div className="text-center">
                   <p className="font-bold text-gray-900 dark:text-white text-base">{followingCount}</p>
                   <p className="text-xs text-gray-400">Seguiti</p>
@@ -283,6 +285,14 @@ export default function ExpertProfile() {
           }}
         />
       )}
-      </div>
-      );
-      }
+
+      {showFollowersModal && (
+        <FollowersModal
+          expertEmail={expertEmail}
+          onClose={() => setShowFollowersModal(false)}
+          currentUser={currentUser}
+        />
+      )}
+    </div>
+    );
+  }
