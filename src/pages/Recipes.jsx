@@ -186,13 +186,30 @@ export default function Recipes() {
     return ids;
   }, [recipes, isPremium]);
 
+  // Reorder recipes: unlocked first, then locked (for FREE_OCCASIONS only)
+  const orderedRecipes = useMemo(() => {
+    const activeOccasion = activeTags.occasion;
+    const isFreeOccasion = activeOccasion && FREE_OCCASIONS.includes(activeOccasion);
+    
+    if (!isFreeOccasion || isPremium) return filteredRecipes;
+    
+    // Sort: unlocked recipes first, then locked
+    return [...filteredRecipes].sort((a, b) => {
+      const aUnlocked = unlockedIds.has(a.id);
+      const bUnlocked = unlockedIds.has(b.id);
+      if (aUnlocked && !bUnlocked) return -1;
+      if (!aUnlocked && bUnlocked) return 1;
+      return 0;
+    });
+  }, [filteredRecipes, activeTags.occasion, isPremium, unlockedIds]);
+
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIdx = startIdx + ITEMS_PER_PAGE;
-    return filteredRecipes.slice(startIdx, endIdx);
-  }, [filteredRecipes, currentPage]);
+    return orderedRecipes.slice(startIdx, endIdx);
+  }, [orderedRecipes, currentPage]);
 
-  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(orderedRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
@@ -281,13 +298,13 @@ export default function Recipes() {
        {/* Recipe count */}
        <div className="px-5 mb-3">
          <p className="text-xs text-gray-400 dark:text-gray-500">
-           {filteredRecipes.length} {filteredRecipes.length === 1 ? "ricetta trovata" : "ricette trovate"}
+           {orderedRecipes.length} {orderedRecipes.length === 1 ? "ricetta trovata" : "ricette trovate"}
          </p>
        </div>
 
        {/* Recipe List */}
        <div className="px-5 space-y-4">
-         {filteredRecipes.length === 0 ?
+         {orderedRecipes.length === 0 ?
           <div className="text-center py-16">
              <p className="text-5xl mb-4">🍳</p>
              <p className="text-gray-400 dark:text-gray-500 text-sm">Nessuna ricetta trovata</p>
