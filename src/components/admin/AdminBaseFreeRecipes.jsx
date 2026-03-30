@@ -10,10 +10,24 @@ export default function AdminBaseFreeRecipes() {
     setLoading(true);
     setStatus(null);
     try {
-      const res = await base44.functions.invoke("updateBaseFreeUnlockedIds", {});
+      await base44.functions.invoke("updateBaseFreeUnlockedIds", {});
       setStatus({ type: "success", message: "IDs aggiornati con successo!" });
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Errore nell'aggiornamento" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteOldConfig = async () => {
+    if (!window.confirm("Sei sicuro di voler eliminare il vecchio registro AppConfig?")) return;
+    setLoading(true);
+    setStatus(null);
+    try {
+      await base44.asServiceRole.entities.AppConfig.delete("69caeb6394b4627f0bd75616");
+      setStatus({ type: "success", message: "Vecchio registro eliminato con successo!" });
+    } catch (error) {
+      setStatus({ type: "error", message: error.message || "Errore nell'eliminazione" });
     } finally {
       setLoading(false);
     }
@@ -28,7 +42,7 @@ export default function AdminBaseFreeRecipes() {
 
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <p className="text-sm text-blue-900">
-          Questo aggiorna il registro AppConfig <code className="bg-blue-100 px-1 py-0.5 rounded">base_free_unlocked_ids</code> con la lista fissa di IDs per ogni occasione.
+          Questo aggiorna il registro AppConfig <code className="bg-blue-100 px-1 py-0.5 rounded">base_free_unlocked_ids_v2</code> con la lista fissa di IDs per ogni occasione.
         </p>
       </div>
 
@@ -49,14 +63,23 @@ export default function AdminBaseFreeRecipes() {
         </div>
       )}
 
-      <button
-        onClick={handleUpdateIds}
-        disabled={loading}
-        className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-        {loading ? "Aggiornamento..." : "Aggiorna IDs Ricette Base"}
-      </button>
+      <div className="flex gap-3 flex-wrap">
+        <button
+          onClick={handleUpdateIds}
+          disabled={loading}
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Aggiornamento..." : "Aggiorna IDs Ricette Base"}
+        </button>
+        <button
+          onClick={handleDeleteOldConfig}
+          disabled={loading}
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Elimina Vecchio Registro
+        </button>
+      </div>
 
       <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 space-y-2">
         <p className="font-semibold text-gray-900">Occasioni speciale incluse:</p>

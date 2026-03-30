@@ -33,10 +33,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: "Admin access required" }, { status: 403 });
     }
 
-    // Update AppConfig
-    await base44.asServiceRole.entities.AppConfig.update("69caeb6394b4627f0bd75616", {
-      value: JSON.stringify(UNLOCKED_IDS)
-    });
+    // Find and update the v2 config
+    const configs = await base44.asServiceRole.entities.AppConfig.filter({ key: "base_free_unlocked_ids_v2" });
+    if (configs.length > 0) {
+      await base44.asServiceRole.entities.AppConfig.update(configs[0].id, {
+        value: JSON.stringify(UNLOCKED_IDS)
+      });
+    }
 
     return Response.json({ success: true, message: "AppConfig updated successfully" });
   } catch (error) {
