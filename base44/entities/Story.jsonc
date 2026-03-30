@@ -47,6 +47,11 @@
       },
       "description": "Array of user emails who liked"
     },
+    "likes_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total likes count"
+    },
     "expires_at": {
       "type": "string",
       "description": "Expiration datetime ISO (24h after creation)"
@@ -73,7 +78,9 @@
     "read": {
       "data.status": "active"
     },
-    "update": true,
+    "update": {
+      "created_by": "{{user.email}}"
+    },
     "delete": {
       "created_by": "{{user.email}}"
     }
