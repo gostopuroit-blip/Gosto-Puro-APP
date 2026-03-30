@@ -75,21 +75,23 @@ export default function Community() {
       {user && (
         <div className="max-w-lg mx-auto px-4 pt-4">
           <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
-            {user.photo_url ? (
-              <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold flex-shrink-0">
-                {(user.full_name || user.email || "U").charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
+            <Link to={createPageUrl("Profile")} className="flex items-center gap-3 flex-shrink-0">
+              {user.photo_url ? (
+                <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold">
+                  {(user.full_name || user.email || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
+            </Link>
+            <Link to={createPageUrl("Profile")} className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                 {user.full_name || user.email?.split("@")[0]}
               </p>
               <p className="text-xs text-gray-400">
                 {user.role === "expert" ? "✅ Expert" : user.role === "admin" ? "👑 Admin" : user.plan === "premium" ? "⭐ Premium" : "Free"}
               </p>
-            </div>
+            </Link>
             <button
               onClick={() => setShowNewPost(true)}
               className="text-xs text-gray-400 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-left flex-1 max-w-[160px] truncate">
