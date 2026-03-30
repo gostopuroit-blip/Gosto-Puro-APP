@@ -12,7 +12,7 @@ import FollowButton from "./FollowButton";
 import PostActionsMenu from "./PostActionsMenu";
 
 const POST_TYPE_META = {
-  tip: { label: "Dica", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
+  tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
   recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
   premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
   image_post: null,
@@ -133,7 +133,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   };
 
   const deletePost = async () => {
-    if (!confirm("Eliminar questo post?")) return;
+    if (!confirm("Eliminare questo post?")) return;
     await base44.entities.CommunityPost.delete(post.id);
     onUpdate(null);
     toast.success("Post eliminato");
@@ -156,7 +156,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {post.is_pinned && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 px-4 py-2 flex items-center gap-2">
           <Pin className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Fixado no topo</p>
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">📌 Fissato in alto</p>
         </div>
       )}
       <div className="flex items-center justify-between px-4 py-3">
@@ -292,10 +292,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             currentUser={currentUser}
             onPostShared={() => setRepostCount((prev) => prev + 1)}
             onDelete={async (p) => {
-              if (!confirm("Excluir este post?")) return;
+              if (!confirm("Eliminare questo post?")) return;
               await base44.entities.CommunityPost.delete(p.id);
               onUpdate(null);
-              toast.success("Post excluído");
+              toast.success("Post eliminato");
             }}
           />
         </div>
@@ -320,7 +320,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submitComment()}
-                placeholder="Aggiungi un commento..."
+                placeholder="Scrivi un commento..."
                 className="flex-1 text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-gray-800 dark:text-white outline-none"
               />
               <button

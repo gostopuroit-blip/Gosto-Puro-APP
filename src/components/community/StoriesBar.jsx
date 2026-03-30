@@ -151,7 +151,7 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
         viewers: [],
         status: "active",
       });
-      toast.success("Story pubblicata!");
+      toast.success("Storia pubblicata!");
       onCreated(story);
       onClose();
     } catch (err) {
@@ -170,7 +170,7 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 space-y-4 pb-24">
-          <h3 className="font-bold text-gray-900 dark:text-white">Crea Story</h3>
+          <h3 className="font-bold text-gray-900 dark:text-white">Crea storia</h3>
           {!preview ? (
             <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-40 cursor-pointer">
               <Plus className="w-8 h-8 text-gray-400 mb-2" />

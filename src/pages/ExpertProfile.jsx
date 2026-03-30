@@ -152,7 +152,7 @@ export default function ExpertProfile() {
                 </div>
                 <div className="text-center">
                   <p className="font-bold text-gray-900 dark:text-white text-base">{followingCount}</p>
-                  <p className="text-xs text-gray-400">Seguendo</p>
+                  <p className="text-xs text-gray-400">Seguiti</p>
                 </div>
                 {premiumCount > 0 && (
                   <div className="text-center">

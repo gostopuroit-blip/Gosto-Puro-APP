@@ -4,12 +4,12 @@ import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const REACTIONS = [
-  { emoji: "❤️", label: "Amei" },
+  { emoji: "❤️", label: "Adoro" },
   { emoji: "😂", label: "Haha" },
-  { emoji: "😮", label: "Uau" },
+  { emoji: "😮", label: "Wow" },
   { emoji: "😢", label: "Triste" },
-  { emoji: "👏", label: "Parabéns" },
-  { emoji: "🔥", label: "Incrível" },
+  { emoji: "👏", label: "Complimenti" },
+  { emoji: "🔥", label: "Fantastico" },
 ];
 
 export default function ReactionButton({ postId, currentUser, onReactionsChange }) {
@@ -84,7 +84,7 @@ export default function ReactionButton({ postId, currentUser, onReactionsChange 
       onReactionsChange?.();
     } catch (error) {
       console.error("Reaction error:", error);
-      toast.error("Erro ao reagir");
+      toast.error("Errore nella reazione");
     } finally {
       setLoading(false);
     }

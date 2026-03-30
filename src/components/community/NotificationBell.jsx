@@ -110,7 +110,7 @@ export default function NotificationBell({ currentUser }) {
                 className="text-xs text-[#2D6A4F] font-semibold hover:text-[#235c43] flex items-center gap-1 transition"
               >
                 <CheckCheck className="w-3 h-3" />
-                Segna tutte lette
+                Segna tutto letto
               </button>
             )}
           </div>

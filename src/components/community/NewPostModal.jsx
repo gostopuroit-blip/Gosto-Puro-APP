@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
-  { value: "tip", label: "Dica", icon: Lightbulb, color: "text-amber-500" },
+  { value: "tip", label: "Consiglio", icon: Lightbulb, color: "text-amber-500" },
   { value: "recipe", label: "Ricetta", icon: UtensilsCrossed, color: "text-[#2D6A4F]" },
   { value: "poll", label: "Sondaggio", icon: BarChart2, color: "text-indigo-500" },
   { value: "premium_content", label: "Premium", icon: Lock, color: "text-purple-500", expertOnly: true },
@@ -118,7 +118,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
     try {
       let image_url = null;
       if (imagePreviews.length > 0) {
-        // Upload first image only (per ora, per compatibilità)
+        // Upload first image only (per now, for compatibility)
         const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFiles[0] });
         image_url = file_url;
       }
@@ -214,7 +214,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={postType === "tip" ? "Titolo della dica..." : postType === "recipe" ? "Nome della ricetta..." : "Titolo del contenuto..."}
+              placeholder={postType === "tip" ? "Titolo del consiglio..." : postType === "recipe" ? "Nome della ricetta..." : "Titolo del contenuto..."}
               className="w-full text-sm font-semibold bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-2.5 text-gray-800 dark:text-white outline-none"
             />
           )}
@@ -284,7 +284,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={
-              postType === "tip" ? "Condividi la tua dica culinaria..."
+              postType === "tip" ? "Condividi il tuo consiglio culinario..."
               : postType === "recipe" ? "Descrivi la ricetta, ingredienti e preparazione..."
               : postType === "premium_content" ? "Contenuto esclusivo per i tuoi follower premium..."
               : "Condividi la tua esperienza culinaria..."
@@ -401,10 +401,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         </div>
 
         <Button
-          onClick={handleSubmit}
-          disabled={uploading || !content.trim()}
-          className="mt-4 mb-16 w-full bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl h-11 text-base font-semibold flex-shrink-0">
-          {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pubblica"}
+           onClick={handleSubmit}
+           disabled={uploading || !content.trim()}
+           className="mt-4 mb-16 w-full bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl h-11 text-base font-semibold flex-shrink-0">
+           {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Pubblica"}
         </Button>
       </div>
 

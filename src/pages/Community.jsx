@@ -163,7 +163,7 @@ export default function Community() {
               onClick={() => setShowNewPost(true)}
               className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
               <Plus className="w-4 h-4" />
-              Post
+              Pubblica
             </Button>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function Community() {
               <>
                 {suggestedUsers.length > 0 && (
                   <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
-                    <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-3">Quem Seguir? 👥</h3>
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-3">Chi seguire? 👥</h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {suggestedUsers.map((sUser) => (
                         <div key={sUser.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-[#111] rounded-lg transition">

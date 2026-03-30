@@ -10,7 +10,7 @@ import RepostModal from "./RepostModal";
 const REPORT_REASONS = [
   { value: "spam", label: "Spam" },
   { value: "inappropriate", label: "Contenuto inappropriato" },
-  { value: "hate_speech", label: "Incitamento all'odio" },
+  { value: "hate_speech", label: "Discorso d'odio" },
   { value: "violence", label: "Violenza" },
   { value: "nudity", label: "Nudità" },
   { value: "misinformation", label: "Disinformazione" },
@@ -103,11 +103,11 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
 
   const handleRepostClick = () => {
     if (!currentUser) {
-      toast.error("Fai login per repostare");
+      toast.error("Fai login per ricondividere");
       return;
     }
     if (post.created_by === currentUser.email) {
-      toast.error("Non puoi repostare il tuo post");
+      toast.error("Non puoi ricondividere il tuo post");
       return;
     }
     setShowRepostModal(true);
@@ -167,16 +167,16 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
             {(isOwner || isAdmin) && (
               <>
                 {isOwner && onEdit && (
-                  <MenuItem icon={Pencil} label="Modifica post" onClick={() => { onEdit(post); setOpen(false); }} />
+                  <MenuItem icon={Pencil} label="Modifica" onClick={() => { onEdit(post); setOpen(false); }} />
                 )}
-                <MenuItem icon={Trash2} label="Elimina post" onClick={() => { onDelete?.(post); setOpen(false); }} danger />
+                <MenuItem icon={Trash2} label="Elimina" onClick={() => { onDelete?.(post); setOpen(false); }} danger />
                 <div className="border-t border-gray-100 dark:border-[#2A2A2A]" />
               </>
             )}
 
             {/* Share actions */}
             {post.created_by !== currentUser?.email && (
-              <MenuItem icon={Repeat2} label="🔁 Repostare" onClick={handleRepostClick} />
+              <MenuItem icon={Repeat2} label="🔁 Ricondividi" onClick={handleRepostClick} />
             )}
             <MenuItem icon={Link} label="Copia link" onClick={copyLink} />
             <MenuItem icon={Facebook} label="Condividi su Facebook" onClick={shareOnFacebook} />
@@ -187,8 +187,8 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
             {!isOwner && currentUser && (
               <>
                 <div className="border-t border-gray-100 dark:border-[#2A2A2A]" />
-                <MenuItem icon={Flag} label="Segnala post" onClick={() => { setShowReport(true); setOpen(false); }} danger />
-                <MenuItem icon={UserX} label="Blocca utente" onClick={handleBlock} danger />
+                <MenuItem icon={Flag} label="Segnala" onClick={() => { setShowReport(true); setOpen(false); }} danger />
+                <MenuItem icon={UserX} label="Blocca" onClick={handleBlock} danger />
               </>
             )}
           </div>

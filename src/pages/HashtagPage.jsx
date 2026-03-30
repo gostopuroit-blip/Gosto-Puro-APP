@@ -73,7 +73,7 @@ export default function HashtagPage() {
             <p className="text-xs text-gray-400">
               {posts.length} post{posts.length !== 1 ? "s" : ""} {hashtag_data?.is_trending && (
                 <span className="flex items-center gap-1 inline-flex ml-2 text-orange-500 font-semibold">
-                  <Flame className="w-3 h-3" /> Trending
+                  <Flame className="w-3 h-3" /> Di tendenza
                 </span>
               )}
             </p>

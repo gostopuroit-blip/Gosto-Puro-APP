@@ -192,7 +192,7 @@ export default function Search() {
 
         {isEmpty && !loading && (
           <div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Hashtag in Trending</p>
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Hashtag di tendenza</p>
             <div className="flex flex-wrap gap-2">
               {trendingHashtags.map((h) => (
                 <button
@@ -285,7 +285,7 @@ export default function Search() {
         {activeTab === "hashtags" && !loading && (
           <div className="space-y-2">
             {hashtags.length === 0 ? (
-              <p className="text-center text-gray-400 text-sm py-8">Nessuna hashtag trovata</p>
+              <p className="text-center text-gray-400 text-sm py-8">Nessun hashtag trovato</p>
             ) : (
               hashtags.map((h) => (
                 <button

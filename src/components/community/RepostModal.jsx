@@ -30,11 +30,11 @@ export default function RepostModal({ post, currentUser, onClose, onReposted }) 
           .catch(() => {});
       }
 
-      toast.success("Post repostato! 🔁");
+      toast.success("Post ricondiviso! 🔁");
       onReposted?.();
       onClose();
     } catch (error) {
-      toast.error("Errore nel repost");
+      toast.error("Errore nella ricondivisione");
       console.error(error);
     } finally {
       setLoading(false);
@@ -49,7 +49,7 @@ export default function RepostModal({ post, currentUser, onClose, onReposted }) 
       >
         {/* Header */}
         <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Repeat2 className="w-5 h-5 text-[#2D6A4F]" /> Repostare
+          <Repeat2 className="w-5 h-5 text-[#2D6A4F]" /> Ricondividi
         </h3>
 
         {/* Original post preview */}
@@ -98,11 +98,11 @@ export default function RepostModal({ post, currentUser, onClose, onReposted }) 
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Repostando...
+                <Loader2 className="w-4 h-4 animate-spin" /> Ricondividendo...
               </>
             ) : (
               <>
-                <Repeat2 className="w-4 h-4" /> Repostare
+                <Repeat2 className="w-4 h-4" /> Ricondividi
               </>
             )}
           </button>
