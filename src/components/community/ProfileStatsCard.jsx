@@ -54,7 +54,7 @@ export default function ProfileStatsCard({ userEmail, onPostClick }) {
   );
 
   return (
-    <button onClick={onPostClick} className="flex-1 flex flex-col items-center py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-[#111] transition">
+    <button onClick={onPostClick} className="flex-1 flex flex-col items-center cursor-pointer">
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">📝</p>
       <p className="text-lg font-bold text-gray-900 dark:text-white">{stats.posts}</p>
       <p className="text-xs text-gray-500 dark:text-gray-400">Post</p>
