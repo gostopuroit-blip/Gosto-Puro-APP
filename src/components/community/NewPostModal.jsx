@@ -107,6 +107,12 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
     setHashtags(hashtags.filter((h) => h !== name));
   };
 
+  // Extract hashtags from content (words starting with #)
+  const extractHashtags = (text) => {
+    const matches = text.match(/#\w+/g) || [];
+    return matches.map((tag) => tag.slice(1).toLowerCase());
+  };
+
   const handleSubmit = async () => {
     if (!content.trim()) return toast.error("Scrivi qualcosa!");
     if (postType === "poll") {
@@ -123,6 +129,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         image_url = file_url;
       }
 
+      // Combine manually added hashtags with auto-detected ones from content
+      const autoTags = extractHashtags(content);
+      const allTags = Array.from(new Set([...hashtags, ...autoTags]));
+
       const post = await base44.entities.CommunityPost.create({
         user_email: currentUser?.email,
         user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
@@ -130,7 +140,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         content: content.trim(),
         title: title.trim() || null,
         image_url,
-        tags: hashtags,
+        tags: allTags,
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
         linked_recipe_id: selectedRecipe?.id || null,
@@ -154,8 +164,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         });
       }
 
-      // Update hashtags
-      for (const tag of hashtags) {
+      // Update hashtags - process all tags including auto-detected ones
+      for (const tag of allTags) {
         const existing = await base44.entities.Hashtag.filter({ name: tag }, "-created_date", 1).catch(() => []);
         if (existing.length > 0) {
           await base44.entities.Hashtag.update(existing[0].id, { posts_count: (existing[0].posts_count || 0) + 1 }).catch(() => {});
@@ -168,6 +178,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       onCreated(post);
       onClose();
     } catch (err) {
+      console.error("Post submission error:", err);
       toast.error("Errore nella pubblicazione. Riprova.");
     } finally {
       setUploading(false);

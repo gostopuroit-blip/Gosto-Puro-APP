@@ -5,7 +5,7 @@ import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { it } from "date-fns/locale";
 import { Link, useNavigate } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 import FollowButton from "./FollowButton";
@@ -180,9 +180,9 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
               {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
             </div>
             {/* Data + plano do autor */}
-            <p className="text-xs text-gray-400">
-              {formatDistanceToNow(new Date(post.created_date), { addSuffix: true, locale: ptBR })}
-            </p>
+             <p className="text-xs text-gray-400">
+               {formatDistanceToNow(new Date(post.created_date), { addSuffix: true, locale: it })}
+             </p>
           </div>
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0">
