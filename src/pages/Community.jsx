@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search, Pin } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, Pin, RefreshCw, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -29,31 +29,61 @@ function rankPosts(posts, followedEmails) {
 
 export default function Community() {
   const navigate = useNavigate();
+  const feedRef = useRef(null);
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [allPostsLoaded, setAllPostsLoaded] = useState(false);
   const [followedEmails, setFollowedEmails] = useState(new Set());
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "following"
   const [hashtagFilter, setHashtagFilter] = useState(null);
   const [postTypeFilter, setPostTypeFilter] = useState(null);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [reposts, setReposts] = useState([]);
+  const [pullProgress, setPullProgress] = useState(0);
+  const [newPostsCount, setNewPostsCount] = useState(0);
+  const [lastCheckedTime, setLastCheckedTime] = useState(null);
+  const pullStartRef = useRef(0);
+  const pageRef = useRef(1);
+
+  const loadPosts = useCallback(async (page = 1) => {
+    const pageSize = 10;
+    const skip = (page - 1) * pageSize;
+    try {
+      const postsData = await base44.entities.CommunityPost.filter(
+        { status: "active" },
+        "-created_date",
+        pageSize,
+      ).catch(() => []);
+      
+      if (page === 1) {
+        setLastCheckedTime(new Date());
+        setPosts(postsData);
+        setAllPostsLoaded(postsData.length < pageSize);
+      } else {
+        setPosts((prev) => [...prev, ...postsData]);
+        setAllPostsLoaded(postsData.length < pageSize);
+      }
+      pageRef.current = page;
+    } catch (err) {
+      console.error("Load posts error:", err);
+    }
+  }, []);
 
   useEffect(() => {
     const init = async () => {
       try {
         const u = await base44.auth.me().catch(() => null);
         setUser(u);
-        const [postsData, followData, usersData, repostsData] = await Promise.all([
-          base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 60).catch(() => []),
+        const [followData, usersData, repostsData] = await Promise.all([
           u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []) : Promise.resolve([]),
           base44.entities.User.list("-created_date", 100).catch(() => []),
           base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60).catch(() => []),
         ]);
         const followed = new Set(followData.map((f) => f.following_email));
         setFollowedEmails(followed);
-        setPosts(postsData);
         setReposts(repostsData);
         
         // Get suggested users not yet followed
@@ -61,6 +91,8 @@ export default function Community() {
           usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
         );
         setSuggestedUsers(suggested);
+        
+        await loadPosts(1);
       } catch (err) {
         console.error("Feed loading error:", err);
       } finally {
@@ -68,7 +100,7 @@ export default function Community() {
       }
     };
     init();
-  }, []);
+  }, [loadPosts]);
 
   const handleFollowChange = useCallback((targetEmail, isNowFollowing) => {
     setFollowedEmails((prev) => {
@@ -127,6 +159,64 @@ export default function Community() {
     ...displayedPosts.map((p) => ({ type: "post", data: p, date: new Date(p.created_date) })),
     ...displayedReposts.map((r) => ({ type: "repost", data: r, date: new Date(r.created_date) })),
   ].sort((a, b) => b.date - a.date);
+
+  // Check for new posts
+  const checkNewPosts = useCallback(async () => {
+    if (!lastCheckedTime) return;
+    try {
+      const newPosts = await base44.entities.CommunityPost.filter(
+        { status: "active", created_date: { $gt: lastCheckedTime.toISOString() } },
+        "-created_date",
+        1000
+      ).catch(() => []);
+      setNewPostsCount(newPosts.length);
+    } catch (err) {
+      console.error("Check new posts error:", err);
+    }
+  }, [lastCheckedTime]);
+
+  useEffect(() => {
+    const interval = setInterval(checkNewPosts, 15000); // Check every 15s
+    return () => clearInterval(interval);
+  }, [checkNewPosts]);
+
+  // Pull to refresh
+  const handleTouchStart = (e) => {
+    const scrollTop = feedRef.current?.scrollTop || 0;
+    if (scrollTop === 0) {
+      pullStartRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (pullStartRef.current === 0) return;
+    const scrollTop = feedRef.current?.scrollTop || 0;
+    if (scrollTop !== 0) return;
+
+    const currentY = e.touches[0].clientY;
+    const diff = Math.max(0, currentY - pullStartRef.current);
+    setPullProgress(Math.min(diff / 100, 1));
+  };
+
+  const handleTouchEnd = async () => {
+    if (pullProgress >= 0.5) {
+      setLoadingMore(true);
+      await loadPosts(1);
+      setNewPostsCount(0);
+      setLoadingMore(false);
+    }
+    setPullProgress(0);
+    pullStartRef.current = 0;
+  };
+
+  // Infinite scroll
+  const handleScroll = useCallback((e) => {
+    const element = e.target;
+    if (element.scrollHeight - element.scrollTop - element.clientHeight < 500 && !loadingMore && !allPostsLoaded) {
+      setLoadingMore(true);
+      loadPosts(pageRef.current + 1).then(() => setLoadingMore(false));
+    }
+  }, [loadingMore, allPostsLoaded, loadPosts]);
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">
@@ -226,7 +316,32 @@ export default function Community() {
       )}
 
       {/* Feed */}
-      <div className="max-w-lg mx-auto px-4 pb-24 space-y-4">
+      <div
+        ref={feedRef}
+        className="max-w-lg mx-auto px-4 pb-24 space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]"
+        onScroll={handleScroll}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* New posts banner */}
+        {newPostsCount > 0 && (
+          <button
+            onClick={() => { loadPosts(1); setNewPostsCount(0); feedRef.current?.scrollTo(0, 0); }}
+            className="sticky top-0 z-20 w-full bg-[#2D6A4F] text-white py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition hover:bg-[#235c43]"
+          >
+            <ChevronUp className="w-4 h-4" />
+            {newPostsCount} nuovi post disponibili — Aggiorna
+          </button>
+        )}
+
+        {/* Pull to refresh indicator */}
+        {pullProgress > 0 && (
+          <div className="fixed top-2 left-1/2 -translate-x-1/2 z-20 bg-white dark:bg-[#1A1A1A] rounded-full p-2 shadow-lg">
+            <RefreshCw className={`w-5 h-5 text-[#2D6A4F] transition-transform ${pullProgress > 0 && 'animate-spin'}`} />
+          </div>
+        )}
+
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
@@ -344,6 +459,20 @@ export default function Community() {
                   />
                 )
               )
+            )}
+
+            {/* Loading indicator */}
+            {loadingMore && (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" />
+              </div>
+            )}
+
+            {/* End of feed message */}
+            {allPostsLoaded && allContent.length > 0 && (
+              <div className="text-center py-8 text-gray-400 dark:text-gray-500">
+                <p className="text-sm font-medium">Hai visto tutti i post! 🎉</p>
+              </div>
             )}
           </>
         )}
