@@ -171,7 +171,7 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
           <MoreHorizontal className="w-5 h-5" />
         </button>
         {open && (
-          <div className="absolute right-0 top-8 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl z-40 w-52 overflow-hidden">
+          <div className="absolute right-0 bottom-8 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl shadow-xl z-40 w-52 overflow-hidden">
 
             {/* Owner actions */}
             {(isOwner || isAdmin) && (

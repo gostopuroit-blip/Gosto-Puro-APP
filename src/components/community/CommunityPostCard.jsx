@@ -119,7 +119,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     : null; // usuário comum: nada extra
 
   return (
-    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3">
         <Link
