@@ -11,13 +11,13 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
   const [loadingComments, setLoadingComments] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [localPost, setLocalPost] = useState(post);
   const inputRef = useRef(null);
 
-  const isLiked = post.likes?.includes(currentUser?.email);
-  const isOwner = post.created_by === currentUser?.email;
+  const isLiked = localPost.likes?.includes(currentUser?.email);
+  const isVerified = localPost.is_expert;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "admin";
-  const isBlurred = post.is_premium && !isPremiumUser;
-  const isVerified = post.is_expert;
+  const isBlurred = localPost.is_premium && !isPremiumUser;
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -34,12 +34,14 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
-    const likes = post.likes || [];
+    const likes = localPost.likes || [];
     const newLikes = isLiked
       ? likes.filter((e) => e !== currentUser?.email)
       : [...likes, currentUser?.email];
-    await base44.entities.CommunityPost.update(post.id, { likes: newLikes, likes_count: newLikes.length });
-    onUpdate({ ...post, likes: newLikes, likes_count: newLikes.length });
+    const updated = { ...localPost, likes: newLikes, likes_count: newLikes.length };
+    await base44.entities.CommunityPost.update(localPost.id, { likes: newLikes, likes_count: newLikes.length });
+    setLocalPost(updated);
+    onUpdate(updated);
   };
 
   const submitComment = async () => {
@@ -47,15 +49,17 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
     if (!currentUser) return toast.error("Fai login per commentare");
     setSubmitting(true);
     const created = await base44.entities.CommunityComment.create({
-      post_id: post.id,
+      post_id: localPost.id,
       user_email: currentUser?.email,
       user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
       user_photo: currentUser?.photo_url || null,
       content: newComment.trim(),
       is_expert: currentUser?.role === "expert" || currentUser?.role === "admin",
     });
-    await base44.entities.CommunityPost.update(post.id, { comments_count: (post.comments_count || 0) + 1 });
-    onUpdate({ ...post, comments_count: (post.comments_count || 0) + 1 });
+    const updated = { ...localPost, comments_count: (localPost.comments_count || 0) + 1 };
+    await base44.entities.CommunityPost.update(localPost.id, { comments_count: updated.comments_count });
+    setLocalPost(updated);
+    onUpdate(updated);
     setComments([created, ...comments]);
     setNewComment("");
     setSubmitting(false);
@@ -65,31 +69,30 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
     if (!confirm("Eliminare questo commento?")) return;
     await base44.entities.CommunityComment.delete(commentId);
     setComments(comments.filter((c) => c.id !== commentId));
-    await base44.entities.CommunityPost.update(post.id, { comments_count: Math.max(0, (post.comments_count || 1) - 1) });
-    onUpdate({ ...post, comments_count: Math.max(0, (post.comments_count || 1) - 1) });
+    const updated = { ...localPost, comments_count: Math.max(0, (localPost.comments_count || 1) - 1) };
+    await base44.entities.CommunityPost.update(localPost.id, { comments_count: updated.comments_count });
+    setLocalPost(updated);
+    onUpdate(updated);
     toast.success("Commento eliminato");
   };
 
-  const avatar = post.user_photo;
-  const initials = (post.user_name || "U").charAt(0).toUpperCase();
+  const avatar = localPost.user_photo;
+  const initials = (localPost.user_name || "U").charAt(0).toUpperCase();
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/90 flex flex-col"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-60 text-white bg-black/40 rounded-full p-2"
+    <div className="fixed inset-0 z-[60] bg-black/80 flex items-end justify-center">
+      {/* Sheet container */}
+      <div
+        className="w-full max-w-lg bg-white dark:bg-[#0F0F0F] flex flex-col rounded-t-3xl"
+        style={{ height: "92dvh", maxHeight: "92dvh" }}
       >
-        <X className="w-5 h-5" />
-      </button>
-
-      <div className="flex flex-col max-w-lg mx-auto w-full bg-white dark:bg-[#0F0F0F] overflow-hidden" style={{ height: "calc(100% - 64px)" }}>
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
-          <Link to={`/ExpertProfile?id=${post.created_by}`} onClick={onClose} className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Header fixo */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
+          <Link
+            to={`/ExpertProfile?id=${localPost.created_by}`}
+            onClick={onClose}
+            className="flex items-center gap-3 flex-1 min-w-0"
+          >
             {avatar ? (
               <img src={avatar} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
             ) : (
@@ -99,98 +102,118 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-1">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{post.user_name || "Utente"}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                  {localPost.user_name || "Utente"}
+                </p>
                 {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
               </div>
               <p className="text-xs text-gray-400">
-                {formatDistanceToNow(new Date(post.created_date), { addSuffix: true, locale: ptBR })}
+                {formatDistanceToNow(new Date(localPost.created_date), { addSuffix: true, locale: ptBR })}
               </p>
             </div>
           </Link>
-        </div>
-
-        {/* Image — full width, no crop */}
-        {post.image_url && (
-          <div className={`w-full bg-black relative flex-shrink-0 ${isBlurred ? "overflow-hidden" : ""}`}>
-            <img
-              src={post.image_url}
-              alt=""
-              className={`w-full object-contain max-h-[55vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
-            />
-            {isBlurred && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                <Lock className="w-8 h-8 text-white" />
-                <p className="text-white font-bold text-sm">Contenuto Premium</p>
-                <p className="text-white/80 text-xs">Abbonati per vedere</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
-          <button onClick={handleLike} className="flex items-center gap-1.5 text-sm font-medium transition">
-            <Heart className={`w-6 h-6 transition ${isLiked ? "fill-red-500 text-red-500" : "text-gray-700 dark:text-gray-300"}`} />
-            <span className={isLiked ? "text-red-500" : "text-gray-600 dark:text-gray-400"}>{post.likes_count || 0}</span>
-          </button>
           <button
-            onClick={() => inputRef.current?.focus()}
-            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400"
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-[#2A2A2A] text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2"
           >
-            <MessageCircle className="w-6 h-6" />
-            <span>{post.comments_count || 0}</span>
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Caption */}
-        {(post.title || post.content) && (
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
-            {post.title && <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{post.title}</p>}
-            <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{post.content}</p>
-            {post.tags?.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {post.tags.map((tag) => (
-                  <span key={tag} className="text-xs text-[#2D6A4F] font-medium">#{tag}</span>
-                ))}
-              </div>
+        {/* Conteúdo scrollável */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Imagem */}
+          {localPost.image_url && (
+            <div className={`w-full bg-black relative ${isBlurred ? "overflow-hidden" : ""}`}>
+              <img
+                src={localPost.image_url}
+                alt=""
+                className={`w-full object-contain max-h-[50vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
+              />
+              {isBlurred && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                  <Lock className="w-8 h-8 text-white" />
+                  <p className="text-white font-bold text-sm">Contenuto Premium</p>
+                  <p className="text-white/80 text-xs">Abbonati per vedere</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Curtidas e comentários */}
+          <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A]">
+            <button onClick={handleLike} className="flex items-center gap-1.5 text-sm font-medium transition">
+              <Heart className={`w-6 h-6 transition ${isLiked ? "fill-red-500 text-red-500" : "text-gray-700 dark:text-gray-300"}`} />
+              <span className={isLiked ? "text-red-500" : "text-gray-600 dark:text-gray-400"}>
+                {localPost.likes_count || 0}
+              </span>
+            </button>
+            <button
+              onClick={() => inputRef.current?.focus()}
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-400"
+            >
+              <MessageCircle className="w-6 h-6" />
+              <span>{localPost.comments_count || 0}</span>
+            </button>
+          </div>
+
+          {/* Texto / legenda */}
+          {(localPost.title || localPost.content) && (
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A]">
+              {localPost.title && (
+                <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{localPost.title}</p>
+              )}
+              <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{localPost.content}</p>
+              {localPost.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {localPost.tags.map((tag) => (
+                    <span key={tag} className="text-xs text-[#2D6A4F] font-medium">#{tag}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Lista de comentários */}
+          <div className="px-4 pt-3 pb-4 space-y-4">
+            {loadingComments ? (
+              <p className="text-xs text-gray-400 text-center py-4">Caricamento...</p>
+            ) : comments.length === 0 ? (
+              <p className="text-xs text-gray-400 text-center py-4">Nessun commento ancora</p>
+            ) : (
+              comments.map((c) => (
+                <div key={c.id} className="flex gap-2">
+                  {c.user_photo ? (
+                    <img src={c.user_photo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {(c.user_name || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                        {c.user_name || "Utente"}
+                      </p>
+                      {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
+                      {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
+                        <button
+                          onClick={() => deleteComment(c.id)}
+                          className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        )}
-
-        {/* Comments list — scrollable */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-          {loadingComments ? (
-            <p className="text-xs text-gray-400 text-center py-4">Caricamento...</p>
-          ) : comments.length === 0 ? (
-            <p className="text-xs text-gray-400 text-center py-4">Nessun commento ancora</p>
-          ) : (
-            comments.map((c) => (
-              <div key={c.id} className="flex gap-2">
-                {c.user_photo ? (
-                  <img src={c.user_photo} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {(c.user_name || "U").charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-1">
-                    <p className="text-xs font-semibold text-gray-900 dark:text-white">{c.user_name || "Utente"}</p>
-                    {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
-                    {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
-                      <button onClick={() => deleteComment(c.id)} className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
-                </div>
-              </div>
-            ))
-          )}
         </div>
 
-        {/* Comment input — fixed at bottom */}
+        {/* Campo de novo comentário — fixo na parte inferior */}
         {currentUser && (
           <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 dark:border-[#2A2A2A] flex-shrink-0 bg-white dark:bg-[#0F0F0F]">
             {currentUser.photo_url ? (
@@ -211,7 +234,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
             <button
               onClick={submitComment}
               disabled={submitting || !newComment.trim()}
-              className="text-[#2D6A4F] disabled:opacity-40 font-semibold text-sm"
+              className="text-[#2D6A4F] disabled:opacity-40"
             >
               <Send className="w-5 h-5" />
             </button>
