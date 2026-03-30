@@ -184,7 +184,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           </span>
         </button>
         <button
-          onClick={toggleComments}
+          onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition hover:text-[#2D6A4F]">
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
