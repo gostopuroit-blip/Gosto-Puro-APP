@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import NewPostModal from "@/components/community/NewPostModal";
@@ -35,6 +35,7 @@ function rankPosts(posts, followedEmails) {
 }
 
 export default function Community() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [followedEmails, setFollowedEmails] = useState(new Set());
@@ -111,6 +112,12 @@ export default function Community() {
           </div>
           <div className="flex items-center gap-2">
             {user && <NotificationBell currentUser={user} />}
+            <button
+              onClick={() => navigate("/Search")}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition"
+            >
+              <Search className="w-5 h-5" />
+            </button>
             <Button
               size="sm"
               onClick={() => setShowNewPost(true)}
