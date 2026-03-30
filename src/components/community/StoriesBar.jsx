@@ -116,23 +116,30 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
   const handleSubmit = async () => {
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
-    const story = await base44.entities.Story.create({
-      user_email: currentUser.email,
-      user_name: currentUser.full_name || currentUser.email.split("@")[0],
-      user_photo: currentUser.photo_url || null,
-      media_url: file_url,
-      media_type: "image",
-      caption: caption.trim() || undefined,
-      expires_at: expires,
-      views_count: 0,
-      viewers: [],
-      status: "active",
-    });
-    toast.success("Story pubblicata!");
-    onCreated(story);
-    onClose();
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+      const story = await base44.entities.Story.create({
+        user_email: currentUser.email,
+        user_name: currentUser.full_name || currentUser.email.split("@")[0],
+        user_photo: currentUser.photo_url || null,
+        media_url: file_url,
+        media_type: "image",
+        caption: caption.trim() || undefined,
+        expires_at: expires,
+        views_count: 0,
+        viewers: [],
+        status: "active",
+      });
+      toast.success("Story pubblicata!");
+      onCreated(story);
+      onClose();
+    } catch (err) {
+      toast.error("Errore durante la pubblicazione. Riprova.");
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
