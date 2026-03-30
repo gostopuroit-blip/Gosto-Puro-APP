@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
+import FollowButton from "./FollowButton";
 
 const POST_TYPE_META = {
   tip: { label: "Dica", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
@@ -14,7 +15,7 @@ const POST_TYPE_META = {
   image_post: null,
 };
 
-export default function CommunityPostCard({ post, currentUser, onUpdate }) {
+export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange }) {
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [comments, setComments] = useState([]);
@@ -177,6 +178,14 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
               <Lock className="w-3 h-3" />
               Premium
             </span>
+          )}
+          {/* Follow button — mostra apenas se não é o próprio post */}
+          {!isOwner && post.created_by && (
+            <FollowButton
+              targetEmail={post.created_by}
+              currentUser={currentUser}
+              onFollowChange={(following) => onFollowChange?.(post.created_by, following)}
+            />
           )}
           {(isOwner || currentUser?.role === "admin") && (
             <button onClick={deletePost} className="text-gray-300 hover:text-red-500 transition p-1">

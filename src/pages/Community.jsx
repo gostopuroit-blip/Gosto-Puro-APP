@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Loader2, Users, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,34 +6,62 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import NewPostModal from "@/components/community/NewPostModal";
+import SuggestedUsers from "@/components/community/SuggestedUsers";
+
+// Algoritmo de recomendação: posts de quem você segue aparecem no topo,
+// depois posts de experts/admin, depois mais curtidos, depois os mais recentes
+function rankPosts(posts, followedEmails) {
+  return [...posts].sort((a, b) => {
+    const aFollowed = followedEmails.has(a.created_by) ? 1 : 0;
+    const bFollowed = followedEmails.has(b.created_by) ? 1 : 0;
+    if (aFollowed !== bFollowed) return bFollowed - aFollowed;
+
+    const aExpert = a.is_expert ? 1 : 0;
+    const bExpert = b.is_expert ? 1 : 0;
+    if (aExpert !== bExpert) return bExpert - aExpert;
+
+    // Mix: likes + recência (posts das últimas 24h têm bônus)
+    const now = Date.now();
+    const aAge = (now - new Date(a.created_date).getTime()) / 3600000; // horas
+    const bAge = (now - new Date(b.created_date).getTime()) / 3600000;
+    const aScore = (a.likes_count || 0) + (aAge < 24 ? 5 : 0);
+    const bScore = (b.likes_count || 0) + (bAge < 24 ? 5 : 0);
+    return bScore - aScore;
+  });
+}
 
 export default function Community() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [followedEmails, setFollowedEmails] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [showNewPost, setShowNewPost] = useState(false);
-  const [page, setPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "following"
 
   useEffect(() => {
     const init = async () => {
       const u = await base44.auth.me().catch(() => null);
       setUser(u);
-      await loadPosts();
+      const [postsData, followData] = await Promise.all([
+        base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 60),
+        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200) : Promise.resolve([]),
+      ]);
+      const followed = new Set(followData.map((f) => f.following_email));
+      setFollowedEmails(followed);
+      setPosts(postsData);
+      setLoading(false);
     };
     init();
   }, []);
 
-  const loadPosts = async () => {
-    setLoading(true);
-    const data = await base44.entities.CommunityPost.filter(
-      { status: "active" },
-      "-created_date",
-      PAGE_SIZE
-    );
-    setPosts(data);
-    setLoading(false);
-  };
+  const handleFollowChange = useCallback((targetEmail, isNowFollowing) => {
+    setFollowedEmails((prev) => {
+      const next = new Set(prev);
+      if (isNowFollowing) next.add(targetEmail);
+      else next.delete(targetEmail);
+      return next;
+    });
+  }, []);
 
   const handlePostUpdate = (updated, originalId) => {
     if (updated === null) {
@@ -46,6 +74,11 @@ export default function Community() {
   const handleNewPost = (post) => {
     setPosts((prev) => [post, ...prev]);
   };
+
+  // Filtra e ordena conforme a aba ativa
+  const displayedPosts = activeTab === "following"
+    ? rankPosts(posts.filter((p) => followedEmails.has(p.created_by)), followedEmails)
+    : rankPosts(posts, followedEmails);
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">
@@ -68,6 +101,30 @@ export default function Community() {
             <Plus className="w-4 h-4" />
             Post
           </Button>
+        </div>
+
+        {/* Tabs */}
+        <div className="max-w-lg mx-auto flex px-4 pb-2 gap-4">
+          <button
+            onClick={() => setActiveTab("for_you")}
+            className={`text-sm font-semibold pb-1 border-b-2 transition-all ${
+              activeTab === "for_you"
+                ? "border-[#2D6A4F] text-[#2D6A4F]"
+                : "border-transparent text-gray-400"
+            }`}
+          >
+            Per te
+          </button>
+          <button
+            onClick={() => setActiveTab("following")}
+            className={`text-sm font-semibold pb-1 border-b-2 transition-all ${
+              activeTab === "following"
+                ? "border-[#2D6A4F] text-[#2D6A4F]"
+                : "border-transparent text-gray-400"
+            }`}
+          >
+            Seguiti {followedEmails.size > 0 && <span className="text-[10px] bg-[#2D6A4F] text-white rounded-full px-1.5 py-0.5 ml-1">{followedEmails.size}</span>}
+          </button>
         </div>
       </div>
 
@@ -107,26 +164,49 @@ export default function Community() {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
           </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-5xl mb-4">🍳</p>
-            <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post ancora</p>
-            <p className="text-sm text-gray-400 mb-6">Sii il primo a condividere qualcosa!</p>
-            <Button
-              onClick={() => setShowNewPost(true)}
-              className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl">
-              Crea il primo post
-            </Button>
-          </div>
         ) : (
-          posts.map((post) => (
-            <CommunityPostCard
-              key={post.id}
-              post={post}
-              currentUser={user}
-              onUpdate={(updated) => handlePostUpdate(updated, post.id)}
-            />
-          ))
+          <>
+            {/* Sugestões — só na aba "Per te" */}
+            {activeTab === "for_you" && (
+              <SuggestedUsers
+                currentUser={user}
+                followedEmails={followedEmails}
+                onFollowChange={handleFollowChange}
+              />
+            )}
+
+            {displayedPosts.length === 0 ? (
+              <div className="text-center py-20">
+                {activeTab === "following" ? (
+                  <>
+                    <p className="text-4xl mb-4">👥</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post da seguiti</p>
+                    <p className="text-sm text-gray-400">Segui altri utenti per vedere i loro post qui</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-5xl mb-4">🍳</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post ancora</p>
+                    <p className="text-sm text-gray-400 mb-6">Sii il primo a condividere qualcosa!</p>
+                    <Button onClick={() => setShowNewPost(true)} className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl">
+                      Crea il primo post
+                    </Button>
+                  </>
+                )}
+              </div>
+            ) : (
+              displayedPosts.map((post) => (
+                <CommunityPostCard
+                  key={post.id}
+                  post={post}
+                  currentUser={user}
+                  followedEmails={followedEmails}
+                  onFollowChange={handleFollowChange}
+                  onUpdate={(updated) => handlePostUpdate(updated, post.id)}
+                />
+              ))
+            )}
+          </>
         )}
       </div>
 

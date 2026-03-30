@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
+import FollowButton from "@/components/community/FollowButton";
 
 export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
@@ -100,16 +101,24 @@ export default function ExpertProfile() {
                   <BadgeCheck className="w-5 h-5 text-[#2D6A4F]" />
                 )}
               </div>
-              <p className="text-xs font-medium mb-3">
-                {expert?.is_expert
-                  ? <span className="text-[#2D6A4F]">✅ Expert</span>
-                  : expertEmail === currentUser?.email
-                    ? (currentUser?.plan === "premium"
-                        ? <span className="text-purple-600">⭐ Premium</span>
-                        : <span className="text-gray-400">Free</span>)
-                    : <span className="text-gray-400">Membro</span>
-                }
-              </p>
+              <div className="flex items-center gap-2 mb-3">
+                <p className="text-xs font-medium">
+                  {expert?.is_expert
+                    ? <span className="text-[#2D6A4F]">✅ Expert</span>
+                    : expertEmail === currentUser?.email
+                      ? (currentUser?.plan === "premium"
+                          ? <span className="text-purple-600">⭐ Premium</span>
+                          : <span className="text-gray-400">Free</span>)
+                      : <span className="text-gray-400">Membro</span>
+                  }
+                </p>
+                {expertEmail !== currentUser?.email && (
+                  <FollowButton
+                    targetEmail={expertEmail}
+                    currentUser={currentUser}
+                  />
+                )}
+              </div>
 
               {/* Stats */}
               <div className="flex gap-4">
