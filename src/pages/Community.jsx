@@ -192,7 +192,7 @@ export default function Community() {
                   followedEmails={followedEmails}
                   onFollowChange={handleFollowChange}
                 />
-                <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} />
+                <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} currentUser={user} />
               </>
             )}
 

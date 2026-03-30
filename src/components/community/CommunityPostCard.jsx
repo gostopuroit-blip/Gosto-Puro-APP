@@ -186,7 +186,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <img
             src={post.image_url}
             alt=""
-            className={`w-full object-cover max-h-80 ${isBlurred ? "blur-xl scale-110" : ""}`}
+            className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
           />
           {isBlurred && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
