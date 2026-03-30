@@ -57,9 +57,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     const newLikes = isLiked
       ? likes.filter((e) => e !== currentUser?.email)
       : [...likes, currentUser?.email];
+    const newLikesCount = newLikes.length;
     await base44.entities.CommunityPost.update(post.id, {
       likes: newLikes,
-      likes_count: newLikes.length,
+      likes_count: newLikesCount,
     });
     
     // Create notification if user just liked the post (not unliking)
@@ -73,7 +74,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       }).catch(() => {});
     }
     
-    onUpdate({ ...post, likes: newLikes, likes_count: newLikes.length });
+    onUpdate({ ...post, likes: newLikes, likes_count: newLikesCount });
   };
 
   const loadComments = async () => {
@@ -92,6 +93,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Fai login per commentare");
     setSubmitting(true);
+    const newCommentsCount = (post.comments_count || 0) + 1;
     const created = await base44.entities.CommunityComment.create({
       post_id: post.id,
       user_email: currentUser?.email,
@@ -101,7 +103,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       is_expert: currentUser?.role === "expert" || currentUser?.role === "admin",
     });
     await base44.entities.CommunityPost.update(post.id, {
-      comments_count: (post.comments_count || 0) + 1,
+      comments_count: newCommentsCount,
     });
     
     // Create notification if commenting on someone else's post
@@ -115,7 +117,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       }).catch(() => {});
     }
     
-    onUpdate({ ...post, comments_count: (post.comments_count || 0) + 1 });
+    onUpdate({ ...post, comments_count: newCommentsCount });
     setComments([created, ...comments]);
     setNewComment("");
     setSubmitting(false);

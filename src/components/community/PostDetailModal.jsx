@@ -46,8 +46,9 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
     const newLikes = isLiked
       ? likes.filter((e) => e !== currentUser?.email)
       : [...likes, currentUser?.email];
-    const updated = { ...localPost, likes: newLikes, likes_count: newLikes.length };
-    await base44.entities.CommunityPost.update(localPost.id, { likes: newLikes, likes_count: newLikes.length });
+    const newLikesCount = newLikes.length;
+    const updated = { ...localPost, likes: newLikes, likes_count: newLikesCount };
+    await base44.entities.CommunityPost.update(localPost.id, { likes: newLikes, likes_count: newLikesCount });
     setLocalPost(updated);
     onUpdate(updated);
   };
@@ -56,6 +57,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Fai login per commentare");
     setSubmitting(true);
+    const newCommentsCount = (localPost.comments_count || 0) + 1;
     const created = await base44.entities.CommunityComment.create({
       post_id: localPost.id,
       user_email: currentUser?.email,
@@ -66,8 +68,8 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
       reply_to_comment_id: replyingTo?.id || null,
       reply_to_user: replyingTo?.user_name || null,
     });
-    const updated = { ...localPost, comments_count: (localPost.comments_count || 0) + 1 };
-    await base44.entities.CommunityPost.update(localPost.id, { comments_count: updated.comments_count });
+    const updated = { ...localPost, comments_count: newCommentsCount };
+    await base44.entities.CommunityPost.update(localPost.id, { comments_count: newCommentsCount });
     setLocalPost(updated);
     onUpdate(updated);
     setComments([created, ...comments]);

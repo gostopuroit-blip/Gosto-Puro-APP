@@ -116,6 +116,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const handleSubmit = async () => {
     if (!content.trim()) return toast.error("Scrivi qualcosa!");
     if (postType === "poll") {
+      if (!title.trim()) return toast.error("Aggiungi una domanda per il sondaggio");
       const validOpts = pollOptions.filter((o) => o.trim());
       if (validOpts.length < 2) return toast.error("Aggiungi almeno 2 opzioni per il sondaggio");
     }
@@ -133,10 +134,14 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       const autoTags = extractHashtags(content);
       const allTags = Array.from(new Set([...hashtags, ...autoTags]));
 
+      // Get fresh user data to ensure photo_url is not null
+      const freshUser = await base44.auth.me().catch(() => currentUser);
+      const photoUrl = freshUser?.photo_url || currentUser?.photo_url || null;
+
       const post = await base44.entities.CommunityPost.create({
         user_email: currentUser?.email,
         user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
-        user_photo: currentUser?.photo_url || null,
+        user_photo: photoUrl,
         content: content.trim(),
         title: title.trim() || null,
         image_url,
@@ -156,16 +161,13 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         const validOpts = pollOptions.filter((o) => o.trim());
         await base44.entities.Poll.create({
           user_email: currentUser?.email,
-          question: title.trim() || content.trim(),
+          question: title.trim(),
           options: validOpts.map((o, i) => ({ id: `opt_${i}`, text: o.trim(), votes_count: 0, voters: [] })),
           total_votes: 0,
           post_id: post.id,
           status: "active",
         });
       }
-
-      // Hash tags update removed — will be handled asynchronously in backend automation
-      // Post creation is now guaranteed to succeed regardless of hashtag processing
 
       toast.success("Post pubblicato!");
       onCreated(post);
@@ -213,12 +215,12 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-3">
-          {/* Title for tip/recipe/premium */}
-          {(postType === "tip" || postType === "recipe" || postType === "premium_content") && (
+          {/* Title for tip/recipe/premium/poll */}
+          {(postType === "tip" || postType === "recipe" || postType === "premium_content" || postType === "poll") && (
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={postType === "tip" ? "Titolo del consiglio..." : postType === "recipe" ? "Nome della ricetta..." : "Titolo del contenuto..."}
+              placeholder={postType === "tip" ? "Titolo del consiglio..." : postType === "recipe" ? "Nome della ricetta..." : postType === "poll" ? "Domanda del sondaggio..." : "Titolo del contenuto..."}
               className="w-full text-sm font-semibold bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-2.5 text-gray-800 dark:text-white outline-none"
             />
           )}
