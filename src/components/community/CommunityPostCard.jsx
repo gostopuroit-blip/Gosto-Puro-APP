@@ -7,6 +7,7 @@ import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
 import VideoPlayer from "./VideoPlayer";
 import VideoLightbox from "./VideoLightbox";
+import SavePostButton from "./SavePostButton";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -329,6 +330,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
         </button>
+        <SavePostButton
+          post={post}
+          currentUser={currentUser}
+          onSaveChange={() => {}}
+        />
         {repostCount > 0 && (
           <button className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
             <Repeat2 className="w-5 h-5" />

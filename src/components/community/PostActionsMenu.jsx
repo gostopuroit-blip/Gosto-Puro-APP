@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   MoreHorizontal, Flag, UserX, Share2, Copy, Facebook,
-  Instagram, Music2, Link, Pencil, Trash2, Repeat2
+  Instagram, Music2, Link, Pencil, Trash2, Repeat2, Bookmark
 } from "lucide-react";
 import { toast } from "sonner";
 import RepostModal from "./RepostModal";
@@ -79,7 +79,27 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
   const [open, setOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [showRepostModal, setShowRepostModal] = useState(false);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const ref = useRef(null);
+
+  useEffect(() => {
+    if (!currentUser || !post) return;
+    checkIfSaved();
+  }, [currentUser?.email, post?.id]);
+
+  const checkIfSaved = async () => {
+    try {
+      const saved = await base44.entities.SavedPost.filter(
+        { post_id: post.id, user_email: currentUser.email },
+        "-created_date",
+        1
+      );
+      setIsSaved(saved.length > 0);
+    } catch {
+      setIsSaved(false);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -137,6 +157,30 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
     setOpen(false);
   };
 
+  const handleSaveClick = async () => {
+    if (!currentUser) {
+      toast.error("Fai login per salvare i post");
+      return;
+    }
+
+    if (isSaved) {
+      // Remove from saved
+      const saved = await base44.entities.SavedPost.filter({
+        post_id: post.id,
+        user_email: currentUser.email,
+      });
+      if (saved.length > 0) {
+        await base44.entities.SavedPost.delete(saved[0].id);
+        setIsSaved(false);
+        toast.success("Post rimosso dai salvati");
+      }
+    } else {
+      // Show collection modal
+      setShowCollectionModal(true);
+    }
+    setOpen(false);
+  };
+
   const isOwner = post.created_by === currentUser?.email;
   const isAdmin = currentUser?.role === "admin";
 
@@ -178,6 +222,11 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
             {post.created_by !== currentUser?.email && (
               <MenuItem icon={Repeat2} label="🔁 Ricondividi" onClick={handleRepostClick} />
             )}
+            <MenuItem
+              icon={Bookmark}
+              label={isSaved ? "Rimuovi dai salvati" : "Salva post"}
+              onClick={handleSaveClick}
+            />
             <MenuItem icon={Link} label="Copia link" onClick={copyLink} />
             <MenuItem icon={Facebook} label="Condividi su Facebook" onClick={shareOnFacebook} />
             <MenuItem icon={Music2} label="Condividi su TikTok" onClick={shareOnTikTok} />
@@ -207,6 +256,142 @@ export default function PostActionsMenu({ post, currentUser, onPostShared, onEdi
           onReposted={() => onPostShared?.()}
         />
       )}
+
+      {showCollectionModal && currentUser && (
+        <SaveToCollectionModal
+          post={post}
+          currentUser={currentUser}
+          onClose={() => setShowCollectionModal(false)}
+          onSaved={() => {
+            setIsSaved(true);
+            setShowCollectionModal(false);
+          }}
+        />
+      )}
     </>
+  );
+}
+
+function SaveToCollectionModal({ post, currentUser, onClose, onSaved }) {
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState("Salvati");
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadCollections();
+  }, []);
+
+  const loadCollections = async () => {
+    try {
+      const saved = await base44.entities.SavedPost.filter(
+        { user_email: currentUser.email },
+        "-created_date",
+        500
+      );
+      const uniqueCollections = [...new Set(saved.map((s) => s.collection || "Salvati"))];
+      setCollections(uniqueCollections);
+    } catch {
+      setCollections(["Salvati"]);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!selectedCollection && !newCollectionName.trim()) {
+      toast.error("Seleziona o crea una collezione");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const collectionName = newCollectionName.trim() || selectedCollection;
+      await base44.entities.SavedPost.create({
+        post_id: post.id,
+        user_email: currentUser.email,
+        collection: collectionName,
+      });
+      toast.success(`Post salvato in "${collectionName}"`);
+      onSaved();
+    } catch (err) {
+      toast.error("Errore nel salvataggio");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center" onClick={onClose}>
+      <div
+        className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg p-5 pb-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          🔖 Salva in collezione
+        </h3>
+
+        {!isCreatingNew && (
+          <>
+            <div className="space-y-2 mb-4">
+              {collections.map((col) => (
+                <button
+                  key={col}
+                  onClick={() => setSelectedCollection(col)}
+                  className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
+                    selectedCollection === col
+                      ? "border-[#2D6A4F] bg-[#2D6A4F]/10 dark:bg-[#2D6A4F]/20 text-[#2D6A4F]"
+                      : "border-gray-100 dark:border-[#2A2A2A] text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#111]"
+                  }`}
+                >
+                  {col}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setIsCreatingNew(true)}
+              className="w-full text-center px-4 py-3 rounded-xl border-2 border-dashed border-gray-200 dark:border-[#333] text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-[#2D6A4F] transition"
+            >
+              ➕ Nuova collezione
+            </button>
+          </>
+        )}
+
+        {isCreatingNew && (
+          <>
+            <input
+              type="text"
+              value={newCollectionName}
+              onChange={(e) => setNewCollectionName(e.target.value)}
+              placeholder="Es: Ricette preferite, Ispirazioni..."
+              className="w-full bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-white outline-none mb-4"
+              autoFocus
+            />
+            <button
+              onClick={() => setIsCreatingNew(false)}
+              className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              ← Torna alle collezioni
+            </button>
+          </>
+        )}
+
+        <div className="flex gap-2 mt-6">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500 dark:text-gray-400"
+          >
+            Annulla
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || (!selectedCollection && !newCollectionName.trim())}
+            className="flex-1 py-3 rounded-xl bg-[#2D6A4F] text-white text-sm font-semibold disabled:opacity-50"
+          >
+            {saving ? "Salvataggio..." : "Salva"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

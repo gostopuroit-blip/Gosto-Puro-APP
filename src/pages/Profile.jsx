@@ -3,12 +3,13 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users, Mail, MessageCircle } from "lucide-react";
+import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users, Mail, MessageCircle, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 import { trackEvent } from "@/components/useAnalytics";
+import SavedPostsTab from "@/components/community/SavedPostsTab";
 
 
 
@@ -25,6 +26,7 @@ export default function Profile() {
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
   const [installPrompt, setInstallPrompt] = useState(() => window.__pwaInstallPrompt || null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile"); // profile | saved
 
   useEffect(() => {
     // Check if already installed
@@ -244,10 +246,45 @@ export default function Profile() {
           </div>
           {user && <PremiumBadge user={user} />}
         </div>
+
+        {/* Tabs */}
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
+              activeTab === "profile"
+                ? "bg-[#2D6A4F] text-white"
+                : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            Profilo
+          </button>
+          <button
+            onClick={() => setActiveTab("saved")}
+            className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
+              activeTab === "saved"
+                ? "bg-[#2D6A4F] text-white"
+                : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            <Bookmark className="w-4 h-4" />
+            Salvati
+          </button>
+        </div>
       </div>
 
-      {/* Avatar + Name */}
-      <div className="px-5 mt-4">
+      {/* Saved posts tab */}
+      {activeTab === "saved" && user && (
+        <div className="px-5">
+          <SavedPostsTab currentUser={user} />
+        </div>
+      )}
+
+      {/* Profile tab */}
+      {activeTab === "profile" && (
+        <>
+          {/* Avatar + Name */}
+          <div className="px-5 mt-4">
         <div className="bg-white dark:bg-[#2D3F35] rounded-3xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246]">
           <div className="flex items-center gap-4">
             {/* Photo */}
@@ -524,8 +561,8 @@ export default function Profile() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-
-
+        </>
+      )}
     </div>
   );
 }
