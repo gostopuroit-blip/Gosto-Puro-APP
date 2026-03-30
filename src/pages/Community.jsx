@@ -297,38 +297,7 @@ export default function Community() {
               </div>
             )}
 
-            {displayedPosts.length === 0 ? (
-              <div className="text-center py-20">
-                {activeTab === "following" ? (
-                  <>
-                    <p className="text-4xl mb-4">👥</p>
-                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post da seguiti</p>
-                    <p className="text-sm text-gray-400">Segui altri utenti per vedere i loro post qui</p>
-                  </>
-                ) : hashtagFilter ? (
-                  <>
-                    <p className="text-4xl mb-4">🔍</p>
-                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post con #{hashtagFilter}</p>
-                    <p className="text-sm text-gray-400">Prova un altro hashtag</p>
-                  </>
-                ) : postTypeFilter ? (
-                  <>
-                    <p className="text-4xl mb-4">📭</p>
-                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post di questo tipo</p>
-                    <p className="text-sm text-gray-400">Prova un altro filtro</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-5xl mb-4">🍳</p>
-                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post ancora</p>
-                    <p className="text-sm text-gray-400 mb-6">Sii il primo a condividere qualcosa!</p>
-                    <Button onClick={() => setShowNewPost(true)} className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl">
-                      Crea il primo post
-                    </Button>
-                  </>
-                )}
-              </div>
-            ) : allContent.length === 0 ? (
+            {allContent.length === 0 ? (
               <div className="text-center py-20">
                 {activeTab === "following" ? (
                   <>
