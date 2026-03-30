@@ -402,9 +402,17 @@ export default function RecipeDetail() {
           {userRecipe?.is_saved ? "Salvata ✓" : "Salvare"}
         </Button>
         <Button
-          onClick={handlePrint}
+          onClick={() => {
+            if (!isPremium) {
+              toast.error("Piano Free: stampa disponibile solo per Premium ✨");
+              trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
+              return;
+            }
+            handlePrint();
+          }}
+          disabled={!isPremium}
           variant="outline"
-          className="w-full py-6 rounded-2xl border-2 font-bold text-sm"
+          className="w-full py-6 rounded-2xl border-2 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Printer className="w-5 h-5 mr-2" />
           Stampa ricetta
