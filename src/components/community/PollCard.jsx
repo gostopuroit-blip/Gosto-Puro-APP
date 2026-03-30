@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default function PollCard({ poll, currentUser, onUpdate }) {
   const [voting, setVoting] = useState(false);
@@ -30,10 +32,18 @@ export default function PollCard({ poll, currentUser, onUpdate }) {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <BarChart2 className="w-4 h-4 text-[#2D6A4F]" />
-        <p className="font-bold text-sm text-gray-900 dark:text-white">{poll.question}</p>
+    <div className="bg-gradient-to-br from-[#2D6A4F]/5 to-transparent border border-[#2D6A4F]/20 rounded-2xl p-4">
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-start gap-2 flex-1">
+          <BarChart2 className="w-4 h-4 text-[#2D6A4F] mt-0.5 flex-shrink-0" />
+          <p className="font-bold text-sm text-gray-900 dark:text-white">{poll.question}</p>
+        </div>
+        {isExpired && (
+          <span className="flex items-center gap-1 text-[10px] bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-full font-semibold flex-shrink-0">
+            <Clock className="w-3 h-3" />
+            Chiusa
+          </span>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -45,22 +55,28 @@ export default function PollCard({ poll, currentUser, onUpdate }) {
             <button
               key={option.id}
               onClick={() => handleVote(option.id)}
-              disabled={showResults || voting}
-              className="w-full text-left relative overflow-hidden rounded-xl border transition-all"
-              style={{ borderColor: isUserChoice ? "#2D6A4F" : "transparent" }}
+              disabled={showResults || voting || isExpired}
+              className={`w-full text-left relative overflow-hidden rounded-xl border transition-all ${
+                !showResults && !isExpired ? "hover:border-[#2D6A4F]/40 cursor-pointer" : ""
+              }`}
+              style={{ borderColor: isUserChoice ? "#2D6A4F" : "rgb(209, 213, 219)" }}
             >
               {showResults && (
                 <div
                   className="absolute inset-0 rounded-xl transition-all duration-500"
-                  style={{ width: `${pct}%`, background: isUserChoice ? "rgba(45,106,79,0.15)" : "rgba(0,0,0,0.04)" }}
+                  style={{ width: `${pct}%`, background: isUserChoice ? "rgba(45,106,79,0.25)" : "rgba(45,106,79,0.08)" }}
                 />
               )}
-              <div className="relative flex items-center justify-between px-3 py-2.5 bg-gray-50 dark:bg-[#111] rounded-xl">
-                <span className={`text-sm font-medium ${isUserChoice ? "text-[#2D6A4F]" : "text-gray-700 dark:text-gray-300"}`}>
+              <div className="relative flex items-center justify-between px-3 py-2.5 bg-white dark:bg-[#0F0F0F]">
+                <span className={`text-sm font-medium ${
+                  isUserChoice ? "text-[#2D6A4F]" : "text-gray-700 dark:text-gray-300"
+                } ${!showResults && !isExpired ? "group-hover:text-[#2D6A4F]" : ""}`}>
                   {isUserChoice && "✓ "}{option.text}
                 </span>
                 {showResults && (
-                  <span className={`text-xs font-bold ${isUserChoice ? "text-[#2D6A4F]" : "text-gray-400"}`}>{pct}%</span>
+                  <span className={`text-xs font-bold ${isUserChoice ? "text-[#2D6A4F]" : "text-gray-500"}`}>
+                    {pct}%
+                  </span>
                 )}
               </div>
             </button>
@@ -68,10 +84,16 @@ export default function PollCard({ poll, currentUser, onUpdate }) {
         })}
       </div>
 
-      <p className="text-[10px] text-gray-400 mt-2">
-        {poll.total_votes || 0} vot{poll.total_votes === 1 ? "o" : "i"}
-        {isExpired ? " · Chiuso" : ""}
-      </p>
+      <div className="flex items-center justify-between mt-3 text-[10px]">
+        <p className="text-gray-500 dark:text-gray-400 font-medium">
+          {poll.total_votes || 0} vot{poll.total_votes === 1 ? "o" : "i"}
+        </p>
+        {poll.expires_at && !isExpired && (
+          <p className="text-gray-400">
+            Scade {formatDistanceToNow(new Date(poll.expires_at), { addSuffix: true, locale: ptBR })}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

@@ -28,13 +28,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const [poll, setPoll] = useState(null);
 
   // Load poll if post_type is poll
-  useState(() => {
+  useEffect(() => {
     if (post.post_type === "poll") {
       base44.entities.Poll.filter({ post_id: post.id }, "-created_date", 1).then((data) => {
         if (data[0]) setPoll(data[0]);
       }).catch(() => {});
     }
-  });
+  }, [post.id, post.post_type]);
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
@@ -248,7 +248,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       </div>
 
       {/* Poll */}
-      {post.post_type === "poll" && poll && (
+      {poll && (
         <div className="px-4 pb-2">
           <PollCard poll={poll} currentUser={currentUser} onUpdate={setPoll} />
         </div>
