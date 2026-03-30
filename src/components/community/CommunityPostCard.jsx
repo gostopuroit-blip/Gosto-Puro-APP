@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import PostDetailModal from "./PostDetailModal";
 
 const POST_TYPE_META = {
   tip: { label: "Dica", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
@@ -15,6 +16,7 @@ const POST_TYPE_META = {
 
 export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [showComments, setShowComments] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -186,7 +188,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
 
       {/* Image */}
       {post.image_url && (
-        <div className={`w-full bg-gray-100 dark:bg-[#111] relative ${isBlurred ? "overflow-hidden" : ""}`}>
+        <div
+          className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
+          onClick={() => !isBlurred && setShowModal(true)}
+        >
           <img
             src={post.image_url}
             alt=""
@@ -282,6 +287,16 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           )}
         </div>
       </div>
+
+      {/* Post detail modal */}
+      {showModal && (
+        <PostDetailModal
+          post={post}
+          currentUser={currentUser}
+          onClose={() => setShowModal(false)}
+          onUpdate={(updated) => { onUpdate(updated); }}
+        />
+      )}
 
       {/* Comments */}
       {showComments && (
