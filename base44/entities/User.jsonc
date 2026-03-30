@@ -1,0 +1,108 @@
+{
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin",
+        "premium"
+      ],
+      "description": "User role"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium"
+      ],
+      "description": "Subscription plan"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "blocked"
+      ],
+      "description": "Account status"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Custom display name"
+    },
+    "bio": {
+      "type": "string",
+      "description": "User bio"
+    },
+    "age": {
+      "type": "number",
+      "description": "User age"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Profile photo URL"
+    },
+    "dietary_restrictions": {
+      "type": "string",
+      "description": "Dietary restrictions text"
+    },
+    "health_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Health conditions"
+    },
+    "dark_mode": {
+      "type": "boolean",
+      "description": "Dark mode preference"
+    },
+    "is_suggested": {
+      "type": "boolean",
+      "default": false,
+      "description": "User is suggested to follow"
+    },
+    "subscription_level": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium"
+      ],
+      "description": "Subscription level from Hotmart"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "cancelled",
+        "expired",
+        "refunded"
+      ],
+      "description": "Subscription status"
+    },
+    "subscription_plan": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "yearly",
+        "lifetime"
+      ],
+      "description": "Subscription plan type"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Subscription expiration date (next_billing_date from Hotmart)"
+    },
+    "hotmart_product_id": {
+      "type": "string",
+      "description": "Hotmart product ID that granted premium access"
+    }
+  },
+  "required": [
+    "role",
+    "plan",
+    "status"
+  ],
+  "name": "User"
+}

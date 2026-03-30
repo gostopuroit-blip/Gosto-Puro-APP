@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -12,10 +12,13 @@ import NotificationBell from "@/components/community/NotificationBell";
 import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
 
-// Algoritmo de recomendação: posts de quem você segue aparecem no topo,
-// depois posts de experts/admin, depois mais curtidos, depois os mais recentes
+// Algoritmo de recomendação: posts fixados no topo,
+// depois posts de quem você segue, experts/admin, mais curtidos, depois os mais recentes
 function rankPosts(posts, followedEmails) {
   return [...posts].sort((a, b) => {
+    // Posts fixados sempre no topo
+    if (a.is_pinned !== b.is_pinned) return b.is_pinned ? 1 : -1;
+
     const aFollowed = followedEmails.has(a.created_by) ? 1 : 0;
     const bFollowed = followedEmails.has(b.created_by) ? 1 : 0;
     if (aFollowed !== bFollowed) return bFollowed - aFollowed;
@@ -44,18 +47,27 @@ export default function Community() {
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "following"
   const [hashtagFilter, setHashtagFilter] = useState(null);
   const [postTypeFilter, setPostTypeFilter] = useState(null);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
 
   useEffect(() => {
     const init = async () => {
       const u = await base44.auth.me().catch(() => null);
       setUser(u);
-      const [postsData, followData] = await Promise.all([
+      const [postsData, followData, usersData] = await Promise.all([
         base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 60),
         u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200) : Promise.resolve([]),
+        base44.entities.User.list("-created_date", 100),
       ]);
       const followed = new Set(followData.map((f) => f.following_email));
       setFollowedEmails(followed);
       setPosts(postsData);
+      
+      // Get suggested users not yet followed
+      const suggested = usersData.filter((usr) => 
+        usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
+      );
+      setSuggestedUsers(suggested);
+      
       setLoading(false);
     };
     init();
@@ -204,6 +216,42 @@ export default function Community() {
             {/* Sugestões — só na aba "Scopri" sem filtros */}
             {activeTab === "for_you" && !hashtagFilter && !postTypeFilter && (
               <>
+                {suggestedUsers.length > 0 && (
+                  <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-3">Quem Seguir? 👥</h3>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {suggestedUsers.map((sUser) => (
+                        <div key={sUser.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-[#111] rounded-lg transition">
+                          <Link
+                            to={`/ExpertProfile?id=${sUser.email}`}
+                            className="flex items-center gap-2 flex-1 min-w-0"
+                          >
+                            {sUser.photo_url ? (
+                              <img src={sUser.photo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                {(sUser.display_name || sUser.email || "U").charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
+                                {sUser.display_name || sUser.email?.split("@")[0]}
+                              </p>
+                            </div>
+                          </Link>
+                          <FollowButton
+                            targetEmail={sUser.email}
+                            currentUser={user}
+                            onFollowChange={() => {
+                              setSuggestedUsers((prev) => prev.filter((u) => u.id !== sUser.id));
+                              handleFollowChange(sUser.email, true);
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <SuggestedUsers
                   currentUser={user}
                   followedEmails={followedEmails}

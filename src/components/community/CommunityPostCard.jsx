@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin } from "lucide-react";
 import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import { toast } from "sonner";
@@ -147,6 +147,12 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
       {/* Header */}
+      {post.is_pinned && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 px-4 py-2 flex items-center gap-2">
+          <Pin className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Fixado no topo</p>
+        </div>
+      )}
       <div className="flex items-center justify-between px-4 py-3">
         <Link
           to={`/ExpertProfile?id=${post.created_by}`}
