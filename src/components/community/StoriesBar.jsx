@@ -149,7 +149,7 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
         style={{ maxHeight: "80vh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 space-y-4 pb-10">
+        <div className="p-5 space-y-4 pb-24">
           <h3 className="font-bold text-gray-900 dark:text-white">Crea Story</h3>
           {!preview ? (
             <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-40 cursor-pointer">
