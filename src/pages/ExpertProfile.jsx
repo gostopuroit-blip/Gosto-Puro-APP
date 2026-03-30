@@ -250,14 +250,10 @@ export default function ExpertProfile() {
                   </div>
                 )}
                 {post.is_premium && !isPremiumUser && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Lock className="w-5 h-5 text-white" />
-                  </div>
-                )}
-                <div className="absolute bottom-1 right-1 flex items-center gap-0.5 bg-black/40 rounded-full px-1.5 py-0.5">
-                  <Heart className="w-2.5 h-2.5 text-white fill-white" />
-                  <span className="text-white text-[9px] font-bold">{post.likes_count || 0}</span>
-                </div>
+                   <div className="absolute inset-0 flex items-center justify-center">
+                     <Lock className="w-5 h-5 text-white" />
+                   </div>
+                 )}
               </button>
             ))}
           </div>
