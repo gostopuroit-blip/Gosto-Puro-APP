@@ -54,9 +54,8 @@ export default function ProfileStatsCard({ userEmail }) {
   );
 
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-3 gap-2">
       <StatItem icon="📝" value={stats.posts} label="Post" />
-      <StatItem icon="❤️" value={stats.totalLikes} label="Mi piace" />
       <StatItem icon="💬" value={stats.totalComments} label="Commenti" />
       <StatItem icon="👥" value={stats.followers} label="Follower" />
     </div>
