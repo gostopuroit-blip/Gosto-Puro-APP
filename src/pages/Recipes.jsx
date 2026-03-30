@@ -301,13 +301,6 @@ export default function Recipes() {
           )}
        </div>
 
-       {/* Recipe count */}
-       <div className="px-5 mb-3">
-         <p className="text-xs text-gray-400 dark:text-gray-500">
-           {orderedRecipes.length} {orderedRecipes.length === 1 ? "ricetta trovata" : "ricette trovate"}
-         </p>
-       </div>
-
        {/* Recipe List */}
        <div className="px-5 space-y-4">
          {orderedRecipes.length === 0 ?
