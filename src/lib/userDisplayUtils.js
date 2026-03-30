@@ -1,27 +1,21 @@
 /**
- * Get display name with fallback to email username
- * @param {string} displayName - The display_name field from user/post
- * @param {string} email - The email field from user/post
- * @returns {string} Display name or email username fallback
+ * Get display name with fallback
+ * If display_name is missing or empty, default to email username (before @)
  */
-export const getDisplayName = (displayName, email) => {
+export function getDisplayName(displayName, email) {
   if (displayName && displayName.trim()) {
-    return displayName.trim();
+    return displayName;
   }
   if (email) {
-    return email.split('@')[0];
+    return email.split("@")[0];
   }
-  return 'Utente';
-};
+  return "Utente";
+}
 
 /**
- * Get photo URL or null if empty
- * @param {string} photoUrl - The photo_url field from user/post
- * @returns {string|null} Photo URL or null
+ * Get photo URL with fallback
+ * If photo_url is missing, return null (UserAvatar will generate initials avatar)
  */
-export const getPhotoUrl = (photoUrl) => {
-  if (photoUrl && photoUrl.trim()) {
-    return photoUrl;
-  }
-  return null;
-};
+export function getPhotoUrl(photoUrl) {
+  return photoUrl || null;
+}
