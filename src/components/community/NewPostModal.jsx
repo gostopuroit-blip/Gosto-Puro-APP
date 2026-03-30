@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -109,7 +109,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
   // Extract hashtags from content (words starting with #)
   const extractHashtags = (text) => {
-    const matches = text.match(/#\w+/g) || [];
+    const matches = text.match(/#(\w+)/g) || [];
     return matches.map((tag) => tag.slice(1).toLowerCase());
   };
 
@@ -130,9 +130,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         image_url = file_url;
       }
 
-      // Combine manually added hashtags with auto-detected ones from content
-      const autoTags = extractHashtags(content);
-      const allTags = Array.from(new Set([...hashtags, ...autoTags]));
+      // Extract hashtags from content BEFORE creating post
+      const contentTags = extractHashtags(content);
+      const allTags = Array.from(new Set([...hashtags, ...contentTags]));
 
       // Get fresh user data to ensure photo_url is not null
       const freshUser = await base44.auth.me().catch(() => currentUser);
@@ -225,22 +225,23 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             />
           )}
 
-          {/* Multiple images carousel */}
+          {/* Image preview with clear controls */}
           {imagePreviews.length > 0 && (
             <div className="space-y-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Anteprima della foto</p>
               <div className="relative rounded-2xl overflow-hidden aspect-video w-full bg-black">
                 <img src={imagePreviews[currentImageIndex]} alt="" className="w-full h-full object-cover" />
                 {imagePreviews.length > 1 && (
                   <>
                     <button
                       onClick={() => setCurrentImageIndex((i) => (i - 1 + imagePreviews.length) % imagePreviews.length)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-1"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-1 hover:bg-black/70 transition"
                     >
                       <ChevronLeft className="w-4 h-4 text-white" />
                     </button>
                     <button
                       onClick={() => setCurrentImageIndex((i) => (i + 1) % imagePreviews.length)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-1"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 rounded-full p-1 hover:bg-black/70 transition"
                     >
                       <ChevronRight className="w-4 h-4 text-white" />
                     </button>
@@ -249,28 +250,36 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
                     </div>
                   </>
                 )}
+                <button
+                  onClick={() => removeImage(currentImageIndex)}
+                  className="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full p-2 transition"
+                  title="Rimuovi questa foto"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Thumbnail grid */}
-              <div className="flex gap-2 flex-wrap">
-                {imagePreviews.map((preview, i) => (
-                  <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border-2" style={{ borderColor: currentImageIndex === i ? "#2D6A4F" : "transparent" }}>
-                    <img src={preview} alt="" className="w-full h-full object-cover cursor-pointer" onClick={() => setCurrentImageIndex(i)} />
+              {imagePreviews.length > 1 && (
+                <div className="flex gap-2 flex-wrap">
+                  {imagePreviews.map((preview, i) => (
                     <button
-                      onClick={() => removeImage(i)}
-                      className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition"
+                      key={i}
+                      onClick={() => setCurrentImageIndex(i)}
+                      className="relative w-16 h-16 rounded-lg overflow-hidden border-2 transition hover:opacity-75"
+                      style={{ borderColor: currentImageIndex === i ? "#2D6A4F" : "transparent" }}
                     >
-                      <X className="w-4 h-4 text-white" />
+                      <img src={preview} alt="" className="w-full h-full object-cover" />
                     </button>
-                  </div>
-                ))}
-                {imagePreviews.length < 5 && (
-                  <label className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-[#333] flex items-center justify-center cursor-pointer hover:border-[#2D6A4F] transition">
-                    <Plus className="w-4 h-4 text-gray-400" />
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImages} multiple />
-                  </label>
-                )}
-              </div>
+                  ))}
+                  {imagePreviews.length < 5 && (
+                    <label className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 dark:border-[#333] flex items-center justify-center cursor-pointer hover:border-[#2D6A4F] transition">
+                      <Plus className="w-4 h-4 text-gray-400" />
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImages} multiple />
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -278,8 +287,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
           {imagePreviews.length === 0 && (
             <label className="block">
               <div className="border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-32 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#2D6A4F] transition">
-                <ImagePlus className="w-7 h-7 text-gray-300 dark:text-gray-600" />
-                <p className="text-xs text-gray-400">Aggiungi fino a 5 foto</p>
+                <Camera className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Carica la tua foto</p>
+                <p className="text-xs text-gray-400">Fino a 5 foto</p>
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={handleImages} multiple />
             </label>

@@ -14,28 +14,16 @@ import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
 import FollowButton from "@/components/community/FollowButton";
 
-// Algoritmo de recomendação: posts fixados no topo,
-// depois posts de quem você segue, experts/admin, mais curtidos, depois os mais recentes
+// Algoritmo de recomendação: posts fixados no topo (ordenados por data desc),
+// depois posts normais ordenados por data decrescente (mais recentes primeiro)
 function rankPosts(posts, followedEmails) {
   return [...posts].sort((a, b) => {
     // Posts fixados sempre no topo
-    if (a.is_pinned !== b.is_pinned) return b.is_pinned ? 1 : -1;
-
-    const aFollowed = followedEmails.has(a.created_by) ? 1 : 0;
-    const bFollowed = followedEmails.has(b.created_by) ? 1 : 0;
-    if (aFollowed !== bFollowed) return bFollowed - aFollowed;
-
-    const aExpert = a.is_expert ? 1 : 0;
-    const bExpert = b.is_expert ? 1 : 0;
-    if (aExpert !== bExpert) return bExpert - aExpert;
-
-    // Mix: likes + recência (posts das últimas 24h têm bônus)
-    const now = Date.now();
-    const aAge = (now - new Date(a.created_date).getTime()) / 3600000; // horas
-    const bAge = (now - new Date(b.created_date).getTime()) / 3600000;
-    const aScore = (a.likes_count || 0) + (aAge < 24 ? 5 : 0);
-    const bScore = (b.likes_count || 0) + (bAge < 24 ? 5 : 0);
-    return bScore - aScore;
+    if (a.is_pinned && !b.is_pinned) return -1;
+    if (!a.is_pinned && b.is_pinned) return 1;
+    
+    // Ambos fixados ou ambos não fixados: ordenar por data decrescente
+    return new Date(b.created_date) - new Date(a.created_date);
   });
 }
 
