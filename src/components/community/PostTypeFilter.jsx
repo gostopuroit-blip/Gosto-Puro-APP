@@ -2,7 +2,7 @@ import { Image, Lightbulb, UtensilsCrossed, BarChart2 } from "lucide-react";
 
 const FILTER_OPTIONS = [
   { value: null, label: "Tutti", icon: null },
-  { value: "image_post", label: "Fotos", icon: Image, color: "text-blue-500" },
+  { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
   { value: "tip", label: "Consigli", icon: Lightbulb, color: "text-amber-500" },
   { value: "recipe", label: "Ricette", icon: UtensilsCrossed, color: "text-[#2D6A4F]" },
   { value: "poll", label: "Sondaggi", icon: BarChart2, color: "text-indigo-500" },

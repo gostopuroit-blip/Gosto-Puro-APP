@@ -33,7 +33,7 @@ export default function SuggestedUsers({ currentUser, followedEmails, onFollowCh
 
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4 mb-4">
-      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Suggeriti per te</p>
+      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Consigliati per te</p>
       <div className="space-y-3">
         {users.map((u) => (
           <div key={u.email} className="flex items-center gap-3">

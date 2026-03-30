@@ -30,9 +30,9 @@ export default function TrendingHashtags({ onHashtagClick, currentUser }) {
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4 mb-4">
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="w-4 h-4 text-[#2D6A4F]" />
-        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Trending hashtags</p>
-        {isAdmin && <span className="text-[10px] text-gray-400 ml-auto">admin: clique no ✕ para apagar</span>}
+         <TrendingUp className="w-4 h-4 text-[#2D6A4F]" />
+         <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Hashtag in tendenza</p>
+         {isAdmin && <span className="text-[10px] text-gray-400 ml-auto">admin: clicca la ✕ per eliminare</span>}
       </div>
       <div className="flex overflow-x-auto gap-2 pb-2 hide-scrollbar">
         {hashtags.map((h) => (
