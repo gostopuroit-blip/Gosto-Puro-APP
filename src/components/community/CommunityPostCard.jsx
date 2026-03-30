@@ -4,6 +4,7 @@ import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, Utensi
 import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
+import ImageLightbox from "./ImageLightbox";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -24,6 +25,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
+  const [lightboxStartIdx, setLightboxStartIdx] = useState(0);
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -217,7 +220,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {(post.image_url || post.images?.length > 0) && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
-          onClick={() => !isBlurred && setShowModal(true)}
+          onClick={() => {
+            if (!isBlurred) {
+              if (post.images && post.images.length > 0) {
+                setLightboxStartIdx(0);
+                setShowImageLightbox(true);
+              } else if (post.image_url) {
+                setLightboxStartIdx(0);
+                setShowImageLightbox(true);
+              }
+            }
+          }}
         >
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />
@@ -308,6 +321,15 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           />
         </div>
       </div>
+
+      {/* Image lightbox */}
+      {showImageLightbox && (
+        <ImageLightbox
+          images={post.images && post.images.length > 0 ? post.images : [post.image_url]}
+          startIndex={lightboxStartIdx}
+          onClose={() => setShowImageLightbox(false)}
+        />
+      )}
 
       {/* Post detail modal */}
       {showModal && (
