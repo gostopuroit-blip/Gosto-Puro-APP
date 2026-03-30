@@ -73,10 +73,10 @@ export default function EditProfileModal({ user, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl w-full max-w-md my-8 shadow-xl">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
+      <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl w-full max-w-md shadow-xl max-h-[90vh] md:max-h-[85vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#2A2A2A]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Modifica Profilo</h2>
           <button
             onClick={onClose}
@@ -87,7 +87,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 overflow-y-auto flex-1">
           {/* Photo */}
           <div>
             <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Foto Profilo</label>
@@ -185,7 +185,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 dark:border-[#2A2A2A]">
+        <div className="flex gap-3 px-6 py-4 border-t border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
           <Button
             variant="outline"
             onClick={onClose}
