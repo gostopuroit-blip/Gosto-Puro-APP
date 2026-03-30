@@ -4,11 +4,11 @@ import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const REACTIONS = [
-  { emoji: "❤️", label: "Adoro" },
-  { emoji: "😂", label: "Haha" },
+  { emoji: "❤️", label: "Amo" },
+  { emoji: "😂", label: "Ahahah" },
   { emoji: "😮", label: "Wow" },
   { emoji: "😢", label: "Triste" },
-  { emoji: "👏", label: "Complimenti" },
+  { emoji: "👏", label: "Bravissimo" },
   { emoji: "🔥", label: "Fantastico" },
 ];
 
