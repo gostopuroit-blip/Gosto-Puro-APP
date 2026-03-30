@@ -99,6 +99,27 @@
       "type": "boolean",
       "description": "Author is expert/verified"
     },
+    "link_preview": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        }
+      },
+      "description": "Link preview metadata"
+    },
     "status": {
       "type": "string",
       "enum": [

@@ -9,6 +9,8 @@ import VideoPlayer from "./VideoPlayer";
 import VideoLightbox from "./VideoLightbox";
 import SavePostButton from "./SavePostButton";
 import MentionText from "./MentionText";
+import LinkPreviewCard from "./LinkPreviewCard";
+import LinkTextWithUrls from "./LinkTextWithUrls";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -289,6 +291,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         <div className={isBlurred ? "blur-sm select-none" : ""}>
           <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
             <MentionText text={post.content} />
+            <LinkTextWithUrls text={post.content} />
           </p>
         </div>
         {isBlurred && (
@@ -309,6 +312,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
                 {tag}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Link preview */}
+        {post.link_preview && (
+          <div className="mt-3">
+            <LinkPreviewCard preview={post.link_preview} />
           </div>
         )}
       </div>

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import MentionAutocomplete from "./MentionAutocomplete";
 import { extractMentionEmails } from "@/lib/mentionUtils";
+import LinkPreviewCard from "./LinkPreviewCard";
+import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
@@ -48,6 +50,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const [recipesLoading, setRecipesLoading] = useState(false);
   const [recipeSearch, setRecipeSearch] = useState("");
 
+  // Link preview state
+  const [linkPreview, setLinkPreview] = useState(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+
   const isExpertOrAdmin = currentUser?.role === "expert" || currentUser?.role === "admin";
 
   // Load hashtag suggestions
@@ -82,6 +88,35 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
     const timer = setTimeout(loadRecipes, 300);
     return () => clearTimeout(timer);
   }, [recipesOpen, recipeSearch]);
+
+  // Auto-detect URL in content and fetch preview
+  useEffect(() => {
+    const detectAndFetchUrl = async () => {
+      const url = extractUrlFromText(content);
+      if (url) {
+        setLoadingPreview(true);
+        const preview = await fetchLinkPreview(url);
+        if (preview) {
+          setLinkPreview(preview);
+        } else {
+          // Fallback: set preview with just the URL
+          setLinkPreview({
+            url,
+            title: null,
+            description: null,
+            image: null,
+            domain: new URL(url).hostname.replace("www.", ""),
+          });
+        }
+        setLoadingPreview(false);
+      } else {
+        setLinkPreview(null);
+      }
+    };
+
+    const timer = setTimeout(detectAndFetchUrl, 500);
+    return () => clearTimeout(timer);
+  }, [content]);
 
   const handleImages = (e) => {
     const files = Array.from(e.target.files || []);
@@ -194,6 +229,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
         linked_recipe_id: selectedRecipe?.id || null,
+        link_preview: linkPreview || null,
         likes: [],
         likes_count: 0,
         comments_count: 0,
@@ -388,6 +424,14 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             onChange={setContent}
             onMentionSelect={(user) => setMentionedUsers([...mentionedUsers, user])}
           />
+
+          {/* Link preview */}
+          {linkPreview && (
+            <LinkPreviewCard 
+              preview={linkPreview}
+              onRemove={() => setLinkPreview(null)}
+            />
+          )}
 
           {/* Poll options */}
           {postType === "poll" && (
