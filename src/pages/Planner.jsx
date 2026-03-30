@@ -130,6 +130,10 @@ export default function Planner() {
   };
 
   const replaceWithRecipe = async (recipe) => {
+    if (!canEditRecipes) {
+      toast.error("I piani Base non possono essere modificati. Passa a Premium!");
+      return;
+    }
     if (!replaceTarget || !plan) return;
     const { dayIndex, meal } = replaceTarget;
     const newPlanData = [...plan.plan_data];
@@ -150,6 +154,10 @@ export default function Planner() {
 
 
   const removeMeal = async (dayIndex, meal) => {
+    if (!canEditRecipes) {
+      toast.error("I piani Base non possono essere modificati. Passa a Premium!");
+      return;
+    }
     if (!plan) return;
     const newPlanData = [...plan.plan_data];
 
@@ -166,6 +174,10 @@ export default function Planner() {
   };
 
   const clearAllMeals = async () => {
+    if (!canEditRecipes) {
+      toast.error("I piani Base non possono essere modificati. Passa a Premium!");
+      return;
+    }
     if (!plan) return;
     const newPlanData = plan.plan_data.map((day) => ({
       ...day,
@@ -184,6 +196,11 @@ export default function Planner() {
   };
 
   const isPremium = user?.plan === "premium" || user?.role === "admin";
+
+  // Free users can create max 3 plans and cannot edit recipes
+  const userPlans = plans || [];
+  const canCreateMorePlans = isPremium || userPlans.length < 3;
+  const canEditRecipes = isPremium;
 
   // Track premium_view when non-premium user sees the paywall
   useEffect(() => {
@@ -231,8 +248,15 @@ export default function Planner() {
           <div className="flex flex-col items-end gap-2">
             <Button
                 size="sm"
-                className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
-                onClick={() => setShowModal(true)}>
+                className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] disabled:opacity-50"
+                disabled={!canCreateMorePlans}
+                onClick={() => {
+                  if (!canCreateMorePlans) {
+                    toast.error("Hai raggiunto il limite di 3 piani. Passa a Premium per crearne altri!");
+                  } else {
+                    setShowModal(true);
+                  }
+                }}>
 
               <Plus className="w-4 h-4" />
               {plan ? "Nuovo piano" : "Crea piano"}
@@ -337,20 +361,30 @@ export default function Planner() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (!canEditRecipes) {
+                                toast.error("I piani Base non possono essere modificati. Passa a Premium!");
+                                return;
+                              }
                               setReplaceTarget({ dayIndex, meal });
                               setSelectedFolder(null);
                               setSearchQuery("");
                             }}
-                            className="text-[#2D6A4F] dark:text-[#40916C] hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition">
+                            disabled={!canEditRecipes}
+                            className={`hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition ${canEditRecipes ? "text-[#2D6A4F] dark:text-[#40916C]" : "text-gray-300 dark:text-gray-600 cursor-not-allowed"}`}>
                             <Shuffle className="w-4 h-4" />
                           </button>
                           {recipe &&
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (!canEditRecipes) {
+                                toast.error("I piani Base non possono essere modificati. Passa a Premium!");
+                                return;
+                              }
                               removeMeal(dayIndex, meal);
                             }}
-                            className="text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition">
+                            disabled={!canEditRecipes}
+                            className={`hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition ${canEditRecipes ? "text-red-500 dark:text-red-400" : "text-gray-300 dark:text-gray-600 cursor-not-allowed"}`}>
                             <X className="w-4 h-4" />
                           </button>
                           }

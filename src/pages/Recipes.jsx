@@ -129,11 +129,11 @@ export default function Recipes() {
   };
 
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const FREE_LIMIT_PER_CATEGORY = 3;
+  const FREE_LIMIT_PER_CATEGORY = 9; // 9 recipes per category (Colazione/Pranzo/Cena/Le più preparate)
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
-  // Unlock only 3 recipes per Colazione/Pranzo/Cena — all others locked for free users
-  // Also always lock Instagram recipes for free users
+  // Unlock only 9 recipes per Colazione/Pranzo/Cena/Le più preparate — rest locked for free users
+  // Instagram recipes always locked for free users
   const unlockedIds = useMemo(() => {
     if (isPremium) return null;
     const countPerCategory = {};

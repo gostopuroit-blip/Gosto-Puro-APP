@@ -221,34 +221,34 @@ export default function Home() {
               }}>
 
             {topRecipes.map((recipe, index) => {
-              const isLocked = !isPremium;
-              if (isLocked) {
-                return (
-                  <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
-                    <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-100">
-                      <img
-                        src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                        alt={recipe.title}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover blur-sm opacity-40"
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-                        <div className="w-9 h-9 bg-white/90 rounded-xl flex items-center justify-center shadow">
-                          <Lock className="w-4 h-4 text-amber-500" />
-                        </div>
-                        <span className="text-white text-[11px] font-bold bg-black/50 px-2 py-0.5 rounded-md">Ricetta Premium</span>
-                        <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow">
-                          <Crown className="w-3 h-3" /> Sblocca Premium
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-[13px] font-semibold text-gray-400 mt-2 line-clamp-2 blur-[2px] select-none">{recipe.title}</p>
-                  </a>
-                );
-              }
-              return <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />;
-            })}
+               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
+               if (isLocked) {
+                 return (
+                   <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
+                     <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-100">
+                       <img
+                         src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                         alt={recipe.title}
+                         loading="lazy"
+                         decoding="async"
+                         className="w-full h-full object-cover blur-sm opacity-40"
+                       />
+                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+                         <div className="w-9 h-9 bg-white/90 rounded-xl flex items-center justify-center shadow">
+                           <Lock className="w-4 h-4 text-amber-500" />
+                         </div>
+                         <span className="text-white text-[11px] font-bold bg-black/50 px-2 py-0.5 rounded-md">Ricetta Premium</span>
+                         <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow">
+                           <Crown className="w-3 h-3" /> Sblocca Premium
+                         </span>
+                       </div>
+                     </div>
+                     <p className="text-[13px] font-semibold text-gray-400 mt-2 line-clamp-2 blur-[2px] select-none">{recipe.title}</p>
+                   </a>
+                 );
+               }
+               return <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />;
+             })}
           </div>
           {/* Dots */}
           {topRecipes.length > 0 &&
