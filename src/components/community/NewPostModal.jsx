@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera, Video } from "lucide-react";
+import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera, Video, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import MentionAutocomplete from "./MentionAutocomplete";
+import { extractMentionEmails } from "@/lib/mentionUtils";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
@@ -28,6 +30,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
   // Poll state
   const [pollOptions, setPollOptions] = useState(["", ""]);
+
+  // Mentions state
+  const [mentionedUsers, setMentionedUsers] = useState([]);
 
   // Hashtag suggestions
   const [tagInput, setTagInput] = useState("");
@@ -167,6 +172,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       const contentTags = extractHashtags(content);
       const allTags = Array.from(new Set([...hashtags, ...contentTags]));
 
+      // Extract mention emails from content
+      const mentionEmails = await extractMentionEmails(content, base44);
+
       // Get fresh user data to ensure photo_url is not null
       const freshUser = await base44.auth.me().catch(() => currentUser);
       const photoUrl = freshUser?.photo_url || currentUser?.photo_url || null;
@@ -182,6 +190,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         video_url,
         media_type,
         tags: allTags,
+        mentions: mentionEmails,
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
         linked_recipe_id: selectedRecipe?.id || null,
@@ -202,6 +211,18 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
           total_votes: 0,
           post_id: post.id,
           status: "active",
+        });
+      }
+
+      // Create mention notifications
+      if (mentionEmails.length > 0) {
+        mentionEmails.forEach((email) => {
+          base44.functions.invoke('createMentionNotification', {
+            recipient_email: email,
+            sender_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+            post_id: post.id,
+            type: "post_mention",
+          }).catch(() => {});
         });
       }
 
@@ -361,18 +382,11 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             </div>
           )}
 
-          {/* Text */}
-          <textarea
+          {/* Text with mention autocomplete */}
+          <MentionAutocomplete
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={
-              postType === "tip" ? "Condividi il tuo consiglio culinario..."
-              : postType === "recipe" ? "Descrivi la ricetta, ingredienti e preparazione..."
-              : postType === "premium_content" ? "Contenuto esclusivo per i tuoi follower premium..."
-              : "Condividi la tua esperienza culinaria..."
-            }
-            rows={3}
-            className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-gray-800 dark:text-white outline-none resize-none"
+            onChange={setContent}
+            onMentionSelect={(user) => setMentionedUsers([...mentionedUsers, user])}
           />
 
           {/* Poll options */}

@@ -8,6 +8,7 @@ import ImageLightbox from "./ImageLightbox";
 import VideoPlayer from "./VideoPlayer";
 import VideoLightbox from "./VideoLightbox";
 import SavePostButton from "./SavePostButton";
+import MentionText from "./MentionText";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -286,7 +287,9 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{post.title}</p>
         )}
         <div className={isBlurred ? "blur-sm select-none" : ""}>
-          <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{post.content}</p>
+          <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+            <MentionText text={post.content} />
+          </p>
         </div>
         {isBlurred && (
           <div className="mt-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl px-3 py-2 text-center">

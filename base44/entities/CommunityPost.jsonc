@@ -88,6 +88,13 @@
       },
       "description": "Food tags"
     },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of mentioned user emails"
+    },
     "is_expert": {
       "type": "boolean",
       "description": "Author is expert/verified"

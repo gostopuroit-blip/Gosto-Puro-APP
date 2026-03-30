@@ -37,6 +37,13 @@
       "default": 0,
       "description": "Total likes count"
     },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of mentioned user emails"
+    },
     "reply_to_comment_id": {
       "type": "string",
       "description": "Reference to parent comment ID if this is a reply"
