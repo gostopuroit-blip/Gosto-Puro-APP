@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BadgeCheck, ArrowLeft, Loader2, Heart, MessageCircle, Lock, Grid3X3 } from "lucide-react";
+import { BadgeCheck, ArrowLeft, Loader2, Heart, MessageCircle, Lock, Grid3X3, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import PostDetailModal from "@/components/community/PostDetailModal";
+import EditProfileModal from "@/components/EditProfileModal";
 import FollowButton from "@/components/community/FollowButton";
 
 export default function ExpertProfile() {
@@ -18,6 +19,7 @@ export default function ExpertProfile() {
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
@@ -133,13 +135,21 @@ export default function ExpertProfile() {
                       : <span className="text-gray-400">Membro</span>
                   }
                 </p>
-                {expertEmail !== currentUser?.email && (
-                  <FollowButton
-                    targetEmail={expertEmail}
-                    currentUser={currentUser}
-                    onFollowChange={handleFollowChange}
-                  />
-                )}
+                {expertEmail !== currentUser?.email ? (
+                    <FollowButton
+                      targetEmail={expertEmail}
+                      currentUser={currentUser}
+                      onFollowChange={handleFollowChange}
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setShowEditModal(true)}
+                      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-[#2D6A4F]/10 text-[#2D6A4F] border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition-all"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      Modifica
+                    </button>
+                  )}
               </div>
 
               {/* Stats */}
@@ -253,6 +263,26 @@ export default function ExpertProfile() {
           </div>
         )}
       </div>
-    </div>
-  );
-}
+
+      {selectedPost && (
+        <PostDetailModal
+          post={selectedPost}
+          currentUser={currentUser}
+          onClose={() => setSelectedPost(null)}
+          onUpdate={(updated) => handlePostUpdate(updated, selectedPost.id)}
+        />
+      )}
+
+      {showEditModal && currentUser && (
+        <EditProfileModal
+          user={currentUser}
+          onClose={() => setShowEditModal(false)}
+          onSave={() => {
+            setShowEditModal(false);
+            base44.auth.me().then(setCurrentUser).catch(() => {});
+          }}
+        />
+      )}
+      </div>
+      );
+      }
