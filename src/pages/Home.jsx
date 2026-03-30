@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
@@ -117,6 +117,27 @@ export default function Home() {
   };
 
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
+
+  const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
+  const FREE_LIMIT_PER_CATEGORY = 9;
+
+  const unlockedIds = useMemo(() => {
+    if (isPremium) return null;
+    const countPerCategory = {};
+    const ids = new Set();
+    for (const r of topRecipes) {
+      const cat = r.category || "";
+      const isInstagram = (r.occasions || []).includes("Instagram") || (r.lifestyle || []).includes("Instagram");
+      if (isInstagram) continue;
+      if (!FREE_CATEGORIES.includes(cat)) continue;
+      if (!countPerCategory[cat]) countPerCategory[cat] = 0;
+      if (countPerCategory[cat] < FREE_LIMIT_PER_CATEGORY) {
+        ids.add(r.id);
+        countPerCategory[cat]++;
+      }
+    }
+    return ids;
+  }, [topRecipes, isPremium]);
 
   if (loading) {
     return (
