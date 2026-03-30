@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash } from "lucide-react";
 import PollCard from "./PollCard";
+import ReactionButton from "./ReactionButton";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -256,12 +257,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
 
       {/* Actions */}
       <div className="flex items-center gap-4 px-4 py-3">
-        <button onClick={handleLike} className="flex items-center gap-1.5 text-sm font-medium transition">
-          <Heart className={`w-5 h-5 transition ${isLiked ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
-          <span className={isLiked ? "text-red-500" : "text-gray-500 dark:text-gray-400"}>
-            {post.likes_count || 0}
-          </span>
-        </button>
+        <ReactionButton
+          postId={post.id}
+          currentUser={currentUser}
+          onReactionsChange={() => {}}
+        />
         <button
           onClick={toggleComments}
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition hover:text-[#2D6A4F]">
