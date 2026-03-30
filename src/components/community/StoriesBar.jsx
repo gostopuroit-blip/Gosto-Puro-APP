@@ -143,22 +143,22 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-end justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/80" onClick={onClose}>
       <div
-        className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg overflow-y-auto"
-        style={{ maxHeight: "90dvh", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}
+        className="absolute bottom-0 left-0 right-0 bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full overflow-y-auto"
+        style={{ maxHeight: "80vh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 pb-10">
           <h3 className="font-bold text-gray-900 dark:text-white">Crea Story</h3>
           {!preview ? (
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-48 cursor-pointer">
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 dark:border-[#333] rounded-2xl h-40 cursor-pointer">
               <Plus className="w-8 h-8 text-gray-400 mb-2" />
               <p className="text-sm text-gray-400">Tocca per scegliere un'immagine</p>
               <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
             </label>
           ) : (
-            <div className="relative rounded-2xl overflow-hidden h-48">
+            <div className="relative rounded-2xl overflow-hidden h-40">
               <img src={preview} alt="" className="w-full h-full object-cover" />
               <button onClick={() => { setPreview(null); setFile(null); }} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1"><X className="w-4 h-4" /></button>
             </div>
