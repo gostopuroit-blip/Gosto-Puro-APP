@@ -223,10 +223,28 @@ export default function StoriesBar({ currentUser }) {
       <div className="flex gap-3 overflow-x-auto hide-scrollbar px-4 py-3">
         {/* Add story */}
         {currentUser && (
-          <button onClick={() => setShowAdd(true)} className="flex-shrink-0 flex flex-col items-center gap-1">
+          <button
+            onClick={() => {
+              if (hasMyStory) {
+                const myGroupIdx = groups.findIndex((g) => g.email === currentUser.email);
+                if (myGroupIdx !== -1) openGroup(myGroupIdx);
+              } else {
+                setShowAdd(true);
+              }
+            }}
+            className="flex-shrink-0 flex flex-col items-center gap-1"
+          >
             <div className="relative w-14 h-14">
-              {hasMyStory && currentUser.photo_url ? (
-                <img src={currentUser.photo_url} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-[#2D6A4F]" />
+              {hasMyStory ? (
+                <div className={`w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]`}>
+                  {currentUser.photo_url ? (
+                    <img src={currentUser.photo_url} alt="" className="w-full h-full rounded-full object-cover border-2 border-white dark:border-[#0F0F0F]" />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-2 border-white dark:border-[#0F0F0F]">
+                      {(currentUser.full_name || currentUser.email || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-[#2A2A2A] border-2 border-dashed border-gray-300 dark:border-[#444] flex items-center justify-center">
                   <Plus className="w-5 h-5 text-gray-400" />
