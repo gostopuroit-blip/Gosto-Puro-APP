@@ -506,7 +506,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
     if (!recipe) return;
     setGeneratingImage(true);
     const imgPrompt = buildImagePrompt(selectedOcc, recipe, selectedCountry);
-    const result = await base44.integrations.Core.GenerateImage({ prompt: imgPrompt });
+    const result = await base44.integrations.Core.GenerateImage({ prompt: imgPrompt, model: "gpt_5_mini" });
     setImageUrl(result.url);
     setGeneratingImage(false);
     toast.success("Immagine generata!");
