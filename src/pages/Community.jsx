@@ -10,6 +10,7 @@ import SuggestedUsers from "@/components/community/SuggestedUsers";
 import StoriesBar from "@/components/community/StoriesBar";
 import NotificationBell from "@/components/community/NotificationBell";
 import TrendingHashtags from "@/components/community/TrendingHashtags";
+import PostTypeFilter from "@/components/community/PostTypeFilter";
 
 // Algoritmo de recomendação: posts de quem você segue aparecem no topo,
 // depois posts de experts/admin, depois mais curtidos, depois os mais recentes
@@ -41,6 +42,7 @@ export default function Community() {
   const [showNewPost, setShowNewPost] = useState(false);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "following"
   const [hashtagFilter, setHashtagFilter] = useState(null);
+  const [postTypeFilter, setPostTypeFilter] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -79,13 +81,16 @@ export default function Community() {
     setPosts((prev) => [post, ...prev]);
   };
 
-  // Filtra e ordena conforme a aba ativa e hashtag
+  // Filtra e ordena conforme a aba ativa, hashtag e tipo de post
   const displayedPosts = (() => {
     let filtered = activeTab === "following"
       ? posts.filter((p) => followedEmails.has(p.created_by))
       : posts;
     if (hashtagFilter) {
       filtered = filtered.filter((p) => p.tags?.includes(hashtagFilter));
+    }
+    if (postTypeFilter) {
+      filtered = filtered.filter((p) => p.post_type === postTypeFilter);
     }
     return rankPosts(filtered, followedEmails);
   })();
@@ -117,20 +122,20 @@ export default function Community() {
         </div>
 
         {/* Tabs */}
-        <div className="max-w-lg mx-auto flex px-4 pb-2 gap-4">
+        <div className="max-w-lg mx-auto flex px-4 pb-3 gap-4 border-b border-gray-100 dark:border-[#2A2A2A]">
           <button
-            onClick={() => setActiveTab("for_you")}
-            className={`text-sm font-semibold pb-1 border-b-2 transition-all ${
+            onClick={() => { setActiveTab("for_you"); setPostTypeFilter(null); }}
+            className={`text-sm font-semibold pb-2 border-b-2 transition-all ${
               activeTab === "for_you"
                 ? "border-[#2D6A4F] text-[#2D6A4F]"
                 : "border-transparent text-gray-400"
             }`}
           >
-            Per te
+            Scopri
           </button>
           <button
-            onClick={() => setActiveTab("following")}
-            className={`text-sm font-semibold pb-1 border-b-2 transition-all ${
+            onClick={() => { setActiveTab("following"); setPostTypeFilter(null); }}
+            className={`text-sm font-semibold pb-2 border-b-2 transition-all ${
               activeTab === "following"
                 ? "border-[#2D6A4F] text-[#2D6A4F]"
                 : "border-transparent text-gray-400"
@@ -138,6 +143,11 @@ export default function Community() {
           >
             Seguiti {followedEmails.size > 0 && <span className="text-[10px] bg-[#2D6A4F] text-white rounded-full px-1.5 py-0.5 ml-1">{followedEmails.size}</span>}
           </button>
+        </div>
+
+        {/* Post type filter */}
+        <div className="max-w-lg mx-auto px-4 pt-3 pb-2">
+          <PostTypeFilter selected={postTypeFilter} onChange={setPostTypeFilter} />
         </div>
       </div>
 
@@ -184,8 +194,8 @@ export default function Community() {
           </div>
         ) : (
           <>
-            {/* Sugestões — só na aba "Per te" */}
-            {activeTab === "for_you" && !hashtagFilter && (
+            {/* Sugestões — só na aba "Scopri" sem filtros */}
+            {activeTab === "for_you" && !hashtagFilter && !postTypeFilter && (
               <>
                 <SuggestedUsers
                   currentUser={user}
@@ -212,6 +222,18 @@ export default function Community() {
                     <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post da seguiti</p>
                     <p className="text-sm text-gray-400">Segui altri utenti per vedere i loro post qui</p>
                   </>
+                ) : hashtagFilter ? (
+                  <>
+                    <p className="text-4xl mb-4">🔍</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post con #{hashtagFilter}</p>
+                    <p className="text-sm text-gray-400">Prova un altro hashtag</p>
+                  </>
+                ) : postTypeFilter ? (
+                  <>
+                    <p className="text-4xl mb-4">📭</p>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post di questo tipo</p>
+                    <p className="text-sm text-gray-400">Prova un altro filtro</p>
+                  </>
                 ) : (
                   <>
                     <p className="text-5xl mb-4">🍳</p>
@@ -232,6 +254,7 @@ export default function Community() {
                   followedEmails={followedEmails}
                   onFollowChange={handleFollowChange}
                   onUpdate={(updated) => handlePostUpdate(updated, post.id)}
+                  onHashtagFilter={(tag) => setHashtagFilter(tag)}
                 />
               ))
             )}

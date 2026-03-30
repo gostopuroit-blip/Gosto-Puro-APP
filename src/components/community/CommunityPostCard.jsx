@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash } from "lucide-react";
 import PollCard from "./PollCard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -17,7 +17,7 @@ const POST_TYPE_META = {
   image_post: null,
 };
 
-export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange }) {
+export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange, onHashtagFilter }) {
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [comments, setComments] = useState([]);
@@ -209,7 +209,14 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {post.tags.map((tag) => (
-              <span key={tag} className="text-xs text-[#2D6A4F] font-medium">#{tag}</span>
+              <button
+                key={tag}
+                onClick={() => onHashtagFilter?.(tag)}
+                className="flex items-center gap-0.5 text-xs text-[#2D6A4F] font-medium hover:underline transition"
+              >
+                <Hash className="w-2.5 h-2.5" />
+                {tag}
+              </button>
             ))}
           </div>
         )}
