@@ -53,7 +53,6 @@ export default function Recipes() {
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
   const FREE_OCCASIONS = ["Occasioni Speciali", "Stile di Vita e Salute", "Dolci", "Leggera"];
-  const FREE_LIMIT_PER_CATEGORY = 9;
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
 
   const filteredRecipes = useMemo(() => {
@@ -127,62 +126,62 @@ export default function Recipes() {
     navigate({ search: params.toString() }, { replace: true });
   };
 
-  const toggleFilter = (filterKey) => {
-    setActiveFilters((prev) => {
-      const newFilters = new Set(prev);
-      if (newFilters.has(filterKey)) {
-        newFilters.delete(filterKey);
-      } else {
-        newFilters.add(filterKey);
-      }
-      return newFilters;
-    });
-    goToPage(1);
-  };
+   const toggleFilter = (filterKey) => {
+     setActiveFilters((prev) => {
+       const newFilters = new Set(prev);
+       if (newFilters.has(filterKey)) {
+         newFilters.delete(filterKey);
+       } else {
+         newFilters.add(filterKey);
+       }
+       return newFilters;
+     });
+     goToPage(1);
+   };
 
-  // Unlock only 9 recipes per Colazione/Pranzo/Cena/Occasions/Lifestyles — rest locked for free users
+  // Unlock 3 recipes for categories (Colazione/Pranzo/Cena), 9 for occasions (Occasioni Speciali, etc)
   // Instagram recipes always locked for free users
   const unlockedIds = useMemo(() => {
     if (isPremium) return null;
     const countPerTag = {};
     const ids = new Set();
-    
+
     // Sort by created_date DESC to get most recent first
     const sorted = [...recipes].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-    
+
     for (const r of sorted) {
       const cat = r.category || "";
       const isInstagram = (r.occasions || []).includes("Instagram") || (r.lifestyle || []).includes("Instagram");
       if (isInstagram) continue; // always locked for free
-      
-      // Check categories
+
+      // Check categories — 3 recipes limit
       if (FREE_CATEGORIES.includes(cat)) {
         if (!countPerTag[cat]) countPerTag[cat] = 0;
-        if (countPerTag[cat] < FREE_LIMIT_PER_CATEGORY) {
+        if (countPerTag[cat] < 3) {
           ids.add(r.id);
           countPerTag[cat]++;
         }
       }
-      
-      // Check occasions
+
+      // Check occasions — 9 recipes limit
       if (r.occasions) {
         for (const occ of r.occasions) {
           if (FREE_OCCASIONS.includes(occ)) {
             if (!countPerTag[occ]) countPerTag[occ] = 0;
-            if (countPerTag[occ] < FREE_LIMIT_PER_CATEGORY) {
+            if (countPerTag[occ] < 9) {
               ids.add(r.id);
               countPerTag[occ]++;
             }
           }
         }
       }
-      
-      // Check lifestyles
+
+      // Check lifestyles — 9 recipes limit
       if (r.lifestyle) {
         for (const life of r.lifestyle) {
           if (FREE_OCCASIONS.includes(life)) {
             if (!countPerTag[life]) countPerTag[life] = 0;
-            if (countPerTag[life] < FREE_LIMIT_PER_CATEGORY) {
+            if (countPerTag[life] < 9) {
               ids.add(r.id);
               countPerTag[life]++;
             }
