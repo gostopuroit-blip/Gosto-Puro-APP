@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2 } from "lucide-react";
 import PollCard from "./PollCard";
 import ReactionButton from "./ReactionButton";
+import ImageCarousel from "./ImageCarousel";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -211,19 +212,23 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         </div>
       </div>
 
-      {/* Image */}
-      {post.image_url && (
+      {/* Image or Images Carousel */}
+      {(post.image_url || post.images?.length > 0) && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
           onClick={() => !isBlurred && setShowModal(true)}
         >
-          <img
-            src={post.image_url}
-            alt=""
-            className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
-          />
+          {post.images && post.images.length > 0 ? (
+            <ImageCarousel images={post.images} isBlurred={isBlurred} />
+          ) : (
+            <img
+              src={post.image_url}
+              alt=""
+              className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
+            />
+          )}
           {isBlurred && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50">
               <Lock className="w-8 h-8 text-white" />
               <p className="text-white font-bold text-sm">Contenuto Premium</p>
               <p className="text-white/80 text-xs">Abbonati per vedere</p>

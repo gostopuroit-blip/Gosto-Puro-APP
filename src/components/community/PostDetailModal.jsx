@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, X, Lock } from "lucide-react";
+import ImageCarousel from "./ImageCarousel";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
@@ -134,24 +135,28 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
         </div>
 
         {/* Conteúdo scrollável */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Imagem */}
-          {localPost.image_url && (
-            <div className={`w-full bg-black relative ${isBlurred ? "overflow-hidden" : ""}`}>
-              <img
-                src={localPost.image_url}
-                alt=""
-                className={`w-full object-contain max-h-[50vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
-              />
-              {isBlurred && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                  <Lock className="w-8 h-8 text-white" />
-                  <p className="text-white font-bold text-sm">Contenuto Premium</p>
-                  <p className="text-white/80 text-xs">Abbonati per vedere</p>
-                </div>
-              )}
-            </div>
-          )}
+         <div className="flex-1 overflow-y-auto">
+           {/* Imagem ou Carousel */}
+           {(localPost.image_url || localPost.images?.length > 0) && (
+             <div className={`w-full bg-black relative ${isBlurred ? "overflow-hidden" : ""}`}>
+               {localPost.images && localPost.images.length > 0 ? (
+                 <ImageCarousel images={localPost.images} isBlurred={isBlurred} />
+               ) : (
+                 <img
+                   src={localPost.image_url}
+                   alt=""
+                   className={`w-full object-contain max-h-[50vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
+                 />
+               )}
+               {isBlurred && (
+                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50">
+                   <Lock className="w-8 h-8 text-white" />
+                   <p className="text-white font-bold text-sm">Contenuto Premium</p>
+                   <p className="text-white/80 text-xs">Abbonati per vedere</p>
+                 </div>
+               )}
+             </div>
+           )}
 
           {/* Curtidas e comentários */}
           <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A]">

@@ -124,10 +124,14 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
     try {
       let image_url = null;
+      let images = [];
       if (imagePreviews.length > 0) {
-        // Upload first image only (per now, for compatibility)
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: imageFiles[0] });
-        image_url = file_url;
+        // Upload all images and save URLs
+        const uploadPromises = imageFiles.map((file) =>
+          base44.integrations.Core.UploadFile({ file }).then((res) => res.file_url)
+        );
+        images = await Promise.all(uploadPromises);
+        image_url = images[0]; // First image as primary
       }
 
       // Extract hashtags from content BEFORE creating post
@@ -145,6 +149,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         content: content.trim(),
         title: title.trim() || null,
         image_url,
+        images: images.length > 0 ? images : [],
         tags: allTags,
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
