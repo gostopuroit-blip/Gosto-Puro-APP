@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { X, Loader2, UserPlus, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 
 export default function FollowersModal({ expertEmail, onClose, currentUser }) {
   const [followers, setFollowers] = useState([]);
@@ -27,8 +28,8 @@ export default function FollowersModal({ expertEmail, onClose, currentUser }) {
         setFollowers(
           followerUsers.map((u) => ({
             email: u.email,
-            name: u.full_name || u.email.split("@")[0],
-            photo: u.photo_url || null,
+            name: getDisplayName(u.full_name, u.email),
+            photo: getPhotoUrl(u.photo_url),
           }))
         );
 
@@ -118,11 +119,11 @@ export default function FollowersModal({ expertEmail, onClose, currentUser }) {
           <div className="space-y-2 overflow-y-auto flex-1 p-4">
             {followers.map((follower) => (
               <div key={follower.email} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition">
-                {follower.photo ? (
-                  <img src={follower.photo} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                {getPhotoUrl(follower.photo) ? (
+                  <img src={getPhotoUrl(follower.photo)} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {(follower.name || "U").charAt(0).toUpperCase()}
+                    {(getDisplayName(follower.name, follower.email) || "U").charAt(0).toUpperCase()}
                   </div>
                 )}
                 <Link
@@ -130,7 +131,7 @@ export default function FollowersModal({ expertEmail, onClose, currentUser }) {
                   className="flex-1 min-w-0"
                 >
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate hover:underline">
-                    {follower.name}
+                    {getDisplayName(follower.name, follower.email)}
                   </p>
                   <p className="text-xs text-gray-400 truncate">{follower.email}</p>
                 </Link>

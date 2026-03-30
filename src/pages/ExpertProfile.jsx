@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { BadgeCheck, ArrowLeft, Loader2, Lock, Grid3X3, Edit3, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import UserAvatar from "@/components/UserAvatar";
+import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 
 
 import CommunityPostCard from "@/components/community/CommunityPostCard";
@@ -57,15 +58,22 @@ export default function ExpertProfile() {
       setIsFollowing(userFollowData.length > 0);
 
       // Use first post to build expert info
+      const displayName = postsData.length > 0 
+        ? getDisplayName(postsData[0].user_name, expertEmail)
+        : getDisplayName(null, expertEmail);
+      const photoUrl = postsData.length > 0
+        ? getPhotoUrl(postsData[0].user_photo)
+        : null;
+
       if (postsData.length > 0) {
         setExpert({
           email: expertEmail,
-          name: postsData[0].user_name || expertEmail.split("@")[0],
-          photo: postsData[0].user_photo || null,
+          name: displayName,
+          photo: photoUrl,
           is_expert: postsData[0].is_expert,
         });
       } else {
-        setExpert({ email: expertEmail, name: expertEmail.split("@")[0], photo: null, is_expert: false });
+        setExpert({ email: expertEmail, name: displayName, photo: photoUrl, is_expert: false });
       }
 
       setLoading(false);
@@ -117,7 +125,7 @@ export default function ExpertProfile() {
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-start gap-4">
             <div className="border-2 border-[#2D6A4F] rounded-full">
-              <UserAvatar photoUrl={expert?.photo} userName={expert?.name} size="xl" />
+              <UserAvatar photoUrl={getPhotoUrl(expert?.photo)} userName={getDisplayName(expert?.name, expert?.email)} size="xl" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
