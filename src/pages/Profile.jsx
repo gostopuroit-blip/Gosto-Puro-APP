@@ -3,12 +3,13 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users } from "lucide-react";
+import { Camera, Check, Loader2, ShieldCheck, Crown, Moon, Sun, Trash2, Bell, BellOff, Download, Users, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 import { trackEvent } from "@/components/useAnalytics";
+import EditProfileModal from "@/components/EditProfileModal";
 
 
 
@@ -25,6 +26,7 @@ export default function Profile() {
   const [notifStatus, setNotifStatus] = useState("idle"); // idle | subscribed | denied | asking | unsupported
   const [installPrompt, setInstallPrompt] = useState(() => window.__pwaInstallPrompt || null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     // Check if already installed
@@ -242,7 +244,16 @@ export default function Profile() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Il mio Profilo</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Personalizza la tua esperienza</p>
           </div>
-          {user && <PremiumBadge user={user} />}
+          <div className="flex items-center gap-2">
+            {user && <PremiumBadge user={user} />}
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="p-2 text-[#2D6A4F] bg-[#2D6A4F]/10 rounded-xl hover:bg-[#2D6A4F]/20 transition"
+              title="Modifica profilo"
+            >
+              <Edit3 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -479,6 +490,15 @@ export default function Profile() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <EditProfileModal
+          user={user}
+          onClose={() => setShowEditModal(false)}
+          onSave={loadUser}
+        />
+      )}
     </div>
   );
 }
