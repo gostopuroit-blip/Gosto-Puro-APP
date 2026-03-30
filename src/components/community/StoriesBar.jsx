@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, X, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Plus, X, ChevronLeft, ChevronRight, Loader2, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 // Story viewer modal
 function StoryViewer({ stories, startIndex, currentUser, onClose }) {
   const [idx, setIdx] = useState(startIndex);
   const [progress, setProgress] = useState(0);
+  const [localStories, setLocalStories] = useState(stories);
   const intervalRef = useRef(null);
   const DURATION = 5000;
 
-  const story = stories[idx];
+  const story = localStories[idx];
 
   useEffect(() => {
     setProgress(0);
@@ -35,23 +36,34 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
   }, [idx]);
 
   const next = () => {
-    if (idx < stories.length - 1) setIdx(idx + 1);
+    if (idx < localStories.length - 1) setIdx(idx + 1);
     else onClose();
   };
   const prev = () => {
     if (idx > 0) setIdx(idx - 1);
   };
 
+  const handleLike = (e) => {
+    e.stopPropagation();
+    if (!currentUser) return toast.error("Fai login per mettere mi piace");
+    const likes = story.likes || [];
+    const isLiked = likes.includes(currentUser.email);
+    const newLikes = isLiked ? likes.filter((e) => e !== currentUser.email) : [...likes, currentUser.email];
+    base44.entities.Story.update(story.id, { likes: newLikes, likes_count: newLikes.length }).catch(() => {});
+    setLocalStories((prev) => prev.map((s, i) => i === idx ? { ...s, likes: newLikes, likes_count: newLikes.length } : s));
+  };
+
   if (!story) return null;
 
   const isOwner = story.created_by === currentUser?.email;
+  const isLiked = story.likes?.includes(currentUser?.email);
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center" onClick={onClose}>
       <div className="relative w-full max-w-sm h-full max-h-[100dvh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Progress bars */}
         <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2">
-          {stories.map((_, i) => (
+          {localStories.map((_, i) => (
             <div key={i} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
               <div
                 className="h-full bg-white rounded-full transition-none"
@@ -65,9 +77,9 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
         <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-between px-3">
           <div className="flex items-center gap-2">
             {story.user_photo ? (
-              <img src={story.user_photo} alt="" className="w-8 h-8 rounded-full object-cover border-2 border-white" />
+              <img src={story.user_photo} alt="" className="w-9 h-9 rounded-full object-cover border-2 border-white" style={{ imageRendering: "auto" }} />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold border-2 border-white">
+              <div className="w-9 h-9 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold border-2 border-white">
                 {(story.user_name || "U").charAt(0)}
               </div>
             )}
@@ -84,12 +96,20 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
           <img src={story.media_url} alt="" className="w-full h-full object-contain" />
         </div>
 
-        {/* Caption */}
-        {story.caption && (
-          <div className="absolute bottom-8 left-0 right-0 px-4">
-            <p className="text-white text-sm text-center font-medium drop-shadow-lg">{story.caption}</p>
-          </div>
-        )}
+        {/* Caption + Like */}
+        <div className="absolute bottom-8 left-0 right-0 px-4 flex items-center justify-between">
+          {story.caption ? (
+            <p className="text-white text-sm font-medium drop-shadow-lg flex-1 text-center">{story.caption}</p>
+          ) : <div className="flex-1" />}
+          {!isOwner && (
+            <button onClick={handleLike} className="flex flex-col items-center gap-0.5 ml-3 flex-shrink-0">
+              <Heart className={`w-7 h-7 drop-shadow-lg transition-all ${isLiked ? "fill-red-500 text-red-500 scale-110" : "text-white"}`} />
+              {(story.likes_count || 0) > 0 && (
+                <span className="text-white text-xs font-semibold drop-shadow">{story.likes_count}</span>
+              )}
+            </button>
+          )}
+        </div>
 
         {/* Tap zones */}
         <button className="absolute left-0 top-0 bottom-0 w-1/3 z-20" onClick={prev} />
@@ -236,11 +256,11 @@ export default function StoriesBar({ currentUser }) {
           >
             <div className="relative w-14 h-14">
               {hasMyStory ? (
-                <div className={`w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]`}>
+                <div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-[#2D6A4F] to-[#D4A846]">
                   {currentUser.photo_url ? (
-                    <img src={currentUser.photo_url} alt="" className="w-full h-full rounded-full object-cover border-2 border-white dark:border-[#0F0F0F]" />
+                    <img src={currentUser.photo_url} alt="" className="w-full h-full rounded-full object-cover border-[2.5px] border-white dark:border-[#0F0F0F]" style={{ imageRendering: "auto" }} />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-2 border-white dark:border-[#0F0F0F]">
+                    <div className="w-full h-full rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold border-[2.5px] border-white dark:border-[#0F0F0F]">
                       {(currentUser.full_name || currentUser.email || "U").charAt(0).toUpperCase()}
                     </div>
                   )}

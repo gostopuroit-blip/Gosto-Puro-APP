@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Author email"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Author display name"
+    },
+    "user_photo": {
+      "type": "string",
+      "description": "Author photo URL"
+    },
+    "media_url": {
+      "type": "string",
+      "description": "Image or video URL"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video"
+      ],
+      "description": "Type of media"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Story caption or text overlay"
+    },
+    "views_count": {
+      "type": "number",
+      "description": "Number of views"
+    },
+    "viewers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails who viewed"
+    },
+    "likes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails who liked"
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "Expiration datetime ISO (24h after creation)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "hidden"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "media_url",
+    "media_type"
+  ],
+  "name": "Story",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "data.status": "active"
+    },
+    "update": true,
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
