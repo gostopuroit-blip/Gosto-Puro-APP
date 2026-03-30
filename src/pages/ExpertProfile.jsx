@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { BadgeCheck, ArrowLeft, Loader2, Heart, MessageCircle, Lock, Grid3X3, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+
+
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import PostDetailModal from "@/components/community/PostDetailModal";
 import EditProfileModal from "@/components/EditProfileModal";
