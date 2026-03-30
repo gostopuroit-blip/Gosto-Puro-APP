@@ -58,13 +58,16 @@ export default function Community() {
         pageSize,
       ).catch(() => []);
       
+      // Filter out posts with "Instagram" in image_url
+      const filteredPosts = postsData.filter((p) => !p.image_url?.includes("Instagram"));
+      
       if (page === 1) {
         setLastCheckedTime(new Date());
-        setPosts(postsData);
-        setAllPostsLoaded(postsData.length < pageSize);
+        setPosts(filteredPosts);
+        setAllPostsLoaded(filteredPosts.length < pageSize);
       } else {
-        setPosts((prev) => [...prev, ...postsData]);
-        setAllPostsLoaded(postsData.length < pageSize);
+        setPosts((prev) => [...prev, ...filteredPosts]);
+        setAllPostsLoaded(filteredPosts.length < pageSize);
       }
       pageRef.current = page;
     } catch (err) {
