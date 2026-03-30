@@ -13,6 +13,9 @@ export default function ExpertProfile() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("feed"); // feed | grid
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
@@ -25,20 +28,31 @@ export default function ExpertProfile() {
 
       if (!expertEmail) { setLoading(false); return; }
 
-      const data = await base44.entities.CommunityPost.filter(
-        { user_email: expertEmail, status: "active" },
-        "-created_date",
-        30
-      );
-      setPosts(data);
+      const [postsData, followersData, followingData, userFollowData] = await Promise.all([
+        base44.entities.CommunityPost.filter(
+          { user_email: expertEmail, status: "active" },
+          "-created_date",
+          30
+        ),
+        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000),
+        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000),
+        u && u.email !== expertEmail
+          ? base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1)
+          : Promise.resolve([]),
+      ]);
+      
+      setPosts(postsData);
+      setFollowersCount(followersData.length);
+      setFollowingCount(followingData.length);
+      setIsFollowing(userFollowData.length > 0);
 
       // Use first post to build expert info
-      if (data.length > 0) {
+      if (postsData.length > 0) {
         setExpert({
           email: expertEmail,
-          name: data[0].user_name || expertEmail.split("@")[0],
-          photo: data[0].user_photo || null,
-          is_expert: data[0].is_expert,
+          name: postsData[0].user_name || expertEmail.split("@")[0],
+          photo: postsData[0].user_photo || null,
+          is_expert: postsData[0].is_expert,
         });
       } else {
         setExpert({ email: expertEmail, name: expertEmail.split("@")[0], photo: null, is_expert: false });
@@ -55,6 +69,11 @@ export default function ExpertProfile() {
     } else {
       setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     }
+  };
+
+  const handleFollowChange = (isNowFollowing) => {
+    setIsFollowing(isNowFollowing);
+    setFollowersCount((prev) => isNowFollowing ? prev + 1 : prev - 1);
   };
 
   const totalLikes = posts.reduce((sum, p) => sum + (p.likes_count || 0), 0);
@@ -116,6 +135,7 @@ export default function ExpertProfile() {
                   <FollowButton
                     targetEmail={expertEmail}
                     currentUser={currentUser}
+                    onFollowChange={handleFollowChange}
                   />
                 )}
               </div>
@@ -127,8 +147,12 @@ export default function ExpertProfile() {
                   <p className="text-xs text-gray-400">Post</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold text-gray-900 dark:text-white text-base">{totalLikes}</p>
-                  <p className="text-xs text-gray-400">Like</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-base">{followersCount}</p>
+                  <p className="text-xs text-gray-400">Follower</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-gray-900 dark:text-white text-base">{followingCount}</p>
+                  <p className="text-xs text-gray-400">Seguendo</p>
                 </div>
                 {premiumCount > 0 && (
                   <div className="text-center">

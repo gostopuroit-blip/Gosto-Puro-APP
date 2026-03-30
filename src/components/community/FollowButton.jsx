@@ -49,18 +49,18 @@ export default function FollowButton({ targetEmail, currentUser, onFollowChange 
     <button
       onClick={handleToggle}
       disabled={loading}
-      className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all ${
+      className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all duration-200 ${
         isFollowing
-          ? "bg-gray-100 dark:bg-[#2A2A2A] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-[#333]"
-          : "bg-[#2D6A4F] text-white"
-      } disabled:opacity-60`}
+          ? "bg-[#2D6A4F]/10 text-[#2D6A4F] border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20"
+          : "bg-[#2D6A4F] text-white hover:bg-[#235c43]"
+      } disabled:opacity-50`}
     >
       {loading ? (
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        <Loader2 className="w-3 h-3 animate-spin" />
       ) : isFollowing ? (
-        <><UserCheck className="w-3.5 h-3.5" /> Seguito</>
+        <><UserCheck className="w-3 h-3" /> Seguito</>
       ) : (
-        <><UserPlus className="w-3.5 h-3.5" /> Segui</>
+        <><UserPlus className="w-3 h-3" /> Segui</>
       )}
     </button>
   );
