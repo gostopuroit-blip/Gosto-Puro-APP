@@ -67,13 +67,19 @@ export default function Recipes() {
       );
     }
 
-    // Tags — cerca sia in occasions che in lifestyle per coprire entrambi i casi
+    // Tags — filter by category for Colazione/Pranzo/Cena, or by occasions/lifestyle for others
     if (activeTags.occasion) {
-      result = result.filter(
-        (r) =>
-        r.occasions && r.occasions.includes(activeTags.occasion) ||
-        r.lifestyle && r.lifestyle.includes(activeTags.occasion)
-      );
+      if (FREE_CATEGORIES.includes(activeTags.occasion)) {
+        // Filter by category
+        result = result.filter((r) => r.category === activeTags.occasion);
+      } else {
+        // Filter by occasions or lifestyle
+        result = result.filter(
+          (r) =>
+          r.occasions && r.occasions.includes(activeTags.occasion) ||
+          r.lifestyle && r.lifestyle.includes(activeTags.occasion)
+        );
+      }
     }
     if (activeTags.lifestyle) {
       result = result.filter(
