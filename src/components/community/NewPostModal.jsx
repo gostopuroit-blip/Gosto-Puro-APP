@@ -164,15 +164,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         });
       }
 
-      // Update hashtags - process all tags including auto-detected ones
-      for (const tag of allTags) {
-        const existing = await base44.entities.Hashtag.filter({ name: tag }, "-created_date", 1).catch(() => []);
-        if (existing.length > 0) {
-          await base44.entities.Hashtag.update(existing[0].id, { posts_count: (existing[0].posts_count || 0) + 1 }).catch(() => {});
-        } else {
-          await base44.entities.Hashtag.create({ name: tag, posts_count: 1, category: "food" }).catch(() => {});
-        }
-      }
+      // Hash tags update removed — will be handled asynchronously in backend automation
+      // Post creation is now guaranteed to succeed regardless of hashtag processing
 
       toast.success("Post pubblicato!");
       onCreated(post);

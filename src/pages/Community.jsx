@@ -54,26 +54,30 @@ export default function Community() {
 
   useEffect(() => {
     const init = async () => {
-      const u = await base44.auth.me().catch(() => null);
-      setUser(u);
-      const [postsData, followData, usersData, repostsData] = await Promise.all([
-        base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 60),
-        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200) : Promise.resolve([]),
-        base44.entities.User.list("-created_date", 100),
-        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60),
-      ]);
-      const followed = new Set(followData.map((f) => f.following_email));
-      setFollowedEmails(followed);
-      setPosts(postsData);
-      setReposts(repostsData);
-      
-      // Get suggested users not yet followed
-      const suggested = usersData.filter((usr) => 
-        usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
-      );
-      setSuggestedUsers(suggested);
-      
-      setLoading(false);
+      try {
+        const u = await base44.auth.me().catch(() => null);
+        setUser(u);
+        const [postsData, followData, usersData, repostsData] = await Promise.all([
+          base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 60).catch(() => []),
+          u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []) : Promise.resolve([]),
+          base44.entities.User.list("-created_date", 100).catch(() => []),
+          base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60).catch(() => []),
+        ]);
+        const followed = new Set(followData.map((f) => f.following_email));
+        setFollowedEmails(followed);
+        setPosts(postsData);
+        setReposts(repostsData);
+        
+        // Get suggested users not yet followed
+        const suggested = usersData.filter((usr) => 
+          usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
+        );
+        setSuggestedUsers(suggested);
+      } catch (err) {
+        console.error("Feed loading error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     init();
   }, []);

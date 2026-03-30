@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, X, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { it } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import CommentItem from "./CommentItem";
 
@@ -29,9 +29,15 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
 
   const loadComments = async () => {
     setLoadingComments(true);
-    const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50);
-    setComments(data);
-    setLoadingComments(false);
+    try {
+      const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50).catch(() => []);
+      setComments(data);
+    } catch (err) {
+      console.error("Comments loading error:", err);
+      setComments([]);
+    } finally {
+      setLoadingComments(false);
+    }
   };
 
   const handleLike = async () => {
@@ -113,7 +119,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
                 {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
               </div>
               <p className="text-xs text-gray-400">
-                {formatDistanceToNow(new Date(localPost.created_date), { addSuffix: true, locale: ptBR })}
+                {formatDistanceToNow(new Date(localPost.created_date), { addSuffix: true, locale: it })}
               </p>
             </div>
           </Link>
