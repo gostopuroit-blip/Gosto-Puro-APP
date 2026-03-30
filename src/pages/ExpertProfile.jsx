@@ -9,6 +9,7 @@ import PostDetailModal from "@/components/community/PostDetailModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import FollowButton from "@/components/community/FollowButton";
 import FollowersModal from "@/components/community/FollowersModal";
+import FollowingModal from "@/components/community/FollowingModal";
 
 export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
@@ -22,6 +23,7 @@ export default function ExpertProfile() {
   const [selectedPost, setSelectedPost] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
@@ -164,10 +166,10 @@ export default function ExpertProfile() {
                   <p className="font-bold text-gray-900 dark:text-white text-base">{followersCount}</p>
                   <p className="text-xs text-gray-400">Follower</p>
                 </button>
-                <div className="text-center">
+                <button onClick={() => setShowFollowingModal(true)} className="text-center hover:opacity-75 transition">
                   <p className="font-bold text-gray-900 dark:text-white text-base">{followingCount}</p>
                   <p className="text-xs text-gray-400">Seguiti</p>
-                </div>
+                </button>
                 {premiumCount > 0 && (
                   <div className="text-center">
                     <p className="font-bold text-purple-600 text-base">{premiumCount}</p>
@@ -290,6 +292,14 @@ export default function ExpertProfile() {
         <FollowersModal
           expertEmail={expertEmail}
           onClose={() => setShowFollowersModal(false)}
+          currentUser={currentUser}
+        />
+      )}
+
+      {showFollowingModal && (
+        <FollowingModal
+          expertEmail={expertEmail}
+          onClose={() => setShowFollowingModal(false)}
           currentUser={currentUser}
         />
       )}
