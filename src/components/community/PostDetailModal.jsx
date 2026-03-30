@@ -34,6 +34,13 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
     try {
       const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50).catch(() => []);
       setComments(data);
+      // Sync comments_count if different from actual count
+      if (data.length !== (post.comments_count || 0)) {
+        const updated = { ...post, comments_count: data.length };
+        await base44.entities.CommunityPost.update(post.id, { comments_count: data.length });
+        setLocalPost(updated);
+        onUpdate(updated);
+      }
     } catch (err) {
       console.error("Comments loading error:", err);
       setComments([]);

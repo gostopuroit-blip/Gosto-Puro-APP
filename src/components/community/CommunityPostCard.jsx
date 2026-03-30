@@ -94,6 +94,12 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     setLoadingComments(true);
     const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50);
     setComments(data);
+    // Sync comments_count if different from actual count
+    if (data.length !== (post.comments_count || 0)) {
+      const updated = { ...post, comments_count: data.length };
+      await base44.entities.CommunityPost.update(post.id, { comments_count: data.length });
+      onUpdate(updated);
+    }
     setLoadingComments(false);
   };
 
