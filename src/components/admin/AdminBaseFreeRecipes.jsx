@@ -42,7 +42,7 @@ export default function AdminBaseFreeRecipes() {
 
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <p className="text-sm text-blue-900">
-          Questo aggiorna il registro AppConfig <code className="bg-blue-100 px-1 py-0.5 rounded">base_free_unlocked_ids_v2</code> con la lista fissa di IDs per ogni occasione.
+          Questo aggiorna il registro AppConfig <code className="bg-blue-100 px-1 py-0.5 rounded">base_free_unlocked_ids_final</code> con la lista fissa di IDs per ogni occasione.
         </p>
       </div>
 

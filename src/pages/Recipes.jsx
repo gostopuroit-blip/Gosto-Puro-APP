@@ -48,7 +48,7 @@ export default function Recipes() {
 
   const loadUnlockedConfig = async () => {
     try {
-      const config = await base44.entities.AppConfig.filter({ key: "base_free_unlocked_ids_v2" });
+      const config = await base44.entities.AppConfig.filter({ key: "base_free_unlocked_ids_final" });
       if (config.length > 0) {
         const parsed = JSON.parse(config[0].value);
         setUnlockedConfig(parsed);
