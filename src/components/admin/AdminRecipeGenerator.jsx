@@ -430,26 +430,60 @@ Difficoltà valide: Facile, Media, Difficile.`;
       ? `CRITICAL PASTA RULE: The pasta MUST be completely coated and enveloped in the sauce — never dry, never with sauce sitting separately on top. The sauce is structural, not decorative. The dish must look like it was just finished "saltato in padella" (tossed in the pan). Pasta should appear slightly glistening and moist. No white dry pasta visible. No sauce pooled only at the bottom. No ingredients floating randomly. Sauce fully integrated with pasta. Realistic Italian home cooking proportions — not excessive sauce, not too little. Authentic texture: creamy sauces look silky and light (not heavy American cream sauce), tomato sauces look rich and naturally red (not neon), meat ragù looks dense and mixed throughout.`
       : ``;
 
-    // Fish detection — filetti vs pesce intero
-    const fishKeywords = ["pesce", "orata", "branzino", "salmone", "tonno", "baccalà", "spigola", "merluzzo", "trota", "sgombro", "sardin", "alici", "calamari", "gamberi", "polpo", "seppia", "rombo", "halibut", "sogliola", "fish"];
+    // Fish detection — filetti vs pesce intero vs frutti di mare + metodo cottura
+    const fishKeywords = ["pesce", "orata", "branzino", "salmone", "tonno", "baccalà", "spigola", "merluzzo", "trota", "sgombro", "sardin", "alici", "calamari", "gamberi", "polpo", "seppia", "rombo", "halibut", "sogliola", "fish", "cozze", "vongole", "frutti di mare", "spada"];
     const filletKeywords = ["filetti", "filetto", "trancio", "tranci", "fillet"];
-    const wholeKeywords = ["intero", "intera", "al forno intero", "pesce al forno"];
+    const wholeKeywords = ["intero", "intera", "al forno intero", "pesce al forno", "pesce intero"];
+    const saltCrustKeywords = ["crosta di sale", "sale grosso", "sale compatto", "in crosta"];
+    const searedKeywords = ["alla griglia", "griglia", "grigliata", "grigliato", "alla brace"];
+    const friedKeywords = ["fritto", "fritta", "fritti", "friggere", "frittura"];
+    const acquaPazzaKeywords = ["acqua pazza", "umido", "brodoso"];
+    const seafoodKeywords = ["cozze", "vongole", "gamberi", "polpo", "calamari", "frutti di mare", "seppia"];
+    const rawKeywords = ["carpaccio", "crudo", "tartare", "marinato a crudo"];
 
     const allText = (titleLower + " " + ingredLower + " " + (recipe.instructions || []).join(" ").toLowerCase());
     const hasFish = fishKeywords.some(k => allText.includes(k));
     const hasFillets = filletKeywords.some(k => allText.includes(k));
     const hasWhole = wholeKeywords.some(k => allText.includes(k));
+    const hasSaltCrust = saltCrustKeywords.some(k => allText.includes(k));
+    const hasSeared = searedKeywords.some(k => allText.includes(k));
+    const hasFried = friedKeywords.some(k => allText.includes(k));
+    const hasAcquaPazza = acquaPazzaKeywords.some(k => allText.includes(k));
+    const hasSeafood = seafoodKeywords.some(k => allText.includes(k));
+    const hasRaw = rawKeywords.some(k => allText.includes(k));
 
     let fishVisual = "";
     if (hasFish) {
-      if (hasFillets && !hasWhole) {
-        fishVisual = `CRITICAL FISH RULE: MOSTRARE chiaramente filetti separati di pesce, pezzi piatti senza testa né lisca centrale visibile. NON mostrare pesce intero con testa e coda. La ricetta usa filetti — mostrare 2 o 4 pezzi di filetto nel piatto, con doratura leggera, pelle croccante opzionale. Stile mediterraneo: olio d'oliva visibile, erbe fresche, limone a fette, verdure arrosto attorno. Piatto ceramica rustico italiana, luce naturale, nessuna salsa pesante.`;
-      } else if (hasWhole && !hasFillets) {
-        fishVisual = `CRITICAL FISH RULE: MOSTRARE pesce intero con testa e coda visibili, pelle integra, cotto in teglia da forno con erbe e limone. NON mostrare filetti. Pesce intero autentico — teglia rustica, verdure arrosto attorno, limone a fette, erbe aromatiche, olio extravergine visibile. Luce naturale, piatto rustico italiano.`;
+      // --- COOKING METHOD block ---
+      let cookingMethod = "";
+      if (hasSaltCrust) {
+        cookingMethod = `COTTURA IN CROSTA DI SALE: Il pesce è COMPLETAMENTE sepolto e NON visibile sotto una crosta di sale BIANCA, SOLIDA e COMPATTA come gesso. La crosta è INTATTA — non rotta, non granulare, non spolverata. Erbe aromatiche spuntano dai bordi. Teglia da forno scura e robusta. Il pesce NON si vede. VIETATO: sale granulare sparso sopra il pesce, pesce già aperto. `;
+      } else if (hasSeared) {
+        cookingMethod = `COTTURA ALLA GRIGLIA: Striature di griglia visibili e ben definite sulla pelle del pesce. Pelle croccante e dorata, non bruciata né pallida. Servito con spicchi di limone e un filo d'olio extravergine visibile. Piatto semplice, luce naturale laterale. `;
+      } else if (hasFried) {
+        cookingMethod = `PESCE FRITTO: Doratura uniforme e croccante su tutta la superficie. Aspetto asciutto e croccante (mai unto o molliccio). Servito su carta assorbente o piatto bianco semplice con spicchi di limone. `;
+      } else if (hasAcquaPazza) {
+        cookingMethod = `PESCE IN UMIDO / ACQUA PAZZA: Pesce immerso in un sugo leggero di pomodoro rosso chiaro, brodoso e non denso. Colore rosso tenue con il pesce bianco visibile dentro. Sugo con pomodorini, aglio, prezzemolo. Piatto fondo in ceramica rustica italiana. `;
       } else {
-        // Default: assume filetti for quick recipes
-        fishVisual = `CRITICAL FISH RULE: MOSTRARE chiaramente pezzi di pesce cotti (filetti o tranci), NON pesce intero con testa e coda a meno che la ricetta non lo specifichi. Stile culinario italiano mediterraneo: semplice, piatto ceramica, luce naturale, erbe fresche, limone.`;
+        cookingMethod = `PESCE AL FORNO: Pesce in teglia da forno rustica, dorato fuori, umido e bianco dentro (mai secco). Pomodorini, olive, capperi o erbe visibili attorno. Olio extravergine visibile. `;
       }
+
+      // --- SHAPE block (whole vs fillet vs seafood vs raw) ---
+      if (hasSeafood && !hasFillets && !hasWhole) {
+        fishVisual = `CRITICAL FISH RULE — FRUTTI DI MARE: Mostrare chiaramente i frutti di mare (cozze aperte, gamberi interi o sgusciati, polpo a tentacoli, calamari ad anelli o interi). Nessun pesce intero con testa. Presentazione italiana autentica: terracotta o piatto bianco semplice, sugo di pomodoro leggero se presente, prezzemolo fresco visibile, pane rustico a lato. Luce naturale, atmosfera trattoria di mare. ${cookingMethod}`;
+      } else if (hasRaw) {
+        fishVisual = `CRITICAL FISH RULE — CRUDO/CARPACCIO: Fettine sottilissime di pesce disposte ordinatamente (salmone rosa chiaro o spada bianco perla). Condimento minimalista: olio, sale, limone (solo come gocce, non spicchi interi). Piatto bianco grande, luce naturale brillante, composizione pulita ed elegante. Nessun pesce intero, nessuna cottura visibile. ${cookingMethod}`;
+      } else if (hasFillets && !hasWhole) {
+        fishVisual = `CRITICAL FISH RULE — FILETTI: Mostrare 2 o 4 filetti di pesce chiaramente separati, piatti, senza testa né lisca centrale. Bordi leggermente dorati, interno umido e bianco. VIETATO mostrare pesce intero con testa e coda. Stile mediterraneo: olio d'oliva visibile, erbe fresche (prezzemolo, timo, rosmarino), verdure arrosto attorno se presenti nella ricetta. Piatto ceramica bianca ovale o teglia rustica, luce naturale laterale. ${cookingMethod}`;
+      } else if (hasWhole && !hasFillets) {
+        fishVisual = `CRITICAL FISH RULE — PESCE INTERO: Mostrare pesce intero con testa e coda visibili, pelle INTEGRA e non rotta. Occhio bianco (pesce cotto). Erbe aromatiche sopra e ai lati, spicchi di limone accanto. VIETATO: pelle bruciata nera, pesce aperto o sfilettato in teglia. Teglia da forno rettangolare scura o terracotta, olio extravergine visibile. Luce naturale laterale, stile trattoria italiana di mare. ${cookingMethod}`;
+      } else {
+        // Default: filetti (most common for quick recipes)
+        fishVisual = `CRITICAL FISH RULE: Mostrare pezzi di pesce cotti (filetti o tranci), NON pesce intero con testa e coda a meno che la ricetta non lo specifichi esplicitamente. Pesce umido e fresco dentro, leggermente dorato fuori. Piatto ceramica semplice, luce naturale, erbe fresche, stile trattoria italiana di mare. ${cookingMethod}`;
+      }
+
+      // Universal fish rules appended to all cases
+      fishVisual += ` REGOLE UNIVERSALI PESCE: Il pesce deve sembrare APPENA CUCINATO, umido e fresco dentro. Stile fotografico trattoria italiana reale. Ingredienti visibili SOLO se presenti nella ricetta. VIETATO: stile fine dining con decorazioni elaborate, sfondi scuri artificiali, presentazione americana fast food, aggiungere ingredienti non presenti nella ricetta.`;
     }
 
     // Peperonata detection
