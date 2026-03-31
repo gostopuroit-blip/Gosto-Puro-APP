@@ -498,10 +498,12 @@ Difficoltà valide: Facile, Media, Difficile.`;
         },
       },
     });
-    setRecipe(result);
+    // Force prep_time to match the user's selected value — the LLM often ignores it
+    const normalizedResult = result ? { ...result, prep_time: maxTime } : result;
+    setRecipe(normalizedResult);
     setRecipeOcc(selectedOcc);
     setRecipeCountry(selectedCountry);
-    setEditedCalories(result?.calories?.toString() || "");
+    setEditedCalories(normalizedResult?.calories?.toString() || "");
     setGenerating(false);
     toast.success("Ricetta generata! Controlla e poi genera l'immagine.");
   };
