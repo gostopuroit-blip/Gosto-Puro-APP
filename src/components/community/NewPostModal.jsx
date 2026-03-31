@@ -27,7 +27,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreviews, setVideoPreviews] = useState(null);
-  const [tags, setTags] = useState("");
+  // (removed: tags state was shadowing the local tags variable in handleSubmit)
   const [postType, setPostType] = useState("image_post");
   const [isPremium, setIsPremium] = useState(false);
   const [uploading, setUploading] = useState(false);

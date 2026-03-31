@@ -58,19 +58,19 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect }
     const currentMention = getLastMention(value, cursorPos);
     if (!currentMention) return;
 
+    const displayName = user.display_name || user.full_name;
     const before = value.substring(0, currentMention.atIndex);
     const after = value.substring(currentMention.endIndex);
-    const newValue = `${before}@${user.full_name} ${after}`;
+    const newValue = `${before}@${displayName} ${after}`;
 
     onChange(newValue);
     setShowSuggestions(false);
     onMentionSelect?.(user);
 
-    // Move cursor after the mention
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
-        const newCursorPos = before.length + user.full_name.length + 2;
+        const newCursorPos = before.length + displayName.length + 2;
         inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
       }
     }, 0);
@@ -121,9 +121,8 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect }
               )}
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {user.full_name}
+                  {user.display_name || user.full_name}
                 </p>
-                <p className="text-xs text-gray-500">{user.email}</p>
               </div>
             </button>
           ))}
