@@ -4,6 +4,7 @@ import { X, Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { checkBadWords } from "@/lib/badWordsFilter";
 
 export default function EditProfileModal({ user, onClose, onSave }) {
   const [displayName, setDisplayName] = useState(user?.display_name || user?.full_name || "");
@@ -49,6 +50,14 @@ export default function EditProfileModal({ user, onClose, onSave }) {
   const handleSave = async () => {
     if (!isFormValid) {
       toast.error("Nome è obbligatorio");
+      return;
+    }
+
+    // Bad words check on name and bio
+    const textToCheck = [displayName, bio].filter(Boolean).join(" ");
+    const check = await checkBadWords(textToCheck);
+    if (check.hasBadWord && check.severity === "block") {
+      toast.error("⚠️ Il tuo profilo contiene linguaggio offensivo. Rimuovi i termini inappropriati.");
       return;
     }
 

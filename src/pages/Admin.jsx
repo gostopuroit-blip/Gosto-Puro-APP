@@ -19,14 +19,16 @@ import AdminModeration from "@/components/admin/AdminModeration";
 import AdminCommunity from "@/components/admin/AdminCommunity";
 import AdminBaseFreeRecipes from "@/components/admin/AdminBaseFreeRecipes";
 import AdminExperts from "@/components/admin/AdminExperts";
+import AdminBadWords from "@/components/admin/AdminBadWords";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare, Gift, UserCheck } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare, Gift, UserCheck, Filter } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
   { key: "community",    label: "Comunità",     icon: MessageSquare },
   { key: "experts",      label: "Gestione Expert",  icon: UserCheck },
+  { key: "badwords",     label: "Parole Vietate",   icon: Filter },
   { key: "moderacao",    label: "Moderazione",      icon: Shield },
   { key: "engagement",   label: "Analytics",       icon: TrendingUp },
   { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
@@ -146,6 +148,7 @@ function AdminContent() {
           {activeTab === "dashboard"    && <AdminDashboard onNavigate={setActiveTab} />}
           {activeTab === "community"    && <AdminCommunity />}
           {activeTab === "experts"      && <AdminExperts />}
+          {activeTab === "badwords"     && <AdminBadWords />}
           {activeTab === "moderacao"    && <AdminModeration />}
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}

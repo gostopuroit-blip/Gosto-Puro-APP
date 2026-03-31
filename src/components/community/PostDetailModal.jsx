@@ -8,6 +8,7 @@ import { it } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import CommentItem from "./CommentItem";
 import UserAvatar from "../UserAvatar";
+import { checkBadWords, logBadWordViolation } from "@/lib/badWordsFilter";
 
 export default function PostDetailModal({ post, currentUser, onClose, onUpdate }) {
   const [comments, setComments] = useState([]);
@@ -17,6 +18,8 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
   const [localPost, setLocalPost] = useState(post);
   const [replyingTo, setReplyingTo] = useState(null);
   const inputRef = useRef(null);
+  const [commentBadWordError, setCommentBadWordError] = useState(null);
+  const [forceComment, setForceComment] = useState(false);
 
   const isLiked = localPost.likes?.includes(currentUser?.email);
   const isVerified = localPost.is_expert;
@@ -62,9 +65,26 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
     onUpdate(updated);
   };
 
-  const submitComment = async () => {
+  const submitComment = async (force = false) => {
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Fai login per commentare");
+
+    // Bad words check
+    if (!force && !forceComment) {
+      const check = await checkBadWords(newComment);
+      if (check.hasBadWord) {
+        if (check.severity === "block") {
+          logBadWordViolation({ userEmail: currentUser?.email, content: newComment, context: "commento" });
+          setCommentBadWordError({ severity: "block" });
+          return;
+        } else {
+          setCommentBadWordError({ severity: "warning" });
+          return;
+        }
+      }
+    }
+    setCommentBadWordError(null);
+    setForceComment(false);
     setSubmitting(true);
     const newCommentsCount = (localPost.comments_count || 0) + 1;
     const created = await base44.entities.CommunityComment.create({
@@ -230,18 +250,39 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
                 </button>
               </div>
             )}
+            {/* Comment bad word feedback */}
+            {commentBadWordError && (
+              <div className={`mx-4 mb-2 rounded-xl px-3 py-2 text-xs font-medium ${
+                commentBadWordError.severity === "block"
+                  ? "bg-red-50 text-red-700 border border-red-200"
+                  : "bg-amber-50 text-amber-700 border border-amber-200"
+              }`}>
+                {commentBadWordError.severity === "block"
+                  ? "⚠️ Il tuo commento contiene linguaggio offensivo."
+                  : (
+                    <div className="space-y-1">
+                      <p>⚠️ Attenzione: il commento potrebbe contenere contenuto inappropriato.</p>
+                      <div className="flex gap-2 pt-0.5">
+                        <button onClick={() => setCommentBadWordError(null)} className="flex-1 py-1 rounded-lg border border-amber-300 text-xs font-semibold">Modifica</button>
+                        <button onClick={() => { setForceComment(true); setCommentBadWordError(null); setTimeout(() => submitComment(true), 0); }} className="flex-1 py-1 rounded-lg bg-amber-500 text-white text-xs font-semibold">Invia comunque</button>
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+            )}
             <div className="flex items-center gap-2 px-4 py-3">
               <UserAvatar photoUrl={currentUser.photo_url} userName={currentUser.full_name} size="sm" />
               <input
                 ref={inputRef}
                 value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
+                onChange={(e) => { setNewComment(e.target.value); setCommentBadWordError(null); }}
                 onKeyDown={(e) => e.key === "Enter" && submitComment()}
                 placeholder="Aggiungi un commento..."
                 className="flex-1 text-sm bg-gray-50 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] rounded-2xl px-3 py-2 text-gray-800 dark:text-white outline-none"
               />
               <button
-                onClick={submitComment}
+                onClick={() => submitComment()}
                 disabled={submitting || !newComment.trim()}
                 className="text-[#2D6A4F] disabled:opacity-40"
               >

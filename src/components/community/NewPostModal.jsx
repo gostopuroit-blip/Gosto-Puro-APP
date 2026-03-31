@@ -8,6 +8,7 @@ import { extractMentionEmails } from "@/lib/mentionUtils";
 import LinkPreviewCard from "./LinkPreviewCard";
 import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";
+import { checkBadWords, logBadWordViolation } from "@/lib/badWordsFilter";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
@@ -58,6 +59,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const isExpertOrAdmin = currentUser?.role === "expert" || currentUser?.role === "admin";
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Bad words state
+  const [badWordError, setBadWordError] = useState(null); // {severity, word}
+  const [forcePublish, setForcePublish] = useState(false);
 
   // Load hashtag suggestions
   useEffect(() => {
@@ -183,6 +188,27 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       if (validOpts.length < 2) return toast.error("Aggiungi almeno 2 opzioni per il sondaggio");
     }
     if (fileSizeWarning) return toast.error(fileSizeWarning);
+
+    // Bad words check (skip if user already confirmed warning)
+    if (!forcePublish) {
+      const textToCheck = [title, content].filter(Boolean).join(" ");
+      const check = await checkBadWords(textToCheck);
+      if (check.hasBadWord) {
+        if (check.severity === "block") {
+          // Log violation and block
+          logBadWordViolation({ userEmail: currentUser?.email, content: textToCheck, context: "post" });
+          setBadWordError({ severity: "block", word: check.word });
+          return;
+        } else {
+          // Warning: ask user
+          setBadWordError({ severity: "warning", word: check.word });
+          return;
+        }
+      }
+    }
+
+    setBadWordError(null);
+    setForcePublish(false);
     setUploading(true);
 
     try {
@@ -553,6 +579,37 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             </button>
           )}
         </div>
+
+        {/* Bad word feedback */}
+        {badWordError && (
+          <div className={`mt-3 rounded-xl px-4 py-3 text-sm font-medium space-y-2 ${
+            badWordError.severity === "block"
+              ? "bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
+              : "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+          }`}>
+            <p>
+              {badWordError.severity === "block"
+                ? "⚠️ Il tuo post contiene linguaggio offensivo. Rimuovi i termini inappropriati per continuare."
+                : "⚠️ Attenzione: il tuo post potrebbe contenere contenuto inappropriato."}
+            </p>
+            {badWordError.severity === "warning" && (
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => setBadWordError(null)}
+                  className="flex-1 py-1.5 rounded-lg border border-amber-300 text-xs font-semibold text-amber-700"
+                >
+                  Modifica
+                </button>
+                <button
+                  onClick={() => { setForcePublish(true); setBadWordError(null); setTimeout(handleSubmit, 0); }}
+                  className="flex-1 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold"
+                >
+                  Pubblica comunque
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <Button
            onClick={handleSubmit}
