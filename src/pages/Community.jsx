@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search, Pin, RefreshCw, ChevronUp } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, Pin, RefreshCw, ChevronUp, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -13,6 +13,7 @@ import NotificationBell from "@/components/community/NotificationBell";
 import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
 import FollowButton from "@/components/community/FollowButton";
+import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
 
 // Algoritmo de recomendação: posts fixados no topo (ordenados por data desc),
 // depois posts normais ordenados por data decrescente (mais recentes primeiro)
@@ -45,8 +46,22 @@ export default function Community() {
   const [pullProgress, setPullProgress] = useState(0);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const [lastCheckedTime, setLastCheckedTime] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("pubblicare");
   const pullStartRef = useRef(0);
   const pageRef = useRef(1);
+
+  const isPremiumUser = (u) =>
+    u?.plan === "premium" || u?.role === "premium" || u?.role === "admin" || u?.is_expert === true;
+
+  const handlePublishClick = () => {
+    if (!isPremiumUser(user)) {
+      setUpgradeReason("pubblicare");
+      setShowUpgradeModal(true);
+      return;
+    }
+    setShowNewPost(true);
+  };
 
   const loadPosts = useCallback(async (page = 1) => {
     const pageSize = 10;
@@ -245,7 +260,7 @@ export default function Community() {
             </button>
             <Button
               size="sm"
-              onClick={() => setShowNewPost(true)}
+              onClick={handlePublishClick}
               className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
               <Plus className="w-4 h-4" />
               Pubblica
@@ -310,8 +325,9 @@ export default function Community() {
               </p>
             </Link>
             <button
-              onClick={() => setShowNewPost(true)}
-              className="text-xs text-gray-400 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-left flex-1 max-w-[160px] truncate">
+              onClick={handlePublishClick}
+              className="text-xs text-gray-400 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-left flex-1 max-w-[160px] truncate flex items-center gap-1">
+              {!isPremiumUser(user) && <Lock className="w-3 h-3 flex-shrink-0" />}
               Cosa stai cucinando?
             </button>
           </div>
@@ -487,6 +503,14 @@ export default function Community() {
           currentUser={user}
           onClose={() => setShowNewPost(false)}
           onCreated={handleNewPost}
+        />
+      )}
+
+      {/* Premium upgrade modal */}
+      {showUpgradeModal && (
+        <PremiumUpgradeModal
+          reason={upgradeReason}
+          onClose={() => setShowUpgradeModal(false)}
         />
       )}
     </div>

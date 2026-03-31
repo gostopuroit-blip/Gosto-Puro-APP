@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, X, ChevronLeft, ChevronRight, Loader2, Heart } from "lucide-react";
+import { Plus, X, ChevronLeft, ChevronRight, Loader2, Heart, Lock } from "lucide-react";
 import { toast } from "sonner";
 import UserAvatar from "../UserAvatar";
+import PremiumUpgradeModal from "./PremiumUpgradeModal";
 
 // Story viewer modal
 function StoryViewer({ stories, startIndex, currentUser, onClose }) {
@@ -324,8 +325,11 @@ function AddStoryModal({ currentUser, onClose, onCreated }) {
 
 export default function StoriesBar({ currentUser }) {
   const [stories, setStories] = useState([]);
-  const [viewerOpen, setViewerOpen] = useState(null); // index
+  const [viewerOpen, setViewerOpen] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
 
   useEffect(() => {
     base44.entities.Story.filter({ status: "active" }, "-created_date", 50).then((data) => {
@@ -365,6 +369,8 @@ export default function StoriesBar({ currentUser }) {
               if (hasMyStory) {
                 const myGroupIdx = groups.findIndex((g) => g.email === currentUser.email);
                 if (myGroupIdx !== -1) openGroup(myGroupIdx);
+              } else if (!isPremiumUser) {
+                setShowUpgrade(true);
               } else {
                 setShowAdd(true);
               }
@@ -435,6 +441,13 @@ export default function StoriesBar({ currentUser }) {
           currentUser={currentUser}
           onClose={() => setShowAdd(false)}
           onCreated={(s) => setStories((prev) => [s, ...prev])}
+        />
+      )}
+
+      {showUpgrade && (
+        <PremiumUpgradeModal
+          reason="creare storie"
+          onClose={() => setShowUpgrade(false)}
         />
       )}
     </>

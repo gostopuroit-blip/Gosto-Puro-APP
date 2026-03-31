@@ -7,6 +7,7 @@ import MentionAutocomplete from "./MentionAutocomplete";
 import { extractMentionEmails } from "@/lib/mentionUtils";
 import LinkPreviewCard from "./LinkPreviewCard";
 import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
+import PremiumUpgradeModal from "./PremiumUpgradeModal";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
@@ -55,6 +56,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   const isExpertOrAdmin = currentUser?.role === "expert" || currentUser?.role === "admin";
+  const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Load hashtag suggestions
   useEffect(() => {
@@ -275,6 +278,16 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   };
 
   const availableTypes = POST_TYPES.filter((t) => !t.expertOnly || isExpertOrAdmin);
+
+  // Block free users from posting
+  if (!isPremiumUser) {
+    return (
+      <PremiumUpgradeModal
+        reason="pubblicare"
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-end">
