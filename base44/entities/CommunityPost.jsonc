@@ -47,7 +47,8 @@
         "tip",
         "recipe",
         "premium_content",
-        "poll"
+        "poll",
+        "quiz"
       ],
       "default": "image_post",
       "description": "Type of post"

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2 } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2, HelpCircle } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 import PollCard from "./PollCard";
+import QuizCard from "./QuizCard";
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
@@ -22,11 +23,12 @@ import FollowButton from "./FollowButton";
 import PostActionsMenu from "./PostActionsMenu";
 
 const POST_TYPE_META = {
-  tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
-  recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
-  premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
-  poll: { label: "Sondaggio", icon: BarChart2, color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" },
-  image_post: null,
+tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
+recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
+premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
+poll: { label: "Sondaggio", icon: BarChart2, color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" },
+quiz: { label: "Quiz", icon: HelpCircle, color: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400" },
+image_post: null,
 };
 
 export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange, onHashtagFilter }) {
@@ -335,6 +337,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {poll && (
         <div className="px-4 pb-2">
           <PollCard poll={poll} currentUser={currentUser} onUpdate={setPoll} />
+        </div>
+      )}
+
+      {/* Quiz */}
+      {post.post_type === "quiz" && (
+        <div className="px-4 pb-2">
+          <QuizCard post={post} currentUser={currentUser} />
         </div>
       )}
 
