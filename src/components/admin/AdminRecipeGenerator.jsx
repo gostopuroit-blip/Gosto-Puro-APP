@@ -136,6 +136,8 @@ export default function AdminRecipeGenerator() {
 
   // generated
   const [recipe, setRecipe] = useState(null);
+  const [recipeOcc, setRecipeOcc] = useState(null); // snapshot of occ at generation time
+  const [recipeCountry, setRecipeCountry] = useState(null); // snapshot of country at generation time
   const [editedCalories, setEditedCalories] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -497,6 +499,8 @@ Difficoltà valide: Facile, Media, Difficile.`;
       },
     });
     setRecipe(result);
+    setRecipeOcc(selectedOcc);
+    setRecipeCountry(selectedCountry);
     setEditedCalories(result?.calories?.toString() || "");
     setGenerating(false);
     toast.success("Ricetta generata! Controlla e poi genera l'immagine.");
@@ -505,7 +509,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
   const handleGenerateImage = async () => {
     if (!recipe) return;
     setGeneratingImage(true);
-    const imgPrompt = buildImagePrompt(selectedOcc, recipe, selectedCountry);
+    const imgPrompt = buildImagePrompt(recipeOcc || selectedOcc, recipe, recipeCountry || selectedCountry);
     const result = await base44.integrations.Core.GenerateImage({ prompt: imgPrompt, model: "gpt_5_mini" });
     setImageUrl(result.url);
     setGeneratingImage(false);
