@@ -58,7 +58,7 @@ function AdminContent() {
     <div className="min-h-screen bg-gray-50 flex" style={{ fontFamily: "Inter, -apple-system, sans-serif" }}>
 
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-100 min-h-screen fixed top-0 left-0 z-40">
+      <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-100 h-screen fixed top-0 left-0 z-40 overflow-hidden">
         {/* Logo / título */}
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2 mb-1">
@@ -69,7 +69,7 @@ function AdminContent() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto min-h-0">
           {tabs.map((t) => {
             const Icon = t.icon;
             const isActive = activeTab === t.key;
