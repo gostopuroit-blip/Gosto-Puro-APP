@@ -197,9 +197,8 @@ export default function Planner() {
 
   const isPremium = user?.plan === "premium" || user?.role === "admin";
 
-  // Free users can create max 3 plans and cannot edit recipes
-  const userPlans = plans || [];
-  const canCreateMorePlans = isPremium || userPlans.length < 3;
+  // Free users cannot edit recipes
+  const canCreateMorePlans = true;
   const canEditRecipes = isPremium;
 
   // Track premium_view when non-premium user sees the paywall
