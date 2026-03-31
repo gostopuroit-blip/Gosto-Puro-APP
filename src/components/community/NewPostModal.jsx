@@ -249,10 +249,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         media_type = "image";
       }
 
-      // Extract hashtags from content and field
-      const extractedTags = (content.match(/#(\w+)/g) || []).map(t => t.replace('#', ''));
-      const allTags = [...new Set([...hashtags, ...extractedTags])];
-      console.log("Tags to save:", allTags, "Field tags:", hashtags, "Content tags:", extractedTags);
+      // Extract hashtags from content
+      const tags = (content.match(/#(\w+)/g) || []).map(t => t.slice(1).toLowerCase());
 
       // Extract mention emails from content
       const mentionEmails = await extractMentionEmails(content, base44);
@@ -271,7 +269,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         images: images.length > 0 ? images : [],
         video_url,
         media_type,
-        tags: allTags,
+        tags: tags,
         mentions: mentionEmails,
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
