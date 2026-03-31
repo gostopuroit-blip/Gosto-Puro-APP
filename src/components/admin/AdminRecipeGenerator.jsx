@@ -708,7 +708,7 @@ Difficoltà valide: Facile, Media, Difficile.`;
             <p className="text-xs font-bold text-gray-600 mb-1">Istruzioni ({recipe.instructions?.length} passi)</p>
             <div className="space-y-1">
               {recipe.instructions?.map((step, i) => (
-                <p key={i} className="text-xs text-gray-500">{i + 1}. {step}</p>
+                <p key={i} className="text-xs text-gray-500">{i + 1}. {step.replace(/^\d+\.\s*/, "")}</p>
               ))}
             </div>
           </div>
