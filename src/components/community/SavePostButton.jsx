@@ -7,7 +7,7 @@ import { toast } from "sonner";
 export default function SavePostButton({ post, currentUser, onSaveChange }) {
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  // (removed collection modal - saves directly to "Salvati")
 
   useEffect(() => {
     if (!currentUser || !post) return;
@@ -47,13 +47,21 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
         }
         setIsSaved(false);
         onSaveChange?.(false);
+        setIsLoading(false);
       } else {
-        // Show collection modal to save
-        setShowCollectionModal(true);
+        // Save directly to "Salvati" without modal
+        await base44.entities.SavedPost.create({
+          post_id: post.id,
+          user_email: currentUser.email,
+          collection: "Salvati",
+        });
+        setIsSaved(true);
+        onSaveChange?.(true);
+        toast.success("Post salvato! 🔖");
+        setIsLoading(false);
       }
     } catch (err) {
       toast.error("Errore nel salvataggio");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -96,18 +104,7 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
         </motion.div>
       </motion.button>
 
-      {showCollectionModal && (
-        <SaveToCollectionModal
-          post={post}
-          currentUser={currentUser}
-          onClose={() => setShowCollectionModal(false)}
-          onSaved={() => {
-            setIsSaved(true);
-            onSaveChange?.(true);
-            setShowCollectionModal(false);
-          }}
-        />
-      )}
+
     </>
   );
 }

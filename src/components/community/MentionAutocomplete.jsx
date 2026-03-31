@@ -93,14 +93,14 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect }
 
   return (
     <div className="relative">
-      <input
+      <textarea
         ref={inputRef}
-        type="text"
+        rows={4}
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onClick={(e) => setCursorPos(e.target.selectionStart || 0)}
-        placeholder="Scrivi un post... Digita @ per menzionare"
+        placeholder="Scrivi un post... Digita @ per menzionare o # per hashtag"
         className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-gray-800 dark:text-white outline-none resize-none"
       />
 

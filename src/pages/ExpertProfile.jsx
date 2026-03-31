@@ -13,13 +13,15 @@ import FollowButton from "@/components/community/FollowButton";
 import FollowersModal from "@/components/community/FollowersModal";
 import FollowingModal from "@/components/community/FollowingModal";
 import ProfileStatsCard from "@/components/community/ProfileStatsCard";
+import SavedPostsTab from "@/components/community/SavedPostsTab";
+import { Bookmark } from "lucide-react";
 
 export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
   const [expert, setExpert] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("feed"); // feed | grid
+  const [view, setView] = useState("feed"); // feed | grid | saved
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -213,15 +215,36 @@ export default function ExpertProfile() {
             <Grid3X3 className="w-4 h-4" />
             Galleria
           </button>
+          {/* Only show "Salvati" tab for the current user's own profile */}
+          {expertEmail === currentUser?.email && (
+            <button
+              onClick={() => setView("saved")}
+              className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${
+                view === "saved"
+                  ? "border-[#2D6A4F] text-[#2D6A4F]"
+                  : "border-transparent text-gray-400"
+              }`}
+            >
+              <Bookmark className="w-4 h-4" />
+              Salvati
+            </button>
+          )}
         </div>
 
+        {/* Saved posts tab */}
+        {view === "saved" && currentUser && (
+          <div className="px-4 py-4 pb-24">
+            <SavedPostsTab currentUser={currentUser} />
+          </div>
+        )}
+
         {/* Content */}
-        {posts.length === 0 ? (
+        {view !== "saved" && posts.length === 0 ? (
           <div className="text-center py-20 px-4">
             <p className="text-4xl mb-3">🍳</p>
             <p className="text-gray-400 text-sm">Nessun post ancora</p>
           </div>
-        ) : view === "feed" ? (
+        ) : view !== "saved" && view === "feed" ? (
           <div className="px-4 py-4 space-y-4 pb-24">
             {posts.map((post) => (
               <CommunityPostCard
@@ -232,7 +255,7 @@ export default function ExpertProfile() {
               />
             ))}
           </div>
-        ) : (
+        ) : view !== "saved" ? (
           /* Grid view */
           <div className="grid grid-cols-3 gap-0.5 pb-24">
             {posts.map((post) => (
@@ -256,7 +279,7 @@ export default function ExpertProfile() {
               </button>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       {selectedPost && (
