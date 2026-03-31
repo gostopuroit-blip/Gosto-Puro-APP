@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search, Pin, RefreshCw, ChevronUp, Lock } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, Pin, RefreshCw, ChevronUp, Lock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,6 +14,7 @@ import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
 import FollowButton from "@/components/community/FollowButton";
 import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
+import MiniRankingCard from "@/components/community/MiniRankingCard";
 
 // Algoritmo de recomendação: posts fixados no topo (ordenados por data desc),
 // depois posts normais ordenados por data decrescente (mais recentes primeiro)
@@ -253,6 +254,12 @@ export default function Community() {
           <div className="flex items-center gap-2">
             {user && <NotificationBell currentUser={user} />}
             <button
+              onClick={() => navigate("/CommunityRanking")}
+              className="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 rounded-lg transition"
+            >
+              <Trophy className="w-5 h-5" />
+            </button>
+            <button
               onClick={() => navigate("/Search")}
               className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition"
             >
@@ -412,6 +419,7 @@ export default function Community() {
                   onFollowChange={handleFollowChange}
                 />
                 <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} currentUser={user} />
+                <MiniRankingCard />
               </>
             )}
 
