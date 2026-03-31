@@ -32,12 +32,23 @@ Deno.serve(async (req) => {
     .replace(/\{\{USER_NAME\}\}/g, testName)
     .replace(/\{\{USER_EMAIL\}\}/g, testEmail);
 
-  await base44.asServiceRole.integrations.Core.SendEmail({
-    to: testEmail,
-    subject,
-    body,
-    from_name: "Gosto Puro"
+  const resendRes = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: "Gosto Puro <onboarding@resend.dev>",
+      to: [testEmail],
+      subject,
+      html: body
+    })
   });
+  if (!resendRes.ok) {
+    const errData = await resendRes.json();
+    throw new Error(errData.message || "Resend error");
+  }
 
   return Response.json({ success: true, sent_to: testEmail });
 });

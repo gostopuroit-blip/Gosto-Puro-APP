@@ -50,12 +50,23 @@ Deno.serve(async (req) => {
         .replace(/\{\{USER_NAME\}\}/g, trigger.user_name || "")
         .replace(/\{\{USER_EMAIL\}\}/g, trigger.user_email || "");
 
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: trigger.user_email,
-        subject,
-        body,
-        from_name: "Gosto Puro"
+      const resendRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          from: "Gosto Puro <onboarding@resend.dev>",
+          to: [trigger.user_email],
+          subject,
+          html: body
+        })
       });
+      if (!resendRes.ok) {
+        const errData = await resendRes.json();
+        throw new Error(errData.message || "Resend error");
+      }
 
       // Marca como enviado
       await base44.asServiceRole.entities.EbookPurchaseTrigger.update(trigger.id, {
