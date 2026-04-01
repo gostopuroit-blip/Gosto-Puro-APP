@@ -214,7 +214,7 @@ export default function Community() {
       const newPosts = await base44.entities.CommunityPost.filter(
         { status: "active", created_date: { $gt: lastCheckedTime.toISOString() } },
         "-created_date",
-        1000
+        5
       ).catch(() => []);
       setNewPostsCount(newPosts.length);
     } catch (err) {
@@ -223,7 +223,7 @@ export default function Community() {
   }, [lastCheckedTime]);
 
   useEffect(() => {
-    const interval = setInterval(checkNewPosts, 15000); // Check every 15s
+    const interval = setInterval(checkNewPosts, 60000); // Check every 60s
     return () => clearInterval(interval);
   }, [checkNewPosts]);
 
