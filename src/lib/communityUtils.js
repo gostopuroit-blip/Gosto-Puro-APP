@@ -39,6 +39,7 @@ export function formatTimeAgo(date) {
   if (diffMin < 60) return `${diffMin} minut${diffMin === 1 ? "o" : "i"} fa`;
   if (diffHours < 24) return `${diffHours} or${diffHours === 1 ? "a" : "e"} fa`;
   if (diffDays < 7) return `${diffDays} giorn${diffDays === 1 ? "o" : "i"} fa`;
+  // 7+ days: Italian format dd/mm/yyyy
 
   // 7+ giorni → data "gg MMM"
   const months = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];

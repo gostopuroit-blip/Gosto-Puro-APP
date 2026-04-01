@@ -256,7 +256,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {/* Image or Images Carousel */}
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
-          className={`w-full relative cursor-pointer overflow-hidden`}
+          className={`w-full relative cursor-pointer overflow-hidden bg-gray-100 dark:bg-[#111]`}
           style={{ aspectRatio: "4/5" }}
         >
           {post.images && post.images.length > 0 ? (

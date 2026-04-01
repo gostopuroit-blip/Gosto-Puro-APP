@@ -77,23 +77,29 @@ export default function Community() {
 
   const loadPosts = useCallback(async (page = 1) => {
     const pageSize = 10;
+    const skip = (page - 1) * pageSize;
     try {
-      const postsData = await base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", pageSize).catch(() => []);
-      
-      const filteredPosts = postsData.filter((p) => !p.image_url?.includes("Instagram"));
-      
+      const postsData = await base44.entities.CommunityPost.filter(
+        { status: "active" },
+        "-created_date",
+        pageSize,
+        skip
+      ).catch(() => []);
+
       if (page === 1) {
         setLastCheckedTime(new Date());
-        _cachedPosts = filteredPosts;
-        setPosts(filteredPosts);
-        setAllPostsLoaded(filteredPosts.length < pageSize);
+        _cachedPosts = postsData;
+        setPosts(postsData);
+        setAllPostsLoaded(postsData.length < pageSize);
       } else {
         setPosts((prev) => {
-          const updated = [...prev, ...filteredPosts];
+          const existingIds = new Set(prev.map((p) => p.id));
+          const newPosts = postsData.filter((p) => !existingIds.has(p.id));
+          const updated = [...prev, ...newPosts];
           _cachedPosts = updated;
           return updated;
         });
-        setAllPostsLoaded(filteredPosts.length < pageSize);
+        setAllPostsLoaded(postsData.length < pageSize);
       }
       pageRef.current = page;
     } catch (err) {
