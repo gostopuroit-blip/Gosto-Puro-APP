@@ -47,7 +47,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const carouselRef = useRef(null);
-  const cardWidth = 176 + 12;
+  const cardWidth = 188;
   const [dailyNotif, setDailyNotif] = useState(null);
   const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 
@@ -220,8 +220,8 @@ export default function Home() {
               ref={carouselRef}
               className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth"
               onScroll={(e) => {
-                const idx = Math.round(e.target.scrollLeft / cardWidth);
-                setCarouselIndex(idx);
+                const idx = Math.floor((e.target.scrollLeft + cardWidth / 2) / cardWidth);
+                setCarouselIndex(Math.max(0, Math.min(idx, topRecipes.length - 1)));
               }}>
 
             {topRecipes.map((recipe, index) => {
