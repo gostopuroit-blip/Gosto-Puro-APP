@@ -15,7 +15,7 @@ export default function ProfileStatsCard({ userEmail, onPostClick, onFollowerCli
   const loadStats = async () => {
     try {
       const postsData = await base44.entities.CommunityPost.filter(
-        { user_email: userEmail, status: "active" },
+        { user_email: userEmail },
         "-created_date",
         500
       );

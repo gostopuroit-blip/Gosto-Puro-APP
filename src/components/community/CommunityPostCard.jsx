@@ -259,18 +259,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       )}
 
       {/* Image or Images Carousel */}
-      {(post.image_url || post.images?.length > 0) && !post.video_url && (
+      {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
           onClick={() => {
             if (!isBlurred) {
-              if (post.images && post.images.length > 0) {
-                setLightboxStartIdx(0);
-                setShowImageLightbox(true);
-              } else if (post.image_url) {
-                setLightboxStartIdx(0);
-                setShowImageLightbox(true);
-              }
+              setLightboxStartIdx(0);
+              setShowImageLightbox(true);
             }
           }}
         >
@@ -293,8 +288,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         </div>
       )}
 
-      {/* Content */}
-      <div className={`px-4 pt-3 pb-1 relative ${isBlurred && !post.image_url ? "overflow-hidden" : ""}`}>
+      {/* Content — click to open post detail */}
+      <div
+        className={`px-4 pt-3 pb-1 relative cursor-pointer ${isBlurred && !post.image_url ? "overflow-hidden" : ""}`}
+        onClick={() => setShowModal(true)}
+      >
         {post.title && (
           <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{post.title}</p>
         )}
@@ -389,7 +387,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {/* Image lightbox */}
       {showImageLightbox && (
         <ImageLightbox
-          images={post.images && post.images.length > 0 ? post.images : [post.image_url]}
+          images={post.images && post.images.length > 0 ? post.images : post.image_url ? [post.image_url] : []}
           startIndex={lightboxStartIdx}
           onClose={() => setShowImageLightbox(false)}
         />

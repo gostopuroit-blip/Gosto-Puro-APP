@@ -249,8 +249,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         media_type = "image";
       }
 
-      // Extract hashtags from content
-      const tags = (content.match(/#(\w+)/g) || []).map(t => t.slice(1).toLowerCase());
+      // Extract hashtags from content (supports hyphens)
+      const tags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
 
       // Extract mention emails from content
       const mentionEmails = await extractMentionEmails(content, base44);
@@ -626,6 +626,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
                   type="datetime-local"
                   value={quizExpiresAt}
                   onChange={(e) => setQuizExpiresAt(e.target.value)}
+                  placeholder="gg/mm/aaaa --:--"
                   className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-2.5 text-gray-800 dark:text-white outline-none"
                 />
               </div>

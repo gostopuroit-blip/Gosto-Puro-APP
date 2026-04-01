@@ -57,7 +57,13 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
         });
         setIsSaved(true);
         onSaveChange?.(true);
-        toast.success("Post salvato! 🔖");
+        toast.success("Post salvato! 🔖 Vedi i tuoi salvati nel profilo →", {
+          action: {
+            label: "Profilo",
+            onClick: () => window.location.href = `/ExpertProfile?id=${currentUser.email}`,
+          },
+          duration: 4000,
+        });
         setIsLoading(false);
       }
     } catch (err) {
