@@ -88,9 +88,9 @@ export default function Community() {
 
       // Secondary data
       const [followData, usersData, repostsData] = await Promise.all([
-        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 50).catch(() => []) : Promise.resolve([]),
-        base44.entities.User.list("-created_date", 30).catch(() => []),
-        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 30).catch(() => []),
+        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 20).catch(() => []) : Promise.resolve([]),
+        base44.entities.User.list("-created_date", 15).catch(() => []),
+        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 15).catch(() => []),
       ]);
 
       const followed = new Set(followData.map((f) => f.following_email));
