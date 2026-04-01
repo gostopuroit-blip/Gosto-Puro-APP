@@ -128,6 +128,18 @@
         "hidden"
       ],
       "default": "active"
+    },
+    "author_role": {
+      "type": "string",
+      "description": "Author role at time of posting"
+    },
+    "author_plan": {
+      "type": "string",
+      "description": "Author plan at time of posting"
+    },
+    "author_id": {
+      "type": "string",
+      "description": "Author user ID"
     }
   },
   "required": [
@@ -138,9 +150,7 @@
     "create": {
       "created_by": "{{user.email}}"
     },
-    "read": {
-      "data.status": "active"
-    },
+    "read": true,
     "update": {
       "created_by": "{{user.email}}"
     },
