@@ -134,7 +134,7 @@ export default function FollowersModal({ expertEmail, onClose, currentUser }) {
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate hover:underline">
                     {getDisplayName(follower.name, follower.email)}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">{follower.email}</p>
+                  <p className="text-xs text-gray-400 truncate">{follower.name}</p>
                 </Link>
 
                 {currentUser?.email !== follower.email && (

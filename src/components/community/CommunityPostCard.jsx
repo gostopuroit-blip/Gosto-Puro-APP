@@ -187,6 +187,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         <Link
           to={`/ExpertProfile?id=${post.created_by}`}
           className="flex items-center gap-3 flex-1 min-w-0"
+          title=""
         >
           <UserAvatar photoUrl={photoUrl} userName={displayName} size="md" />
           <div className="min-w-0">
@@ -195,12 +196,12 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
               {displayName}
             </p>
             {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
-            {/* Role/plan badge on post */}
+            {/* Role/plan badge on post — priority: admin > expert > premium */}
             {post.author_role === "admin" ? (
               <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>
-            ) : post.is_expert ? (
+            ) : post.is_expert && post.author_role !== "admin" ? (
               <span className="text-[9px] bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>
-            ) : post.author_plan === "premium" ? (
+            ) : (post.author_plan === "premium" || post.author_role === "premium") ? (
               <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>
             ) : null}
           </div>
@@ -262,15 +263,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isBlurred) {
-              setLightboxStartIdx(0);
-              setShowImageLightbox(true);
-            } else {
-              setShowModal(true);
-            }
-          }}
         >
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />

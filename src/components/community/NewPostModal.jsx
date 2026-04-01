@@ -279,6 +279,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         likes_count: 0,
         comments_count: 0,
         is_expert: isExpertOrAdmin,
+        author_role: currentUser?.role || null,
+        author_plan: currentUser?.plan || null,
         status: "active",
       });
 

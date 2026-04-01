@@ -133,7 +133,7 @@ export default function FollowingModal({ expertEmail, onClose, currentUser }) {
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate hover:underline">
                     {user.name}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                  <p className="text-xs text-gray-400 truncate">{user.name}</p>
                 </Link>
 
                 {currentUser?.email !== user.email && (
