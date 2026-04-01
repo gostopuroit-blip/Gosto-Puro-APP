@@ -37,13 +37,15 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect }
 
     const loadUsers = async () => {
       try {
-        const users = await base44.entities.User.list("-created_date", 20);
+        // Fetch more users and filter client-side by full_name or display_name
+        const users = await base44.entities.User.list("-created_date", 200);
+        const q = currentMention.mention.toLowerCase();
         const filtered = users.filter(
           (u) =>
-            u.full_name &&
-            u.full_name.toLowerCase().includes(currentMention.mention.toLowerCase())
+            (u.full_name && u.full_name.toLowerCase().includes(q)) ||
+            (u.display_name && u.display_name.toLowerCase().includes(q))
         );
-        setSuggestions(filtered.slice(0, 5));
+        setSuggestions(filtered.slice(0, 6));
         setShowSuggestions(filtered.length > 0);
       } catch {
         setSuggestions([]);

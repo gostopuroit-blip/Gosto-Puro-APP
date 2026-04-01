@@ -187,14 +187,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
               {displayName}
             </p>
-            {/* Badge — priority: admin > expert > premium — usa SOLO author_role/author_plan, mai is_expert del post */}
-            {post.author_role === "admin" ? (
-              <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>
-            ) : post.author_role === "expert" ? (
-              <span className="text-[9px] bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>
-            ) : (post.author_plan === "premium" || post.author_role === "premium") ? (
-              <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>
-            ) : null}
+            {/* Badge: per il post del currentUser usa role/plan sessione; per altri usa author_role/is_expert del post */}
+            {(() => {
+              const isOwnPost = currentUser && post.created_by === currentUser.email;
+              const role = isOwnPost ? currentUser.role : post.author_role;
+              const plan = isOwnPost ? currentUser.plan : post.author_plan;
+              const isExpert = isOwnPost ? currentUser.is_expert : post.is_expert;
+              if (role === "admin") return <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>;
+              if (role === "expert" || isExpert) return <span className="text-[9px] bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>;
+              if (plan === "premium" || role === "premium") return <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>;
+              return null;
+            })()}
           </div>
            <p className="text-xs text-gray-400">
              {formatTimeAgo(post.created_date)}
@@ -253,7 +256,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {/* Image or Images Carousel */}
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
-          className={`w-full relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
+          className={`w-full relative cursor-pointer overflow-hidden`}
+          style={{ aspectRatio: "4/5" }}
         >
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />
@@ -262,7 +266,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
               src={post.image_url}
               alt=""
               loading="lazy"
-              className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
+              className={`w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
             />
           )}
           {isBlurred && (
@@ -295,15 +299,14 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           </div>
         )}
         {post.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div className="flex flex-wrap gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
             {post.tags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(tag)}`)}
-                className="flex items-center gap-0.5 text-xs text-[#2D6A4F] font-medium hover:underline transition"
+                className="flex items-center gap-0.5 text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
               >
-                <Hash className="w-2.5 h-2.5" />
-                {tag}
+                #&thinsp;{tag}
               </button>
             ))}
           </div>
