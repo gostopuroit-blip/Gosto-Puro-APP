@@ -127,7 +127,7 @@ export default function Community() {
     }
   }, [loadingMore, allPostsLoaded, loadPosts]);
 
-  const displayedPosts = rankPosts(posts);
+  const displayedPosts = posts;
 
   const handlePostUpdate = (updated, originalId) => {
     if (updated === null) {
