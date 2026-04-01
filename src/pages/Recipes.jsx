@@ -28,9 +28,7 @@ export default function Recipes() {
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
   const [unlockedConfig, setUnlockedConfig] = useState(null);
-  const [allRecipesLoaded, setAllRecipesLoaded] = useState(false);
-  const pageRef = useRef(1);
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 6;
 
   const loadUnlockedConfig = async () => {
     try {
@@ -46,24 +44,12 @@ export default function Recipes() {
   };
 
   const loadRecipes = useCallback(async (page = 1) => {
-    const pageSize = 20;
-    const skip = (page - 1) * pageSize;
-    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", pageSize, skip).catch(() => []);
-
-    if (page === 1) {
-      setRecipes(data);
-      setAllRecipesLoaded(data.length < pageSize);
-    } else {
-      setRecipes((prev) => {
-        const ids = new Set(prev.map((r) => r.id));
-        const merged = [...prev, ...data.filter((r) => !ids.has(r.id))];
-        return merged;
-      });
-      setAllRecipesLoaded(data.length < pageSize);
-    }
-    pageRef.current = page;
+    setLoading(true);
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", ITEMS_PER_PAGE * 10, 0).catch(() => []);
+    setRecipes(data);
+    setCurrentPage(page);
     setLoading(false);
-    setLoadingMore(false);
   }, []);
 
   useEffect(() => {
@@ -187,17 +173,14 @@ export default function Recipes() {
     return ids;
   }, [unlockedConfig, isPremium, isSpecialView, activeTags]);
 
-  // Keep filteredRecipes in natural order (most recent first)
-  const orderedRecipes = filteredRecipes;
+  // Pagination
+  const paginatedRecipes = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredRecipes.slice(start, end);
+  }, [filteredRecipes, currentPage]);
 
-  // Infinite scroll
-  const handleScroll = useCallback((e) => {
-    const el = e.target;
-    if (el.scrollHeight - el.scrollTop - el.clientHeight < 500 && !loadingMore && !allRecipesLoaded) {
-      setLoadingMore(true);
-      loadRecipes(pageRef.current + 1);
-    }
-  }, [loadingMore, allRecipesLoaded, loadRecipes]);
+  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
@@ -209,7 +192,7 @@ export default function Recipes() {
 
   return (
     <PullToRefresh onRefresh={() => loadRecipes(1)}>
-      <div className="pb-24" onScroll={handleScroll} style={{ height: '100vh', overflowY: 'auto' }}>
+      <div className="pb-24">
       {/* Header */}
       
 
@@ -285,13 +268,13 @@ export default function Recipes() {
 
        {/* Recipe List */}
        <div className="px-5 space-y-4">
-         {orderedRecipes.length === 0 ?
+         {filteredRecipes.length === 0 ?
           <div className="text-center py-16">
              <p className="text-5xl mb-4">🍳</p>
              <p className="text-gray-400 dark:text-gray-500 text-sm">Nessuna ricetta trovata</p>
            </div> :
           <>
-             {orderedRecipes.map((recipe) => {
+             {paginatedRecipes.map((recipe) => {
               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
               if (isLocked) {
                 return (
@@ -313,15 +296,37 @@ export default function Recipes() {
               }
               return <RecipeCard key={recipe.id} recipe={recipe} />;
             })}
-           {loadingMore && (
-             <div className="flex items-center justify-center py-6">
-               <Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" />
-             </div>
-           )}
 
-           {allRecipesLoaded && orderedRecipes.length > 0 && (
-             <div className="text-center py-8 text-gray-400 dark:text-gray-500">
-               <p className="text-sm font-medium">Hai visto tutte le ricette! 🎉</p>
+           {/* Pagination */}
+           {totalPages > 1 && (
+             <div className="flex justify-center gap-2 py-8">
+               <button
+                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                 disabled={currentPage === 1}
+                 className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
+               >
+                 ← Indietro
+               </button>
+               {Array.from({ length: totalPages }, (_, i) => (
+                 <button
+                   key={i + 1}
+                   onClick={() => setCurrentPage(i + 1)}
+                   className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
+                     currentPage === i + 1
+                       ? 'bg-[#2D6A4F] text-white'
+                       : 'border border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-[#1A1A1A]'
+                   }`}
+                 >
+                   {i + 1}
+                 </button>
+               ))}
+               <button
+                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                 disabled={currentPage === totalPages}
+                 className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
+               >
+                 Avanti →
+               </button>
              </div>
            )}
            </>
