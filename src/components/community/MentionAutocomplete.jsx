@@ -47,8 +47,8 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
 
         // Fetch both directions of follow relationship
          const [followingData, followersData] = await Promise.all([
-           base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []),
-           base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []),
+           base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 30).catch(() => []),
+           base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 30).catch(() => []),
          ]);
 
          // Build set of emails: people who follow me (followers) + people I follow (following)
@@ -56,15 +56,15 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
          followingData.forEach((f) => allowedEmails.add(f.follower_email)); // followers: those who follow me
          followersData.forEach((f) => allowedEmails.add(f.following_email)); // following: those I follow
 
-        // If no follows/followers, show nothing
-        if (allowedEmails.size === 0) {
-          setSuggestions([]);
-          setShowSuggestions(false);
-          return;
-        }
+         // If no follows/followers, show nothing
+         if (allowedEmails.size === 0) {
+           setSuggestions([]);
+           setShowSuggestions(false);
+           return;
+         }
 
-        // Fetch only those users
-        const allUsers = await base44.entities.User.list("-created_date", 100);
+         // Fetch only those users with reduced limit
+         const allUsers = await base44.entities.User.list("-created_date", 50);
         const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email);
 
         // Filter by search query
