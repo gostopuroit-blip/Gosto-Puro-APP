@@ -129,7 +129,9 @@ function StoryViewer({ stories, startIndex, currentUser, onClose }) {
         {/* Caption + Like */}
         <div className="absolute bottom-8 left-0 right-0 px-4 flex items-center justify-between">
           {story.caption ? (
-            <p className="text-white text-sm font-medium drop-shadow-lg flex-1 text-center">{story.caption}</p>
+            <div className="flex-1 bg-black/50 rounded-xl px-3 py-2 mr-3">
+              <p className="text-white text-sm font-medium text-center">{story.caption}</p>
+            </div>
           ) : <div className="flex-1" />}
           {!isOwner && (
             <button onClick={handleLike} className="flex flex-col items-center gap-0.5 ml-3 flex-shrink-0">

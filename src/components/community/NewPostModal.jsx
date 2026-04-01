@@ -249,8 +249,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         media_type = "image";
       }
 
-      // Extract hashtags from content (supports hyphens)
-      const tags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
+      // Extract hashtags from content + merge with manually added hashtags
+      const extractedTags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
+      const tags = [...new Set([...extractedTags, ...hashtags])];
 
       // Extract mention emails from content
       const mentionEmails = await extractMentionEmails(content, base44);
