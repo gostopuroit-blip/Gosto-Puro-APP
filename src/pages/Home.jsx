@@ -218,9 +218,9 @@ export default function Home() {
         <div className="relative">
           <div
               ref={carouselRef}
-              className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth"
+              className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth snap-x snap-mandatory"
               onScroll={(e) => {
-                const idx = Math.floor((e.target.scrollLeft + cardWidth / 2) / cardWidth);
+                const idx = Math.round(e.target.scrollLeft / cardWidth);
                 setCarouselIndex(Math.max(0, Math.min(idx, topRecipes.length - 1)));
               }}>
 
@@ -251,7 +251,7 @@ export default function Home() {
                    </a>
                  );
                }
-               return <RecipeCard key={recipe.id} recipe={recipe} variant="compact" />;
+               return <div key={recipe.id} className="snap-start"><RecipeCard recipe={recipe} variant="compact" /></div>;
              })}
           </div>
           {/* Dots */}

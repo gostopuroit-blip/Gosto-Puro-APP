@@ -8,7 +8,7 @@ import CommunityPostCard from "@/components/community/CommunityPostCard";
 import RepostCard from "@/components/community/RepostCard";
 import NewPostModal from "@/components/community/NewPostModal";
 import SuggestedUsers from "@/components/community/SuggestedUsers";
-import StoriesBar from "@/components/community/StoriesBar";
+
 import NotificationBell from "@/components/community/NotificationBell";
 import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
@@ -251,10 +251,7 @@ export default function Community() {
         </div>
       </div>
 
-      {/* Stories */}
-      <div className="max-w-lg mx-auto border-b border-gray-100 dark:border-[#2A2A2A]">
-        <StoriesBar currentUser={user} />
-      </div>
+
 
       {/* My profile strip */}
       {user && (

@@ -71,9 +71,23 @@ export default function ExpertProfile() {
       const resolvedPhoto = isOwnProfile
         ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
         : (expertUser?.photo_url || postsData[0]?.user_photo || null);
-      const resolvedName = isOwnProfile
-        ? (u?.display_name || u?.full_name || expertUser?.display_name || expertUser?.full_name || expertEmail || "Utente")
-        : (postsData[0]?.user_name || expertUser?.display_name || expertUser?.full_name || expertEmail || "Utente");
+      
+      // Safe name resolution with corruption detection
+      let safeName = isOwnProfile
+        ? (u?.display_name || u?.full_name)
+        : postsData[0]?.user_name;
+      
+      if (!safeName) {
+        safeName = expertUser?.display_name || expertUser?.full_name;
+      }
+      
+      // Detect corrupted names (non-latin chars, base64-like patterns)
+      if (safeName && (safeName.length < 2 || !/^[\w\s\-àèéìòùÀÈÉÌÒÙ'.,()&]+$/.test(safeName))) {
+        safeName = null;
+      }
+      
+      const displayName = safeName || expertEmail.split("@")[0];
+      
       const resolvedRole = isOwnProfile
         ? (u?.role || expertUser?.role || null)
         : (expertUser?.role || null);
@@ -83,7 +97,7 @@ export default function ExpertProfile() {
 
       setExpert({
         email: expertEmail,
-        name: getDisplayName(resolvedName && resolvedName.length > 3 ? resolvedName : expertEmail.split("@")[0], expertEmail),
+        name: getDisplayName(displayName, expertEmail),
         photo: getPhotoUrl(resolvedPhoto),
         is_expert: expertUser?.is_expert || postsData[0]?.is_expert || false,
         role: resolvedRole,
