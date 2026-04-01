@@ -36,53 +36,56 @@ export default function ExpertProfile() {
 
   useEffect(() => {
     const init = async () => {
+      // Always fetch fresh session data
       const u = await base44.auth.me().catch(() => null);
       setCurrentUser(u);
 
       if (!expertEmail) { setLoading(false); return; }
 
-      const postsData = await base44.entities.CommunityPost.filter(
-        { created_by: expertEmail },
-        "-created_date",
-        30
-      );
-
-      const [followersData, followingData] = await Promise.all([
-        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000),
-        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000),
+      // Fetch all data in parallel
+      const [postsData, followersData, followingData, allUsers] = await Promise.all([
+        base44.entities.CommunityPost.filter({ created_by: expertEmail }, "-created_date", 30).catch(() => []),
+        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000).catch(() => []),
+        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000).catch(() => []),
+        base44.entities.User.list().catch(() => []),
       ]);
 
       const userFollowData = u && u.email !== expertEmail
-        ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1)
+        ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1).catch(() => [])
         : [];
 
-      // Deduplicate by follower_email before counting
       const uniqueFollowers = [...new Map(followersData.map(f => [f.follower_email, f])).values()];
       const uniqueFollowing = [...new Map(followingData.map(f => [f.following_email, f])).values()];
-      
+
       setPosts(postsData);
       setFollowersCount(uniqueFollowers.length);
       setFollowingCount(uniqueFollowing.length);
       setIsFollowing(userFollowData.length > 0);
 
-      // Load expert user record for role info and photo
-      const allUsers = await base44.entities.User.list().catch(() => []);
       const expertUser = allUsers.find((usr) => usr.email === expertEmail);
 
-      // Prefer photo from User record (most up-to-date), fallback to post data
-      const resolvedPhoto = expertUser?.photo_url || postsData[0]?.user_photo || null;
-      const displayName = postsData.length > 0
-        ? getDisplayName(postsData[0].user_name, expertEmail)
-        : getDisplayName(expertUser?.full_name || null, expertEmail);
-      const photoUrl = getPhotoUrl(resolvedPhoto);
+      // For own profile: prefer session data (most up-to-date), then User record, then post data
+      const isOwnProfile = u?.email === expertEmail;
+      const resolvedPhoto = isOwnProfile
+        ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
+        : (expertUser?.photo_url || postsData[0]?.user_photo || null);
+      const resolvedName = isOwnProfile
+        ? (u?.full_name || expertUser?.full_name || postsData[0]?.user_name || null)
+        : (postsData[0]?.user_name || expertUser?.full_name || null);
+      const resolvedRole = isOwnProfile
+        ? (u?.role || expertUser?.role || null)
+        : (expertUser?.role || null);
+      const resolvedPlan = isOwnProfile
+        ? (u?.plan || expertUser?.plan || null)
+        : (expertUser?.plan || null);
 
       setExpert({
         email: expertEmail,
-        name: displayName,
-        photo: photoUrl,
-        is_expert: postsData[0]?.is_expert || false,
-        role: expertUser?.role || null,
-        plan: expertUser?.plan || null,
+        name: getDisplayName(resolvedName, expertEmail),
+        photo: getPhotoUrl(resolvedPhoto),
+        is_expert: expertUser?.is_expert || postsData[0]?.is_expert || false,
+        role: resolvedRole,
+        plan: resolvedPlan,
       });
 
       setLoading(false);
