@@ -9,9 +9,9 @@ async function computeWeeklyTop3() {
   const iso = startDate.toISOString();
 
   const [posts, comments, stories] = await Promise.all([
-    base44.entities.CommunityPost.filter({ status: "active", created_date: { $gte: iso } }, "-created_date", 200).catch(() => []),
-    base44.entities.CommunityComment.filter({ created_date: { $gte: iso } }, "-created_date", 500).catch(() => []),
-    base44.entities.Story.filter({ created_date: { $gte: iso } }, "-created_date", 200).catch(() => []),
+    base44.entities.CommunityPost.filter({ status: "active", created_date: { $gte: iso } }, "-created_date", 50).catch(() => []),
+    base44.entities.CommunityComment.filter({ created_date: { $gte: iso } }, "-created_date", 50).catch(() => []),
+    base44.entities.Story.filter({ created_date: { $gte: iso } }, "-created_date", 30).catch(() => []),
   ]);
 
   const scores = {};
@@ -45,7 +45,11 @@ export default function MiniRankingCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    computeWeeklyTop3().then(setTop3).finally(() => setLoading(false));
+    // Delay to avoid rate limit on initial page load
+    const timer = setTimeout(() => {
+      computeWeeklyTop3().then(setTop3).finally(() => setLoading(false));
+    }, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!loading && top3.length === 0) return null;

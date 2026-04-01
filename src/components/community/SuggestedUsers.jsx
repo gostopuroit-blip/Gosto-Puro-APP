@@ -9,24 +9,24 @@ export default function SuggestedUsers({ currentUser, followedEmails, onFollowCh
 
   useEffect(() => {
     if (!currentUser) return;
-    // Get users who have posts (experts/admins or active posters)
-    base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 100)
-      .then((posts) => {
-        // Count posts per user
-        const map = {};
-        posts.forEach((p) => {
-          const key = p.created_by;
-          if (!key || key === currentUser.email) return;
-          if (!map[key]) map[key] = { email: key, name: p.user_name, photo: p.user_photo, is_expert: p.is_expert, count: 0 };
-          map[key].count++;
+    const timer = setTimeout(() => {
+      base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 30)
+        .then((posts) => {
+          const map = {};
+          posts.forEach((p) => {
+            const key = p.created_by;
+            if (!key || key === currentUser.email) return;
+            if (!map[key]) map[key] = { email: key, name: p.user_name, photo: p.user_photo, is_expert: p.is_expert, count: 0 };
+            map[key].count++;
+          });
+          const sorted = Object.values(map)
+            .filter((u) => !followedEmails.has(u.email))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 6);
+          setUsers(sorted);
         });
-        // Sort by post count, pick top 6 not already followed
-        const sorted = Object.values(map)
-          .filter((u) => !followedEmails.has(u.email))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 6);
-        setUsers(sorted);
-      });
+    }, 3000);
+    return () => clearTimeout(timer);
   }, [currentUser, followedEmails]);
 
   if (users.length === 0) return null;
