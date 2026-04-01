@@ -270,6 +270,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             <img
               src={post.image_url}
               alt=""
+              loading="lazy"
               className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
             />
           )}

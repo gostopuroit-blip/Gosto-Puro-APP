@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search, Pin, RefreshCw, ChevronUp, Lock, Trophy } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, RefreshCw, ChevronUp, Lock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -15,6 +15,12 @@ import PostTypeFilter from "@/components/community/PostTypeFilter";
 import FollowButton from "@/components/community/FollowButton";
 import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
 import MiniRankingCard from "@/components/community/MiniRankingCard";
+import FeedSkeleton from "@/components/community/FeedSkeleton";
+
+// Module-level cache so data persists between tab switches
+let _cachedPosts = null;
+let _cachedReposts = null;
+let _cachedFollowed = null;
 
 // Algoritmo de recomendação: posts fixados no topo (ordenados por data desc),
 // depois posts normais ordenados por data decrescente (mais recentes primeiro)
@@ -33,17 +39,18 @@ export default function Community() {
   const navigate = useNavigate();
   const feedRef = useRef(null);
   const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(_cachedPosts || []);
   const [allPostsLoaded, setAllPostsLoaded] = useState(false);
-  const [followedEmails, setFollowedEmails] = useState(new Set());
-  const [loading, setLoading] = useState(true);
+  const [followedEmails, setFollowedEmails] = useState(_cachedFollowed || new Set());
+  const [loading, setLoading] = useState(!_cachedPosts);
   const [loadingMore, setLoadingMore] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [activeTab, setActiveTab] = useState("for_you"); // "for_you" | "following"
   const [hashtagFilter, setHashtagFilter] = useState(null);
   const [postTypeFilter, setPostTypeFilter] = useState(null);
   const [suggestedUsers, setSuggestedUsers] = useState([]);
-  const [reposts, setReposts] = useState([]);
+  const [reposts, setReposts] = useState(_cachedReposts || []);
+  const [secondaryLoaded, setSecondaryLoaded] = useState(false);
   const [pullProgress, setPullProgress] = useState(0);
   const [newPostsCount, setNewPostsCount] = useState(0);
   const [lastCheckedTime, setLastCheckedTime] = useState(null);
@@ -64,25 +71,31 @@ export default function Community() {
     setShowNewPost(true);
   };
 
+  const withTimeout = (promise, ms = 5000) => {
+    const timer = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms));
+    return Promise.race([promise, timer]);
+  };
+
   const loadPosts = useCallback(async (page = 1) => {
     const pageSize = 10;
-    const skip = (page - 1) * pageSize;
     try {
-      const postsData = await base44.entities.CommunityPost.filter(
-        { status: "active" },
-        "-created_date",
-        pageSize,
+      const postsData = await withTimeout(
+        base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", pageSize)
       ).catch(() => []);
       
-      // Filter out posts with "Instagram" in image_url
       const filteredPosts = postsData.filter((p) => !p.image_url?.includes("Instagram"));
       
       if (page === 1) {
         setLastCheckedTime(new Date());
+        _cachedPosts = filteredPosts;
         setPosts(filteredPosts);
         setAllPostsLoaded(filteredPosts.length < pageSize);
       } else {
-        setPosts((prev) => [...prev, ...filteredPosts]);
+        setPosts((prev) => {
+          const updated = [...prev, ...filteredPosts];
+          _cachedPosts = updated;
+          return updated;
+        });
         setAllPostsLoaded(filteredPosts.length < pageSize);
       }
       pageRef.current = page;
@@ -94,27 +107,34 @@ export default function Community() {
   useEffect(() => {
     const init = async () => {
       try {
-        const u = await base44.auth.me().catch(() => null);
-        setUser(u);
-        const [followData, usersData, repostsData] = await Promise.all([
-          u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []) : Promise.resolve([]),
-          base44.entities.User.list("-created_date", 100).catch(() => []),
-          base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60).catch(() => []),
+        // Phase 1: auth + posts in parallel — show feed ASAP
+        const [u, postsReady] = await Promise.all([
+          base44.auth.me().catch(() => null),
+          _cachedPosts ? Promise.resolve(true) : loadPosts(1).then(() => true),
         ]);
+        setUser(u);
+        setLoading(false);
+
+        // Phase 2: secondary data after feed is visible
+        const [followData, usersData, repostsData] = await Promise.all([
+          u ? withTimeout(base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200)).catch(() => []) : Promise.resolve([]),
+          withTimeout(base44.entities.User.list("-created_date", 100)).catch(() => []),
+          withTimeout(base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60)).catch(() => []),
+        ]);
+
         const followed = new Set(followData.map((f) => f.following_email));
+        _cachedFollowed = followed;
+        _cachedReposts = repostsData;
         setFollowedEmails(followed);
         setReposts(repostsData);
-        
-        // Get suggested users not yet followed
-        const suggested = usersData.filter((usr) => 
+
+        const suggested = usersData.filter((usr) =>
           usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
         );
         setSuggestedUsers(suggested);
-        
-        await loadPosts(1);
+        setSecondaryLoaded(true);
       } catch (err) {
         console.error("Feed loading error:", err);
-      } finally {
         setLoading(false);
       }
     };
@@ -316,7 +336,7 @@ export default function Community() {
           <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
             <Link to={`/ExpertProfile?id=${user.email}`} className="flex items-center gap-3 flex-shrink-0">
               {user.photo_url ? (
-                <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" />
+                <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" loading="lazy" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold">
                   {(user.full_name || user.email || "U").charAt(0).toUpperCase()}
@@ -369,9 +389,7 @@ export default function Community() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
-          </div>
+          <FeedSkeleton />
         ) : (
           <>
             {/* Sugestões — só na aba "Scopri" sem filtros */}
@@ -388,7 +406,7 @@ export default function Community() {
                             className="flex items-center gap-2 flex-1 min-w-0"
                           >
                             {sUser.photo_url ? (
-                              <img src={sUser.photo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                              <img src={sUser.photo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
                             ) : (
                               <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                                 {(sUser.display_name || sUser.email || "U").charAt(0).toUpperCase()}
