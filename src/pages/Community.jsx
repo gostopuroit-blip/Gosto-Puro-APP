@@ -17,7 +17,7 @@ import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
 import MiniRankingCard from "@/components/community/MiniRankingCard";
 import FeedSkeleton from "@/components/community/FeedSkeleton";
 
-// Module-level cache so data persists between tab switches
+// Module-level cache so data persists between tab switches (cleared on mount)
 let _cachedPosts = null;
 let _cachedReposts = null;
 let _cachedFollowed = null;
@@ -102,12 +102,17 @@ export default function Community() {
   }, []);
 
   useEffect(() => {
+    // Clear cache on mount to always fetch fresh data
+    _cachedPosts = null;
+    _cachedReposts = null;
+    _cachedFollowed = null;
+
     const init = async () => {
       try {
         // Phase 1: auth + posts in parallel — show feed ASAP
-        const [u, postsReady] = await Promise.all([
+        const [u] = await Promise.all([
           base44.auth.me().catch(() => null),
-          _cachedPosts ? Promise.resolve(true) : loadPosts(1).then(() => true),
+          loadPosts(1),
         ]);
         setUser(u);
         setLoading(false);
