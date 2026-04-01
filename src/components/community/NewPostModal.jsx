@@ -49,12 +49,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   // Mentions state
   const [mentionedUsers, setMentionedUsers] = useState([]);
 
-  // Hashtag suggestions
-  const [tagInput, setTagInput] = useState("");
-  const [hashtags, setHashtags] = useState([]);
-  const [hashtagSuggestions, setHashtagSuggestions] = useState([]);
-  const [showHashtagSuggestions, setShowHashtagSuggestions] = useState(false);
-  const hashtagInputRef = useRef(null);
+
 
   // Recipe selection
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -76,22 +71,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   const [forcePublish, setForcePublish] = useState(false);
   const isPublishingRef = useRef(false);
 
-  // Load hashtag suggestions
-  useEffect(() => {
-    if (tagInput.length < 2) {
-      setHashtagSuggestions([]);
-      return;
-    }
-    const loadSuggestions = async () => {
-      const data = await base44.entities.Hashtag.filter(
-        { name: { $regex: `^${tagInput.toLowerCase()}` } },
-        "-posts_count",
-        5
-      ).catch(() => []);
-      setHashtagSuggestions(data);
-    };
-    loadSuggestions();
-  }, [tagInput]);
+
 
   // Load recipes
   useEffect(() => {
@@ -174,23 +154,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
     }
   };
 
-  const addHashtag = (name) => {
-    if (hashtags.includes(name)) return;
-    setHashtags([...hashtags, name]);
-    setTagInput("");
-    setHashtagSuggestions([]);
-    setShowHashtagSuggestions(false);
-  };
 
-  const removeHashtag = (name) => {
-    setHashtags(hashtags.filter((h) => h !== name));
-  };
 
-  // Extract hashtags from content (words starting with #)
-  const extractHashtags = (text) => {
-    const matches = text.match(/#(\w+)/g) || [];
-    return matches.map((tag) => tag.slice(1).toLowerCase());
-  };
+
 
   const handleSubmit = async () => {
     if (isPublishingRef.current) return; // Prevent double submit
@@ -252,9 +218,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         media_type = "image";
       }
 
-      // Extract ALL hashtags from content + merge with manually added hashtags
-      const tags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
-      const allTags = [...new Set([...tags, ...hashtags])];
+      // Extract hashtags from content: #word format only
+      const extractedTags = (content.match(/#([\w]+)/g) || []).map(t => t.slice(1).toLowerCase());
+      // Merge with manually added hashtags
+      const tags = [...new Set([...extractedTags, ...hashtags])];
 
       // Extract mention emails from content
       const mentionEmails = await extractMentionEmails(content, base44);
@@ -273,11 +240,10 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         images: images.length > 0 ? images : [],
         video_url,
         media_type,
-        tags: allTags,
+        tags: tags,
         mentions: mentionEmails,
         post_type: postType,
         is_premium: postType === "premium_content" ? true : isPremium,
-        linked_recipe_id: selectedRecipe?.id || null,
         link_preview: linkPreview || null,
         likes: [],
         likes_count: 0,
@@ -544,41 +510,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             </div>
           )}
 
-          {/* Hashtag input with suggestions */}
-          <div className="relative">
-            <div className="flex flex-wrap gap-1.5 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2.5">
-              {hashtags.map((tag) => (
-                <div key={tag} className="flex items-center gap-1 bg-[#2D6A4F]/10 text-[#2D6A4F] px-2 py-1 rounded-lg text-xs font-semibold">
-                  #{tag}
-                  <button onClick={() => removeHashtag(tag)} className="hover:text-red-500">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-              <input
-                ref={hashtagInputRef}
-                value={tagInput}
-                onChange={(e) => { setTagInput(e.target.value.replace("#", "")); setShowHashtagSuggestions(true); }}
-                onFocus={() => setShowHashtagSuggestions(true)}
-                placeholder={hashtags.length === 0 ? "#tag" : ""}
-                className="flex-1 text-sm bg-transparent text-gray-800 dark:text-white outline-none"
-              />
-            </div>
-            {showHashtagSuggestions && hashtagSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl shadow-lg max-h-32 overflow-y-auto z-10">
-                {hashtagSuggestions.map((h) => (
-                  <button
-                    key={h.id}
-                    onClick={() => addHashtag(h.name)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-[#222] flex items-center justify-between"
-                  >
-                    <span>#{h.name}</span>
-                    <span className="text-xs text-gray-400">{h.posts_count || 0}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+
 
           {/* Quiz fields */}
           {postType === "quiz" && (

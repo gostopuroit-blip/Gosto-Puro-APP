@@ -14,14 +14,17 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
     
     if (atIndex === -1) return null;
     
-    // Check if @ is not part of an existing mention
+    // @ must be preceded by space or be at start
     const beforeAt = textBeforeCursor.substring(0, atIndex);
-    if (beforeAt.length > 0 && beforeAt[beforeAt.length - 1].match(/\w/)) {
+    if (beforeAt.length > 0 && /\w/.test(beforeAt[beforeAt.length - 1])) {
       return null;
     }
     
     const mention = textBeforeCursor.substring(atIndex + 1);
+    // Stop if there's a space after @ (user finished typing the mention)
     if (mention.includes(" ")) return null;
+    // Stop if user typed # after @ (different feature)
+    if (mention.includes("#")) return null;
     
     return { mention, atIndex, endIndex: pos };
   };
