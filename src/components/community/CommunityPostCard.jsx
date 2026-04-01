@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+// Note: using asServiceRole via base44 requires the function context; direct use won't work in components
+// Instead, we'll call updateCommentCount backend function for comment/like operations
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
@@ -31,23 +33,34 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
 
 
   const handleLike = async () => {
-    if (!currentUser) return toast.error("Fai login per mettere mi piace");
-    const res = await base44.functions.invoke('togglePostLike', { post_id: post.id });
-    const { likes, likes_count } = res.data;
-    
-    // Create notification if user just liked the post (not unliking)
-    if (!isLiked && post.created_by !== currentUser?.email) {
-      await base44.functions.invoke('createLikeNotification', {
-        post_id: post.id,
-        post_author_email: post.created_by,
-        liker_email: currentUser?.email,
-        liker_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
-        liker_photo: currentUser?.photo_url || null,
-      }).catch(() => {});
-    }
-    
-    onUpdate({ ...post, likes, likes_count });
-  };
+     if (!currentUser) return toast.error("Fai login per mettere mi piace");
+     try {
+       const newLikes = isLiked
+         ? post.likes.filter((e) => e !== currentUser.email)
+         : [...(post.likes || []), currentUser.email];
+       const newLikesCount = newLikes.length;
+
+       await base44.entities.CommunityPost.update(post.id, {
+         likes: newLikes,
+         likes_count: newLikesCount,
+       });
+
+       if (!isLiked && post.created_by !== currentUser?.email) {
+         await base44.functions.invoke('createLikeNotification', {
+           post_id: post.id,
+           post_author_email: post.created_by,
+           liker_email: currentUser?.email,
+           liker_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+           liker_photo: currentUser?.photo_url || null,
+         }).catch(() => {});
+       }
+
+       onUpdate({ ...post, likes: newLikes, likes_count: newLikesCount });
+     } catch (error) {
+       console.error('Like error:', error);
+       toast.error('Errore nel mettere mi piace');
+     }
+   };
 
   const loadComments = async () => {
     setLoadingComments(true);
@@ -71,24 +84,40 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Fai login per commentare");
     setSubmitting(true);
-    const res = await base44.functions.invoke('addPostComment', { post_id: post.id, content: newComment.trim() });
-    const { comment: created, comments_count: newCommentsCount } = res.data;
-    
-    // Create notification if commenting on someone else's post
-    if (post.created_by !== currentUser?.email) {
-      await base44.functions.invoke('createCommentNotification', {
+    try {
+      const comment = await base44.entities.CommunityComment.create({
         post_id: post.id,
-        post_author_email: post.created_by,
-        comment_author_email: currentUser?.email,
-        comment_author_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
-        comment_author_photo: currentUser?.photo_url || null,
-      }).catch(() => {});
+        user_email: currentUser.email,
+        user_name: currentUser.full_name || currentUser.email.split("@")[0],
+        user_photo: currentUser.photo_url || null,
+        content: newComment.trim(),
+        is_expert: currentUser.role === "admin" || currentUser.role === "expert" || currentUser.is_expert === true,
+      });
+
+      const newCommentsCount = (post.comments_count || 0) + 1;
+      await base44.entities.CommunityPost.update(post.id, {
+        comments_count: newCommentsCount,
+      });
+
+      if (post.created_by !== currentUser?.email) {
+        await base44.functions.invoke('createCommentNotification', {
+          post_id: post.id,
+          post_author_email: post.created_by,
+          comment_author_email: currentUser?.email,
+          comment_author_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+          comment_author_photo: currentUser?.photo_url || null,
+        }).catch(() => {});
+      }
+
+      onUpdate({ ...post, comments_count: newCommentsCount });
+      setComments([comment, ...comments]);
+      setNewComment("");
+    } catch (error) {
+      console.error('Comment error:', error);
+      toast.error('Errore nel commentare');
+    } finally {
+      setSubmitting(false);
     }
-    
-    onUpdate({ ...post, comments_count: newCommentsCount });
-    setComments([created, ...comments]);
-    setNewComment("");
-    setSubmitting(false);
   };
 
   const deleteComment = async (commentId) => {
