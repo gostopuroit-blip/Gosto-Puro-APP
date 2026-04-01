@@ -65,16 +65,16 @@ export default function ExpertProfile() {
       setFollowingCount(uniqueFollowing.length);
       setIsFollowing(userFollowData.length > 0);
 
-      // Load expert user record for role info
+      // Load expert user record for role info and photo
       const allUsers = await base44.entities.User.list().catch(() => []);
-      const expertUser = allUsers.find((u) => u.email === expertEmail);
+      const expertUser = allUsers.find((usr) => usr.email === expertEmail);
 
+      // Prefer photo from User record (most up-to-date), fallback to post data
+      const resolvedPhoto = expertUser?.photo_url || postsData[0]?.user_photo || null;
       const displayName = postsData.length > 0
         ? getDisplayName(postsData[0].user_name, expertEmail)
         : getDisplayName(expertUser?.full_name || null, expertEmail);
-      const photoUrl = postsData.length > 0
-        ? getPhotoUrl(postsData[0].user_photo)
-        : getPhotoUrl(expertUser?.photo_url || null);
+      const photoUrl = getPhotoUrl(resolvedPhoto);
 
       setExpert({
         email: expertEmail,

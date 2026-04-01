@@ -262,7 +262,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {/* Image or Images Carousel */}
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
-          className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
+          className={`w-full relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
         >
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />

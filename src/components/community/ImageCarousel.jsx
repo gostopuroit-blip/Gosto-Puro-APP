@@ -10,11 +10,12 @@ export default function ImageCarousel({ images, isBlurred = false }) {
   if (!images || images.length === 0) return null;
   if (images.length === 1) {
     return (
-      <div className={`w-full bg-black relative ${isBlurred ? "overflow-hidden" : ""}`}>
+      <div className={`w-full relative ${isBlurred ? "overflow-hidden" : ""}`}>
         <img
           src={images[0]}
           alt=""
-          className={`w-full object-contain max-h-[60vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
+          loading="lazy"
+          className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
         />
       </div>
     );
@@ -44,14 +45,15 @@ export default function ImageCarousel({ images, isBlurred = false }) {
   return (
     <div
       ref={containerRef}
-      className={`w-full bg-black relative ${isBlurred ? "overflow-hidden" : ""}`}
+      className={`w-full relative ${isBlurred ? "overflow-hidden" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       <img
         src={images[currentIndex]}
         alt=""
-        className={`w-full object-contain max-h-[60vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
+        loading="lazy"
+        className={`w-full object-cover ${isBlurred ? "blur-xl scale-110" : ""}`}
       />
 
       {/* Previous button */}
