@@ -60,8 +60,8 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
         if (allowedEmails.size === 0) {
           const fallbackUsers = await base44.entities.User.list("-created_date", 30).catch(() => []);
           const filtered = fallbackUsers.filter((u) => {
-            const name = u.display_name || u.full_name || u.email.split("@")[0] || "";
-            return name.toLowerCase().includes(q) && u.email !== myEmail;
+            const displayNameOrEmail = u.display_name && u.display_name.trim() ? u.display_name : u.email.split("@")[0];
+            return displayNameOrEmail.toLowerCase().includes(q) && u.email !== myEmail;
           });
           setSuggestions(filtered.slice(0, 6));
           setShowSuggestions(filtered.length > 0);
@@ -72,10 +72,11 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
         const allUsers = await base44.entities.User.list("-created_date", 50);
         const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email && u.email !== myEmail);
 
-        // Filter by search query
+        // Filter by search query: check display_name OR email username
         const filtered = filteredByEmail.filter((u) => {
-          const name = u.display_name || u.full_name || u.email.split("@")[0] || "";
-          return name.toLowerCase().includes(q);
+          const displayNameOrEmail = u.display_name && u.display_name.trim() ? u.display_name : u.email.split("@")[0];
+          const emailUsername = u.email.split("@")[0];
+          return displayNameOrEmail.toLowerCase().includes(q) || emailUsername.toLowerCase().includes(q);
         });
 
         setSuggestions(filtered.slice(0, 6));
@@ -93,7 +94,7 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
     const currentMention = getLastMention(value, cursorPos);
     if (!currentMention) return;
 
-    const displayName = user.display_name || user.full_name || user.email?.split("@")[0];
+    const displayName = user.display_name && user.display_name.trim() ? user.display_name : user.email?.split("@")[0];
     const before = value.substring(0, currentMention.atIndex);
     const after = value.substring(currentMention.endIndex);
     const newValue = `${before}@${displayName} ${after}`;
@@ -151,14 +152,14 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
                 <img src={user.photo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
               ) : (
                 <div className="w-6 h-6 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold">
-                  {(user.display_name || user.full_name || user.email?.split("@")[0] || "?").charAt(0).toUpperCase()}
+                    {(user.display_name && user.display_name.trim() ? user.display_name : user.email?.split("@")[0] || "?").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {user.display_name && user.display_name.trim() ? user.display_name : user.email?.split("@")[0]}
+                  </p>
                 </div>
-              )}
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {user.display_name || user.full_name || user.email?.split("@")[0]}
-                </p>
-              </div>
             </button>
           ))}
         </div>
