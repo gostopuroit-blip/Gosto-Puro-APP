@@ -153,10 +153,12 @@ export default function Community() {
                  <h1 className="font-bold text-gray-900 dark:text-white text-lg">Comunità</h1>
                </div>
              </div>
-            <Button size="sm" onClick={handlePublishClick} className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
-              <Plus className="w-4 h-4" />
-              Pubblica
-            </Button>
+             {isPremiumUser(user) && (
+               <Button size="sm" onClick={handlePublishClick} className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
+                 <Plus className="w-4 h-4" />
+                 Pubblica
+               </Button>
+             )}
         </div>
       </div>
 

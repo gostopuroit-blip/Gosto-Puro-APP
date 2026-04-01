@@ -19,10 +19,10 @@ export default function PremiumUpgradeModal({ onClose, reason = "pubblicare" }) 
         </div>
 
         <h2 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-1">
-          Diventa Premium
+          Passa a Premium per {reason} 🌟
         </h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-5">
-          Passa a Premium per {reason} nella Comunità!
+          Sblocca tutte le funzionalità della Comunità
         </p>
 
         {/* Benefits */}
