@@ -33,7 +33,7 @@ export default function ShoppingList() {
     if (!u) { setLoading(false); return; }
 
     // Load existing items first — only regenerate if none exist
-    const existing = await base44.entities.ShoppingItem.filter({ created_by: u.email }, "category", 200);
+    const existing = await base44.entities.ShoppingItem.filter({ created_by: u.email }, "category", 100);
     if (existing.length > 0) {
       setItems(existing);
       setLoading(false);
@@ -53,7 +53,7 @@ export default function ShoppingList() {
     
     if (plans.length === 0) {
       // Delete any orphaned items and show empty state
-      const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
+      const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 100);
       for (let i = 0; i < oldItems.length; i += 5) {
         await Promise.all(oldItems.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id)));
       }
@@ -72,7 +72,7 @@ export default function ShoppingList() {
     )];
 
     // Fetch all published recipes in one call and filter locally by ID
-    const allRecipes = await base44.entities.Recipe.list("-created_date", 1000);
+    const allRecipes = await base44.entities.Recipe.list("-created_date", 200);
     const recipeMap = Object.fromEntries(allRecipes.map((r) => [r.id, r]));
     const planRecipes = recipeIds.map((id) => recipeMap[id]).filter(Boolean);
 
@@ -129,7 +129,7 @@ export default function ShoppingList() {
     }
 
     // Delete old items in batches to avoid rate limit
-    const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
+    const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 100);
     for (let i = 0; i < oldItems.length; i += 5) {
       await Promise.all(oldItems.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id).catch(() => null)));
     }
@@ -147,7 +147,7 @@ export default function ShoppingList() {
       await base44.entities.ShoppingItem.bulkCreate(newItems);
     }
 
-    const created = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
+    const created = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 100);
     setItems(created);
     setLoading(false);
     setGenerating(false);

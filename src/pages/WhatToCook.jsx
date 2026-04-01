@@ -25,7 +25,7 @@ export default function WhatToCook() {
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    base44.entities.Recipe.list("-created_date", 500).then(setRecipes);
+    base44.entities.Recipe.list("-created_date", 200).then(setRecipes);
   }, []);
 
   const addIngredient = () => {
