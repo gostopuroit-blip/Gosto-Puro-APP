@@ -8,11 +8,9 @@ async function computeWeeklyTop3() {
   startDate.setDate(startDate.getDate() - 7);
   const iso = startDate.toISOString();
 
-  const [posts, comments, stories] = await Promise.all([
-    base44.entities.CommunityPost.filter({ status: "active", created_date: { $gte: iso } }, "-created_date", 50).catch(() => []),
-    base44.entities.CommunityComment.filter({ created_date: { $gte: iso } }, "-created_date", 50).catch(() => []),
-    base44.entities.Story.filter({ created_date: { $gte: iso } }, "-created_date", 30).catch(() => []),
-  ]);
+  const posts = await base44.entities.CommunityPost.filter({ status: "active", created_date: { $gte: iso } }, "-created_date", 20).catch(() => []);
+  const comments = await base44.entities.CommunityComment.filter({ created_date: { $gte: iso } }, "-created_date", 20).catch(() => []);
+  const stories = await base44.entities.Story.filter({ created_date: { $gte: iso } }, "-created_date", 15).catch(() => []);
 
   const scores = {};
   const ensure = (email, name, photo) => {
@@ -48,7 +46,7 @@ export default function MiniRankingCard() {
     // Delay to avoid rate limit on initial page load
     const timer = setTimeout(() => {
       computeWeeklyTop3().then(setTop3).finally(() => setLoading(false));
-    }, 2000);
+    }, 4000);
     return () => clearTimeout(timer);
   }, []);
 

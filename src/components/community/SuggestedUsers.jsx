@@ -10,7 +10,7 @@ export default function SuggestedUsers({ currentUser, followedEmails, onFollowCh
   useEffect(() => {
     if (!currentUser) return;
     const timer = setTimeout(() => {
-      base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 30)
+      base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 15)
         .then((posts) => {
           const map = {};
           posts.forEach((p) => {
@@ -25,7 +25,7 @@ export default function SuggestedUsers({ currentUser, followedEmails, onFollowCh
             .slice(0, 6);
           setUsers(sorted);
         });
-    }, 3000);
+    }, 5000);
     return () => clearTimeout(timer);
   }, [currentUser, followedEmails]);
 

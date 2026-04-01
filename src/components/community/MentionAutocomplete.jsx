@@ -42,14 +42,14 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
         let userEmails = new Set();
         const myEmail = currentUser?.email || null;
         const [followingData, followersData] = await Promise.all([
-          myEmail ? base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 500).catch(() => []) : Promise.resolve([]),
-          myEmail ? base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 500).catch(() => []) : Promise.resolve([]),
+          myEmail ? base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []) : Promise.resolve([]),
+          myEmail ? base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []) : Promise.resolve([]),
         ]);
         followingData.forEach((f) => userEmails.add(f.following_email));
         followersData.forEach((f) => userEmails.add(f.follower_email));
 
         // Get all users and filter
-        const allUsers = await base44.entities.User.list("-created_date", 300);
+        const allUsers = await base44.entities.User.list("-created_date", 50);
         let pool = userEmails.size > 0
           ? allUsers.filter((u) => userEmails.has(u.email))
           : allUsers;
