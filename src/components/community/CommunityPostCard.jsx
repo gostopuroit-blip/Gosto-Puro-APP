@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 
 export default function CommunityPostCard({ post, currentUser, onUpdate }) {
-  const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
@@ -114,7 +113,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
 
   const displayName = getDisplayName(post.user_name, post.created_by);
   const photoUrl = getPhotoUrl(post.user_photo);
-  const typeMeta = POST_TYPE_META[post.post_type] || null;
 
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl cursor-pointer" onClick={() => setShowModal(true)}>
