@@ -20,6 +20,7 @@ import AdminCommunity from "@/components/admin/AdminCommunity";
 import AdminBaseFreeRecipes from "@/components/admin/AdminBaseFreeRecipes";
 import AdminExperts from "@/components/admin/AdminExperts";
 import AdminBadWords from "@/components/admin/AdminBadWords";
+import AdminRecipeIngredientAudit from "@/components/admin/AdminRecipeIngredientAudit";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare, Gift, UserCheck, Filter } from "lucide-react";
@@ -36,6 +37,7 @@ const tabs = [
   { key: "utm",            label: "Link UTM",          icon: Link2 },
   { key: "utenti",       label: "Utenti",        icon: Users },
   { key: "ricette",      label: "Ricette",        icon: UtensilsCrossed },
+  { key: "audit_ingredients", label: "Audit Ingredienti", icon: Filter },
   { key: "genera",       label: "Genera con IA",    icon: Sparkles },
   { key: "base_free",    label: "Ricette Base",   icon: Gift },
   { key: "emails",       label: "Template Email",  icon: Mail },
@@ -156,6 +158,7 @@ function AdminContent() {
           {activeTab === "utm"            && <AdminUTMGenerator />}
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
+          {activeTab === "audit_ingredients" && <AdminRecipeIngredientAudit />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
           {activeTab === "base_free"    && <AdminBaseFreeRecipes />}
           {activeTab === "emails"       && <AdminEmailTemplates />}
