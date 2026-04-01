@@ -16,6 +16,7 @@ const POST_TYPES = [
   { value: "tip", label: "Consiglio", icon: Lightbulb, color: "text-amber-500" },
   { value: "recipe", label: "Ricetta", icon: UtensilsCrossed, color: "text-[#2D6A4F]" },
   { value: "poll", label: "Sondaggio", icon: BarChart2, color: "text-indigo-500" },
+  { value: "quiz", label: "Quiz", icon: HelpCircle, color: "text-violet-500" },
   { value: "premium_content", label: "Premium", icon: Lock, color: "text-purple-500", expertOnly: true },
 ];
 
@@ -35,6 +36,15 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
   // Poll state
   const [pollOptions, setPollOptions] = useState(["", ""]);
+
+  // Quiz state
+  const [quizQuestion, setQuizQuestion] = useState("");
+  const [quizOptions, setQuizOptions] = useState([
+    { id: "opt_0", text: "", is_correct: false },
+    { id: "opt_1", text: "", is_correct: false },
+  ]);
+  const [quizExplanation, setQuizExplanation] = useState("");
+  const [quizExpiresAt, setQuizExpiresAt] = useState("");
 
   // Mentions state
   const [mentionedUsers, setMentionedUsers] = useState([]);
@@ -165,9 +175,8 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   };
 
   const addHashtag = (name) => {
-    const cleanName = name.replace(/^#+/, '').toLowerCase();
-    if (!cleanName || hashtags.includes(cleanName)) return;
-    setHashtags([...hashtags, cleanName]);
+    if (hashtags.includes(name)) return;
+    setHashtags([...hashtags, name]);
     setTagInput("");
     setHashtagSuggestions([]);
     setShowHashtagSuggestions(false);
@@ -190,6 +199,12 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       if (!title.trim()) return toast.error("Aggiungi una domanda per il sondaggio");
       const validOpts = pollOptions.filter((o) => o.trim());
       if (validOpts.length < 2) return toast.error("Aggiungi almeno 2 opzioni per il sondaggio");
+    }
+    if (postType === "quiz") {
+      if (!quizQuestion.trim()) return toast.error("Aggiungi una domanda per il quiz");
+      const validOpts = quizOptions.filter((o) => o.text.trim());
+      if (validOpts.length < 2) return toast.error("Aggiungi almeno 2 opzioni");
+      if (!quizOptions.some((o) => o.is_correct)) return toast.error("Segna almeno una risposta corretta");
     }
     if (fileSizeWarning) return toast.error(fileSizeWarning);
 
@@ -238,7 +253,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       }
 
       // Extract ALL hashtags from content + merge with manually added hashtags
-      const tags = (content.match(/#([\w]+)/g) || []).map(t => t.replace('#', '').toLowerCase());
+      const tags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
       const allTags = [...new Set([...tags, ...hashtags])];
 
       // Extract mention emails from content
@@ -283,6 +298,26 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
           options: validOpts.map((o, i) => ({ id: `opt_${i}`, text: o.trim(), votes_count: 0, voters: [] })),
           total_votes: 0,
           post_id: post.id,
+          status: "active",
+        });
+      }
+
+      // Create quiz if needed
+      if (postType === "quiz") {
+        const validOpts = quizOptions.filter((o) => o.text.trim()).map((o) => ({
+          ...o,
+          votes_count: 0,
+          voters: [],
+        }));
+        await base44.entities.Quiz.create({
+          user_email: currentUser?.email,
+          post_id: post.id,
+          question: quizQuestion.trim(),
+          options: validOpts,
+          explanation: quizExplanation.trim() || null,
+          expires_at: quizExpiresAt || null,
+          total_answers: 0,
+          correct_answers: 0,
           status: "active",
         });
       }
@@ -356,7 +391,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-3">
-          {/* Title for tip/recipe/premium/poll/quiz */}
+          {/* Title for tip/recipe/premium/poll */}
           {(postType === "tip" || postType === "recipe" || postType === "premium_content" || postType === "poll") && (
             <input
               value={title}
@@ -523,11 +558,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
               <input
                 ref={hashtagInputRef}
                 value={tagInput}
-                onChange={(e) => { 
-                  const val = e.target.value.replace(/^#+/, '');
-                  setTagInput(val);
-                  setShowHashtagSuggestions(true);
-                }}
+                onChange={(e) => { setTagInput(e.target.value.replace("#", "")); setShowHashtagSuggestions(true); }}
                 onFocus={() => setShowHashtagSuggestions(true)}
                 placeholder={hashtags.length === 0 ? "#tag" : ""}
                 className="flex-1 text-sm bg-transparent text-gray-800 dark:text-white outline-none"
@@ -548,6 +579,68 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
               </div>
             )}
           </div>
+
+          {/* Quiz fields */}
+          {postType === "quiz" && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Domanda del quiz</p>
+              <input
+                value={quizQuestion}
+                onChange={(e) => setQuizQuestion(e.target.value)}
+                placeholder="Es: Quale vitamina è prodotta dal sole?"
+                className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-2.5 text-gray-800 dark:text-white outline-none"
+              />
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Opzioni (seleziona quella corretta)</p>
+              {quizOptions.map((opt, i) => (
+                <div key={opt.id} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQuizOptions(quizOptions.map((o, j) => ({ ...o, is_correct: j === i })))}
+                    className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all ${
+                      opt.is_correct ? "border-green-500 bg-green-500" : "border-gray-300 dark:border-[#444]"
+                    }`}
+                  >
+                    {opt.is_correct && <div className="w-full h-full flex items-center justify-center"><div className="w-2 h-2 bg-white rounded-full" /></div>}
+                  </button>
+                  <input
+                    value={opt.text}
+                    onChange={(e) => setQuizOptions(quizOptions.map((o, j) => j === i ? { ...o, text: e.target.value } : o))}
+                    placeholder={`Opzione ${i + 1}`}
+                    className="flex-1 text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-gray-800 dark:text-white outline-none"
+                  />
+                  {quizOptions.length > 2 && (
+                    <button onClick={() => setQuizOptions(quizOptions.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 p-1">
+                      <Minus className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {quizOptions.length < 4 && (
+                <button
+                  onClick={() => setQuizOptions([...quizOptions, { id: `opt_${quizOptions.length}`, text: "", is_correct: false }])}
+                  className="flex items-center gap-1.5 text-xs text-violet-600 font-semibold"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Aggiungi opzione
+                </button>
+              )}
+              <input
+                value={quizExplanation}
+                onChange={(e) => setQuizExplanation(e.target.value)}
+                placeholder="Spiegazione (opzionale) — mostrata dopo aver risposto"
+                className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-2.5 text-gray-800 dark:text-white outline-none"
+              />
+              <div>
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Data di scadenza (opzionale)</p>
+                <input
+                  type="datetime-local"
+                  value={quizExpiresAt}
+                  onChange={(e) => setQuizExpiresAt(e.target.value)}
+                  placeholder="gg/mm/aaaa --:--"
+                  className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-2.5 text-gray-800 dark:text-white outline-none"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Recipe selector */}
           {postType === "recipe" && (

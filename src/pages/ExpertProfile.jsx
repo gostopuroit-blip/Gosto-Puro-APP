@@ -47,18 +47,17 @@ export default function ExpertProfile() {
       // Fetch posts by user_email, followers and following in parallel
       const [postsData, followersData, followingData, allUsers] = await Promise.all([
         base44.entities.CommunityPost.filter({ user_email: expertEmail }, "-created_date", 50).catch(() => []),
-        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 100).catch(() => []),
-        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 100).catch(() => []),
-        base44.entities.User.list("-created_date", 100).catch(() => []),
+        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000).catch(() => []),
+        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000).catch(() => []),
+        base44.entities.User.list().catch(() => []),
       ]);
 
       const userFollowData = u && u.email !== expertEmail
         ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1).catch(() => [])
         : [];
 
-      // Deduplicate followers (where following_email = expertEmail) by follower_email
+      // Deduplicate followers/following by email
       const uniqueFollowers = [...new Map(followersData.map((f) => [f.follower_email, f])).values()];
-      // Deduplicate following (where follower_email = expertEmail) by following_email
       const uniqueFollowing = [...new Map(followingData.map((f) => [f.following_email, f])).values()];
 
       setPosts(postsData);

@@ -35,7 +35,7 @@ export default function Planner() {
     setUser(currentUser);
     const [plans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
     base44.entities.MealPlan.filter({ is_active: true, created_by: currentUser?.email }),
-    base44.entities.Recipe.list("-created_date", 150),
+    base44.entities.Recipe.list("-created_date", 1000),
     base44.entities.Folder.list(),
     base44.entities.UserRecipe.list()]
     );
@@ -307,7 +307,7 @@ export default function Planner() {
               <div className="flex items-center gap-2 mb-3">
                 <CalendarDays className="w-5 h-5 text-[#2D6A4F]" />
                 <div>
-                  <p className="font-bold text-gray-900 dark:text-white">{dayNames[day.day - 1]}</p>
+                  <p className="font-bold text-gray-900 dark:text-white">{day.day_name}</p>
                   <p className="text-[11px] text-gray-500 dark:text-gray-400">Giorno {day.day}</p>
                 </div>
               </div>
@@ -327,16 +327,16 @@ export default function Planner() {
                     "border-gray-100 dark:border-[#3D5246] bg-gray-50 dark:bg-[#1A2B20]"}`
                     }>
 
-                      {recipe && recipe.image_url && (
-                      <Link to={createPageUrl(`RecipeDetail?id=${recipeId}`)} className="block">
-                      <div className="relative h-32 bg-gray-100 dark:bg-[#3D5246] overflow-hidden group">
+                      {recipe && recipe.image_url &&
+                    <Link to={createPageUrl(`RecipeDetail?id=${recipeId}`)} className="block">
+                      <div className="relative h-32 bg-gradient-to-t from-black/40 to-transparent overflow-hidden group">
                           <img
                         src={recipe.image_url}
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                         </div>
-                      </Link>
-                      )}
+                    </Link>
+                    }
                       <div className="p-3 flex items-center justify-between">
                         <div className="flex-1">
                           <p className="text-xs font-bold text-gray-500 dark:text-gray-400">{mealLabels[meal]}</p>

@@ -39,8 +39,8 @@ export default function Folders() {
     const user = await base44.auth.me().catch(() => null);
     setCurrentUser(user);
     const [ur, r, f] = await Promise.all([
-      user ? base44.entities.UserRecipe.filter({ created_by: user.email }, "-created_date", 100) : Promise.resolve([]),
-      base44.entities.Recipe.list("-numero_preparate", 100),
+      user ? base44.entities.UserRecipe.filter({ created_by: user.email }, "-created_date", 200) : Promise.resolve([]),
+      base44.entities.Recipe.list("-numero_preparate", 200),
       user ? base44.entities.Folder.filter({ is_system: false, created_by: user.email }) : Promise.resolve([]),
     ]);
     setUserRecipes(ur);

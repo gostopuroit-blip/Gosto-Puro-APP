@@ -27,7 +27,7 @@ export default function HashtagPage() {
 
       const [hashtagData, postsData] = await Promise.all([
         base44.entities.Hashtag.filter({ name: hashtag }, "-created_date", 1).catch(() => []),
-        base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 50).catch(() => []),
+        base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 100).catch(() => []),
       ]);
 
       setHashtagData(hashtagData[0] || null);

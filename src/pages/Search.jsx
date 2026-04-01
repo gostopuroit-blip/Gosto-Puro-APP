@@ -34,7 +34,7 @@ export default function Search() {
       const u = await base44.auth.me().catch(() => null);
       setCurrentUser(u);
       if (u) {
-        const followData = await base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 50).catch(() => []);
+        const followData = await base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []);
         setFollowedEmails(new Set(followData.map((f) => f.following_email)));
       }
     };
@@ -67,7 +67,7 @@ export default function Search() {
 
       try {
         // Search posts by content, title, or tags
-        const allPosts = await base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 50).catch(() => []);
+        const allPosts = await base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", 100).catch(() => []);
         const filteredPosts = allPosts.filter((p) =>
           p.content?.toLowerCase().includes(lowerQuery) ||
           p.title?.toLowerCase().includes(lowerQuery) ||
@@ -76,7 +76,7 @@ export default function Search() {
         setPosts(filteredPosts);
 
         // Search users by display_name or email
-        const allUsers = await base44.entities.User.list("-created_date", 50).catch(() => []);
+        const allUsers = await base44.entities.User.list("-created_date", 100).catch(() => []);
         const filteredUsers = allUsers.filter((u) =>
           u.full_name?.toLowerCase().includes(lowerQuery) ||
           u.email?.toLowerCase().includes(lowerQuery)
@@ -84,7 +84,7 @@ export default function Search() {
         setUsers(filteredUsers);
 
         // Search hashtags by name
-        const allHashtags = await base44.entities.Hashtag.list("-posts_count", 50).catch(() => []);
+        const allHashtags = await base44.entities.Hashtag.list("-posts_count", 100).catch(() => []);
         const filteredHashtags = allHashtags.filter((h) =>
           h.name?.toLowerCase().includes(lowerQuery)
         );

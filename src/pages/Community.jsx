@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search, RefreshCw, ChevronUp, Lock } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, RefreshCw, ChevronUp, Lock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,7 +14,7 @@ import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
 import FollowButton from "@/components/community/FollowButton";
 import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
-
+import MiniRankingCard from "@/components/community/MiniRankingCard";
 import FeedSkeleton from "@/components/community/FeedSkeleton";
 
 function rankPosts(posts) {
@@ -86,32 +86,21 @@ export default function Community() {
       setUser(u);
       setLoading(false);
 
-      // Secondary data — lazy load
-      if (u) {
-        const [followData] = await Promise.all([
-          base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 20).catch(() => []),
-        ]);
-        const followed = new Set(followData.map((f) => f.following_email));
-        setFollowedEmails(followed);
-      }
+      // Secondary data
+      const [followData, usersData, repostsData] = await Promise.all([
+        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []) : Promise.resolve([]),
+        base44.entities.User.list("-created_date", 100).catch(() => []),
+        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60).catch(() => []),
+      ]);
 
-      // Load suggested users and reposts on demand (lazy)
-      setTimeout(async () => {
-        const usersData = await base44.entities.User.list("-created_date", 15).catch(() => []);
-        const repostsData = await base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 15).catch(() => []);
+      const followed = new Set(followData.map((f) => f.following_email));
+      setFollowedEmails(followed);
+      setReposts(repostsData);
 
-        const followed = new Set();
-        if (u) {
-          const followData = await base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 20).catch(() => []);
-          followData.forEach((f) => followed.add(f.following_email));
-        }
-
-        setReposts(repostsData);
-        const suggested = usersData.filter(
-          (usr) => usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
-        );
-        setSuggestedUsers(suggested);
-      }, 2000);
+      const suggested = usersData.filter(
+        (usr) => usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
+      );
+      setSuggestedUsers(suggested);
     };
     init();
   }, [loadPosts]);
@@ -229,6 +218,9 @@ export default function Community() {
           </div>
           <div className="flex items-center gap-2">
             {user && <NotificationBell currentUser={user} />}
+            <button onClick={() => navigate("/CommunityRanking")} className="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 rounded-lg transition">
+              <Trophy className="w-5 h-5" />
+            </button>
             <button onClick={() => navigate("/Search")} className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition">
               <Search className="w-5 h-5" />
             </button>
@@ -361,6 +353,7 @@ export default function Community() {
                 )}
                 <SuggestedUsers currentUser={user} followedEmails={followedEmails} onFollowChange={handleFollowChange} />
                 <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} currentUser={user} />
+                <MiniRankingCard />
               </>
             )}
 

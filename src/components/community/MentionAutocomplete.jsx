@@ -45,38 +45,32 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
           return;
         }
 
-        // Fetch both directions of follow relationship
+        // Fetch both directions
         const [followingData, followersData] = await Promise.all([
-          base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 30).catch(() => []),
-          base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 30).catch(() => []),
+          base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []),
+          base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []),
         ]);
 
-        // Build set of emails: people I follow + people who follow me
+        // Build set of emails (follows + followers)
         const allowedEmails = new Set();
-        followingData.forEach((f) => allowedEmails.add(f.following_email)); // people I follow
-        followersData.forEach((f) => allowedEmails.add(f.follower_email)); // people who follow me
+        followingData.forEach((f) => allowedEmails.add(f.following_email));
+        followersData.forEach((f) => allowedEmails.add(f.follower_email));
 
-        // Fallback: if no follows/followers, fetch all users
+        // If no follows/followers, show nothing
         if (allowedEmails.size === 0) {
-          const fallbackUsers = await base44.entities.User.list("-created_date", 30).catch(() => []);
-          const filtered = fallbackUsers.filter((u) => {
-            const displayNameOrEmail = u.display_name && u.display_name.trim() ? u.display_name : u.email.split("@")[0];
-            return displayNameOrEmail.toLowerCase().includes(q) && u.email !== myEmail;
-          });
-          setSuggestions(filtered.slice(0, 6));
-          setShowSuggestions(filtered.length > 0);
+          setSuggestions([]);
+          setShowSuggestions(false);
           return;
         }
 
-        // Fetch only those users with reduced limit
-        const allUsers = await base44.entities.User.list("-created_date", 50);
-        const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email && u.email !== myEmail);
+        // Fetch only those users
+        const allUsers = await base44.entities.User.list("-created_date", 100);
+        const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email);
 
-        // Filter by search query: check display_name OR email username
+        // Filter by search query
         const filtered = filteredByEmail.filter((u) => {
-          const displayNameOrEmail = u.display_name && u.display_name.trim() ? u.display_name : u.email.split("@")[0];
-          const emailUsername = u.email.split("@")[0];
-          return displayNameOrEmail.toLowerCase().includes(q) || emailUsername.toLowerCase().includes(q);
+          const name = u.display_name || u.full_name || u.email.split("@")[0] || "";
+          return name.toLowerCase().includes(q);
         });
 
         setSuggestions(filtered.slice(0, 6));
@@ -94,7 +88,7 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
     const currentMention = getLastMention(value, cursorPos);
     if (!currentMention) return;
 
-    const displayName = user.display_name && user.display_name.trim() ? user.display_name : user.email?.split("@")[0];
+    const displayName = user.display_name || user.full_name || user.email?.split("@")[0];
     const before = value.substring(0, currentMention.atIndex);
     const after = value.substring(currentMention.endIndex);
     const newValue = `${before}@${displayName} ${after}`;
@@ -152,14 +146,14 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
                 <img src={user.photo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
               ) : (
                 <div className="w-6 h-6 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold">
-                    {(user.display_name && user.display_name.trim() ? user.display_name : user.email?.split("@")[0] || "?").charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {user.display_name && user.display_name.trim() ? user.display_name : user.email?.split("@")[0]}
-                  </p>
+                  {(user.display_name || user.full_name || user.email?.split("@")[0] || "?").charAt(0).toUpperCase()}
                 </div>
+              )}
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {user.display_name || user.full_name || user.email?.split("@")[0]}
+                </p>
+              </div>
             </button>
           ))}
         </div>

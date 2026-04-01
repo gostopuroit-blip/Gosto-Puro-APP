@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2 } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2, HelpCircle } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 import PollCard from "./PollCard";
+import QuizCard from "./QuizCard";
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
@@ -25,6 +26,7 @@ tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 
 recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
 premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
 poll: { label: "Sondaggio", icon: BarChart2, color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" },
+quiz: { label: "Quiz", icon: HelpCircle, color: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400" },
 image_post: null,
 };
 
@@ -281,18 +283,15 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         )}
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
-            {post.tags.map((tag) => {
-              const cleanTag = tag.replace(/^#+/, '').toLowerCase();
-              return (
-                <button
-                  key={cleanTag}
-                  onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(cleanTag)}`)}
-                  className="flex items-center gap-0.5 text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
-                >
-                  #{cleanTag}
-                </button>
-              );
-            })}
+            {post.tags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(tag)}`)}
+                className="flex items-center gap-0.5 text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
+              >
+                #&thinsp;{tag}
+              </button>
+            ))}
           </div>
         )}
 
@@ -308,6 +307,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {poll && (
         <div className="px-4 pb-2">
           <PollCard poll={poll} currentUser={currentUser} onUpdate={setPoll} />
+        </div>
+      )}
+
+      {/* Quiz */}
+      {post.post_type === "quiz" && (
+        <div className="px-4 pb-2">
+          <QuizCard post={post} currentUser={currentUser} />
         </div>
       )}
 
