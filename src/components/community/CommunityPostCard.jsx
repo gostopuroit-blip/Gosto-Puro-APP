@@ -283,15 +283,18 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         )}
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
-            {post.tags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(tag)}`)}
-                className="flex items-center gap-0.5 text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
-              >
-                #&thinsp;{tag}
-              </button>
-            ))}
+            {post.tags.map((tag) => {
+              const cleanTag = tag.replace(/^#+/, '').toLowerCase();
+              return (
+                <button
+                  key={cleanTag}
+                  onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(cleanTag)}`)}
+                  className="flex items-center gap-0.5 text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
+                >
+                  #{cleanTag}
+                </button>
+              );
+            })}
           </div>
         )}
 

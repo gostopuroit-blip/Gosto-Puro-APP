@@ -175,8 +175,9 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   };
 
   const addHashtag = (name) => {
-    if (hashtags.includes(name)) return;
-    setHashtags([...hashtags, name]);
+    const cleanName = name.replace(/^#+/, '').toLowerCase();
+    if (!cleanName || hashtags.includes(cleanName)) return;
+    setHashtags([...hashtags, cleanName]);
     setTagInput("");
     setHashtagSuggestions([]);
     setShowHashtagSuggestions(false);
@@ -558,7 +559,11 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
               <input
                 ref={hashtagInputRef}
                 value={tagInput}
-                onChange={(e) => { setTagInput(e.target.value.replace("#", "")); setShowHashtagSuggestions(true); }}
+                onChange={(e) => { 
+                  const val = e.target.value.replace(/^#+/, '');
+                  setTagInput(val);
+                  setShowHashtagSuggestions(true);
+                }}
                 onFocus={() => setShowHashtagSuggestions(true)}
                 placeholder={hashtags.length === 0 ? "#tag" : ""}
                 className="flex-1 text-sm bg-transparent text-gray-800 dark:text-white outline-none"

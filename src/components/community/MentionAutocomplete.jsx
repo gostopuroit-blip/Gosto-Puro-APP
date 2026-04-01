@@ -46,26 +46,31 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
         }
 
         // Fetch both directions of follow relationship
-         const [followingData, followersData] = await Promise.all([
-           base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 30).catch(() => []),
-           base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 30).catch(() => []),
-         ]);
+        const [followingData, followersData] = await Promise.all([
+          base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 30).catch(() => []),
+          base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 30).catch(() => []),
+        ]);
 
-         // Build set of emails: people who follow me (followers) + people I follow (following)
-         const allowedEmails = new Set();
-         followingData.forEach((f) => allowedEmails.add(f.follower_email)); // followers: those who follow me
-         followersData.forEach((f) => allowedEmails.add(f.following_email)); // following: those I follow
+        // Build set of emails: people I follow + people who follow me
+        const allowedEmails = new Set();
+        followingData.forEach((f) => allowedEmails.add(f.following_email)); // people I follow
+        followersData.forEach((f) => allowedEmails.add(f.follower_email)); // people who follow me
 
-         // If no follows/followers, show nothing
-         if (allowedEmails.size === 0) {
-           setSuggestions([]);
-           setShowSuggestions(false);
-           return;
-         }
+        // Fallback: if no follows/followers, fetch all users
+        if (allowedEmails.size === 0) {
+          const fallbackUsers = await base44.entities.User.list("-created_date", 30).catch(() => []);
+          const filtered = fallbackUsers.filter((u) => {
+            const name = u.display_name || u.full_name || u.email.split("@")[0] || "";
+            return name.toLowerCase().includes(q) && u.email !== myEmail;
+          });
+          setSuggestions(filtered.slice(0, 6));
+          setShowSuggestions(filtered.length > 0);
+          return;
+        }
 
-         // Fetch only those users with reduced limit
-         const allUsers = await base44.entities.User.list("-created_date", 50);
-        const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email);
+        // Fetch only those users with reduced limit
+        const allUsers = await base44.entities.User.list("-created_date", 50);
+        const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email && u.email !== myEmail);
 
         // Filter by search query
         const filtered = filteredByEmail.filter((u) => {
