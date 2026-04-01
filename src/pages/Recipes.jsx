@@ -25,10 +25,11 @@ export default function Recipes() {
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
-  const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
   const [unlockedConfig, setUnlockedConfig] = useState(null);
-  const ITEMS_PER_PAGE = 6;
+  const [totalRecipesCount, setTotalRecipesCount] = useState(0);
+  const containerRef = useRef(null);
+  const BATCH_SIZE = 20;
 
   const loadUnlockedConfig = async () => {
     try {
@@ -43,12 +44,16 @@ export default function Recipes() {
     }
   };
 
-  const loadRecipes = useCallback(async (page = 1) => {
-    setLoading(true);
-    const skip = (page - 1) * ITEMS_PER_PAGE;
-    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", ITEMS_PER_PAGE * 10, 0).catch(() => []);
-    setRecipes(data);
-    setCurrentPage(page);
+  const loadRecipes = useCallback(async (skip = 0) => {
+    if (skip === 0) setLoading(true);
+    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", BATCH_SIZE, skip).catch(() => []);
+    if (skip === 0) {
+      setRecipes(data);
+      setTotalRecipesCount(data.length >= BATCH_SIZE ? BATCH_SIZE * 5 : data.length); // estimate total
+    } else {
+      setRecipes((prev) => [...prev, ...data]);
+    }
+    setLoadingMore(false);
     setLoading(false);
   }, []);
 
@@ -56,18 +61,25 @@ export default function Recipes() {
     const params = new URLSearchParams(location.search);
     const occ = params.get("occasion");
     const life = params.get("lifestyle");
-    const page = parseInt(params.get("page") || "1", 10);
     const q = params.get("search") || "";
     setActiveTags({ occasion: occ || null, lifestyle: life || null });
-    setCurrentPage(page);
     setSearch(q);
   }, [location.search]);
 
   useEffect(() => {
-    loadRecipes(1);
+    loadRecipes(0);
     base44.auth.me().then(setUser).catch(() => setUser(null));
     loadUnlockedConfig();
   }, [loadRecipes]);
+
+  const handleScroll = useCallback(() => {
+    if (!containerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    if (scrollHeight - scrollTop - clientHeight < 500 && !loadingMore && recipes.length > 0) {
+      setLoadingMore(true);
+      loadRecipes(recipes.length);
+    }
+  }, [loadingMore, recipes.length, loadRecipes]);
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
@@ -125,18 +137,7 @@ export default function Recipes() {
   }, [recipes, search, activeFilters, activeTags]);
 
   const clearTag = (type) => {
-    setActiveTags((prev) => ({ ...prev, [type]: null }));
-  };
-
-  const goToPage = (page) => {
-    const params = new URLSearchParams(location.search);
-    params.set("page", page);
-    if (search.trim()) {
-      params.set("search", search.trim());
-    } else {
-      params.delete("search");
-    }
-    navigate({ search: params.toString() }, { replace: true });
+   setActiveTags((prev) => ({ ...prev, [type]: null }));
   };
 
   const toggleFilter = (filterKey) => {
@@ -149,7 +150,6 @@ export default function Recipes() {
       }
       return newFilters;
     });
-    goToPage(1);
   };
 
   // Determine if current view is speciale/stile_vita
@@ -173,14 +173,7 @@ export default function Recipes() {
     return ids;
   }, [unlockedConfig, isPremium, isSpecialView, activeTags]);
 
-  // Pagination
-  const paginatedRecipes = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    return filteredRecipes.slice(start, end);
-  }, [filteredRecipes, currentPage]);
 
-  const totalPages = Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
@@ -191,8 +184,8 @@ export default function Recipes() {
   }
 
   return (
-    <PullToRefresh onRefresh={() => loadRecipes(1)}>
-      <div className="pb-24">
+    <PullToRefresh onRefresh={() => loadRecipes(0)}>
+      <div className="pb-24" ref={containerRef} style={{ height: '100vh', overflowY: 'auto' }} onScroll={handleScroll}>
       {/* Header */}
       
 
@@ -268,13 +261,17 @@ export default function Recipes() {
 
        {/* Recipe List */}
        <div className="px-5 space-y-4">
-         {filteredRecipes.length === 0 ?
+         {filteredRecipes.length === 0 ? (
           <div className="text-center py-16">
              <p className="text-5xl mb-4">🍳</p>
              <p className="text-gray-400 dark:text-gray-500 text-sm">Nessuna ricetta trovata</p>
-           </div> :
+           </div>
+         ) : (
           <>
-             {paginatedRecipes.map((recipe) => {
+            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2">
+              {filteredRecipes.length} ricette disponibili
+            </div>
+             {filteredRecipes.map((recipe) => {
               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
               if (isLocked) {
                 return (
@@ -295,33 +292,16 @@ export default function Recipes() {
 
               }
               return <RecipeCard key={recipe.id} recipe={recipe} />;
-            })}
+              })}
 
-           {/* Pagination */}
-           {totalPages > 1 && (
-             <div className="flex items-center justify-between gap-2 py-6 px-2">
-               <button
-                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                 disabled={currentPage === 1}
-                 className="px-3 py-2 rounded-lg bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] text-xs font-semibold disabled:opacity-40 transition"
-               >
-                 ← Indietro
-               </button>
-               <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                 {currentPage} / {totalPages}
-               </span>
-               <button
-                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                 disabled={currentPage === totalPages}
-                 className="px-3 py-2 rounded-lg bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] text-xs font-semibold disabled:opacity-40 transition"
-               >
-                 Avanti →
-               </button>
-             </div>
-           )}
-           </>
-           }
-           </div>
+              {loadingMore && (
+              <div className="flex items-center justify-center py-6">
+               <Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" />
+              </div>
+              )}
+              </>
+              )}
+              </div>
        </div>
      </PullToRefresh>);
 
