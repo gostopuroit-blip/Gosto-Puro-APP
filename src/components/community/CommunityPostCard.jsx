@@ -15,8 +15,7 @@ import MentionText from "./MentionText";
 import LinkPreviewCard from "./LinkPreviewCard";
 import LinkTextWithUrls from "./LinkTextWithUrls";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
+import { formatTimeAgo } from "@/lib/communityUtils";
 import { Link, useNavigate } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 import FollowButton from "./FollowButton";
@@ -63,7 +62,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const isOwner = post.created_by === currentUser?.email;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
   const isBlurred = post.is_premium && !isPremiumUser;
-  const isVerified = post.is_expert;
 
 
 
@@ -166,13 +164,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
 
 
   const displayName = getDisplayName(post.user_name, post.created_by);
-   const photoUrl = getPhotoUrl(post.user_photo);
-   const typeMeta = POST_TYPE_META[post.post_type] || null;
-
-  // Label do plano do autor do post (baseado nos dados do post)
-  const authorPlanLabel = post.is_expert
-    ? null // expert/admin: mostra badge verificado em vez disso
-    : null; // usuário comum: nada extra
+  const photoUrl = getPhotoUrl(post.user_photo);
+  const typeMeta = POST_TYPE_META[post.post_type] || null;
 
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl cursor-pointer" onClick={() => setShowModal(true)}>
@@ -187,7 +180,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         <Link
           to={`/ExpertProfile?id=${post.created_by}`}
           className="flex items-center gap-3 flex-1 min-w-0"
-          title=""
         >
           <UserAvatar photoUrl={photoUrl} userName={displayName} size="md" />
           <div className="min-w-0">
@@ -195,18 +187,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
               {displayName}
             </p>
-            {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
-            {/* Role/plan badge on post — priority: admin > expert > premium */}
+            {/* Badge — priority: admin > expert > premium */}
             {post.author_role === "admin" ? (
               <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>
-            ) : post.is_expert && post.author_role !== "admin" ? (
-              <span className="text-[9px] bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>
+            ) : (post.author_role === "expert" || post.is_expert === true) && post.author_role !== "admin" ? (
+              <span className="text-[9px] bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>
             ) : (post.author_plan === "premium" || post.author_role === "premium") ? (
               <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>
             ) : null}
           </div>
            <p className="text-xs text-gray-400">
-             {formatDistanceToNow(new Date(post.created_date), { addSuffix: true, locale: it })}
+             {formatTimeAgo(post.created_date)}
            </p>
           </div>
         </Link>

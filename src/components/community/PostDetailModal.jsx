@@ -3,8 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, X, Lock } from "lucide-react";
 import ImageCarousel from "./ImageCarousel";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { it } from "date-fns/locale";
+import { formatTimeAgo } from "@/lib/communityUtils";
 import { Link } from "react-router-dom";
 import CommentItem from "./CommentItem";
 import UserAvatar from "../UserAvatar";
@@ -145,7 +144,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
                 {isVerified && <BadgeCheck className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />}
               </div>
               <p className="text-xs text-gray-400">
-                {formatDistanceToNow(new Date(localPost.created_date), { addSuffix: true, locale: it })}
+                {formatTimeAgo(localPost.created_date)}
               </p>
             </div>
           </Link>

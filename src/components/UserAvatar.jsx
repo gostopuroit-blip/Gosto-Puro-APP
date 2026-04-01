@@ -19,7 +19,7 @@ export default function UserAvatar({ photoUrl, userName, size = "md" }) {
     return (
       <img
         src={photoUrl}
-        alt={userName}
+        alt=""
         className={`${sizeClasses[size]} rounded-full object-cover flex-shrink-0`}
       />
     );

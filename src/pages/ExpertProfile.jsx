@@ -150,7 +150,7 @@ export default function ExpertProfile() {
                 <p className="text-xs font-medium">
                   {expert?.role === "admin"
                     ? <span className="text-purple-600">👑 Admin</span>
-                    : expert?.is_expert
+                    : (expert?.is_expert === true || expert?.role === "expert")
                     ? <span className="text-[#2D6A4F]">✅ Expert</span>
                     : (expert?.plan === "premium" || expert?.role === "premium")
                     ? <span className="text-amber-600">⭐ Premium</span>
