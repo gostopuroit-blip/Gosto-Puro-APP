@@ -86,21 +86,32 @@ export default function Community() {
       setUser(u);
       setLoading(false);
 
-      // Secondary data
-      const [followData, usersData, repostsData] = await Promise.all([
-        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 20).catch(() => []) : Promise.resolve([]),
-        base44.entities.User.list("-created_date", 15).catch(() => []),
-        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 15).catch(() => []),
-      ]);
+      // Secondary data — lazy load
+      if (u) {
+        const [followData] = await Promise.all([
+          base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 20).catch(() => []),
+        ]);
+        const followed = new Set(followData.map((f) => f.following_email));
+        setFollowedEmails(followed);
+      }
 
-      const followed = new Set(followData.map((f) => f.following_email));
-      setFollowedEmails(followed);
-      setReposts(repostsData);
+      // Load suggested users and reposts on demand (lazy)
+      setTimeout(async () => {
+        const usersData = await base44.entities.User.list("-created_date", 15).catch(() => []);
+        const repostsData = await base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 15).catch(() => []);
 
-      const suggested = usersData.filter(
-        (usr) => usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
-      );
-      setSuggestedUsers(suggested);
+        const followed = new Set();
+        if (u) {
+          const followData = await base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 20).catch(() => []);
+          followData.forEach((f) => followed.add(f.following_email));
+        }
+
+        setReposts(repostsData);
+        const suggested = usersData.filter(
+          (usr) => usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
+        );
+        setSuggestedUsers(suggested);
+      }, 2000);
     };
     init();
   }, [loadPosts]);

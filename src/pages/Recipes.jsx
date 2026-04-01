@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { trackEvent } from "@/components/useAnalytics";
 import RecipeCard from "@/components/RecipeCard";
@@ -21,13 +21,16 @@ export default function Recipes() {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
   const [unlockedConfig, setUnlockedConfig] = useState(null);
-  const ITEMS_PER_PAGE = 6;
+  const [allRecipesLoaded, setAllRecipesLoaded] = useState(false);
+  const pageRef = useRef(1);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -41,10 +44,10 @@ export default function Recipes() {
   }, [location.search]);
 
   useEffect(() => {
-    loadRecipes();
+    loadRecipes(1);
     base44.auth.me().then(setUser).catch(() => setUser(null));
     loadUnlockedConfig();
-  }, []);
+  }, [loadRecipes]);
 
   const loadUnlockedConfig = async () => {
     try {
@@ -59,11 +62,26 @@ export default function Recipes() {
     }
   };
 
-  const loadRecipes = async () => {
-    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 100);
-    setRecipes(data);
+  const loadRecipes = useCallback(async (page = 1) => {
+    const pageSize = 20;
+    const skip = (page - 1) * pageSize;
+    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", pageSize, skip).catch(() => []);
+
+    if (page === 1) {
+      setRecipes(data);
+      setAllRecipesLoaded(data.length < pageSize);
+    } else {
+      setRecipes((prev) => {
+        const ids = new Set(prev.map((r) => r.id));
+        const merged = [...prev, ...data.filter((r) => !ids.has(r.id))];
+        return merged;
+      });
+      setAllRecipesLoaded(data.length < pageSize);
+    }
+    pageRef.current = page;
     setLoading(false);
-  };
+    setLoadingMore(false);
+  }, []);
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
@@ -78,15 +96,7 @@ export default function Recipes() {
     // Search
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter(
-        (r) =>
-        r.title.toLowerCase().includes(q) ||
-        (r.description || "").toLowerCase().includes(q) ||
-        (r.category || "").toLowerCase().includes(q) ||
-        (r.occasions || []).some((o) => o.toLowerCase().includes(q)) ||
-        (r.lifestyle || []).some((l) => l.toLowerCase().includes(q)) ||
-        (r.ingredients || []).some((i) => (i.name || "").toLowerCase().includes(q))
-      );
+      result = result.filter((r) => r.title.toLowerCase().includes(q));
     }
 
     // Tags — filter by category for Colazione/Pranzo/Cena, or by occasions/lifestyle for others
@@ -180,13 +190,14 @@ export default function Recipes() {
   // Keep filteredRecipes in natural order (most recent first)
   const orderedRecipes = filteredRecipes;
 
-  const paginatedRecipes = useMemo(() => {
-    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIdx = startIdx + ITEMS_PER_PAGE;
-    return orderedRecipes.slice(startIdx, endIdx);
-  }, [orderedRecipes, currentPage]);
-
-  const totalPages = Math.ceil(orderedRecipes.length / ITEMS_PER_PAGE);
+  // Infinite scroll
+  const handleScroll = useCallback((e) => {
+    const el = e.target;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 500 && !loadingMore && !allRecipesLoaded) {
+      setLoadingMore(true);
+      loadRecipes(pageRef.current + 1);
+    }
+  }, [loadingMore, allRecipesLoaded, loadRecipes]);
 
   if (loading) {
     return (
@@ -197,8 +208,8 @@ export default function Recipes() {
   }
 
   return (
-    <PullToRefresh onRefresh={loadRecipes}>
-      <div className="pb-4">
+    <PullToRefresh onRefresh={() => loadRecipes(1)}>
+      <div className="pb-24" onScroll={handleScroll} style={{ height: '100vh', overflowY: 'auto' }}>
       {/* Header */}
       
 
@@ -280,7 +291,7 @@ export default function Recipes() {
              <p className="text-gray-400 dark:text-gray-500 text-sm">Nessuna ricetta trovata</p>
            </div> :
           <>
-             {paginatedRecipes.map((recipe) => {
+             {orderedRecipes.map((recipe) => {
               const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
               if (isLocked) {
                 return (
@@ -302,32 +313,20 @@ export default function Recipes() {
               }
               return <RecipeCard key={recipe.id} recipe={recipe} />;
             })}
+           {loadingMore && (
+             <div className="flex items-center justify-center py-6">
+               <Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" />
+             </div>
+           )}
+
+           {allRecipesLoaded && orderedRecipes.length > 0 && (
+             <div className="text-center py-8 text-gray-400 dark:text-gray-500">
+               <p className="text-sm font-medium">Hai visto tutte le ricette! 🎉</p>
+             </div>
+           )}
            </>
-          }
-       </div>
-
-       {/* Pagination */}
-       {totalPages > 1 &&
-        <div className="px-5 mt-8 pb-4 flex items-center justify-between">
-           <button
-            onClick={() => goToPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-[#3D5246] text-sm font-semibold text-gray-700 dark:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#2D3F35] transition-colors">
-
-             ← Indietro
-           </button>
-           <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-             Pagina {currentPage} di {totalPages}
-           </span>
-           <button
-            onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-[#3D5246] text-sm font-semibold text-gray-700 dark:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#2D3F35] transition-colors">
-
-             Avanti →
-           </button>
-         </div>
-        }
+           }
+           </div>
        </div>
      </PullToRefresh>);
 
