@@ -162,37 +162,6 @@ export default function Community() {
         </div>
       </div>
 
-      {/* My profile strip */}
-      {user && (
-        <div className="max-w-lg mx-auto px-4 pt-4">
-          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
-            <Link to={`/ExpertProfile?uid=${btoa(user.email)}`} className="flex items-center gap-3 flex-shrink-0">
-              {user.photo_url ? (
-                <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" loading="lazy" />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold">
-                  {(user.full_name || "U").charAt(0).toUpperCase()}
-                </div>
-              )}
-            </Link>
-            <Link to={`/ExpertProfile?uid=${btoa(user.email)}`} className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                {user.full_name || "Utente"}
-              </p>
-              <p className="text-xs text-gray-400">
-                {user.role === "admin" ? "👑 Admin" : user.role === "expert" || user.is_expert ? "✅ Expert" : user.plan === "premium" ? "⭐ Premium" : "Free"}
-              </p>
-            </Link>
-            <button
-              onClick={handlePublishClick}
-              className="text-xs text-gray-400 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-left flex-1 max-w-[160px] truncate flex items-center gap-1"
-            >
-              Cosa stai cucinando?
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Feed */}
       <div
         ref={feedRef}
@@ -208,9 +177,37 @@ export default function Community() {
           </div>
         )}
 
-        {loading ? (
-          <FeedSkeleton />
-        ) : displayedPosts.length === 0 ? (
+        {/* User profile card with "Cosa stai cucinando?" — integrated at feed top */}
+         {user && (
+           <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 flex items-center gap-3 sticky top-0 z-10 mb-4">
+             <Link to={`/ExpertProfile?uid=${btoa(user.email)}`} className="flex items-center gap-3 flex-shrink-0">
+               {user.photo_url ? (
+                 <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" loading="lazy" />
+               ) : (
+                 <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold">
+                   {(user.full_name || "U").charAt(0).toUpperCase()}
+                 </div>
+               )}
+             </Link>
+             <div className="flex-1 min-w-0">
+               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                 {user.full_name || "Utente"}
+               </p>
+             </div>
+             {isPremiumUser(user) && (
+               <button
+                 onClick={handlePublishClick}
+                 className="text-xs text-gray-400 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 whitespace-nowrap flex-shrink-0"
+               >
+                 Cosa stai cucinando?
+               </button>
+             )}
+           </div>
+         )}
+
+         {loading ? (
+           <FeedSkeleton />
+         ) : displayedPosts.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">🍳</p>
             <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Nessun post ancora</p>

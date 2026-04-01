@@ -9,6 +9,7 @@ import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
 import VideoPlayer from "./VideoPlayer";
 import VideoLightbox from "./VideoLightbox";
+import SavePostModal from "./SavePostModal";
 import { toast } from "sonner";
 import { formatTimeAgo } from "@/lib/communityUtils";
 import { Link } from "react-router-dom";
@@ -26,6 +27,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [submitting, setSubmitting] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
@@ -155,33 +157,27 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
 
   const toggleSavePost = async () => {
     if (!currentUser) return toast.error("Fai login per salvare i post");
-    setSavingPost(true);
-    try {
-      if (isSaved) {
+    if (isSaved) {
+      setSavingPost(true);
+      try {
         const saved = await base44.entities.SavedPost.filter(
-          { post_id: post.id, user_email: currentUser.email, collection: "Salvati" },
+          { post_id: post.id, user_email: currentUser.email },
           "-created_date",
-          1
+          100
         ).catch(() => []);
         if (saved.length > 0) {
-          await base44.entities.SavedPost.delete(saved[0].id);
+          await Promise.all(saved.map((s) => base44.entities.SavedPost.delete(s.id)));
           setIsSaved(false);
           toast.success("Post rimosso dai salvati");
         }
-      } else {
-        await base44.entities.SavedPost.create({
-          post_id: post.id,
-          user_email: currentUser.email,
-          collection: "Salvati",
-        });
-        setIsSaved(true);
-        toast.success("Post salvato");
+      } catch (error) {
+        console.error('Save post error:', error);
+        toast.error('Errore nel salvare il post');
+      } finally {
+        setSavingPost(false);
       }
-    } catch (error) {
-      console.error('Save post error:', error);
-      toast.error('Errore nel salvare il post');
-    } finally {
-      setSavingPost(false);
+    } else {
+      setShowSaveModal(true);
     }
   };
 
@@ -362,6 +358,19 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           currentUser={currentUser}
           onClose={() => setShowModal(false)}
           onUpdate={(updated) => { onUpdate(updated); }}
+        />
+      )}
+
+      {/* Save post modal */}
+      {showSaveModal && (
+        <SavePostModal
+          post={post}
+          currentUser={currentUser}
+          onClose={() => setShowSaveModal(false)}
+          onSaved={() => {
+            setIsSaved(true);
+            setShowSaveModal(false);
+          }}
         />
       )}
 

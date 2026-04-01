@@ -56,9 +56,9 @@ export default function Home() {
   }, []);
 
   const loadData = async () => {
-    const today = new Date().toISOString().split("T")[0];
-    const [recipes, user, notifs, occasions] = await Promise.all([
-    base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
+       const today = new Date().toISOString().split("T")[0];
+       const [recipes, user, notifs, occasions] = await Promise.all([
+       base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order")]
@@ -210,7 +210,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Top Prepared — carousel with cards */}
+      {/* Top Prepared — carousel with large cards */}
       <div className="mt-8">
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
@@ -220,8 +220,8 @@ export default function Home() {
             const isLocked = !isPremium;
             if (isLocked) {
               return (
-                <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-40 group">
-                  <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] mb-2" style={{ aspectRatio: "3/4" }}>
+                <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group" style={{ width: "200px", height: "250px" }}>
+                  <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] w-full h-full">
                     <img
                       src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
                       alt={recipe.title}
@@ -233,24 +233,22 @@ export default function Home() {
                       <Lock className="w-6 h-6 text-white" />
                     </div>
                   </div>
-                  <p className="text-[12px] font-semibold text-gray-400 line-clamp-2 blur-[1px]">{recipe.title}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">🔒 Premium</p>
                 </a>
               );
             }
             return (
-              <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 w-40 group active:scale-95 transition-transform duration-150">
-                <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] mb-2" style={{ aspectRatio: "3/4" }}>
-                  <img
-                    src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                    alt={recipe.title}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+              <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+                <img
+                  src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                  alt={recipe.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
+                  <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
                 </div>
-                <p className="text-[12px] font-semibold text-gray-900 dark:text-white line-clamp-2">{recipe.title}</p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">⏱️ {recipe.prep_time || "–"} min</p>
               </Link>
             );
           })}
