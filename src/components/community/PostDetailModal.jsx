@@ -122,11 +122,12 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
   const initials = (localPost.user_name || "U").charAt(0).toUpperCase();
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/80 flex items-end justify-center">
+    <div className="fixed inset-0 z-[60] bg-black/80 flex items-end justify-center" onClick={onClose}>
       {/* Sheet container */}
       <div
         className="w-full max-w-lg bg-white dark:bg-[#0F0F0F] flex flex-col rounded-t-3xl"
         style={{ height: "92dvh", maxHeight: "92dvh" }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header fixo */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">

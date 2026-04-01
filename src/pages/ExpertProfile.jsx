@@ -55,30 +55,35 @@ export default function ExpertProfile() {
       const userFollowData = u && u.email !== expertEmail
         ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1)
         : [];
+
+      // Deduplicate by follower_email before counting
+      const uniqueFollowers = [...new Map(followersData.map(f => [f.follower_email, f])).values()];
+      const uniqueFollowing = [...new Map(followingData.map(f => [f.following_email, f])).values()];
       
       setPosts(postsData);
-      setFollowersCount(followersData.length);
-      setFollowingCount(followingData.length);
+      setFollowersCount(uniqueFollowers.length);
+      setFollowingCount(uniqueFollowing.length);
       setIsFollowing(userFollowData.length > 0);
 
-      // Use first post to build expert info
-      const displayName = postsData.length > 0 
+      // Load expert user record for role info
+      const allUsers = await base44.entities.User.list().catch(() => []);
+      const expertUser = allUsers.find((u) => u.email === expertEmail);
+
+      const displayName = postsData.length > 0
         ? getDisplayName(postsData[0].user_name, expertEmail)
-        : getDisplayName(null, expertEmail);
+        : getDisplayName(expertUser?.full_name || null, expertEmail);
       const photoUrl = postsData.length > 0
         ? getPhotoUrl(postsData[0].user_photo)
-        : null;
+        : getPhotoUrl(expertUser?.photo_url || null);
 
-      if (postsData.length > 0) {
-        setExpert({
-          email: expertEmail,
-          name: displayName,
-          photo: photoUrl,
-          is_expert: postsData[0].is_expert,
-        });
-      } else {
-        setExpert({ email: expertEmail, name: displayName, photo: photoUrl, is_expert: false });
-      }
+      setExpert({
+        email: expertEmail,
+        name: displayName,
+        photo: photoUrl,
+        is_expert: postsData[0]?.is_expert || false,
+        role: expertUser?.role || null,
+        plan: expertUser?.plan || null,
+      });
 
       setLoading(false);
     };
@@ -140,13 +145,13 @@ export default function ExpertProfile() {
               </div>
               <div className="flex items-center gap-2 mb-3">
                 <p className="text-xs font-medium">
-                  {expert?.is_expert
+                  {expert?.role === "admin"
+                    ? <span className="text-purple-600">👑 Admin</span>
+                    : expert?.is_expert
                     ? <span className="text-[#2D6A4F]">✅ Expert</span>
-                    : expertEmail === currentUser?.email
-                      ? (currentUser?.plan === "premium"
-                          ? <span className="text-purple-600">⭐ Premium</span>
-                          : <span className="text-gray-400">Free</span>)
-                      : <span className="text-gray-400">Membro</span>
+                    : (expert?.plan === "premium" || expert?.role === "premium")
+                    ? <span className="text-amber-600">⭐ Premium</span>
+                    : <span className="text-gray-400">Basic</span>
                   }
                 </p>
                 {expertEmail !== currentUser?.email ? (
