@@ -72,8 +72,8 @@ export default function ExpertProfile() {
         ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
         : (expertUser?.photo_url || postsData[0]?.user_photo || null);
       const resolvedName = isOwnProfile
-        ? (u?.display_name || u?.full_name || expertUser?.display_name || expertUser?.full_name || postsData[0]?.user_name || null)
-        : (postsData[0]?.user_name || expertUser?.display_name || expertUser?.full_name || null);
+        ? (u?.display_name || u?.full_name || expertUser?.display_name || expertUser?.full_name || expertEmail || "Utente")
+        : (postsData[0]?.user_name || expertUser?.display_name || expertUser?.full_name || expertEmail || "Utente");
       const resolvedRole = isOwnProfile
         ? (u?.role || expertUser?.role || null)
         : (expertUser?.role || null);
@@ -83,7 +83,7 @@ export default function ExpertProfile() {
 
       setExpert({
         email: expertEmail,
-        name: getDisplayName(resolvedName, expertEmail),
+        name: getDisplayName(resolvedName && resolvedName.length > 3 ? resolvedName : expertEmail.split("@")[0], expertEmail),
         photo: getPhotoUrl(resolvedPhoto),
         is_expert: expertUser?.is_expert || postsData[0]?.is_expert || false,
         role: resolvedRole,
