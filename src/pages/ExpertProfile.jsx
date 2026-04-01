@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BadgeCheck, ArrowLeft, Loader2, Lock, Grid3X3, Edit3, Users } from "lucide-react";
+import { BadgeCheck, ArrowLeft, Loader2, Lock, Grid3X3, Edit3, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import UserAvatar from "@/components/UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
-
-
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import PostDetailModal from "@/components/community/PostDetailModal";
 import EditProfileModal from "@/components/EditProfileModal";
@@ -14,14 +12,13 @@ import FollowersModal from "@/components/community/FollowersModal";
 import FollowingModal from "@/components/community/FollowingModal";
 import ProfileStatsCard from "@/components/community/ProfileStatsCard";
 import SavedPostsTab from "@/components/community/SavedPostsTab";
-import { Bookmark } from "lucide-react";
 
 export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
   const [expert, setExpert] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("feed"); // feed | grid | saved
+  const [view, setView] = useState("feed");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -32,28 +29,22 @@ export default function ExpertProfile() {
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
-  // Support ?uid=btoa(email) (new) and legacy ?id=email
   const uidParam = params.get("uid");
   const idParam = params.get("id");
 
-  // Resolve the target email: decode btoa uid if present, fallback to id param
-  const resolveTargetEmail = () => {
-    if (uidParam) {
-      try { return atob(uidParam); } catch { return uidParam; }
-    }
+  const expertEmail = (() => {
+    if (uidParam) { try { return atob(uidParam); } catch { return uidParam; } }
     return idParam || null;
-  };
-  const expertEmail = resolveTargetEmail();
+  })();
 
   useEffect(() => {
     const init = async () => {
-      // Always fetch fresh session data
       const u = await base44.auth.me().catch(() => null);
       setCurrentUser(u);
 
       if (!expertEmail) { setLoading(false); return; }
 
-      // Fetch all data in parallel
+      // Fetch posts by user_email, followers and following in parallel
       const [postsData, followersData, followingData, allUsers] = await Promise.all([
         base44.entities.CommunityPost.filter({ user_email: expertEmail }, "-created_date", 50).catch(() => []),
         base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000).catch(() => []),
@@ -65,8 +56,9 @@ export default function ExpertProfile() {
         ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1).catch(() => [])
         : [];
 
-      const uniqueFollowers = [...new Map(followersData.map(f => [f.follower_email, f])).values()];
-      const uniqueFollowing = [...new Map(followingData.map(f => [f.following_email, f])).values()];
+      // Deduplicate followers/following by email
+      const uniqueFollowers = [...new Map(followersData.map((f) => [f.follower_email, f])).values()];
+      const uniqueFollowing = [...new Map(followingData.map((f) => [f.following_email, f])).values()];
 
       setPosts(postsData);
       setFollowersCount(uniqueFollowers.length);
@@ -74,9 +66,8 @@ export default function ExpertProfile() {
       setIsFollowing(userFollowData.length > 0);
 
       const expertUser = allUsers.find((usr) => usr.email === expertEmail);
-
-      // For own profile: prefer session data (most up-to-date), then User record, then post data
       const isOwnProfile = u?.email === expertEmail;
+
       const resolvedPhoto = isOwnProfile
         ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
         : (expertUser?.photo_url || postsData[0]?.user_photo || null);
@@ -117,7 +108,6 @@ export default function ExpertProfile() {
     setFollowersCount((prev) => isNowFollowing ? prev + 1 : prev - 1);
   };
 
-  const totalLikes = posts.reduce((sum, p) => sum + (p.likes_count || 0), 0);
   const premiumCount = posts.filter((p) => p.is_premium).length;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "admin";
 
@@ -148,14 +138,12 @@ export default function ExpertProfile() {
         <div className="px-5 pt-6 pb-4">
           <div className="flex items-start gap-4">
             <div className="border-2 border-[#2D6A4F] rounded-full">
-              <UserAvatar photoUrl={getPhotoUrl(expert?.photo)} userName={getDisplayName(expert?.name, expert?.email)} size="xl" />
+              <UserAvatar photoUrl={getPhotoUrl(expert?.photo)} userName={expert?.name || "U"} size="xl" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg">{expert?.name}</h2>
-                {expert?.is_expert && (
-                  <BadgeCheck className="w-5 h-5 text-[#2D6A4F]" />
-                )}
+                {expert?.is_expert && <BadgeCheck className="w-5 h-5 text-[#2D6A4F]" />}
               </div>
               <div className="flex items-center gap-2 mb-3">
                 <p className="text-xs font-medium">
@@ -169,25 +157,24 @@ export default function ExpertProfile() {
                   }
                 </p>
                 {expertEmail !== currentUser?.email ? (
-                    <FollowButton
-                      targetEmail={expertEmail}
-                      currentUser={currentUser}
-                      onFollowChange={handleFollowChange}
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setShowEditModal(true)}
-                      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-[#2D6A4F]/10 text-[#2D6A4F] border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition-all"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                      Modifica
-                    </button>
-                  )}
+                  <FollowButton
+                    targetEmail={expertEmail}
+                    currentUser={currentUser}
+                    onFollowChange={handleFollowChange}
+                  />
+                ) : (
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-[#2D6A4F]/10 text-[#2D6A4F] border border-[#2D6A4F]/30 hover:bg-[#2D6A4F]/20 transition-all"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    Modifica
+                  </button>
+                )}
               </div>
 
-              {/* Stats */}
               <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A]">
-                <ProfileStatsCard 
+                <ProfileStatsCard
                   userEmail={expertEmail}
                   postCount={posts.length}
                   followerCount={followersCount}
@@ -200,7 +187,6 @@ export default function ExpertProfile() {
             </div>
           </div>
 
-          {/* Premium banner for non-premium users when expert has premium content */}
           {premiumCount > 0 && !isPremiumUser && (
             <div className="mt-4 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-2xl px-4 py-3 flex items-center gap-3">
               <Lock className="w-5 h-5 text-purple-600 flex-shrink-0" />
@@ -218,34 +204,21 @@ export default function ExpertProfile() {
         <div className="flex border-t border-gray-100 dark:border-[#2A2A2A]">
           <button
             onClick={() => setView("feed")}
-            className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${
-              view === "feed"
-                ? "border-[#2D6A4F] text-[#2D6A4F]"
-                : "border-transparent text-gray-400"
-            }`}
+            className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${view === "feed" ? "border-[#2D6A4F] text-[#2D6A4F]" : "border-transparent text-gray-400"}`}
           >
             Feed
           </button>
           <button
             onClick={() => setView("grid")}
-            className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${
-              view === "grid"
-                ? "border-[#2D6A4F] text-[#2D6A4F]"
-                : "border-transparent text-gray-400"
-            }`}
+            className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${view === "grid" ? "border-[#2D6A4F] text-[#2D6A4F]" : "border-transparent text-gray-400"}`}
           >
             <Grid3X3 className="w-4 h-4" />
             Galleria
           </button>
-          {/* Only show "Salvati" tab for the current user's own profile */}
           {expertEmail === currentUser?.email && (
             <button
               onClick={() => setView("saved")}
-              className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${
-                view === "saved"
-                  ? "border-[#2D6A4F] text-[#2D6A4F]"
-                  : "border-transparent text-gray-400"
-              }`}
+              className={`flex-1 py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 border-b-2 transition ${view === "saved" ? "border-[#2D6A4F] text-[#2D6A4F]" : "border-transparent text-gray-400"}`}
             >
               <Bookmark className="w-4 h-4" />
               Salvati
@@ -253,7 +226,7 @@ export default function ExpertProfile() {
           )}
         </div>
 
-        {/* Saved posts tab */}
+        {/* Saved tab */}
         {view === "saved" && currentUser && (
           <div className="px-4 py-4 pb-24">
             <SavedPostsTab currentUser={currentUser} />
@@ -278,13 +251,16 @@ export default function ExpertProfile() {
             ))}
           </div>
         ) : view !== "saved" ? (
-          /* Grid view */
           <div className="grid grid-cols-3 gap-0.5 pb-24">
             {posts.map((post) => (
-              <button key={post.id} onClick={() => setSelectedPost(post)} className="relative aspect-square bg-gray-100 dark:bg-[#1A1A1A] overflow-hidden hover:opacity-80 transition">
-                {post.image_url ? (
+              <button
+                key={post.id}
+                onClick={() => setSelectedPost(post)}
+                className="relative aspect-square bg-gray-100 dark:bg-[#1A1A1A] overflow-hidden hover:opacity-80 transition"
+              >
+                {post.image_url || (post.images && post.images.length > 0) ? (
                   <img
-                    src={post.image_url}
+                    src={post.images?.[0] || post.image_url}
                     alt=""
                     className={`w-full h-full object-cover ${post.is_premium && !isPremiumUser ? "blur-lg" : ""}`}
                   />
@@ -294,10 +270,10 @@ export default function ExpertProfile() {
                   </div>
                 )}
                 {post.is_premium && !isPremiumUser && (
-                   <div className="absolute inset-0 flex items-center justify-center">
-                     <Lock className="w-5 h-5 text-white" />
-                   </div>
-                 )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-white" />
+                  </div>
+                )}
               </button>
             ))}
           </div>
@@ -340,5 +316,5 @@ export default function ExpertProfile() {
         />
       )}
     </div>
-    );
-  }
+  );
+}

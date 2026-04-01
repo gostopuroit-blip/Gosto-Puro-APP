@@ -25,23 +25,13 @@ export function getUserBadge(user) {
  */
 export function formatTimeAgo(date) {
   if (!date) return "";
-  const now = new Date();
   const d = new Date(date);
   if (isNaN(d.getTime())) return "";
-  const diffMs = now - d;
-  if (diffMs < 0) return "adesso"; // future date guard
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHours = Math.floor(diffMin / 60);
-  const diffDays = Math.floor(diffHours / 24);
+  const diff = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
 
-  if (diffSec < 60) return "adesso";
-  if (diffMin < 60) return `${diffMin} minut${diffMin === 1 ? "o" : "i"} fa`;
-  if (diffHours < 24) return `${diffHours} or${diffHours === 1 ? "a" : "e"} fa`;
-  if (diffDays < 7) return `${diffDays} giorn${diffDays === 1 ? "o" : "i"} fa`;
-  // 7+ days: Italian format dd/mm/yyyy
-
-  // 7+ giorni → data "gg MMM"
-  const months = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
-  return `${d.getDate()} ${months[d.getMonth()]}`;
+  if (diff < 60) return "adesso";
+  if (diff < 3600) return `${Math.floor(diff / 60)} minuti fa`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ore fa`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} giorni fa`;
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
 }
