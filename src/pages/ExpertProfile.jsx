@@ -55,7 +55,7 @@ export default function ExpertProfile() {
 
       // Fetch all data in parallel
       const [postsData, followersData, followingData, allUsers] = await Promise.all([
-        base44.entities.CommunityPost.filter({ created_by: expertEmail, status: "active" }, "-created_date", 30).catch(() => []),
+        base44.entities.CommunityPost.filter({ user_email: expertEmail }, "-created_date", 50).catch(() => []),
         base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000).catch(() => []),
         base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000).catch(() => []),
         base44.entities.User.list().catch(() => []),
