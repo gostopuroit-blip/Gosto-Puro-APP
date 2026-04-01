@@ -180,7 +180,7 @@ export default function Community() {
     }
   }, [loadingMore, allPostsLoaded, loadPosts]);
 
-  // Filtered display
+  // Filtered display (maintain exact order from DB)
   const displayedPosts = (() => {
     let filtered = activeTab === "following"
       ? posts.filter((p) => followedEmails.has(p.created_by))
@@ -200,7 +200,7 @@ export default function Community() {
   const allContent = [
     ...displayedPosts.map((p) => ({ type: "post", data: p, date: new Date(p.created_date) })),
     ...displayedReposts.map((r) => ({ type: "repost", data: r, date: new Date(r.created_date) })),
-  ].sort((a, b) => b.date - a.date);
+  ];
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">

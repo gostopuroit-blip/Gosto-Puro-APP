@@ -38,30 +38,43 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
     const loadUsers = async () => {
       try {
         const q = currentMention.mention.toLowerCase();
-        // Fetch who the current user follows and who follows them
-        let userEmails = new Set();
         const myEmail = currentUser?.email || null;
-        const [followingData, followersData] = await Promise.all([
-          myEmail ? base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []) : Promise.resolve([]),
-          myEmail ? base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []) : Promise.resolve([]),
-        ]);
-        followingData.forEach((f) => userEmails.add(f.following_email));
-        followersData.forEach((f) => userEmails.add(f.follower_email));
 
-        // Get all users and filter
-        const allUsers = await base44.entities.User.list("-created_date", 50);
-        let pool = userEmails.size > 0
-          ? allUsers.filter((u) => userEmails.has(u.email))
-          : allUsers;
-        
-        const filterFn = (u) => {
-          const name = u.display_name || u.full_name || u.email?.split("@")[0] || "";
+        if (!myEmail) {
+          setShowSuggestions(false);
+          return;
+        }
+
+        // Fetch both directions
+        const [followingData, followersData] = await Promise.all([
+          base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []),
+          base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []),
+        ]);
+
+        // Build set of emails (follows + followers)
+        const allowedEmails = new Set();
+        followingData.forEach((f) => allowedEmails.add(f.following_email));
+        followersData.forEach((f) => allowedEmails.add(f.follower_email));
+
+        // If no follows/followers, show nothing
+        if (allowedEmails.size === 0) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
+
+        // Fetch only those users
+        const allUsers = await base44.entities.User.list("-created_date", 100);
+        const filteredByEmail = allUsers.filter((u) => allowedEmails.has(u.email) && u.email);
+
+        // Filter by search query
+        const filtered = filteredByEmail.filter((u) => {
+          const name = u.display_name || u.full_name || u.email.split("@")[0] || "";
           return name.toLowerCase().includes(q);
-        };
-        const filtered = pool.filter(filterFn);
-        const validList = filtered.filter((u) => u.email);
-        setSuggestions(validList.slice(0, 6));
-        setShowSuggestions(validList.length > 0);
+        });
+
+        setSuggestions(filtered.slice(0, 6));
+        setShowSuggestions(filtered.length > 0);
       } catch {
         setSuggestions([]);
       }
@@ -69,7 +82,7 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
 
     const timer = setTimeout(loadUsers, 300);
     return () => clearTimeout(timer);
-  }, [value, cursorPos]);
+  }, [value, cursorPos, currentUser?.email]);
 
   const handleSelectMention = (user) => {
     const currentMention = getLastMention(value, cursorPos);
