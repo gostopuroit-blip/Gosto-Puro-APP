@@ -1,10 +1,20 @@
 /**
+ * Check if a name is corrupted (non-latin chars, invalid patterns)
+ */
+function isCorruptedName(name) {
+  if (!name || typeof name !== 'string') return true;
+  if (name.trim().length < 2) return true;
+  // Allow only latin letters, numbers, spaces, hyphens, and common italian accents
+  return !/^[\w\s\-àèéìòùÀÈÉÌÒÙ'.,()&]+$/i.test(name);
+}
+
+/**
  * Get display name with fallback
- * If display_name is missing or empty, default to email username (before @)
+ * If display_name is missing, empty, or corrupted, default to email username (before @)
  */
 export function getDisplayName(displayName, email) {
-  if (displayName && displayName.trim()) {
-    return displayName;
+  if (displayName && !isCorruptedName(displayName)) {
+    return displayName.trim();
   }
   if (email) {
     return email.split("@")[0];

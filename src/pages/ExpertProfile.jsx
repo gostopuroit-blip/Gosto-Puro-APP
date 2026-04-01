@@ -72,7 +72,7 @@ export default function ExpertProfile() {
         ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
         : (expertUser?.photo_url || postsData[0]?.user_photo || null);
       
-      // Safe name resolution with corruption detection
+      // Safe name resolution — let getDisplayName handle corruption detection
       let safeName = isOwnProfile
         ? (u?.display_name || u?.full_name)
         : postsData[0]?.user_name;
@@ -81,12 +81,7 @@ export default function ExpertProfile() {
         safeName = expertUser?.display_name || expertUser?.full_name;
       }
       
-      // Detect corrupted names (non-latin chars, base64-like patterns)
-      if (safeName && (safeName.length < 2 || !/^[\w\s\-àèéìòùÀÈÉÌÒÙ'.,()&]+$/.test(safeName))) {
-        safeName = null;
-      }
-      
-      const displayName = safeName || expertEmail.split("@")[0];
+      const displayName = getDisplayName(safeName, expertEmail);
       
       const resolvedRole = isOwnProfile
         ? (u?.role || expertUser?.role || null)

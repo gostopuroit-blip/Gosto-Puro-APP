@@ -215,7 +215,7 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {topRecipes.map((recipe) => {
             const isLocked = !isPremium;
             if (isLocked) {
