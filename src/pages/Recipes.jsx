@@ -32,23 +32,6 @@ export default function Recipes() {
   const pageRef = useRef(1);
   const ITEMS_PER_PAGE = 20;
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const occ = params.get("occasion");
-    const life = params.get("lifestyle");
-    const page = parseInt(params.get("page") || "1", 10);
-    const q = params.get("search") || "";
-    setActiveTags({ occasion: occ || null, lifestyle: life || null });
-    setCurrentPage(page);
-    setSearch(q);
-  }, [location.search]);
-
-  useEffect(() => {
-    loadRecipes(1);
-    base44.auth.me().then(setUser).catch(() => setUser(null));
-    loadUnlockedConfig();
-  }, [loadRecipes]);
-
   const loadUnlockedConfig = async () => {
     try {
       const config = await base44.entities.AppConfig.filter({ key: "base_free_unlocked_ids_final" });
@@ -82,6 +65,23 @@ export default function Recipes() {
     setLoading(false);
     setLoadingMore(false);
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const occ = params.get("occasion");
+    const life = params.get("lifestyle");
+    const page = parseInt(params.get("page") || "1", 10);
+    const q = params.get("search") || "";
+    setActiveTags({ occasion: occ || null, lifestyle: life || null });
+    setCurrentPage(page);
+    setSearch(q);
+  }, [location.search]);
+
+  useEffect(() => {
+    loadRecipes(1);
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+    loadUnlockedConfig();
+  }, [loadRecipes]);
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
