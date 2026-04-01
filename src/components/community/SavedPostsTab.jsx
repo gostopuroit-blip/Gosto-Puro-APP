@@ -30,22 +30,22 @@ export default function SavedPostsTab({ currentUser }) {
         return;
       }
 
-      // Fetch full post for each saved item sequentially to avoid rate limits
-      const items = [];
-      for (const s of saved) {
-        try {
-          // Use the built-in id field to fetch a single post
-          const post = await base44.entities.CommunityPost.get(s.post_id).catch(() => null);
-          items.push({
-            savedId: s.id,
-            collection: s.collection || "Salvati",
-            post: post || null,
-            post_id: s.post_id,
-          });
-        } catch {
-          items.push({ savedId: s.id, collection: s.collection || "Salvati", post: null, post_id: s.post_id });
-        }
-      }
+      // Collect unique post IDs and fetch all in one batch query
+      const uniquePostIds = [...new Set(saved.map((s) => s.post_id))];
+      const fetchedPosts = await base44.entities.CommunityPost.filter(
+        { id: { $in: uniquePostIds } },
+        "-created_date",
+        500
+      ).catch(() => []);
+      const postMap = {};
+      fetchedPosts.forEach((p) => { postMap[p.id] = p; });
+
+      const items = saved.map((s) => ({
+        savedId: s.id,
+        collection: s.collection || "Salvati",
+        post: postMap[s.post_id] || null,
+        post_id: s.post_id,
+      }));
 
       // Group by collection, filter out items with no post found
       const groups = {};
