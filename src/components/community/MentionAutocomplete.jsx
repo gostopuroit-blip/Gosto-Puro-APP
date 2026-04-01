@@ -59,8 +59,7 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
           return name.toLowerCase().includes(q);
         };
         const filtered = pool.filter(filterFn);
-        const finalList = filtered.length > 0 ? filtered : allUsers.filter(filterFn);
-        const validList = finalList.filter((u) => u.email);
+        const validList = filtered.filter((u) => u.email);
         setSuggestions(validList.slice(0, 6));
         setShowSuggestions(validList.length > 0);
       } catch {

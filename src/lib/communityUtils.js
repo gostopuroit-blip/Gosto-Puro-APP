@@ -23,7 +23,8 @@ export function getUserBadge(user) {
 /**
  * Formatta una data in italiano senza "circa" o "tra"
  */
-export function formatTimeAgo(date) {
+export function formatTimeAgo(post) {
+  const date = typeof post === 'string' || post instanceof Date ? post : post?.created_date;
   if (!date) return "";
   const d = new Date(date);
   if (isNaN(d.getTime())) return "";

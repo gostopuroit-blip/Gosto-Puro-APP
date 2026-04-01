@@ -252,7 +252,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         media_type = "image";
       }
 
-      // Extract hashtags from content + merge with manually added hashtags
+      // Extract ALL hashtags from content + merge with manually added hashtags (no limit)
       const extractedTags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
       const tags = [...new Set([...extractedTags, ...hashtags])];
 
