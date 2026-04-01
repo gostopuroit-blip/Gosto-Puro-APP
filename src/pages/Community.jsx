@@ -86,21 +86,23 @@ export default function Community() {
       setUser(u);
       setLoading(false);
 
-      // Secondary data
-      const [followData, usersData, repostsData] = await Promise.all([
-        u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []) : Promise.resolve([]),
-        base44.entities.User.list("-created_date", 100).catch(() => []),
-        base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60).catch(() => []),
-      ]);
+      // Lazy load secondary data after initial render
+      setTimeout(async () => {
+        const [followData, usersData, repostsData] = await Promise.all([
+          u ? base44.entities.UserFollow.filter({ follower_email: u.email }, "-created_date", 200).catch(() => []) : Promise.resolve([]),
+          base44.entities.User.list("-created_date", 100).catch(() => []),
+          base44.entities.PostShare.filter({ share_type: "repost" }, "-created_date", 60).catch(() => []),
+        ]);
 
-      const followed = new Set(followData.map((f) => f.following_email));
-      setFollowedEmails(followed);
-      setReposts(repostsData);
+        const followed = new Set(followData.map((f) => f.following_email));
+        setFollowedEmails(followed);
+        setReposts(repostsData);
 
-      const suggested = usersData.filter(
-        (usr) => usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
-      );
-      setSuggestedUsers(suggested);
+        const suggested = usersData.filter(
+          (usr) => usr.is_suggested && u && usr.email !== u.email && !followed.has(usr.email)
+        );
+        setSuggestedUsers(suggested);
+      }, 100);
     };
     init();
   }, [loadPosts]);
