@@ -42,7 +42,7 @@ export default function ExpertProfile() {
       if (!expertEmail) { setLoading(false); return; }
 
       const postsData = await base44.entities.CommunityPost.filter(
-        { user_email: expertEmail, status: "active" },
+        { created_by: expertEmail },
         "-created_date",
         30
       );

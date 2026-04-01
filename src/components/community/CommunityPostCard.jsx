@@ -175,7 +175,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     : null; // usuário comum: nada extra
 
   return (
-    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl">
+    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl cursor-pointer" onClick={() => setShowModal(true)}>
       {/* Header */}
       {post.is_pinned && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 px-4 py-2 flex items-center gap-2">
@@ -183,7 +183,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">📌 Fissato in alto</p>
         </div>
       )}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3" onClick={(e) => e.stopPropagation()}>
         <Link
           to={`/ExpertProfile?id=${post.created_by}`}
           className="flex items-center gap-3 flex-1 min-w-0"
@@ -245,7 +245,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
               <p className="text-white/80 text-xs">Abbonati per vedere</p>
             </div>
           ) : (
-            <div onClick={() => setShowVideoLightbox(true)}>
+            <div onClick={(e) => { e.stopPropagation(); setShowVideoLightbox(true); }}>
               <VideoPlayer
                 src={post.video_url}
                 autoplay={true}
@@ -262,10 +262,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
           className={`w-full bg-gray-100 dark:bg-[#111] relative cursor-pointer ${isBlurred ? "overflow-hidden" : ""}`}
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             if (!isBlurred) {
               setLightboxStartIdx(0);
               setShowImageLightbox(true);
+            } else {
+              setShowModal(true);
             }
           }}
         >
@@ -288,10 +291,9 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         </div>
       )}
 
-      {/* Content — click to open post detail */}
+      {/* Content */}
       <div
-        className={`px-4 pt-3 pb-1 relative cursor-pointer ${isBlurred && !post.image_url ? "overflow-hidden" : ""}`}
-        onClick={() => setShowModal(true)}
+        className={`px-4 pt-3 pb-1 relative ${isBlurred && !post.image_url ? "overflow-hidden" : ""}`}
       >
         {post.title && (
           <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{post.title}</p>
@@ -346,7 +348,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 px-4 py-3">
+      <div className="flex items-center gap-4 px-4 py-3" onClick={(e) => e.stopPropagation()}>
         <ReactionButton
           postId={post.id}
           currentUser={currentUser}
@@ -413,7 +415,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
 
       {/* Comments */}
       {showComments && (
-        <div className="border-t border-gray-100 dark:border-[#2A2A2A] px-4 pb-3">
+        <div className="border-t border-gray-100 dark:border-[#2A2A2A] px-4 pb-3" onClick={(e) => e.stopPropagation()}>
           {currentUser && (
             <div className="flex items-center gap-2 py-3">
               <input

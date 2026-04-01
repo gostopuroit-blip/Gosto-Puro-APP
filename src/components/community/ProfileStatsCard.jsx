@@ -7,7 +7,7 @@ export default function ProfileStatsCard({ userEmail, postCount, onPostClick, on
 
   useEffect(() => {
     if (postCount !== undefined) return; // skip fetch if passed directly
-    base44.entities.CommunityPost.filter({ user_email: userEmail }, "-created_date", 500)
+    base44.entities.CommunityPost.filter({ created_by: userEmail }, "-created_date", 500)
       .then((data) => setFetchedPosts(data.length))
       .catch(() => setFetchedPosts(0));
   }, [userEmail, postCount]);

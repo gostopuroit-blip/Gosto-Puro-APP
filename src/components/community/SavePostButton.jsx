@@ -1,31 +1,22 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bookmark } from "lucide-react";
+import { Bookmark, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
 export default function SavePostButton({ post, currentUser, onSaveChange }) {
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // (removed collection modal - saves directly to "Salvati")
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!currentUser || !post) return;
-    checkIfSaved();
+    base44.entities.SavedPost.filter(
+      { post_id: post.id, user_email: currentUser.email },
+      "-created_date",
+      1
+    ).then((saved) => setIsSaved(saved.length > 0)).catch(() => {});
   }, [currentUser?.email, post?.id]);
-
-  const checkIfSaved = async () => {
-    try {
-      const saved = await base44.entities.SavedPost.filter(
-        { post_id: post.id, user_email: currentUser.email },
-        "-created_date",
-        1
-      );
-      setIsSaved(saved.length > 0);
-    } catch {
-      setIsSaved(false);
-    }
-  };
 
   const handleSaveClick = async () => {
     if (!currentUser) {
@@ -33,11 +24,10 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      if (isSaved) {
-        // Remove saved post
+    if (isSaved) {
+      // Unsave directly
+      setIsLoading(true);
+      try {
         const saved = await base44.entities.SavedPost.filter({
           post_id: post.id,
           user_email: currentUser.email,
@@ -47,46 +37,29 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
         }
         setIsSaved(false);
         onSaveChange?.(false);
-        setIsLoading(false);
-      } else {
-        // Save directly to "Salvati" without modal
-        await base44.entities.SavedPost.create({
-          post_id: post.id,
-          user_email: currentUser.email,
-          collection: "Salvati",
-        });
-        setIsSaved(true);
-        onSaveChange?.(true);
-        toast.success("Post salvato! 🔖 Vedi i tuoi salvati nel profilo →", {
-          action: {
-            label: "Profilo",
-            onClick: () => window.location.href = `/ExpertProfile?id=${currentUser.email}`,
-          },
-          duration: 4000,
-        });
+        toast.success("Post rimosso dai salvati");
+      } catch {
+        toast.error("Errore nella rimozione");
+      } finally {
         setIsLoading(false);
       }
-    } catch (err) {
-      toast.error("Errore nel salvataggio");
-      setIsLoading(false);
+    } else {
+      // Show collection modal before saving
+      setShowModal(true);
     }
   };
 
-  const handleRemove = async () => {
-    try {
-      const saved = await base44.entities.SavedPost.filter({
-        post_id: post.id,
-        user_email: currentUser.email,
-      });
-      if (saved.length > 0) {
-        await base44.entities.SavedPost.delete(saved[0].id);
-        setIsSaved(false);
-        onSaveChange?.(false);
-        toast.success("Post rimosso dai salvati");
-      }
-    } catch {
-      toast.error("Errore nella rimozione");
-    }
+  const handleSaved = (collectionName) => {
+    setIsSaved(true);
+    setShowModal(false);
+    onSaveChange?.(true);
+    toast.success(`Post salvato in "${collectionName}" 🔖`, {
+      action: {
+        label: "Profilo",
+        onClick: () => window.location.href = `/ExpertProfile?id=${currentUser.email}`,
+      },
+      duration: 4000,
+    });
   };
 
   return (
@@ -110,7 +83,14 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
         </motion.div>
       </motion.button>
 
-
+      {showModal && (
+        <SaveToCollectionModal
+          post={post}
+          currentUser={currentUser}
+          onClose={() => setShowModal(false)}
+          onSaved={handleSaved}
+        />
+      )}
     </>
   );
 }
@@ -123,40 +103,29 @@ function SaveToCollectionModal({ post, currentUser, onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadCollections();
+    base44.entities.SavedPost.filter({ user_email: currentUser.email }, "-created_date", 500)
+      .then((saved) => {
+        const unique = [...new Set(saved.map((s) => s.collection || "Salvati"))];
+        setCollections(unique.length > 0 ? unique : ["Salvati"]);
+      })
+      .catch(() => setCollections(["Salvati"]));
   }, []);
 
-  const loadCollections = async () => {
-    try {
-      const saved = await base44.entities.SavedPost.filter(
-        { user_email: currentUser.email },
-        "-created_date",
-        500
-      );
-      const uniqueCollections = [...new Set(saved.map((s) => s.collection || "Salvati"))];
-      setCollections(uniqueCollections);
-    } catch {
-      setCollections(["Salvati"]);
-    }
-  };
-
   const handleSave = async () => {
-    if (!selectedCollection && !newCollectionName.trim()) {
+    const collectionName = isCreatingNew ? newCollectionName.trim() : selectedCollection;
+    if (!collectionName) {
       toast.error("Seleziona o crea una collezione");
       return;
     }
-
     setSaving(true);
     try {
-      const collectionName = newCollectionName.trim() || selectedCollection;
       await base44.entities.SavedPost.create({
         post_id: post.id,
         user_email: currentUser.email,
         collection: collectionName,
       });
-      toast.success(`Post salvato in "${collectionName}"`);
-      onSaved();
-    } catch (err) {
+      onSaved(collectionName);
+    } catch {
       toast.error("Errore nel salvataggio");
     } finally {
       setSaving(false);
@@ -164,54 +133,52 @@ function SaveToCollectionModal({ post, currentUser, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] bg-black/60 flex items-end justify-center" onClick={onClose}>
       <div
         className="bg-white dark:bg-[#1A1A1A] rounded-t-3xl w-full max-w-lg p-5 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          🔖 Salva in collezione
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            🔖 Salva in collezione
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-        {/* Existing collections */}
-        {!isCreatingNew && (
+        {!isCreatingNew ? (
           <>
             <div className="space-y-2 mb-4">
               {collections.map((col) => (
                 <button
                   key={col}
-                  onClick={() => {
-                    setSelectedCollection(col);
-                  }}
+                  onClick={() => setSelectedCollection(col)}
                   className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                     selectedCollection === col
-                      ? "border-[#2D6A4F] bg-[#2D6A4F]/10 dark:bg-[#2D6A4F]/20 text-[#2D6A4F]"
+                      ? "border-[#2D6A4F] bg-[#2D6A4F]/10 text-[#2D6A4F]"
                       : "border-gray-100 dark:border-[#2A2A2A] text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#111]"
                   }`}
                 >
-                  {col}
+                  📁 {col}
                 </button>
               ))}
             </div>
-
             <button
               onClick={() => setIsCreatingNew(true)}
-              className="w-full text-center px-4 py-3 rounded-xl border-2 border-dashed border-gray-200 dark:border-[#333] text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-[#2D6A4F] transition"
+              className="w-full text-center px-4 py-3 rounded-xl border-2 border-dashed border-gray-200 dark:border-[#333] text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-[#2D6A4F] transition mb-4"
             >
               ➕ Nuova collezione
             </button>
           </>
-        )}
-
-        {/* Create new collection */}
-        {isCreatingNew && (
-          <>
+        ) : (
+          <div className="mb-4">
             <input
               type="text"
               value={newCollectionName}
               onChange={(e) => setNewCollectionName(e.target.value)}
               placeholder="Es: Ricette preferite, Ispirazioni..."
-              className="w-full bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-white outline-none mb-4"
+              className="w-full bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-white outline-none mb-3"
               autoFocus
             />
             <button
@@ -220,20 +187,19 @@ function SaveToCollectionModal({ post, currentUser, onClose, onSaved }) {
             >
               ← Torna alle collezioni
             </button>
-          </>
+          </div>
         )}
 
-        {/* Buttons */}
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500 dark:text-gray-400"
+            className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold text-gray-500"
           >
             Annulla
           </button>
           <button
             onClick={handleSave}
-            disabled={saving || (!selectedCollection && !newCollectionName.trim())}
+            disabled={saving || (isCreatingNew && !newCollectionName.trim())}
             className="flex-1 py-3 rounded-xl bg-[#2D6A4F] text-white text-sm font-semibold disabled:opacity-50"
           >
             {saving ? "Salvataggio..." : "Salva"}

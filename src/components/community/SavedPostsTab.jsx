@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
-import CommunityPostCard from "./CommunityPostCard";
+import PostDetailModal from "./PostDetailModal";
 
 export default function SavedPostsTab({ currentUser }) {
-  const [savedPosts, setSavedPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [savedGroups, setSavedGroups] = useState({});
   const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [expandedCollection, setExpandedCollection] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     loadSavedPosts();
@@ -23,28 +23,45 @@ export default function SavedPostsTab({ currentUser }) {
         500
       );
 
-      // Get unique collections
-      const uniqueCollections = [...new Set(saved.map((s) => s.collection || "Salvati"))].sort();
-      setCollections(uniqueCollections);
-      if (uniqueCollections.length > 0 && !selectedCollection) {
-        setSelectedCollection(uniqueCollections[0]);
-        setExpandedCollection(uniqueCollections[0]);
+      if (saved.length === 0) {
+        setSavedGroups({});
+        setCollections([]);
+        setLoading(false);
+        return;
       }
 
-      // Fetch full post details for each saved post
-      const postsData = await Promise.all(
-        saved.map((s) =>
-          base44.entities.CommunityPost.filter({ id: s.post_id }, "-created_date", 1).then((posts) => ({
+      // Fetch full post for each saved item sequentially to avoid rate limits
+      const items = [];
+      for (const s of saved) {
+        try {
+          // Use the built-in id field to fetch a single post
+          const post = await base44.entities.CommunityPost.get(s.post_id).catch(() => null);
+          items.push({
             savedId: s.id,
             collection: s.collection || "Salvati",
-            post: posts[0],
-          }))
-        )
-      );
+            post: post || null,
+            post_id: s.post_id,
+          });
+        } catch {
+          items.push({ savedId: s.id, collection: s.collection || "Salvati", post: null, post_id: s.post_id });
+        }
+      }
 
-      setSavedPosts(postsData.filter((p) => p.post));
+      // Group by collection, filter out items with no post found
+      const groups = {};
+      items.forEach((item) => {
+        if (!item.post) return;
+        const col = item.collection;
+        if (!groups[col]) groups[col] = [];
+        groups[col].push(item);
+      });
+
+      const uniqueCollections = Object.keys(groups).sort();
+      setCollections(uniqueCollections);
+      setSavedGroups(groups);
+      if (uniqueCollections.length > 0) setExpandedCollection(uniqueCollections[0]);
     } catch (err) {
-      setSavedPosts([]);
+      setSavedGroups({});
     } finally {
       setLoading(false);
     }
@@ -58,14 +75,7 @@ export default function SavedPostsTab({ currentUser }) {
     );
   }
 
-  const groupedByCollection = {};
-  savedPosts.forEach((item) => {
-    const col = item.collection;
-    if (!groupedByCollection[col]) groupedByCollection[col] = [];
-    groupedByCollection[col].push(item);
-  });
-
-  if (Object.keys(groupedByCollection).length === 0) {
+  if (collections.length === 0) {
     return (
       <div className="py-12 text-center">
         <p className="text-4xl mb-3">🔖</p>
@@ -78,69 +88,72 @@ export default function SavedPostsTab({ currentUser }) {
   }
 
   return (
-    <div className="space-y-4">
-      {collections.map((collection) => {
-        const posts = groupedByCollection[collection] || [];
-        const isExpanded = expandedCollection === collection;
+    <>
+      <div className="space-y-4">
+        {collections.map((collection) => {
+          const posts = savedGroups[collection] || [];
+          const isExpanded = expandedCollection === collection;
 
-        return (
-          <div key={collection} className="space-y-3">
-            {/* Collection header */}
-            <button
-              onClick={() =>
-                setExpandedCollection(isExpanded ? null : collection)
-              }
-              className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] hover:border-[#2D6A4F] transition"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-lg">📁</span>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {collection}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {posts.length} post
-                  </p>
-                </div>
-              </div>
-              {isExpanded ? (
-                <ChevronUp className="w-5 h-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
-
-            {/* Posts grid */}
-            {isExpanded && (
-              <div className="grid grid-cols-2 gap-3 pl-2">
-                {posts.map((item) => (
-                  <div key={item.post.id} className="rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] aspect-square cursor-pointer hover:opacity-80 transition group">
-                    {item.post.image_url ? (
-                      <img
-                        src={item.post.image_url}
-                        alt=""
-                        className="w-full h-full object-cover"
-                      />
-                    ) : item.post.video_url ? (
-                      <div className="w-full h-full bg-black flex items-center justify-center">
-                        <span className="text-2xl">🎥</span>
-                      </div>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-2xl">📝</span>
-                      </div>
-                    )}
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                      <p className="text-white text-sm font-semibold">Visualizza</p>
-                    </div>
+          return (
+            <div key={collection} className="space-y-3">
+              <button
+                onClick={() => setExpandedCollection(isExpanded ? null : collection)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-gray-100 dark:border-[#2A2A2A] hover:border-[#2D6A4F] transition"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">📁</span>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-900 dark:text-white">{collection}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{posts.length} post</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="w-5 h-5 text-gray-400" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                )}
+              </button>
+
+              {isExpanded && (
+                <div className="grid grid-cols-2 gap-3 pl-2">
+                  {posts.map((item) => (
+                    <div
+                      key={item.savedId}
+                      onClick={() => setSelectedPost(item.post)}
+                      className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] aspect-square cursor-pointer hover:opacity-80 transition"
+                    >
+                      {(item.post.images?.length > 0 || item.post.image_url) ? (
+                        <img
+                          src={item.post.images?.[0] || item.post.image_url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : item.post.video_url ? (
+                        <div className="w-full h-full bg-black flex items-center justify-center">
+                          <span className="text-2xl">🎥</span>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center p-3">
+                          <p className="text-gray-500 text-xs text-center line-clamp-4">{item.post.content}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {selectedPost && (
+        <PostDetailModal
+          post={selectedPost}
+          currentUser={currentUser}
+          onClose={() => setSelectedPost(null)}
+          onUpdate={() => {}}
+        />
+      )}
+    </>
   );
 }

@@ -20,9 +20,10 @@ export default function FollowersModal({ expertEmail, onClose, currentUser }) {
           1000
         );
 
-        // Get user details for each follower
-        const followerEmails = followData.map((f) => f.follower_email);
+        // Deduplicate by follower_email (in case of duplicate records)
+        const uniqueFollowerEmails = [...new Set(followData.map((f) => f.follower_email))];
         const users = await base44.entities.User.list();
+        const followerEmails = uniqueFollowerEmails;
         const followerUsers = users.filter((u) => followerEmails.includes(u.email));
 
         setFollowers(
