@@ -41,18 +41,20 @@ export default function ExpertProfile() {
 
       if (!expertEmail) { setLoading(false); return; }
 
-      const [postsData, followersData, followingData, userFollowData] = await Promise.all([
-        base44.entities.CommunityPost.filter(
-          { user_email: expertEmail, status: "active" },
-          "-created_date",
-          30
-        ),
+      const postsData = await base44.entities.CommunityPost.filter(
+        { user_email: expertEmail, status: "active" },
+        "-created_date",
+        30
+      );
+
+      const [followersData, followingData] = await Promise.all([
         base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000),
         base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000),
-        u && u.email !== expertEmail
-          ? base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1)
-          : Promise.resolve([]),
       ]);
+
+      const userFollowData = u && u.email !== expertEmail
+        ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1)
+        : [];
       
       setPosts(postsData);
       setFollowersCount(followersData.length);
@@ -168,6 +170,7 @@ export default function ExpertProfile() {
               <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#2A2A2A]">
                 <ProfileStatsCard 
                   userEmail={expertEmail}
+                  postCount={posts.length}
                   followerCount={followersCount}
                   followingCount={followingCount}
                   onPostClick={() => {}}
