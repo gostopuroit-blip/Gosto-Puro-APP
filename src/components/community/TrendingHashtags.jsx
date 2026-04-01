@@ -9,9 +9,9 @@ export default function TrendingHashtags({ onHashtagClick, currentUser }) {
   const isAdmin = currentUser?.role === "admin";
 
   useEffect(() => {
-    base44.entities.Hashtag.filter({ is_trending: true }, "-posts_count", 15).then(setHashtags).catch(() => {
+    base44.entities.Hashtag.filter({ is_trending: true }, "-posts_count", 10).then(setHashtags).catch(() => {
       // Fallback: get all by posts_count if is_trending filter fails
-      base44.entities.Hashtag.list("-posts_count", 15).then(setHashtags).catch(() => {});
+      base44.entities.Hashtag.list("-posts_count", 10).then(setHashtags).catch(() => {});
     });
   }, []);
 

@@ -60,7 +60,7 @@ export default function Recipes() {
   };
 
   const loadRecipes = async () => {
-    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 200);
+    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 100);
     setRecipes(data);
     setLoading(false);
   };
