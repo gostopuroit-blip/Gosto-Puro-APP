@@ -299,31 +299,21 @@ export default function Recipes() {
 
            {/* Pagination */}
            {totalPages > 1 && (
-             <div className="flex justify-center gap-2 py-8">
+             <div className="flex items-center justify-between gap-2 py-6 px-2">
                <button
                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                  disabled={currentPage === 1}
-                 className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
+                 className="px-3 py-2 rounded-lg bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] text-xs font-semibold disabled:opacity-40 transition"
                >
                  ← Indietro
                </button>
-               {Array.from({ length: totalPages }, (_, i) => (
-                 <button
-                   key={i + 1}
-                   onClick={() => setCurrentPage(i + 1)}
-                   className={`px-3 py-2 rounded-xl text-sm font-semibold transition ${
-                     currentPage === i + 1
-                       ? 'bg-[#2D6A4F] text-white'
-                       : 'border border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-[#1A1A1A]'
-                   }`}
-                 >
-                   {i + 1}
-                 </button>
-               ))}
+               <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                 {currentPage} / {totalPages}
+               </span>
                <button
                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                  disabled={currentPage === totalPages}
-                 className="px-4 py-2 rounded-xl border border-gray-200 dark:border-[#333] text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#1A1A1A] transition"
+                 className="px-3 py-2 rounded-lg bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#333] text-xs font-semibold disabled:opacity-40 transition"
                >
                  Avanti →
                </button>
