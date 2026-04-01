@@ -32,9 +32,9 @@ async function computeRanking(period) {
   const commentQuery = dateFilter ? { created_date: dateFilter } : {};
   const storyQuery = dateFilter ? { created_date: dateFilter } : {};
 
-  const posts = await base44.entities.CommunityPost.filter(postQuery, "-created_date", 30).catch(() => []);
-  const comments = await base44.entities.CommunityComment.filter(commentQuery, "-created_date", 30).catch(() => []);
-  const stories = await base44.entities.Story.filter(storyQuery, "-created_date", 20).catch(() => []);
+  const posts = await base44.entities.CommunityPost.filter(postQuery, "-created_date", 20).catch(() => []);
+  const comments = await base44.entities.CommunityComment.filter(commentQuery, "-created_date", 20).catch(() => []);
+  const stories = await base44.entities.Story.filter(storyQuery, "-created_date", 15).catch(() => []);
 
   const scores = {}; // email -> { points, name, photo, email }
 
