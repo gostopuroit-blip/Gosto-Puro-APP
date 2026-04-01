@@ -57,20 +57,32 @@ export default function Home() {
 
   const loadData = async () => {
     const today = new Date().toISOString().split("T")[0];
-    const [recipes, user, notifs, occasions] = await Promise.all([
-    base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 20),
-    base44.auth.me().catch(() => null),
-    base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
-    base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order")]
-    );
+    
+    try {
+      // Load with staggered delays to avoid rate limit
+      const user = await base44.auth.me().catch(() => null);
+      await new Promise(r => setTimeout(r, 200));
+      
+      const recipes = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 20).catch(() => []);
+      await new Promise(r => setTimeout(r, 200));
+      
+      const notifs = await base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1).catch(() => []);
+      await new Promise(r => setTimeout(r, 200));
+      
+      const occasions = await base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order").catch(() => []);
 
-    setTopRecipes(recipes);
-    setUser(user);
-    if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
-    if (user?.photo_url) setUserPhoto(user.photo_url);
-    setUserPlan(user?.plan || "free");
-    setUserRole(user?.role || null);
-    if (notifs?.length > 0) setDailyNotif(notifs[0]);
+      setTopRecipes(recipes);
+      setUser(user);
+      if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
+      if (user?.photo_url) setUserPhoto(user.photo_url);
+      setUserPlan(user?.plan || "free");
+      setUserRole(user?.role || null);
+      if (notifs?.length > 0) setDailyNotif(notifs[0]);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      setLoading(false);
+      return;
+    }
 
     const occasionImages = {
       "Autunno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png",
