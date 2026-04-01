@@ -56,7 +56,7 @@ export default function SavePostButton({ post, currentUser, onSaveChange }) {
     toast.success(`Post salvato in "${collectionName}" 🔖`, {
       action: {
         label: "Profilo",
-        onClick: () => window.location.href = `/ExpertProfile?id=${currentUser.email}`,
+        onClick: () => window.location.href = `/ExpertProfile?uid=${btoa(currentUser.email)}`,
       },
       duration: 4000,
     });

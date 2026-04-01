@@ -127,7 +127,7 @@ export default function FollowingModal({ expertEmail, onClose, currentUser }) {
                   </div>
                 )}
                 <Link
-                  to={`/ExpertProfile?id=${user.email}`}
+                  to={`/ExpertProfile?uid=${btoa(user.email)}`}
                   className="flex-1 min-w-0"
                 >
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate hover:underline">

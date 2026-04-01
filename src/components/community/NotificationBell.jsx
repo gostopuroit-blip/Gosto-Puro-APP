@@ -78,10 +78,8 @@ export default function NotificationBell({ currentUser }) {
   };
 
   const getNotificationLink = (notification) => {
-    if (notification.reference_type === "post") {
-      return `/ExpertProfile?id=${notification.sender_email}`;
-    } else if (notification.reference_type === "profile") {
-      return `/ExpertProfile?id=${notification.sender_email}`;
+    if (notification.sender_email && (notification.reference_type === "post" || notification.reference_type === "profile")) {
+      return `/ExpertProfile?uid=${btoa(notification.sender_email)}`;
     }
     return null;
   };

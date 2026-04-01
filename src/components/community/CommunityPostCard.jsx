@@ -178,7 +178,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       )}
       <div className="flex items-center justify-between px-4 py-3" onClick={(e) => e.stopPropagation()}>
         <Link
-          to={`/ExpertProfile?id=${post.created_by}`}
+          to={`/ExpertProfile?uid=${post.author_id || btoa(post.created_by || "")}`}
           className="flex items-center gap-3 flex-1 min-w-0"
         >
           <UserAvatar photoUrl={photoUrl} userName={displayName} size="md" />
@@ -187,10 +187,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
             <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
               {displayName}
             </p>
-            {/* Badge — priority: admin > expert > premium */}
+            {/* Badge — priority: admin > expert > premium — usa SOLO author_role/author_plan, mai is_expert del post */}
             {post.author_role === "admin" ? (
               <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>
-            ) : (post.author_role === "expert" || post.is_expert === true) && post.author_role !== "admin" ? (
+            ) : post.author_role === "expert" ? (
               <span className="text-[9px] bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>
             ) : (post.author_plan === "premium" || post.author_role === "premium") ? (
               <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>

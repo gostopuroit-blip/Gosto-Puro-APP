@@ -282,6 +282,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         is_expert: isExpertOrAdmin,
         author_role: currentUser?.role || null,
         author_plan: currentUser?.plan || null,
+        author_id: currentUser?.id || null,
         status: "active",
       });
 

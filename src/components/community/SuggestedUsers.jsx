@@ -37,7 +37,7 @@ export default function SuggestedUsers({ currentUser, followedEmails, onFollowCh
       <div className="space-y-3">
         {users.map((u) => (
           <div key={u.email} className="flex items-center gap-3">
-            <Link to={`/ExpertProfile?id=${u.email}`} className="flex items-center gap-2 flex-1 min-w-0">
+            <Link to={`/ExpertProfile?uid=${btoa(u.email)}`} className="flex items-center gap-2 flex-1 min-w-0">
               {u.photo ? (
                 <img src={u.photo} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
               ) : (

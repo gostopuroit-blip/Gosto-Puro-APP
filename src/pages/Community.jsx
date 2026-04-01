@@ -334,7 +334,7 @@ export default function Community() {
       {user && (
         <div className="max-w-lg mx-auto px-4 pt-4">
           <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
-            <Link to={`/ExpertProfile?id=${user.email}`} className="flex items-center gap-3 flex-shrink-0">
+            <Link to={`/ExpertProfile?uid=${btoa(user.email)}`} className="flex items-center gap-3 flex-shrink-0">
               {user.photo_url ? (
                 <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" loading="lazy" />
               ) : (
@@ -343,7 +343,7 @@ export default function Community() {
                 </div>
               )}
             </Link>
-            <Link to={`/ExpertProfile?id=${user.email}`} className="flex-1 min-w-0">
+            <Link to={`/ExpertProfile?uid=${btoa(user.email)}`} className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                 {user.full_name || user.email?.split("@")[0]}
               </p>
@@ -402,7 +402,7 @@ export default function Community() {
                       {suggestedUsers.map((sUser) => (
                         <div key={sUser.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-[#111] rounded-lg transition">
                           <Link
-                            to={`/ExpertProfile?id=${sUser.email}`}
+                            to={`/ExpertProfile?uid=${btoa(sUser.email)}`}
                             className="flex items-center gap-2 flex-1 min-w-0"
                           >
                             {sUser.photo_url ? (

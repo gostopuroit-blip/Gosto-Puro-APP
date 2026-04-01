@@ -32,7 +32,18 @@ export default function ExpertProfile() {
   const navigate = useNavigate();
 
   const params = new URLSearchParams(window.location.search);
-  const expertEmail = params.get("id");
+  // Support ?uid=btoa(email) (new) and legacy ?id=email
+  const uidParam = params.get("uid");
+  const idParam = params.get("id");
+
+  // Resolve the target email: decode btoa uid if present, fallback to id param
+  const resolveTargetEmail = () => {
+    if (uidParam) {
+      try { return atob(uidParam); } catch { return uidParam; }
+    }
+    return idParam || null;
+  };
+  const expertEmail = resolveTargetEmail();
 
   useEffect(() => {
     const init = async () => {

@@ -252,7 +252,7 @@ export default function Search() {
               users.map((user) => (
                 <Link
                   key={user.id}
-                  to={`/ExpertProfile?id=${user.email}`}
+                  to={`/ExpertProfile?uid=${btoa(user.email)}`}
                   className="flex items-center gap-3 p-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#111] transition"
                 >
                   {user.photo_url ? (
@@ -266,7 +266,7 @@ export default function Search() {
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">
                       {user.full_name || user.email?.split("@")[0]}
                     </p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="text-xs text-gray-500">{user.role === "admin" ? "👑 Admin" : user.is_expert ? "✅ Expert" : user.plan === "premium" ? "⭐ Premium" : "Membro"}</p>
                   </div>
                   {currentUser && currentUser.email !== user.email && (
                     <FollowButton

@@ -24,9 +24,12 @@ export function getUserBadge(user) {
  * Formatta una data in italiano senza "circa" o "tra"
  */
 export function formatTimeAgo(date) {
+  if (!date) return "";
   const now = new Date();
   const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
   const diffMs = now - d;
+  if (diffMs < 0) return "adesso"; // future date guard
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHours = Math.floor(diffMin / 60);
