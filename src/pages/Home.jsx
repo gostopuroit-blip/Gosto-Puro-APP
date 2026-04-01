@@ -101,7 +101,7 @@ export default function Home() {
     });
 
     const specialRaw = deduped(occasions.filter((o) => o.tipo === "speciale")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
-    const special = [...specialRaw.filter(o => o.label === "Instagram"), ...specialRaw.filter(o => o.label !== "Instagram")];
+    const special = specialRaw.filter(o => o.label !== "Instagram");
     const lifestyle = deduped(occasions.filter((o) => o.tipo === "stile_vita")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label], isLifestyle: true }));
 
     setSpecialOccasions(special);

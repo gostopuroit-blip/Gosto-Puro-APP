@@ -1,36 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2, HelpCircle } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
-import PollCard from "./PollCard";
-import QuizCard from "./QuizCard";
-import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
 import VideoPlayer from "./VideoPlayer";
 import VideoLightbox from "./VideoLightbox";
-import SavePostButton from "./SavePostButton";
-import MentionText from "./MentionText";
-import LinkPreviewCard from "./LinkPreviewCard";
-import LinkTextWithUrls from "./LinkTextWithUrls";
 import { toast } from "sonner";
 import { formatTimeAgo } from "@/lib/communityUtils";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
-import FollowButton from "./FollowButton";
-import PostActionsMenu from "./PostActionsMenu";
 
-const POST_TYPE_META = {
-tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
-recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
-premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
-poll: { label: "Sondaggio", icon: BarChart2, color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" },
-quiz: { label: "Quiz", icon: HelpCircle, color: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400" },
-image_post: null,
-};
-
-export default function CommunityPostCard({ post, currentUser, onUpdate, followedEmails, onFollowChange, onHashtagFilter }) {
+export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -41,22 +23,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [poll, setPoll] = useState(null);
-  const [repostCount, setRepostCount] = useState(0);
-
-  // Load poll if post_type is poll and repost count
-  useEffect(() => {
-    if (post.post_type === "poll") {
-      base44.entities.Poll.filter({ post_id: post.id }, "-created_date", 1).then((data) => {
-        if (data[0]) setPoll(data[0]);
-      }).catch(() => {});
-    }
-
-    // Load repost count
-    base44.entities.PostShare.filter({ original_post_id: post.id, share_type: "repost" }, "-created_date", 500).then((data) => {
-      setRepostCount(data.length);
-    }).catch(() => {});
-  }, [post.id, post.post_type]);
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
@@ -187,28 +153,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
            </p>
           </div>
         </Link>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {typeMeta && (
-            <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${typeMeta.color}`}>
-              <typeMeta.icon className="w-3 h-3" />
-              {typeMeta.label}
-            </span>
-          )}
-          {post.is_premium && post.post_type !== "premium_content" && (
-            <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400">
-              <Lock className="w-3 h-3" />
-              Premium
-            </span>
-          )}
-          {/* Follow button — mostra apenas se não é o próprio post */}
-          {!isOwner && post.created_by && (
-            <FollowButton
-              targetEmail={post.created_by}
-              currentUser={currentUser}
-              onFollowChange={(following) => onFollowChange?.(post.created_by, following)}
-            />
-          )}
-        </div>
+
       </div>
 
       {/* Video */}
@@ -270,11 +215,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{post.title}</p>
         )}
         <div className={isBlurred ? "blur-sm select-none" : ""}>
-          <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-            <MentionText text={post.content} />
-            <LinkTextWithUrls text={post.content} />
-          </p>
-        </div>
+           <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+             {post.content}
+           </p>
+         </div>
         {isBlurred && (
           <div className="mt-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl px-3 py-2 text-center">
             <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold">🔒 Contenuto esclusivo Premium</p>
@@ -282,78 +226,36 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           </div>
         )}
         {post.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-wrap gap-1.5 mt-2">
             {post.tags.map((tag) => (
-              <button
+              <span
                 key={tag}
-                onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(tag)}`)}
-                className="flex items-center gap-0.5 text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
+                className="text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold"
               >
                 #&thinsp;{tag}
-              </button>
+              </span>
             ))}
-          </div>
-        )}
-
-        {/* Link preview */}
-        {post.link_preview && (
-          <div className="mt-3">
-            <LinkPreviewCard preview={post.link_preview} />
           </div>
         )}
       </div>
 
-      {/* Poll */}
-      {poll && (
-        <div className="px-4 pb-2">
-          <PollCard poll={poll} currentUser={currentUser} onUpdate={setPoll} />
-        </div>
-      )}
-
-      {/* Quiz */}
-      {post.post_type === "quiz" && (
-        <div className="px-4 pb-2">
-          <QuizCard post={post} currentUser={currentUser} />
-        </div>
-      )}
-
       {/* Actions */}
-      <div className="flex items-center gap-4 px-4 py-3" onClick={(e) => e.stopPropagation()}>
-        <ReactionButton
-          postId={post.id}
-          currentUser={currentUser}
-          onReactionsChange={() => {}}
-        />
+      <div className="flex items-center gap-3 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={handleLike}
+          className={`flex items-center gap-1.5 text-sm font-medium transition ${isLiked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"}`}>
+          <Heart className={`w-5 h-5 ${isLiked ? "fill-red-500" : ""}`} />
+          <span>{post.likes_count || 0}</span>
+        </button>
         <button
           onClick={toggleComments}
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition hover:text-[#2D6A4F]">
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
         </button>
-        <SavePostButton
-          post={post}
-          currentUser={currentUser}
-          onSaveChange={() => {}}
-        />
-        {repostCount > 0 && (
-          <button className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
-            <Repeat2 className="w-5 h-5" />
-            <span>{repostCount}</span>
-          </button>
-        )}
-        <div className="ml-auto">
-          <PostActionsMenu
-            post={post}
-            currentUser={currentUser}
-            onPostShared={() => setRepostCount((prev) => prev + 1)}
-            onDelete={async (p) => {
-              if (!confirm("Eliminare questo post?")) return;
-              await base44.entities.CommunityPost.delete(p.id);
-              onUpdate(null);
-              toast.success("Post eliminato");
-            }}
-          />
-        </div>
+        <button className="ml-auto text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition">
+          <MoreVertical className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Image lightbox */}
