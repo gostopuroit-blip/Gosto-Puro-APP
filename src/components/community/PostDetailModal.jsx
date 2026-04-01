@@ -131,7 +131,7 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
         {/* Header fixo */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
           <Link
-            to={`/ExpertProfile?id=${localPost.created_by}`}
+            to={`/ExpertProfile?uid=${btoa(localPost.created_by || "")}`}
             onClick={onClose}
             className="flex items-center gap-3 flex-1 min-w-0"
           >
@@ -160,14 +160,14 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
          <div className="flex-1 overflow-y-auto">
            {/* Imagem ou Carousel */}
            {(localPost.image_url || localPost.images?.length > 0) && (
-             <div className={`w-full bg-black relative ${isBlurred ? "overflow-hidden" : ""}`}>
+             <div className="w-full overflow-hidden relative" style={{ aspectRatio: "4/5" }}>
                {localPost.images && localPost.images.length > 0 ? (
                  <ImageCarousel images={localPost.images} isBlurred={isBlurred} />
                ) : (
                  <img
                    src={localPost.image_url}
                    alt=""
-                   className={`w-full object-contain max-h-[50vh] ${isBlurred ? "blur-xl scale-110" : ""}`}
+                   className={`w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
                  />
                )}
                {isBlurred && (

@@ -24,13 +24,12 @@ let _cachedFollowed = null;
 
 // Algoritmo de recomendação: posts fixados no topo (ordenados por data desc),
 // depois posts normais ordenados por data decrescente (mais recentes primeiro)
-function rankPosts(posts, followedEmails) {
+function rankPosts(posts) {
   return [...posts].sort((a, b) => {
     // Posts fixados sempre no topo
     if (a.is_pinned && !b.is_pinned) return -1;
     if (!a.is_pinned && b.is_pinned) return 1;
-    
-    // Ambos fixados ou ambos não fixados: ordenar por data decrescente
+    // Ordenar sempre por created_date decrescente
     return new Date(b.created_date) - new Date(a.created_date);
   });
 }
@@ -177,7 +176,7 @@ export default function Community() {
     if (postTypeFilter) {
       filtered = filtered.filter((p) => p.post_type === postTypeFilter);
     }
-    return rankPosts(filtered, followedEmails);
+    return rankPosts(filtered);
   })();
 
   // Filtra reposts conforme filtros

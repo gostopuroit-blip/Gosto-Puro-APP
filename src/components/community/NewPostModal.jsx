@@ -74,6 +74,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   // Bad words state
   const [badWordError, setBadWordError] = useState(null); // {severity, word}
   const [forcePublish, setForcePublish] = useState(false);
+  const isPublishingRef = useRef(false);
 
   // Load hashtag suggestions
   useEffect(() => {
@@ -192,6 +193,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
   };
 
   const handleSubmit = async () => {
+    if (isPublishingRef.current) return; // Prevent double submit
     if (!content.trim()) return toast.error("Scrivi qualcosa!");
     if (postType === "poll") {
       if (!title.trim()) return toast.error("Aggiungi una domanda per il sondaggio");
@@ -226,6 +228,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
     setBadWordError(null);
     setForcePublish(false);
+    isPublishingRef.current = true;
     setUploading(true);
 
     try {
@@ -338,6 +341,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       console.error("Post submission error:", err);
       toast.error("Errore nella pubblicazione. Riprova.");
     } finally {
+      isPublishingRef.current = false;
       setUploading(false);
     }
   };
@@ -502,6 +506,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             value={content}
             onChange={setContent}
             onMentionSelect={(user) => setMentionedUsers([...mentionedUsers, user])}
+            currentUser={currentUser}
           />
 
           {/* Link preview */}

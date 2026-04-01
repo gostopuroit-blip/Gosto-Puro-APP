@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 
-export default function MentionAutocomplete({ value, onChange, onMentionSelect }) {
+export default function MentionAutocomplete({ value, onChange, onMentionSelect, currentUser }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [cursorPos, setCursorPos] = useState(0);
@@ -37,16 +37,36 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect }
 
     const loadUsers = async () => {
       try {
-        // Fetch more users and filter client-side by full_name or display_name
-        const users = await base44.entities.User.list("-created_date", 200);
         const q = currentMention.mention.toLowerCase();
-        const filtered = users.filter(
+        // Fetch who the current user follows and who follows them
+        let userEmails = new Set();
+        const myEmail = currentUser?.email || null;
+        const [followingData, followersData] = await Promise.all([
+          myEmail ? base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 500).catch(() => []) : Promise.resolve([]),
+          myEmail ? base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 500).catch(() => []) : Promise.resolve([]),
+        ]);
+        followingData.forEach((f) => userEmails.add(f.following_email));
+        followersData.forEach((f) => userEmails.add(f.follower_email));
+
+        // Get all users and filter
+        const allUsers = await base44.entities.User.list("-created_date", 300);
+        let pool = userEmails.size > 0
+          ? allUsers.filter((u) => userEmails.has(u.email))
+          : allUsers;
+        
+        const filtered = pool.filter(
           (u) =>
             (u.full_name && u.full_name.toLowerCase().includes(q)) ||
             (u.display_name && u.display_name.toLowerCase().includes(q))
         );
-        setSuggestions(filtered.slice(0, 6));
-        setShowSuggestions(filtered.length > 0);
+        // Fallback: se nenhum resultado na rede social, busca em todos
+        const finalList = filtered.length > 0 ? filtered : allUsers.filter(
+          (u) =>
+            (u.full_name && u.full_name.toLowerCase().includes(q)) ||
+            (u.display_name && u.display_name.toLowerCase().includes(q))
+        );
+        setSuggestions(finalList.slice(0, 6));
+        setShowSuggestions(finalList.length > 0);
       } catch {
         setSuggestions([]);
       }
