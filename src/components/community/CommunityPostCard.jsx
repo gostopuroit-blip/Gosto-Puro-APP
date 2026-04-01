@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 // Note: using asServiceRole via base44 requires the function context; direct use won't work in components
 // Instead, we'll call updateCommentCount backend function for comment/like operations
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical, Bookmark } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 import ImageCarousel from "./ImageCarousel";
@@ -24,11 +24,26 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingPost, setSavingPost] = useState(false);
 
   const isLiked = post.likes?.includes(currentUser?.email);
   const isOwner = post.created_by === currentUser?.email;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
   const isBlurred = post.is_premium && !isPremiumUser;
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const checkSaved = async () => {
+      const saved = await base44.entities.SavedPost.filter(
+        { post_id: post.id, user_email: currentUser.email, collection: "Salvati" },
+        "-created_date",
+        1
+      ).catch(() => []);
+      setIsSaved(saved.length > 0);
+    };
+    checkSaved();
+  }, [post.id, currentUser]);
 
 
 
@@ -132,10 +147,42 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   };
 
   const deletePost = async () => {
-    if (!confirm("Eliminare questo post?")) return;
-    await base44.entities.CommunityPost.delete(post.id);
-    onUpdate(null);
-    toast.success("Post eliminato");
+     if (!confirm("Eliminare questo post?")) return;
+     await base44.entities.CommunityPost.delete(post.id);
+     onUpdate(null);
+     toast.success("Post eliminato");
+   };
+
+  const toggleSavePost = async () => {
+    if (!currentUser) return toast.error("Fai login per salvare i post");
+    setSavingPost(true);
+    try {
+      if (isSaved) {
+        const saved = await base44.entities.SavedPost.filter(
+          { post_id: post.id, user_email: currentUser.email, collection: "Salvati" },
+          "-created_date",
+          1
+        ).catch(() => []);
+        if (saved.length > 0) {
+          await base44.entities.SavedPost.delete(saved[0].id);
+          setIsSaved(false);
+          toast.success("Post rimosso dai salvati");
+        }
+      } else {
+        await base44.entities.SavedPost.create({
+          post_id: post.id,
+          user_email: currentUser.email,
+          collection: "Salvati",
+        });
+        setIsSaved(true);
+        toast.success("Post salvato");
+      }
+    } catch (error) {
+      console.error('Save post error:', error);
+      toast.error('Errore nel salvare il post');
+    } finally {
+      setSavingPost(false);
+    }
   };
 
 
@@ -279,6 +326,12 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition hover:text-[#2D6A4F]">
           <MessageCircle className="w-5 h-5" />
           <span>{post.comments_count || 0}</span>
+        </button>
+        <button
+          onClick={toggleSavePost}
+          disabled={savingPost}
+          className={`flex items-center gap-1.5 text-sm font-medium transition ${isSaved ? "text-[#2D6A4F]" : "text-gray-500 dark:text-gray-400 hover:text-[#2D6A4F]"}`}>
+          <Bookmark className={`w-5 h-5 ${isSaved ? "fill-[#2D6A4F]" : ""}`} />
         </button>
         <button className="ml-auto text-gray-500 dark:text-gray-400 p-1 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition">
           <MoreVertical className="w-5 h-5" />

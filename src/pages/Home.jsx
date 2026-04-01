@@ -210,69 +210,50 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Top Prepared — carousel with dots */}
+      {/* Top Prepared — carousel with cards */}
       <div className="mt-8">
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
-        <div className="relative">
-          <div
-              ref={carouselRef}
-              className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 scroll-smooth snap-x snap-mandatory"
-              onScroll={(e) => {
-                const idx = Math.round(e.target.scrollLeft / cardWidth);
-                setCarouselIndex(Math.max(0, Math.min(idx, topRecipes.length - 1)));
-              }}>
-
-            {topRecipes.map((recipe, index) => {
-               const isLocked = !isPremium;
-               if (isLocked) {
-                 return (
-                   <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-44 group">
-                     <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-100">
-                       <img
-                         src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                         alt={recipe.title}
-                         loading="lazy"
-                         decoding="async"
-                         className="w-full h-full object-cover blur-sm opacity-40"
-                       />
-                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-                         <div className="w-9 h-9 bg-white/90 rounded-xl flex items-center justify-center shadow">
-                           <Lock className="w-4 h-4 text-amber-500" />
-                         </div>
-                         <span className="text-white text-[11px] font-bold bg-black/50 px-2 py-0.5 rounded-md">Ricetta Premium</span>
-                         <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow">
-                           <Crown className="w-3 h-3" /> Sblocca Premium
-                         </span>
-                       </div>
-                     </div>
-                     <p className="text-[13px] font-semibold text-gray-400 mt-2 line-clamp-2 blur-[2px] select-none">{recipe.title}</p>
-                   </a>
-                 );
-               }
-               return <div key={recipe.id} className="snap-start"><RecipeCard recipe={recipe} variant="compact" /></div>;
-             })}
-          </div>
-          {/* Dots */}
-          {topRecipes.length > 0 &&
-            <div className="flex justify-center gap-1.5 mt-3">
-              {topRecipes.map((_, i) =>
-              <button
-                key={i}
-                onClick={() => {
-                  carouselRef.current?.scrollTo({ left: i * cardWidth, behavior: "smooth" });
-                  setCarouselIndex(i);
-                }}
-                className={`rounded-full transition-all duration-200 ${
-                i === carouselIndex ?
-                "w-4 h-1.5 bg-[#2D6A4F] dark:bg-[#40916C]" :
-                "w-1.5 h-1.5 bg-gray-300 dark:bg-[#2D4A38]"}`
-                } />
-
-              )}
-            </div>
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+          {topRecipes.map((recipe) => {
+            const isLocked = !isPremium;
+            if (isLocked) {
+              return (
+                <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-40 group">
+                  <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] mb-2" style={{ aspectRatio: "3/4" }}>
+                    <img
+                      src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                      alt={recipe.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover blur-sm opacity-40"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Lock className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <p className="text-[12px] font-semibold text-gray-400 line-clamp-2 blur-[1px]">{recipe.title}</p>
+                  <p className="text-[10px] text-gray-400 mt-1">🔒 Premium</p>
+                </a>
+              );
             }
+            return (
+              <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 w-40 group active:scale-95 transition-transform duration-150">
+                <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] mb-2" style={{ aspectRatio: "3/4" }}>
+                  <img
+                    src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                    alt={recipe.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <p className="text-[12px] font-semibold text-gray-900 dark:text-white line-clamp-2">{recipe.title}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">⏱️ {recipe.prep_time || "–"} min</p>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
