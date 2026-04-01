@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Loader2, Users, ArrowLeft, Search, RefreshCw, ChevronUp, Lock, Trophy } from "lucide-react";
+import { Plus, Loader2, Users, ArrowLeft, Search, RefreshCw, ChevronUp, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,7 +14,7 @@ import TrendingHashtags from "@/components/community/TrendingHashtags";
 import PostTypeFilter from "@/components/community/PostTypeFilter";
 import FollowButton from "@/components/community/FollowButton";
 import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
-import MiniRankingCard from "@/components/community/MiniRankingCard";
+
 import FeedSkeleton from "@/components/community/FeedSkeleton";
 
 function rankPosts(posts) {
@@ -212,16 +212,13 @@ export default function Community() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-[#2D6A4F]" />
-              <h1 className="font-bold text-gray-900 dark:text-white text-lg">Comunità</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {user && <NotificationBell currentUser={user} />}
-            <button onClick={() => navigate("/CommunityRanking")} className="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 rounded-lg transition">
-              <Trophy className="w-5 h-5" />
-            </button>
-            <button onClick={() => navigate("/Search")} className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition">
+               <Users className="w-5 h-5 text-[#2D6A4F]" />
+                 <h1 className="font-bold text-gray-900 dark:text-white text-lg">Comunità</h1>
+               </div>
+             </div>
+             <div className="flex items-center gap-2">
+               {user && <NotificationBell currentUser={user} />}
+               <button onClick={() => navigate("/Search")} className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition">
               <Search className="w-5 h-5" />
             </button>
             <Button size="sm" onClick={handlePublishClick} className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-1">
@@ -321,39 +318,38 @@ export default function Community() {
             {activeTab === "for_you" && !hashtagFilter && !postTypeFilter && (
               <>
                 {suggestedUsers.length > 0 && (
-                  <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
-                    <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-3">Chi seguire? 👥</h3>
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {suggestedUsers.map((sUser) => (
-                        <div key={sUser.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-[#111] rounded-lg transition">
-                          <Link to={`/ExpertProfile?uid=${btoa(sUser.email)}`} className="flex items-center gap-2 flex-1 min-w-0">
-                            {sUser.photo_url ? (
-                              <img src={sUser.photo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
-                            ) : (
-                              <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                {(sUser.display_name || "U").charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                            <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
-                              {sUser.display_name || sUser.full_name || "Utente"}
-                            </p>
-                          </Link>
-                          <FollowButton
-                            targetEmail={sUser.email}
-                            currentUser={user}
-                            onFollowChange={() => {
-                              setSuggestedUsers((prev) => prev.filter((u) => u.id !== sUser.id));
-                              handleFollowChange(sUser.email, true);
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <SuggestedUsers currentUser={user} followedEmails={followedEmails} onFollowChange={handleFollowChange} />
-                <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} currentUser={user} />
-                <MiniRankingCard />
+                   <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl p-4">
+                     <h3 className="font-bold text-sm text-gray-900 dark:text-white mb-3">Chi seguire? 👥</h3>
+                     <div className="space-y-2 max-h-64 overflow-y-auto">
+                       {suggestedUsers.map((sUser) => (
+                         <div key={sUser.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-[#111] rounded-lg transition">
+                           <Link to={`/ExpertProfile?uid=${btoa(sUser.email)}`} className="flex items-center gap-2 flex-1 min-w-0">
+                             {sUser.photo_url ? (
+                               <img src={sUser.photo_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" loading="lazy" />
+                             ) : (
+                               <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                                 {(sUser.display_name || "U").charAt(0).toUpperCase()}
+                               </div>
+                             )}
+                             <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
+                               {sUser.display_name || sUser.full_name || "Utente"}
+                             </p>
+                           </Link>
+                           <FollowButton
+                             targetEmail={sUser.email}
+                             currentUser={user}
+                             onFollowChange={() => {
+                               setSuggestedUsers((prev) => prev.filter((u) => u.id !== sUser.id));
+                               handleFollowChange(sUser.email, true);
+                             }}
+                           />
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+                 <SuggestedUsers currentUser={user} followedEmails={followedEmails} onFollowChange={handleFollowChange} />
+                 <TrendingHashtags onHashtagClick={(tag) => setHashtagFilter(tag)} currentUser={user} />
               </>
             )}
 
