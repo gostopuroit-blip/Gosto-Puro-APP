@@ -78,9 +78,7 @@ export default function Community() {
   const loadPosts = useCallback(async (page = 1) => {
     const pageSize = 10;
     try {
-      const postsData = await withTimeout(
-        base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", pageSize)
-      ).catch(() => []);
+      const postsData = await base44.entities.CommunityPost.filter({ status: "active" }, "-created_date", pageSize).catch(() => []);
       
       const filteredPosts = postsData.filter((p) => !p.image_url?.includes("Instagram"));
       
