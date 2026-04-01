@@ -229,7 +229,6 @@ export default function Community() {
           </div>
           <div className="flex items-center gap-2">
             {user && <NotificationBell currentUser={user} />}
-
             <button onClick={() => navigate("/Search")} className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2A2A2A] rounded-lg transition">
               <Search className="w-5 h-5" />
             </button>

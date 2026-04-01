@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2, HelpCircle } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, UtensilsCrossed, Hash, Pin, Repeat2, BarChart2 } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 import PollCard from "./PollCard";
-
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
@@ -26,7 +25,6 @@ tip: { label: "Consiglio", icon: Lightbulb, color: "bg-amber-100 text-amber-700 
 recipe: { label: "Ricetta", icon: UtensilsCrossed, color: "bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-400" },
 premium_content: { label: "Premium", icon: Lock, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400" },
 poll: { label: "Sondaggio", icon: BarChart2, color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" },
-quiz: { label: "Quiz", icon: HelpCircle, color: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400" },
 image_post: null,
 };
 
@@ -312,8 +310,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
           <PollCard poll={poll} currentUser={currentUser} onUpdate={setPoll} />
         </div>
       )}
-
-
 
       {/* Actions */}
       <div className="flex items-center gap-4 px-4 py-3" onClick={(e) => e.stopPropagation()}>

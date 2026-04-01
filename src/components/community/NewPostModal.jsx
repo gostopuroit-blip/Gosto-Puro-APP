@@ -9,6 +9,7 @@ import LinkPreviewCard from "./LinkPreviewCard";
 import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";
 import { checkBadWords, logBadWordViolation } from "@/lib/badWordsFilter";
+import { HelpCircle } from "lucide-react";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },
@@ -34,15 +35,6 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
   // Poll state
   const [pollOptions, setPollOptions] = useState(["", ""]);
-
-  // Quiz state
-  const [quizQuestion, setQuizQuestion] = useState("");
-  const [quizOptions, setQuizOptions] = useState([
-    { id: "opt_0", text: "", is_correct: false },
-    { id: "opt_1", text: "", is_correct: false },
-  ]);
-  const [quizExplanation, setQuizExplanation] = useState("");
-  const [quizExpiresAt, setQuizExpiresAt] = useState("");
 
   // Mentions state
   const [mentionedUsers, setMentionedUsers] = useState([]);
@@ -295,8 +287,6 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         });
       }
 
-
-
       // Create mention notifications
       if (mentionEmails.length > 0) {
         mentionEmails.forEach((email) => {
@@ -366,7 +356,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-3">
-          {/* Title for tip/recipe/premium/poll */}
+          {/* Title for tip/recipe/premium/poll/quiz */}
           {(postType === "tip" || postType === "recipe" || postType === "premium_content" || postType === "poll") && (
             <input
               value={title}
@@ -558,8 +548,6 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
               </div>
             )}
           </div>
-
-
 
           {/* Recipe selector */}
           {postType === "recipe" && (
