@@ -72,8 +72,8 @@ export default function ExpertProfile() {
         ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
         : (expertUser?.photo_url || postsData[0]?.user_photo || null);
       const resolvedName = isOwnProfile
-        ? (u?.full_name || expertUser?.full_name || postsData[0]?.user_name || null)
-        : (postsData[0]?.user_name || expertUser?.full_name || null);
+        ? (u?.display_name || u?.full_name || expertUser?.display_name || expertUser?.full_name || postsData[0]?.user_name || null)
+        : (postsData[0]?.user_name || expertUser?.display_name || expertUser?.full_name || null);
       const resolvedRole = isOwnProfile
         ? (u?.role || expertUser?.role || null)
         : (expertUser?.role || null);
