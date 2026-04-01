@@ -45,16 +45,16 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
           return;
         }
 
-        // Fetch both directions
-        const [followingData, followersData] = await Promise.all([
-          base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []),
-          base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []),
-        ]);
+        // Fetch both directions of follow relationship
+         const [followingData, followersData] = await Promise.all([
+           base44.entities.UserFollow.filter({ following_email: myEmail }, "-created_date", 100).catch(() => []),
+           base44.entities.UserFollow.filter({ follower_email: myEmail }, "-created_date", 100).catch(() => []),
+         ]);
 
-        // Build set of emails (follows + followers)
-        const allowedEmails = new Set();
-        followingData.forEach((f) => allowedEmails.add(f.following_email));
-        followersData.forEach((f) => allowedEmails.add(f.follower_email));
+         // Build set of emails: people who follow me (followers) + people I follow (following)
+         const allowedEmails = new Set();
+         followingData.forEach((f) => allowedEmails.add(f.follower_email)); // followers: those who follow me
+         followersData.forEach((f) => allowedEmails.add(f.following_email)); // following: those I follow
 
         // If no follows/followers, show nothing
         if (allowedEmails.size === 0) {

@@ -253,7 +253,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       }
 
       // Extract ALL hashtags from content + merge with manually added hashtags
-      const tags = (content.match(/#([\w-]+)/g) || []).map(t => t.slice(1).toLowerCase());
+      const tags = (content.match(/#([\w]+)/g) || []).map(t => t.replace('#', '').toLowerCase());
       const allTags = [...new Set([...tags, ...hashtags])];
 
       // Extract mention emails from content

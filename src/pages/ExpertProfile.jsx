@@ -56,8 +56,9 @@ export default function ExpertProfile() {
         ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1).catch(() => [])
         : [];
 
-      // Deduplicate followers/following by email
+      // Deduplicate followers (where following_email = expertEmail) by follower_email
       const uniqueFollowers = [...new Map(followersData.map((f) => [f.follower_email, f])).values()];
+      // Deduplicate following (where follower_email = expertEmail) by following_email
       const uniqueFollowing = [...new Map(followingData.map((f) => [f.following_email, f])).values()];
 
       setPosts(postsData);
