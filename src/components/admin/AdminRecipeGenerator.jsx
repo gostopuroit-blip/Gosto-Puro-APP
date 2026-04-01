@@ -24,6 +24,31 @@ const countries = [
   { label: "Vietnam", flag: "🇻🇳" },
 ];
 
+const INGREDIENT_DICTIONARY = {
+  // Ortofrutta
+  "mele": "mele", "pomodori": "pomodori", "cipolla": "cipolla", "aglio": "aglio", "carota": "carota", "celery": "sedano", "prezzemolo": "prezzemolo", "basilico": "basilico", "rosmarino": "rosmarino", "timo": "timo", "origano": "origano",
+  "insalata": "insalata", "spinaci": "spinaci", "broccoli": "broccoli", "cavolo": "cavolo", "zucchina": "zucchina", "melanzana": "melanzana", "peperone": "peperone", "peperoni": "peperoni",
+  "limone": "limone", "arancia": "arancia", "banana": "banana", "fragola": "fragola", "pera": "pera", "pesca": "pesca",
+  // Carne e pesce
+  "pollo": "pollo", "carne": "carne", "manzo": "manzo", "maiale": "maiale", "vitello": "vitello", "agnello": "agnello",
+  "salmone": "salmone", "tonno": "tonno", "branzino": "branzino", "orata": "orata", "gamberi": "gamberi", "polpo": "polpo", "calamari": "calamari", "cozze": "cozze", "vongole": "vongole",
+  "uova": "uova", "uovo": "uovo", "egg": "uova", "eggs": "uova",
+  // Latticini
+  "latte": "latte", "panna": "panna", "formaggio": "formaggio", "mozzarella": "mozzarella", "parmigiano": "parmigiano", "ricotta": "ricotta", "mascarpone": "mascarpone", "feta": "feta",
+  // Dispensa
+  "pasta": "pasta", "riso": "riso", "farina": "farina", "pane": "pane", "olio": "olio", "burro": "burro", "sale": "sale", "zucchero": "zucchero", "pepe": "pepe",
+  "aceto": "aceto", "salsa di soia": "salsa di soia", "miele": "miele", "sugo di pomodoro": "sugo di pomodoro", "polpa di pomodoro": "polpa di pomodoro",
+};
+
+const sanitizeIngredientName = (name) => {
+  if (!name) return "";
+  const lower = name.toLowerCase().trim();
+  // Check if it's in our dictionary
+  if (INGREDIENT_DICTIONARY[lower]) return INGREDIENT_DICTIONARY[lower];
+  // If not, return as-is (will be reviewed by admin)
+  return name.trim();
+};
+
 const countryProfiles = {
   "Giappone": {
     identity: "Cucina giapponese minimalista: equilibrio tra sapore, estetica e leggerezza. Ingredienti semplici ma di qualità, tagli precisi, presentazione ordinata.",
@@ -353,7 +378,15 @@ Rispondi SOLO in formato JSON con questa struttura:
 
 Categorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
 Categorie valide per la ricetta: Colazione, Pranzo, Cena, Dolce, Snack, Bevanda.
-Difficoltà valide: Facile, Media, Difficile.`;
+Difficoltà valide: Facile, Media, Difficile.
+
+REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
+- TUTTI gli ingredienti DEVONO avere nomi italiani corretti e reali.
+- NO parole di senso (tipo "respiro", "osso", "alto", "fibra") — questi sono errori di traduzione/generazione automatica.
+- NO nomi vuoti, NO nomi generici come "ingrediente", NO parole strane.
+- Esempi CORRETTI: "pomodori", "aglio", "cipolla", "pasta", "riso", "olio extravergine", "sale", "pepe", "mozzarella", "pollo", "salmone".
+- Esempi SBAGLIATI: "respiro", "osso", "alto", "fibra", "farina 00" (scritto male — DEVE essere "farina 00" ma niente errori).
+- Se un ingrediente ha un nome dubbio o non è reale, sostituiscilo con il nome STANDARD italiano più vicino.`;
   };
 
   const buildImagePrompt = (occ, recipe, country = null) => {
@@ -534,6 +567,15 @@ Difficoltà valide: Facile, Media, Difficile.`;
     });
     // Force prep_time to match the user's selected value — the LLM often ignores it
     const normalizedResult = result ? { ...result, prep_time: maxTime } : result;
+    
+    // Sanitize ingredient names
+    if (normalizedResult?.ingredients) {
+      normalizedResult.ingredients = normalizedResult.ingredients.map(ing => ({
+        ...ing,
+        name: sanitizeIngredientName(ing.name)
+      }));
+    }
+    
     setRecipe(normalizedResult);
     setRecipeOcc(selectedOcc);
     setRecipeCountry(selectedCountry);
