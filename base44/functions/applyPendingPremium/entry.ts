@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PRODUCT_LIFETIME = "7079227";
 
@@ -29,103 +29,72 @@ const getExpirationDate = (purchaseData, planType) => {
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Fetch pending entries first
-  const pendingList = await base44.asServiceRole.entities.PendingPremium.filter(
-    { status: "pending" }, "-created_date", 200
-  );
+  try {
+    // Fetch small batch of pending entries (5 per run to minimize quota)
+    const pendingList = await base44.asServiceRole.entities.PendingPremium.filter(
+      { status: "pending" }, "-created_date", 5
+    ).catch(() => []);
 
-  if (!pendingList || pendingList.length === 0) {
-    return Response.json({ success: true, processed: 0, message: "No pending entries" });
-  }
-
-  // Get unique emails from pending list
-  const pendingEmails = [...new Set(pendingList.map(p => p.email?.toLowerCase()?.trim()).filter(Boolean))];
-
-  // Fetch ALL users and build a map by email (same robust approach as hotmartWebhook)
-  const allUsers = await base44.asServiceRole.entities.User.list("-created_date", 5000);
-  const userByEmail = {};
-  for (const u of allUsers) {
-    if (u.email) {
-      userByEmail[u.email.toLowerCase().trim()] = u;
-    }
-  }
-
-  // Group pending entries by email (deduplicate)
-  const pendingByEmail = {};
-  for (const p of pendingList) {
-    const email = p.email?.toLowerCase()?.trim();
-    if (!email) continue;
-    if (!pendingByEmail[email]) pendingByEmail[email] = [];
-    pendingByEmail[email].push(p);
-  }
-
-  let applied = 0;
-  let notFound = 0;
-  const updates = [];
-
-  for (const [email, entries] of Object.entries(pendingByEmail)) {
-    const user = userByEmail[email];
-    if (!user) {
-      notFound++;
-      // Log so we can track emails that haven't registered yet
-      updates.push(
-        base44.asServiceRole.entities.WebhookLog.create({
-          source: "System",
-          event_type: "PENDING_PREMIUM_NOT_FOUND",
-          status: "error",
-          user_email: email,
-          payload: JSON.stringify({ pendingCount: entries.length }),
-          error_message: "User not registered yet — will retry next cycle",
-          timestamp: new Date().toISOString(),
-        }).catch(() => {})
-      );
-      continue;
+    if (!pendingList || pendingList.length === 0) {
+      return Response.json({ success: true, processed: 0, message: "No pending entries" });
     }
 
-    const entry = entries[0]; // most recent
-    let rawPayload = {};
-    try { rawPayload = JSON.parse(entry.raw_payload || "{}"); } catch (_) {}
+    let applied = 0;
 
-    const purchaseData = rawPayload.data?.purchase || {};
-    const subscription = rawPayload.data?.subscription || {};
-    const productId = String(entry.product_id || "");
+    // Process each pending entry
+    for (const pending of pendingList) {
+      const email = pending.email?.toLowerCase()?.trim();
+      if (!email) continue;
 
-    let updateData = {
-      plan: "premium",
-      subscription_level: "premium",
-      subscription_status: "active",
-      hotmart_product_id: productId,
-    };
+      // Get single user by email (minimizes quota usage)
+      const users = await base44.asServiceRole.entities.User.filter(
+        { email },
+        "-created_date",
+        1
+      ).catch(() => []);
 
-    if (productId === PRODUCT_LIFETIME) {
-      updateData.subscription_plan = "lifetime";
-      updateData.expiration_date = null;
-    } else {
-      const planType = detectPlanType(purchaseData, subscription);
-      updateData.subscription_plan = planType;
-      updateData.expiration_date = getExpirationDate(purchaseData, planType);
+      if (!users || users.length === 0) {
+        continue; // User not found, skip this one
+      }
+
+      const user = users[0];
+      let rawPayload = {};
+      try {
+        rawPayload = JSON.parse(pending.raw_payload || "{}");
+      } catch (_) {}
+
+      const purchaseData = rawPayload.data?.purchase || {};
+      const subscription = rawPayload.data?.subscription || {};
+      const productId = String(pending.product_id || "");
+
+      const updateData = {
+        plan: "premium",
+        subscription_level: "premium",
+        subscription_status: "active",
+        hotmart_product_id: productId,
+      };
+
+      if (productId === PRODUCT_LIFETIME) {
+        updateData.subscription_plan = "lifetime";
+        updateData.expiration_date = null;
+      } else {
+        const planType = detectPlanType(purchaseData, subscription);
+        updateData.subscription_plan = planType;
+        updateData.expiration_date = getExpirationDate(purchaseData, planType);
+      }
+
+      // Update user and mark pending as applied
+      await Promise.all([
+        base44.asServiceRole.entities.User.update(user.id, updateData).catch(() => {}),
+        base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {})
+      ]);
+
+      applied++;
     }
 
-    // Collect all update promises
-    updates.push(
-      base44.asServiceRole.entities.User.update(user.id, updateData),
-      ...entries.map(p => base44.asServiceRole.entities.PendingPremium.update(p.id, { status: "applied" })),
-      base44.asServiceRole.entities.WebhookLog.create({
-        source: "System",
-        event_type: "PENDING_PREMIUM_APPLIED",
-        status: "success",
-        user_email: email,
-        payload: JSON.stringify({ userId: user.id, productId, plan: updateData.subscription_plan }),
-        error_message: "",
-        timestamp: new Date().toISOString(),
-      }).catch(() => {}),
-    );
-
-    applied++;
+    return Response.json({ success: true, processed: pendingList.length, applied });
+  } catch (err) {
+    console.error("Error in applyPendingPremium:", err);
+    return Response.json({ success: false, error: err.message }, { status: 500 });
   }
-
-  // Run all updates in parallel
-  await Promise.all(updates);
-
-  return Response.json({ success: true, processed: Object.keys(pendingByEmail).length, applied, notFound });
 });
