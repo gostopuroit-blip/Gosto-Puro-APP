@@ -67,15 +67,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
-    const likes = post.likes || [];
-    const newLikes = isLiked
-      ? likes.filter((e) => e !== currentUser?.email)
-      : [...likes, currentUser?.email];
-    const newLikesCount = newLikes.length;
-    await base44.entities.CommunityPost.update(post.id, {
-      likes: newLikes,
-      likes_count: newLikesCount,
-    });
+    const res = await base44.functions.invoke('togglePostLike', { post_id: post.id });
+    const { likes, likes_count } = res.data;
     
     // Create notification if user just liked the post (not unliking)
     if (!isLiked && post.created_by !== currentUser?.email) {
@@ -88,7 +81,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
       }).catch(() => {});
     }
     
-    onUpdate({ ...post, likes: newLikes, likes_count: newLikesCount });
+    onUpdate({ ...post, likes, likes_count });
   };
 
   const loadComments = async () => {
@@ -113,18 +106,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Fai login per commentare");
     setSubmitting(true);
-    const newCommentsCount = (post.comments_count || 0) + 1;
-    const created = await base44.entities.CommunityComment.create({
-      post_id: post.id,
-      user_email: currentUser?.email,
-      user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
-      user_photo: currentUser?.photo_url || null,
-      content: newComment.trim(),
-      is_expert: currentUser?.role === "expert" || currentUser?.role === "admin",
-    });
-    await base44.entities.CommunityPost.update(post.id, {
-      comments_count: newCommentsCount,
-    });
+    const res = await base44.functions.invoke('addPostComment', { post_id: post.id, content: newComment.trim() });
+    const { comment: created, comments_count: newCommentsCount } = res.data;
     
     // Create notification if commenting on someone else's post
     if (post.created_by !== currentUser?.email) {

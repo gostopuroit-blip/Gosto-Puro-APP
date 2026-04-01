@@ -54,19 +54,15 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
           ? allUsers.filter((u) => userEmails.has(u.email))
           : allUsers;
         
-        const filtered = pool.filter(
-          (u) =>
-            (u.full_name && u.full_name.toLowerCase().includes(q)) ||
-            (u.display_name && u.display_name.toLowerCase().includes(q))
-        );
-        // Fallback: se nenhum resultado na rede social, busca em todos
-        const finalList = filtered.length > 0 ? filtered : allUsers.filter(
-          (u) =>
-            (u.full_name && u.full_name.toLowerCase().includes(q)) ||
-            (u.display_name && u.display_name.toLowerCase().includes(q))
-        );
-        setSuggestions(finalList.slice(0, 6));
-        setShowSuggestions(finalList.length > 0);
+        const filterFn = (u) => {
+          const name = u.display_name || u.full_name || u.email?.split("@")[0] || "";
+          return name.toLowerCase().includes(q);
+        };
+        const filtered = pool.filter(filterFn);
+        const finalList = filtered.length > 0 ? filtered : allUsers.filter(filterFn);
+        const validList = finalList.filter((u) => u.email);
+        setSuggestions(validList.slice(0, 6));
+        setShowSuggestions(validList.length > 0);
       } catch {
         setSuggestions([]);
       }
@@ -80,7 +76,7 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
     const currentMention = getLastMention(value, cursorPos);
     if (!currentMention) return;
 
-    const displayName = user.display_name || user.full_name;
+    const displayName = user.display_name || user.full_name || user.email?.split("@")[0];
     const before = value.substring(0, currentMention.atIndex);
     const after = value.substring(currentMention.endIndex);
     const newValue = `${before}@${displayName} ${after}`;
@@ -138,12 +134,12 @@ export default function MentionAutocomplete({ value, onChange, onMentionSelect, 
                 <img src={user.photo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
               ) : (
                 <div className="w-6 h-6 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white text-xs font-bold">
-                  {user.full_name.charAt(0).toUpperCase()}
+                  {(user.display_name || user.full_name || user.email?.split("@")[0] || "?").charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {user.display_name || user.full_name}
+                  {user.display_name || user.full_name || user.email?.split("@")[0]}
                 </p>
               </div>
             </button>
