@@ -4,7 +4,7 @@ import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Lightbulb, Utensi
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 import PollCard from "./PollCard";
-import QuizCard from "./QuizCard";
+
 import ReactionButton from "./ReactionButton";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
@@ -313,12 +313,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, followe
         </div>
       )}
 
-      {/* Quiz */}
-      {post.post_type === "quiz" && (
-        <div className="px-4 pb-2">
-          <QuizCard post={post} currentUser={currentUser} />
-        </div>
-      )}
+
 
       {/* Actions */}
       <div className="flex items-center gap-4 px-4 py-3" onClick={(e) => e.stopPropagation()}>
