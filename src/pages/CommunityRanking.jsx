@@ -33,9 +33,9 @@ async function computeRanking(period) {
   const storyQuery = dateFilter ? { created_date: dateFilter } : {};
 
   const [posts, comments, stories] = await Promise.all([
-    base44.entities.CommunityPost.filter(postQuery, "-created_date", 500).catch(() => []),
-    base44.entities.CommunityComment.filter(commentQuery, "-created_date", 1000).catch(() => []),
-    base44.entities.Story.filter(storyQuery, "-created_date", 500).catch(() => []),
+    base44.entities.CommunityPost.filter(postQuery, "-created_date", 100).catch(() => []),
+    base44.entities.CommunityComment.filter(commentQuery, "-created_date", 100).catch(() => []),
+    base44.entities.Story.filter(storyQuery, "-created_date", 50).catch(() => []),
   ]);
 
   const scores = {}; // email -> { points, name, photo, email }
