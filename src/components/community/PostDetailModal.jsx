@@ -20,7 +20,8 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
   const [commentBadWordError, setCommentBadWordError] = useState(null);
   const [forceComment, setForceComment] = useState(false);
 
-  const isLiked = localPost.likes?.includes(currentUser?.email);
+  const [localIsLiked, setLocalIsLiked] = useState(false);
+  const [localLikesCount, setLocalLikesCount] = useState(post.likes_count || 0);
   const isVerified = localPost.is_expert;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "admin";
   const isBlurred = localPost.is_premium && !isPremiumUser;
@@ -28,6 +29,11 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
   useEffect(() => {
     document.body.style.overflow = "hidden";
     loadComments();
+    if (currentUser) {
+      base44.entities.PostReaction.filter({ post_id: post.id, user_email: currentUser.email }, "-created_date", 1)
+        .then((res) => setLocalIsLiked(res.length > 0))
+        .catch(() => {});
+    }
     return () => { document.body.style.overflow = ""; };
   }, []);
 
@@ -53,15 +59,21 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
-    const likes = localPost.likes || [];
-    const newLikes = isLiked
-      ? likes.filter((e) => e !== currentUser?.email)
-      : [...likes, currentUser?.email];
-    const newLikesCount = newLikes.length;
-    const updated = { ...localPost, likes: newLikes, likes_count: newLikesCount };
-    await base44.entities.CommunityPost.update(localPost.id, { likes: newLikes, likes_count: newLikesCount });
-    setLocalPost(updated);
-    onUpdate(updated);
+    try {
+      if (localIsLiked) {
+        const reactions = await base44.entities.PostReaction.filter({ post_id: localPost.id, user_email: currentUser.email }, "-created_date", 1);
+        if (reactions.length > 0) await base44.entities.PostReaction.delete(reactions[0].id);
+        setLocalIsLiked(false);
+        setLocalLikesCount((c) => Math.max(0, c - 1));
+      } else {
+        await base44.entities.PostReaction.create({ post_id: localPost.id, user_email: currentUser.email, reaction: "❤️" });
+        setLocalIsLiked(true);
+        setLocalLikesCount((c) => c + 1);
+      }
+    } catch (error) {
+      console.error('Like error:', error);
+      toast.error('Errore nel mettere mi piace');
+    }
   };
 
   const submitComment = async (force = false) => {
@@ -183,9 +195,9 @@ export default function PostDetailModal({ post, currentUser, onClose, onUpdate }
           {/* Curtidas e comentários */}
           <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A]">
             <button onClick={handleLike} className="flex items-center gap-1.5 text-sm font-medium transition">
-              <Heart className={`w-6 h-6 transition ${isLiked ? "fill-red-500 text-red-500" : "text-gray-700 dark:text-gray-300"}`} />
-              <span className={isLiked ? "text-red-500" : "text-gray-600 dark:text-gray-400"}>
-                {localPost.likes_count || 0}
+              <Heart className={`w-6 h-6 transition ${localIsLiked ? "fill-red-500 text-red-500" : "text-gray-700 dark:text-gray-300"}`} />
+              <span className={localIsLiked ? "text-red-500" : "text-gray-600 dark:text-gray-400"}>
+                {localLikesCount}
               </span>
             </button>
             <button

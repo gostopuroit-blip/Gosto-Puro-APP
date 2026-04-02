@@ -30,7 +30,17 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [savingPost, setSavingPost] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
-  const isLiked = post.likes?.includes(currentUser?.email);
+  const [localLikesCount, setLocalLikesCount] = useState(post.likes_count || 0);
+  const [localIsLiked, setLocalIsLiked] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    base44.entities.PostReaction.filter({ post_id: post.id, user_email: currentUser.email }, "-created_date", 1)
+      .then((res) => setLocalIsLiked(res.length > 0))
+      .catch(() => {});
+  }, [post.id, currentUser?.email]);
+
+  const isLiked = localIsLiked;
   const isOwner = post.created_by === currentUser?.email;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
   const isBlurred = post.is_premium && !isPremiumUser;
@@ -51,34 +61,34 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
 
 
   const handleLike = async () => {
-     if (!currentUser) return toast.error("Fai login per mettere mi piace");
-     try {
-       const newLikes = isLiked
-         ? post.likes.filter((e) => e !== currentUser.email)
-         : [...(post.likes || []), currentUser.email];
-       const newLikesCount = newLikes.length;
-
-       await base44.entities.CommunityPost.update(post.id, {
-         likes: newLikes,
-         likes_count: newLikesCount,
-       });
-
-       if (!isLiked && post.created_by !== currentUser?.email) {
-         await base44.functions.invoke('createLikeNotification', {
-           post_id: post.id,
-           post_author_email: post.created_by,
-           liker_email: currentUser?.email,
-           liker_name: getUserName(currentUser),
-           liker_photo: currentUser?.photo_url || null,
-         }).catch(() => {});
-       }
-
-       onUpdate({ ...post, likes: newLikes, likes_count: newLikesCount });
-     } catch (error) {
-       console.error('Like error:', error);
-       toast.error('Errore nel mettere mi piace');
-     }
-   };
+    if (!currentUser) return toast.error("Fai login per mettere mi piace");
+    try {
+      if (localIsLiked) {
+        // Descurtir: deletar PostReaction
+        const reactions = await base44.entities.PostReaction.filter({ post_id: post.id, user_email: currentUser.email }, "-created_date", 1);
+        if (reactions.length > 0) await base44.entities.PostReaction.delete(reactions[0].id);
+        setLocalIsLiked(false);
+        setLocalLikesCount((c) => Math.max(0, c - 1));
+      } else {
+        // Curtir: criar PostReaction
+        await base44.entities.PostReaction.create({ post_id: post.id, user_email: currentUser.email, reaction: "❤️" });
+        setLocalIsLiked(true);
+        setLocalLikesCount((c) => c + 1);
+        if (post.created_by !== currentUser?.email) {
+          base44.functions.invoke('createLikeNotification', {
+            post_id: post.id,
+            post_author_email: post.created_by,
+            liker_email: currentUser?.email,
+            liker_name: getUserName(currentUser),
+            liker_photo: currentUser?.photo_url || null,
+          }).catch(() => {});
+        }
+      }
+    } catch (error) {
+      console.error('Like error:', error);
+      toast.error('Errore nel mettere mi piace');
+    }
+  };
 
   const loadComments = async () => {
     setLoadingComments(true);
@@ -317,7 +327,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           onClick={handleLike}
           className={`flex items-center gap-1.5 text-sm font-medium transition ${isLiked ? "text-red-500" : "text-gray-500 dark:text-gray-400 hover:text-red-500"}`}>
           <Heart className={`w-5 h-5 ${isLiked ? "fill-red-500" : ""}`} />
-          <span>{post.likes_count || 0}</span>
+          <span>{localLikesCount}</span>
         </button>
         <button
           onClick={toggleComments}
