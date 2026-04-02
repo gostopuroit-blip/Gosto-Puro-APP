@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 // Instead, we'll call updateCommentCount backend function for comment/like operations
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical, Bookmark } from "lucide-react";
 import UserAvatar from "../UserAvatar";
-import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
+import { getDisplayName, getPhotoUrl, getUserName } from "@/lib/userDisplayUtils";
 import ImageCarousel from "./ImageCarousel";
 import ImageLightbox from "./ImageLightbox";
 import VideoPlayer from "./VideoPlayer";
@@ -68,7 +68,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
            post_id: post.id,
            post_author_email: post.created_by,
            liker_email: currentUser?.email,
-           liker_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+           liker_name: getUserName(currentUser),
            liker_photo: currentUser?.photo_url || null,
          }).catch(() => {});
        }
@@ -106,7 +106,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
       const comment = await base44.entities.CommunityComment.create({
         post_id: post.id,
         user_email: currentUser.email,
-        user_name: currentUser.full_name || currentUser.email.split("@")[0],
+        user_name: getUserName(currentUser),
         user_photo: currentUser.photo_url || null,
         content: newComment.trim(),
         is_expert: currentUser.role === "admin" || currentUser.role === "expert" || currentUser.is_expert === true,
@@ -122,7 +122,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           post_id: post.id,
           post_author_email: post.created_by,
           comment_author_email: currentUser?.email,
-          comment_author_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+          comment_author_name: getUserName(currentUser),
           comment_author_photo: currentUser?.photo_url || null,
         }).catch(() => {});
       }

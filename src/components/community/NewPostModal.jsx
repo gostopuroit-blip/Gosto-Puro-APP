@@ -4,6 +4,7 @@ import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChar
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { extractMentionEmails } from "@/lib/mentionUtils";
+import { getUserName } from "@/lib/userDisplayUtils";
 import LinkPreviewCard from "./LinkPreviewCard";
 import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";
@@ -218,7 +219,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
 
       const post = await base44.entities.CommunityPost.create({
         user_email: currentUser?.email,
-        user_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+        user_name: getUserName(currentUser),
         user_photo: photoUrl || null,
         content: content.trim(),
         title: title.trim() || null,
@@ -261,7 +262,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
         mentionEmails.forEach((email) => {
           base44.functions.invoke('createMentionNotification', {
             recipient_email: email,
-            sender_name: currentUser?.full_name || currentUser?.email?.split("@")[0],
+            sender_name: getUserName(currentUser),
             post_id: post.id,
             type: "post_mention",
           }).catch(() => {});

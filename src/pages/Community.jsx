@@ -4,6 +4,7 @@ import { Plus, Loader2, Users, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { getUserName } from "@/lib/userDisplayUtils";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import NewPostModal from "@/components/community/NewPostModal";
 import PremiumUpgradeModal from "@/components/community/PremiumUpgradeModal";
@@ -200,13 +201,13 @@ export default function Community() {
                  <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover" loading="lazy" />
                ) : (
                  <div className="w-10 h-10 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white font-bold">
-                   {(user.full_name || "U").charAt(0).toUpperCase()}
+                   {getUserName(user).charAt(0).toUpperCase()}
                  </div>
                )}
              </Link>
              <div className="flex-1 min-w-0">
                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                 {user.full_name || "Utente"}
+                 {getUserName(user)}
                </p>
              </div>
              {isPremiumUser(user) && (

@@ -4,8 +4,8 @@
 function isCorruptedName(name) {
   if (!name || typeof name !== 'string') return true;
   if (name.trim().length < 2) return true;
-  // Allow only latin letters, numbers, spaces, hyphens, and common italian accents
-  return !/^[\w\s\-àèéìòùÀÈÉÌÒÙ'.,()&]+$/i.test(name);
+  // Allow only latin/extended-latin letters, numbers, spaces, and common punctuation
+  return !/^[\x00-\x7F\u00C0-\u024F\s]+$/.test(name);
 }
 
 /**
@@ -18,6 +18,20 @@ export function getDisplayName(displayName, email) {
   }
   if (email) {
     return email.split("@")[0];
+  }
+  return "Utente";
+}
+
+/**
+ * Get display name from a user object with fallback
+ */
+export function getUserName(user) {
+  const name = user?.full_name || user?.display_name;
+  if (name && !isCorruptedName(name)) {
+    return name.trim();
+  }
+  if (user?.email) {
+    return user.email.split("@")[0];
   }
   return "Utente";
 }
