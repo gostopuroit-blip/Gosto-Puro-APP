@@ -10,12 +10,12 @@ export default function ImageCarousel({ images, isBlurred = false }) {
   if (!images || images.length === 0) return null;
   if (images.length === 1) {
     return (
-      <div className="w-full h-full relative">
+      <div className="w-full relative" style={{ aspectRatio: "4/5" }}>
         <img
           src={images[0]}
           alt=""
           loading="lazy"
-          className={`w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
+          className={`absolute inset-0 w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
         />
       </div>
     );
@@ -45,7 +45,8 @@ export default function ImageCarousel({ images, isBlurred = false }) {
   return (
     <div
       ref={containerRef}
-      className="w-full h-full relative"
+      className="w-full relative"
+      style={{ aspectRatio: "4/5" }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -53,7 +54,7 @@ export default function ImageCarousel({ images, isBlurred = false }) {
         src={images[currentIndex]}
         alt=""
         loading="lazy"
-        className={`w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
+        className={`absolute inset-0 w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
       />
 
       {/* Previous button */}

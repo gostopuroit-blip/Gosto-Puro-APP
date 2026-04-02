@@ -255,7 +255,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
           className={`w-full relative cursor-pointer overflow-hidden bg-gray-100 dark:bg-[#111]`}
-          style={{ aspectRatio: "4/5" }}
+          style={{ aspectRatio: "4/5", minHeight: "200px" }}
         >
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />
