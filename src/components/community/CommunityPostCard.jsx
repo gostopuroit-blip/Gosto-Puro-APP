@@ -42,6 +42,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
 
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
+    if (!currentUser.email || !currentUser.email.includes('@')) return;
     try {
       if (localIsLiked) {
         const reactions = await base44.entities.PostReaction.filter({ post_id: post.id, user_email: currentUser.email }, "-created_date", 1);
@@ -180,7 +181,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
       )}
       <div className="flex items-center justify-between px-4 py-3" onClick={(e) => e.stopPropagation()}>
         <Link
-          to={`/ExpertProfile?uid=${post.author_id || btoa(post.created_by || "")}`}
+          to={`/ExpertProfile?uid=${post.user_email && post.user_email.includes('@') ? btoa(post.user_email) : (post.author_id || "")}`}
           className="flex items-center gap-3 flex-1 min-w-0"
         >
           <UserAvatar photoUrl={photoUrl} userName={displayName} size="md" />

@@ -79,7 +79,7 @@ export default function Community() {
       setUser(u);
 
       // Load user interaction data once — single queries for all posts
-      if (u) {
+      if (u && u.email && u.email.includes('@')) {
         Promise.all([
           base44.entities.SavedPost.filter({ user_email: u.email }, "-created_date", 200).catch(() => []),
           base44.entities.PostReaction.filter({ user_email: u.email, reaction: "❤️" }, "-created_date", 200).catch(() => []),

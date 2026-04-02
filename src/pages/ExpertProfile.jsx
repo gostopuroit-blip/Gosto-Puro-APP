@@ -35,8 +35,12 @@ export default function ExpertProfile() {
   const idParam = params.get("id");
 
   const expertEmail = (() => {
-    if (uidParam) { try { return atob(uidParam); } catch { return uidParam; } }
-    return idParam || null;
+    let email = null;
+    if (uidParam) { try { email = atob(uidParam); } catch { email = uidParam; } }
+    else { email = idParam || null; }
+    // Validate: must be a real email
+    if (!email || !email.includes('@')) return null;
+    return email;
   })();
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export default function ExpertProfile() {
       if (!expertEmail) { setLoading(false); return; }
 
       // Load user interaction data once
-      if (u) {
+      if (u && u.email && u.email.includes('@')) {
         Promise.all([
           base44.entities.SavedPost.filter({ user_email: u.email }, "-created_date", 200).catch(() => []),
           base44.entities.PostReaction.filter({ user_email: u.email, reaction: "❤️" }, "-created_date", 200).catch(() => []),
@@ -64,7 +68,7 @@ export default function ExpertProfile() {
         base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 50).catch(() => []),
       ]);
 
-      const userFollowData = u && u.email !== expertEmail
+      const userFollowData = u && u.email && u.email.includes('@') && u.email !== expertEmail
         ? await base44.entities.UserFollow.filter({ follower_email: u.email, following_email: expertEmail }, "-created_date", 1).catch(() => [])
         : [];
 
