@@ -44,12 +44,11 @@ export default function ExpertProfile() {
 
       if (!expertEmail) { setLoading(false); return; }
 
-      // Fetch posts by user_email, followers and following in parallel
-      const [postsData, followersData, followingData, allUsers] = await Promise.all([
+      // Fetch posts, followers and following in parallel — NO User entity query (403)
+      const [postsData, followersData, followingData] = await Promise.all([
         base44.entities.CommunityPost.filter({ user_email: expertEmail }, "-created_date", 50).catch(() => []),
         base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000).catch(() => []),
         base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000).catch(() => []),
-        base44.entities.User.list().catch(() => []),
       ]);
 
       const userFollowData = u && u.email !== expertEmail
@@ -65,36 +64,28 @@ export default function ExpertProfile() {
       setFollowingCount(uniqueFollowing.length);
       setIsFollowing(userFollowData.length > 0);
 
-      const expertUser = allUsers.find((usr) => usr.email === expertEmail);
       const isOwnProfile = u?.email === expertEmail;
 
+      // Use post data for photo/name — no User entity query needed
       const resolvedPhoto = isOwnProfile
-        ? (u?.photo_url || expertUser?.photo_url || postsData[0]?.user_photo || null)
-        : (expertUser?.photo_url || postsData[0]?.user_photo || null);
-      
-      // Safe name resolution — let getDisplayName handle corruption detection
-      let safeName = isOwnProfile
-        ? (u?.display_name || u?.full_name)
+        ? (u?.photo_url || postsData[0]?.user_photo || null)
+        : (postsData[0]?.user_photo || null);
+
+      const rawName = isOwnProfile
+        ? (u?.display_name || u?.full_name || postsData[0]?.user_name)
         : postsData[0]?.user_name;
-      
-      if (!safeName) {
-        safeName = expertUser?.display_name || expertUser?.full_name;
-      }
-      
-      const displayName = getDisplayName(safeName, expertEmail);
-      
-      const resolvedRole = isOwnProfile
-        ? (u?.role || expertUser?.role || null)
-        : (expertUser?.role || null);
-      const resolvedPlan = isOwnProfile
-        ? (u?.plan || expertUser?.plan || null)
-        : (expertUser?.plan || null);
+      const displayName = rawName && rawName.trim().length > 0 && rawName.length < 100
+        ? rawName.trim()
+        : expertEmail.split("@")[0];
+
+      const resolvedRole = isOwnProfile ? (u?.role || null) : (postsData[0]?.author_role || null);
+      const resolvedPlan = isOwnProfile ? (u?.plan || null) : (postsData[0]?.author_plan || null);
 
       setExpert({
         email: expertEmail,
-        name: getDisplayName(displayName, expertEmail),
+        name: displayName,
         photo: getPhotoUrl(resolvedPhoto),
-        is_expert: expertUser?.is_expert || postsData[0]?.is_expert || false,
+        is_expert: postsData[0]?.is_expert || false,
         role: resolvedRole,
         plan: resolvedPlan,
       });

@@ -27,7 +27,7 @@ export function getDisplayName(displayName, email) {
  */
 export function getUserName(user) {
   const name = user?.display_name;
-  if (name && name.trim().length > 0 && isValidName(name)) {
+  if (name && name.trim().length > 0 && name.length < 100) {
     return name.trim();
   }
   if (user?.email) return user.email.split("@")[0];

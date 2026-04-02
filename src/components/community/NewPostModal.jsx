@@ -206,9 +206,7 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
       }
 
       // Extract hashtags from content: #word format only
-      const extractedTags = (content.match(/#([\w]+)/g) || []).map(t => t.slice(1).toLowerCase());
-      // Merge with manually added hashtags
-      const tags = [...new Set([...extractedTags, ...hashtags])];
+      const tags = (content.match(/#([\w]+)/g) || []).map(t => t.slice(1).toLowerCase());
 
       // Extract mention emails from content
       const mentionEmails = await extractMentionEmails(content, base44);
