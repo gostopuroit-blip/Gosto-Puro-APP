@@ -1,19 +1,18 @@
 /**
- * Check if a name is corrupted (non-latin chars, invalid patterns)
+ * Check if a name is corrupted (non-latin/european chars)
+ * Allows U+0000–U+024F (Basic Latin + Latin Extended) and whitespace
  */
-function isCorruptedName(name) {
-  if (!name || typeof name !== 'string') return true;
-  if (name.trim().length < 2) return true;
-  // Allow only latin/extended-latin letters, numbers, spaces, and common punctuation
-  return !/^[\x00-\x7F\u00C0-\u024F\s]+$/.test(name);
+function isValidName(name) {
+  if (!name || typeof name !== 'string') return false;
+  if (name.trim().length === 0) return false;
+  return !/[^\u0000-\u024F\s]/.test(name);
 }
 
 /**
- * Get display name with fallback
- * If display_name is missing, empty, or corrupted, default to email username (before @)
+ * Get display name with fallback (for post/comment author fields)
  */
 export function getDisplayName(displayName, email) {
-  if (displayName && !isCorruptedName(displayName)) {
+  if (displayName && isValidName(displayName)) {
     return displayName.trim();
   }
   if (email) {
@@ -24,15 +23,14 @@ export function getDisplayName(displayName, email) {
 
 /**
  * Get display name from a user object with fallback
+ * Uses display_name first, then email prefix
  */
 export function getUserName(user) {
-  const name = user?.full_name || user?.display_name;
-  if (name && !isCorruptedName(name)) {
+  const name = user?.display_name;
+  if (name && name.trim().length > 0 && isValidName(name)) {
     return name.trim();
   }
-  if (user?.email) {
-    return user.email.split("@")[0];
-  }
+  if (user?.email) return user.email.split("@")[0];
   return "Utente";
 }
 
