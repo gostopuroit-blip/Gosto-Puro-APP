@@ -188,7 +188,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const photoUrl = getPhotoUrl(post.user_photo);
 
   return (
-    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl cursor-pointer" onClick={() => setShowModal(true)}>
+    <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl cursor-pointer w-full overflow-x-hidden" onClick={() => setShowModal(true)}>
       {/* Header */}
       {post.is_pinned && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 px-4 py-2 flex items-center gap-2">

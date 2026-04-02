@@ -140,7 +140,7 @@ export default function Community() {
   const handleNewPost = (post) => setPosts((prev) => [post, ...prev]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F]">
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] overflow-x-hidden">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-white/95 dark:bg-[#1A1A1A]/95 backdrop-blur border-b border-gray-100 dark:border-[#2A2A2A]">
         <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
@@ -165,7 +165,7 @@ export default function Community() {
       {/* Feed */}
       <div
         ref={feedRef}
-        className="max-w-lg mx-auto px-4 pb-24 space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]"
+        className="max-w-lg mx-auto w-full px-4 pb-24 space-y-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]"
         onScroll={handleScroll}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
