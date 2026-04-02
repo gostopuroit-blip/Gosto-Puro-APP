@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import MentionAutocomplete from "./MentionAutocomplete";
 import { extractMentionEmails } from "@/lib/mentionUtils";
 import LinkPreviewCard from "./LinkPreviewCard";
 import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
@@ -436,12 +435,13 @@ export default function NewPostModal({ currentUser, onClose, onCreated }) {
             </div>
           )}
 
-          {/* Text with mention autocomplete */}
-          <MentionAutocomplete
+          {/* Text content */}
+          <textarea
+            rows={4}
             value={content}
-            onChange={setContent}
-            onMentionSelect={(user) => setMentionedUsers([...mentionedUsers, user])}
-            currentUser={currentUser}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Scrivi un post... Usa # per hashtag"
+            className="w-full text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-gray-800 dark:text-white outline-none resize-none"
           />
 
           {/* Link preview */}

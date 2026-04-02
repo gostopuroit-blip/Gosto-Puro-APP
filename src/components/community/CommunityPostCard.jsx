@@ -12,10 +12,11 @@ import VideoLightbox from "./VideoLightbox";
 import SavePostModal from "./SavePostModal";
 import { toast } from "sonner";
 import { formatTimeAgo } from "@/lib/communityUtils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 
 export default function CommunityPostCard({ post, currentUser, onUpdate }) {
+  const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
@@ -254,8 +255,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
       {/* Image or Images Carousel */}
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
         <div
-          className={`w-full relative cursor-pointer overflow-hidden bg-gray-100 dark:bg-[#111]`}
-          style={{ aspectRatio: "4/5", minHeight: "200px" }}
+          style={{ width: "100%", aspectRatio: "4/5", overflow: "hidden", position: "relative", cursor: "pointer" }}
         >
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />
@@ -264,7 +264,8 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
               src={post.image_url}
               alt=""
               loading="lazy"
-              className={`w-full h-full object-cover object-center ${isBlurred ? "blur-xl scale-110" : ""}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+              className={isBlurred ? "blur-xl scale-110" : ""}
             />
           )}
           {isBlurred && (
@@ -296,14 +297,15 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
           </div>
         )}
         {post.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
+          <div className="flex flex-wrap gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
             {post.tags.map((tag) => (
-              <span
+              <button
                 key={tag}
-                className="text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold"
+                onClick={() => navigate(`/Hashtag?tag=${encodeURIComponent(tag)}`)}
+                className="text-xs text-[#2D6A4F] bg-[#2D6A4F]/10 border border-[#2D6A4F]/20 px-2 py-0.5 rounded-full font-semibold hover:bg-[#2D6A4F]/20 transition"
               >
                 #&thinsp;{tag}
-              </span>
+              </button>
             ))}
           </div>
         )}
