@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical, Bookmark } from "lucide-react";
+import { Heart, Lock, Pin, MoreVertical, Bookmark } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl, getUserName } from "@/lib/userDisplayUtils";
 import ImageCarousel from "./ImageCarousel";
@@ -15,15 +15,10 @@ import PostDetailModal from "./PostDetailModal";
 
 export default function CommunityPostCard({ post, currentUser, onUpdate, savedPostIds = [], userReactionPostIds = [] }) {
   const navigate = useNavigate();
-  const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [lightboxStartIdx, setLightboxStartIdx] = useState(0);
   const [showVideoLightbox, setShowVideoLightbox] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [loadingComments, setLoadingComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
@@ -67,59 +62,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
       console.error('Like error:', error);
       toast.error('Errore nel mettere mi piace');
     }
-  };
-
-  const loadComments = async () => {
-    setLoadingComments(true);
-    const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50);
-    setComments(data);
-    setLoadingComments(false);
-  };
-
-  const toggleComments = () => {
-    if (!showComments) loadComments();
-    setShowComments(!showComments);
-  };
-
-  const submitComment = async () => {
-    if (!newComment.trim()) return;
-    if (!currentUser) return toast.error("Fai login per commentare");
-    setSubmitting(true);
-    try {
-      const comment = await base44.entities.CommunityComment.create({
-        post_id: post.id,
-        user_email: currentUser.email,
-        user_name: getUserName(currentUser),
-        user_photo: currentUser.photo_url || null,
-        content: newComment.trim(),
-        is_expert: currentUser.role === "admin" || currentUser.role === "expert" || currentUser.is_expert === true,
-      });
-
-      if (post.created_by !== currentUser?.email) {
-        base44.functions.invoke('createCommentNotification', {
-          post_id: post.id,
-          post_author_email: post.created_by,
-          comment_author_email: currentUser?.email,
-          comment_author_name: getUserName(currentUser),
-          comment_author_photo: currentUser?.photo_url || null,
-        }).catch(() => {});
-      }
-
-      setComments([comment, ...comments]);
-      setNewComment("");
-    } catch (error) {
-      console.error('Comment error:', error);
-      toast.error('Errore nel commentare');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const deleteComment = async (commentId) => {
-    if (!confirm("Eliminare questo commento?")) return;
-    await base44.entities.CommunityComment.delete(commentId);
-    setComments(comments.filter((c) => c.id !== commentId));
-    toast.success("Commento eliminato");
   };
 
   const deletePost = async () => {
@@ -274,12 +216,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
           <span>{localLikesCount}</span>
         </button>
         <button
-          onClick={toggleComments}
-          className="flex items-center gap-1.5 text-sm font-medium text-gray-500 dark:text-gray-400 transition hover:text-[#2D6A4F]">
-          <MessageCircle className="w-5 h-5" />
-          <span>{post.comments_count || 0}</span>
-        </button>
-        <button
           onClick={toggleSavePost}
           disabled={savingPost}
           className={`flex items-center gap-1.5 text-sm font-medium transition ${isSaved ? "text-[#2D6A4F]" : "text-gray-500 dark:text-gray-400 hover:text-[#2D6A4F]"}`}>
@@ -323,60 +259,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
         />
       )}
 
-      {showComments && (
-        <div className="border-t border-gray-100 dark:border-[#2A2A2A] px-4 pb-3" onClick={(e) => e.stopPropagation()}>
-          {currentUser && (
-            <div className="flex items-center gap-2 py-3">
-              <input
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submitComment()}
-                placeholder="Scrivi un commento..."
-                className="flex-1 text-sm bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-xl px-3 py-2 text-gray-800 dark:text-white outline-none"
-              />
-              <button
-                onClick={submitComment}
-                disabled={submitting || !newComment.trim()}
-                className="text-[#2D6A4F] disabled:opacity-40 p-1"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-          {loadingComments ? (
-            <p className="text-xs text-gray-400 text-center py-2">Caricamento...</p>
-          ) : (
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {comments.map((c) => {
-                const commentDisplayName = getDisplayName(c.user_name, c.user_email);
-                const commentPhotoUrl = getPhotoUrl(c.user_photo);
-                return (
-                  <div key={c.id} className="flex gap-2">
-                    <UserAvatar photoUrl={commentPhotoUrl} userName={commentDisplayName} size="sm" />
-                    <div className="bg-gray-50 dark:bg-[#111] rounded-xl px-3 py-2 flex-1">
-                      <div className="flex items-center gap-1">
-                        <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                          {commentDisplayName}
-                        </p>
-                        {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
-                        {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
-                          <button
-                            onClick={() => deleteComment(c.id)}
-                            className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
