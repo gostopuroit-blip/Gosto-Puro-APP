@@ -76,8 +76,9 @@ export default function Layout({ children, currentPageName }) {
     return <>{children}</>;
   }
 
-  // Community pages: only visible to admins
-  if (communityPages.includes(currentPageName) && user !== null && user?.role !== "admin") {
+  // Community pages: only visible to admins, experts, and premium users
+  const canSeeCommunity = !user || user?.role === "admin" || user?.role === "expert" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
+  if (communityPages.includes(currentPageName) && user !== null && !canSeeCommunity) {
     return (
       <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex items-center justify-center px-6">
         <div className="text-center">
