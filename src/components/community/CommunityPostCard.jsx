@@ -73,11 +73,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
     setLoadingComments(true);
     const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50);
     setComments(data);
-    if (data.length !== (post.comments_count || 0)) {
-      const updated = { ...post, comments_count: data.length };
-      await base44.entities.CommunityPost.update(post.id, { comments_count: data.length });
-      onUpdate(updated);
-    }
     setLoadingComments(false);
   };
 
@@ -100,9 +95,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
         is_expert: currentUser.role === "admin" || currentUser.role === "expert" || currentUser.is_expert === true,
       });
 
-      const newCommentsCount = (post.comments_count || 0) + 1;
-      await base44.entities.CommunityPost.update(post.id, { comments_count: newCommentsCount });
-
       if (post.created_by !== currentUser?.email) {
         base44.functions.invoke('createCommentNotification', {
           post_id: post.id,
@@ -113,7 +105,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
         }).catch(() => {});
       }
 
-      onUpdate({ ...post, comments_count: newCommentsCount });
       setComments([comment, ...comments]);
       setNewComment("");
     } catch (error) {
@@ -128,10 +119,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
     if (!confirm("Eliminare questo commento?")) return;
     await base44.entities.CommunityComment.delete(commentId);
     setComments(comments.filter((c) => c.id !== commentId));
-    await base44.entities.CommunityPost.update(post.id, {
-      comments_count: Math.max(0, (post.comments_count || 1) - 1),
-    });
-    onUpdate({ ...post, comments_count: Math.max(0, (post.comments_count || 1) - 1) });
     toast.success("Commento eliminato");
   };
 
