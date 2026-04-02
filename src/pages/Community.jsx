@@ -29,6 +29,7 @@ export default function Community() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allPostsLoaded, setAllPostsLoaded] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
@@ -40,17 +41,24 @@ export default function Community() {
   const loadPosts = useCallback(async (page = 1) => {
     const pageSize = 10;
     const skip = (page - 1) * pageSize;
-    const data = await base44.entities.CommunityPost.filter(
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), 8000)
+    );
+    const fetchPromise = base44.entities.CommunityPost.filter(
       { status: "active" },
       "-created_date",
       pageSize,
       skip
-    ).catch(() => []);
+    );
+
+    const data = await Promise.race([fetchPromise, timeoutPromise]);
 
     if (page === 1) {
       setLastCheckedTime(new Date());
       setPosts(data);
       setAllPostsLoaded(data.length < pageSize);
+      setLoadError(false);
     } else {
       setPosts((prev) => {
         const ids = new Set(prev.map((p) => p.id));
@@ -64,9 +72,16 @@ export default function Community() {
 
   useEffect(() => {
     const init = async () => {
-      const u = await base44.auth.me().catch(() => null);
+      // Load posts independently from user auth — don't block feed on auth
+      const [u] = await Promise.all([
+        base44.auth.me().catch(() => null),
+      ]);
       setUser(u);
-      await loadPosts(1);
+      try {
+        await loadPosts(1);
+      } catch {
+        setLoadError(true);
+      }
       setLoading(false);
     };
     init();
@@ -207,6 +222,18 @@ export default function Community() {
 
          {loading ? (
            <FeedSkeleton />
+         ) : loadError ? (
+          <div className="text-center py-20">
+            <p className="text-4xl mb-4">😕</p>
+            <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Errore nel caricamento</p>
+            <p className="text-sm text-gray-400 mb-6">Controlla la connessione e riprova</p>
+            <Button
+              onClick={async () => { setLoading(true); setLoadError(false); try { await loadPosts(1); } catch { setLoadError(true); } setLoading(false); }}
+              className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl"
+            >
+              Riprova
+            </Button>
+          </div>
          ) : displayedPosts.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">🍳</p>
