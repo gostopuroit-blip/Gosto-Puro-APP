@@ -34,5 +34,5 @@ export function formatTimeAgo(post) {
   if (diff < 3600) return `${Math.floor(diff / 60)} minuti fa`;
   if (diff < 86400) return `${Math.floor(diff / 3600)} ore fa`;
   if (diff < 604800) return `${Math.floor(diff / 86400)} giorni fa`;
-  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "Europe/Rome" });
 }

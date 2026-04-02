@@ -165,7 +165,7 @@ export default function Community() {
       {/* Feed */}
       <div
         ref={feedRef}
-        className="max-w-lg mx-auto w-full px-4 pb-24 space-y-4 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)]"
+        className="max-w-lg mx-auto w-full px-4 pb-6 space-y-4 overflow-x-hidden"
         onScroll={handleScroll}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
