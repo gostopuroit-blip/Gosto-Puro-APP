@@ -29,6 +29,8 @@ export default function Community() {
 
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [savedPostIds, setSavedPostIds] = useState([]);
+  const [userReactionPostIds, setUserReactionPostIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -73,11 +75,20 @@ export default function Community() {
 
   useEffect(() => {
     const init = async () => {
-      // Load posts independently from user auth — don't block feed on auth
-      const [u] = await Promise.all([
-        base44.auth.me().catch(() => null),
-      ]);
+      const u = await base44.auth.me().catch(() => null);
       setUser(u);
+
+      // Load user interaction data once — single queries for all posts
+      if (u) {
+        Promise.all([
+          base44.entities.SavedPost.filter({ user_email: u.email }, "-created_date", 200).catch(() => []),
+          base44.entities.PostReaction.filter({ user_email: u.email, reaction: "❤️" }, "-created_date", 200).catch(() => []),
+        ]).then(([saved, reactions]) => {
+          setSavedPostIds(saved.map((s) => s.post_id));
+          setUserReactionPostIds(reactions.map((r) => r.post_id));
+        });
+      }
+
       try {
         await loadPosts(1);
       } catch {
@@ -252,6 +263,8 @@ export default function Community() {
                 post={post}
                 currentUser={user}
                 onUpdate={(updated) => handlePostUpdate(updated, post.id)}
+                savedPostIds={savedPostIds}
+                userReactionPostIds={userReactionPostIds}
               />
             ))}
             {loadingMore && (

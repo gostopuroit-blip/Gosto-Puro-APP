@@ -1,7 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-// Note: using asServiceRole via base44 requires the function context; direct use won't work in components
-// Instead, we'll call updateCommentCount backend function for comment/like operations
 import { Heart, MessageCircle, BadgeCheck, Send, Trash2, Lock, Pin, MoreVertical, Bookmark } from "lucide-react";
 import UserAvatar from "../UserAvatar";
 import { getDisplayName, getPhotoUrl, getUserName } from "@/lib/userDisplayUtils";
@@ -15,7 +13,7 @@ import { formatTimeAgo } from "@/lib/communityUtils";
 import { Link, useNavigate } from "react-router-dom";
 import PostDetailModal from "./PostDetailModal";
 
-export default function CommunityPostCard({ post, currentUser, onUpdate }) {
+export default function CommunityPostCard({ post, currentUser, onUpdate, savedPostIds = [], userReactionPostIds = [] }) {
   const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -26,51 +24,31 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
   const [localLikesCount, setLocalLikesCount] = useState(post.likes_count || 0);
-  const [localIsLiked, setLocalIsLiked] = useState(false);
+  const [localIsLiked, setLocalIsLiked] = useState(() => userReactionPostIds.includes(post.id));
+  const [isSaved, setIsSaved] = useState(() => savedPostIds.includes(post.id));
 
-  useEffect(() => {
-    if (!currentUser) return;
-    base44.entities.PostReaction.filter({ post_id: post.id, user_email: currentUser.email }, "-created_date", 1)
-      .then((res) => setLocalIsLiked(res.length > 0))
-      .catch(() => {});
-  }, [post.id, currentUser?.email]);
+  // Sync if parent arrays change (e.g. after refresh)
+  useEffect(() => { setLocalIsLiked(userReactionPostIds.includes(post.id)); }, [userReactionPostIds, post.id]);
+  useEffect(() => { setIsSaved(savedPostIds.includes(post.id)); }, [savedPostIds, post.id]);
 
   const isLiked = localIsLiked;
   const isOwner = post.created_by === currentUser?.email;
   const isPremiumUser = currentUser?.plan === "premium" || currentUser?.role === "premium" || currentUser?.role === "admin" || currentUser?.is_expert === true;
   const isBlurred = post.is_premium && !isPremiumUser;
 
-  useEffect(() => {
-    if (!currentUser) return;
-    const checkSaved = async () => {
-      const saved = await base44.entities.SavedPost.filter(
-        { post_id: post.id, user_email: currentUser.email, collection: "Salvati" },
-        "-created_date",
-        1
-      ).catch(() => []);
-      setIsSaved(saved.length > 0);
-    };
-    checkSaved();
-  }, [post.id, currentUser]);
-
-
-
   const handleLike = async () => {
     if (!currentUser) return toast.error("Fai login per mettere mi piace");
     try {
       if (localIsLiked) {
-        // Descurtir: deletar PostReaction
         const reactions = await base44.entities.PostReaction.filter({ post_id: post.id, user_email: currentUser.email }, "-created_date", 1);
         if (reactions.length > 0) await base44.entities.PostReaction.delete(reactions[0].id);
         setLocalIsLiked(false);
         setLocalLikesCount((c) => Math.max(0, c - 1));
       } else {
-        // Curtir: criar PostReaction
         await base44.entities.PostReaction.create({ post_id: post.id, user_email: currentUser.email, reaction: "❤️" });
         setLocalIsLiked(true);
         setLocalLikesCount((c) => c + 1);
@@ -94,7 +72,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
     setLoadingComments(true);
     const data = await base44.entities.CommunityComment.filter({ post_id: post.id }, "-created_date", 50);
     setComments(data);
-    // Sync comments_count if different from actual count
     if (data.length !== (post.comments_count || 0)) {
       const updated = { ...post, comments_count: data.length };
       await base44.entities.CommunityPost.update(post.id, { comments_count: data.length });
@@ -123,12 +100,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
       });
 
       const newCommentsCount = (post.comments_count || 0) + 1;
-      await base44.entities.CommunityPost.update(post.id, {
-        comments_count: newCommentsCount,
-      });
+      await base44.entities.CommunityPost.update(post.id, { comments_count: newCommentsCount });
 
       if (post.created_by !== currentUser?.email) {
-        await base44.functions.invoke('createCommentNotification', {
+        base44.functions.invoke('createCommentNotification', {
           post_id: post.id,
           post_author_email: post.created_by,
           comment_author_email: currentUser?.email,
@@ -160,11 +135,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
   };
 
   const deletePost = async () => {
-     if (!confirm("Eliminare questo post?")) return;
-     await base44.entities.CommunityPost.delete(post.id);
-     onUpdate(null);
-     toast.success("Post eliminato");
-   };
+    if (!confirm("Eliminare questo post?")) return;
+    await base44.entities.CommunityPost.delete(post.id);
+    onUpdate(null);
+    toast.success("Post eliminato");
+  };
 
   const toggleSavePost = async () => {
     if (!currentUser) return toast.error("Fai login per salvare i post");
@@ -192,14 +167,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
     }
   };
 
-
-
   const displayName = getDisplayName(post.user_name, post.created_by);
   const photoUrl = getPhotoUrl(post.user_photo);
 
   return (
     <div className="bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl cursor-pointer w-full overflow-x-hidden" onClick={() => setShowModal(true)}>
-      {/* Header */}
       {post.is_pinned && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 px-4 py-2 flex items-center gap-2">
           <Pin className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -213,35 +185,31 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
         >
           <UserAvatar photoUrl={photoUrl} userName={displayName} size="md" />
           <div className="min-w-0">
-          <div className="flex items-center gap-1 flex-wrap">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              {displayName}
+            <div className="flex items-center gap-1 flex-wrap">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {displayName}
+              </p>
+              {(() => {
+                const isOwnPost = currentUser && post.created_by === currentUser.email;
+                const role = isOwnPost ? currentUser.role : post.author_role;
+                const plan = isOwnPost ? currentUser.plan : post.author_plan;
+                const isExpert = isOwnPost ? currentUser.is_expert : post.is_expert;
+                if (role === "admin") return <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>;
+                if (role === "expert" || isExpert) return <span className="text-[9px] bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>;
+                if (plan === "premium" || role === "premium") return <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>;
+                return null;
+              })()}
+            </div>
+            <p className="text-xs text-gray-400">
+              {formatTimeAgo(post.created_date)}
             </p>
-            {/* Badge: per il post del currentUser usa role/plan sessione; per altri usa author_role/is_expert del post */}
-            {(() => {
-              const isOwnPost = currentUser && post.created_by === currentUser.email;
-              const role = isOwnPost ? currentUser.role : post.author_role;
-              const plan = isOwnPost ? currentUser.plan : post.author_plan;
-              const isExpert = isOwnPost ? currentUser.is_expert : post.is_expert;
-              if (role === "admin") return <span className="text-[9px] bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-1.5 py-0.5 rounded-full font-bold">👑 Admin</span>;
-              if (role === "expert" || isExpert) return <span className="text-[9px] bg-green-100 text-[#2D6A4F] dark:bg-green-950/40 dark:text-green-300 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>;
-              if (plan === "premium" || role === "premium") return <span className="text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 px-1.5 py-0.5 rounded-full font-bold">⭐ Premium</span>;
-              return null;
-            })()}
-          </div>
-           <p className="text-xs text-gray-400">
-             {formatTimeAgo(post.created_date)}
-           </p>
           </div>
         </Link>
-
       </div>
 
       {/* Video */}
       {post.video_url && post.media_type === "video" && (
-        <div
-          className={`w-full bg-gray-100 dark:bg-[#111] relative ${isBlurred ? "overflow-hidden" : ""}`}
-        >
+        <div className={`w-full bg-gray-100 dark:bg-[#111] relative ${isBlurred ? "overflow-hidden" : ""}`}>
           {isBlurred ? (
             <div className="w-full aspect-video bg-black/50 flex flex-col items-center justify-center gap-2">
               <Lock className="w-8 h-8 text-white" />
@@ -250,13 +218,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
             </div>
           ) : (
             <div onClick={(e) => { e.stopPropagation(); setShowVideoLightbox(true); }}>
-              <VideoPlayer
-                src={post.video_url}
-                autoplay={true}
-                muted={true}
-                onFullscreen={() => setShowVideoLightbox(true)}
-                showIcon={true}
-              />
+              <VideoPlayer src={post.video_url} autoplay={true} muted={true} onFullscreen={() => setShowVideoLightbox(true)} showIcon={true} />
             </div>
           )}
         </div>
@@ -264,9 +226,7 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
 
       {/* Image or Images Carousel */}
       {((post.images?.length > 0) || post.image_url) && !post.video_url && (
-        <div
-          style={{ width: "100%", aspectRatio: "4/5", overflow: "hidden", position: "relative", cursor: "pointer" }}
-        >
+        <div style={{ width: "100%", aspectRatio: "4/5", overflow: "hidden", position: "relative", cursor: "pointer" }}>
           {post.images && post.images.length > 0 ? (
             <ImageCarousel images={post.images} isBlurred={isBlurred} />
           ) : (
@@ -289,17 +249,13 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
       )}
 
       {/* Content */}
-      <div
-        className={`px-4 pt-3 pb-1 relative ${isBlurred && !post.image_url ? "overflow-hidden" : ""}`}
-      >
+      <div className={`px-4 pt-3 pb-1 relative ${isBlurred && !post.image_url ? "overflow-hidden" : ""}`}>
         {post.title && (
           <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">{post.title}</p>
         )}
         <div className={isBlurred ? "blur-sm select-none" : ""}>
-           <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
-             {post.content}
-           </p>
-         </div>
+          <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{post.content}</p>
+        </div>
         {isBlurred && (
           <div className="mt-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl px-3 py-2 text-center">
             <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold">🔒 Contenuto esclusivo Premium</p>
@@ -346,7 +302,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
         </button>
       </div>
 
-      {/* Image lightbox */}
       {showImageLightbox && (
         <ImageLightbox
           images={post.images && post.images.length > 0 ? post.images : post.image_url ? [post.image_url] : []}
@@ -355,15 +310,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
         />
       )}
 
-      {/* Video lightbox */}
       {showVideoLightbox && (
-        <VideoLightbox
-          videoUrl={post.video_url}
-          onClose={() => setShowVideoLightbox(false)}
-        />
+        <VideoLightbox videoUrl={post.video_url} onClose={() => setShowVideoLightbox(false)} />
       )}
 
-      {/* Post detail modal */}
       {showModal && (
         <PostDetailModal
           post={post}
@@ -373,7 +323,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
         />
       )}
 
-      {/* Save post modal */}
       {showSaveModal && (
         <SavePostModal
           post={post}
@@ -386,7 +335,6 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
         />
       )}
 
-      {/* Comments */}
       {showComments && (
         <div className="border-t border-gray-100 dark:border-[#2A2A2A] px-4 pb-3" onClick={(e) => e.stopPropagation()}>
           {currentUser && (
@@ -415,28 +363,28 @@ export default function CommunityPostCard({ post, currentUser, onUpdate }) {
                 const commentDisplayName = getDisplayName(c.user_name, c.user_email);
                 const commentPhotoUrl = getPhotoUrl(c.user_photo);
                 return (
-                <div key={c.id} className="flex gap-2">
-                  <UserAvatar photoUrl={commentPhotoUrl} userName={commentDisplayName} size="sm" />
-                  <div className="bg-gray-50 dark:bg-[#111] rounded-xl px-3 py-2 flex-1">
-                    <div className="flex items-center gap-1">
-                      <p className="text-xs font-semibold text-gray-900 dark:text-white">
-                        {commentDisplayName}
-                      </p>
-                      {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
-                      {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
-                        <button
-                          onClick={() => deleteComment(c.id)}
-                          className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      )}
+                  <div key={c.id} className="flex gap-2">
+                    <UserAvatar photoUrl={commentPhotoUrl} userName={commentDisplayName} size="sm" />
+                    <div className="bg-gray-50 dark:bg-[#111] rounded-xl px-3 py-2 flex-1">
+                      <div className="flex items-center gap-1">
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                          {commentDisplayName}
+                        </p>
+                        {c.is_expert && <BadgeCheck className="w-3 h-3 text-[#2D6A4F]" />}
+                        {(currentUser?.role === "admin" || c.created_by === currentUser?.email) && (
+                          <button
+                            onClick={() => deleteComment(c.id)}
+                            className="ml-auto text-gray-300 hover:text-red-500 transition p-0.5"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
                     </div>
-                    <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{c.content}</p>
-                    </div>
-                    </div>
-                    );
-                    })}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

@@ -17,6 +17,8 @@ export default function ExpertProfile() {
   const [posts, setPosts] = useState([]);
   const [expert, setExpert] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [savedPostIds, setSavedPostIds] = useState([]);
+  const [userReactionPostIds, setUserReactionPostIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("feed");
   const [followersCount, setFollowersCount] = useState(0);
@@ -44,11 +46,22 @@ export default function ExpertProfile() {
 
       if (!expertEmail) { setLoading(false); return; }
 
+      // Load user interaction data once
+      if (u) {
+        Promise.all([
+          base44.entities.SavedPost.filter({ user_email: u.email }, "-created_date", 200).catch(() => []),
+          base44.entities.PostReaction.filter({ user_email: u.email, reaction: "❤️" }, "-created_date", 200).catch(() => []),
+        ]).then(([saved, reactions]) => {
+          setSavedPostIds(saved.map((s) => s.post_id));
+          setUserReactionPostIds(reactions.map((r) => r.post_id));
+        });
+      }
+
       // Fetch posts, followers and following in parallel — NO User entity query (403)
       const [postsData, followersData, followingData] = await Promise.all([
         base44.entities.CommunityPost.filter({ user_email: expertEmail }, "-created_date", 50).catch(() => []),
-        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 1000).catch(() => []),
-        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 1000).catch(() => []),
+        base44.entities.UserFollow.filter({ following_email: expertEmail }, "-created_date", 50).catch(() => []),
+        base44.entities.UserFollow.filter({ follower_email: expertEmail }, "-created_date", 50).catch(() => []),
       ]);
 
       const userFollowData = u && u.email !== expertEmail
@@ -247,6 +260,8 @@ export default function ExpertProfile() {
                 post={post}
                 currentUser={currentUser}
                 onUpdate={(updated) => handlePostUpdate(updated, post.id)}
+                savedPostIds={savedPostIds}
+                userReactionPostIds={userReactionPostIds}
               />
             ))}
           </div>
