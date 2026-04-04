@@ -210,6 +210,8 @@ export default function Planner() {
 
 
 
+  const isBasicBlocked = !isPremium && totalPlansCount >= 3;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -226,7 +228,7 @@ export default function Planner() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Il mio Piano</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Pianifica i tuoi pasti</p>
             {!isPremium && (
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-semibold">
+              <p className={`text-xs mt-1 font-semibold ${isBasicBlocked ? "text-red-400" : "text-gray-400 dark:text-gray-500"}`}>
                 {totalPlansCount}/3 piani utilizzati
               </p>
             )}
@@ -245,13 +247,6 @@ export default function Planner() {
                 <Button size="sm" disabled className="rounded-xl bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 mb-1">
                   <Plus className="w-4 h-4" /> Nuovo piano
                 </Button>
-                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[180px] leading-tight mb-1">
-                  Hai usato tutti i 3 piani disponibili. Passa a Premium!
-                </p>
-                <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-amber-500 transition-colors">
-                  <Crown className="w-3 h-3" /> Passa a Premium
-                </a>
               </div>
             )}
             {plan &&
@@ -292,8 +287,21 @@ export default function Planner() {
         </div>
       </div>
 
+      {/* Blocked overlay for Basic users at limit */}
+      {isBasicBlocked && (
+        <div className="mx-5 mb-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-3xl p-5 text-center">
+          <p className="text-2xl mb-2">🔒</p>
+          <p className="font-bold text-gray-800 dark:text-white text-sm mb-1">Hai raggiunto il limite del piano Basic</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Hai usato tutti i 3 piani disponibili. Passa a Premium per crearne altri.</p>
+          <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-amber-500 transition-colors">
+            <Crown className="w-4 h-4" /> Passa a Premium
+          </a>
+        </div>
+      )}
+
       {/* Plan Grid */}
-      <div className="px-5 space-y-4 mt-4">
+      <div className={`px-5 space-y-4 mt-4 ${isBasicBlocked ? "blur-sm pointer-events-none select-none opacity-60" : ""}`}>
         {plan ?
           plan.plan_data.map((day, dayIndex) =>
           <div key={dayIndex} className="bg-white dark:bg-[#2D3F35] border border-gray-100 dark:border-[#3D5246] rounded-3xl p-4">
@@ -351,16 +359,27 @@ export default function Planner() {
                         }
                         </div>
                         <div className="flex flex-col gap-1 ml-2 flex-shrink-0">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setReplaceTarget({ dayIndex, meal });
-                              setSelectedFolder(null);
-                              setSearchQuery("");
-                            }}
-                            className="hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition text-[#2D6A4F] dark:text-[#40916C]">
-                            <Shuffle className="w-4 h-4" />
-                          </button>
+                          {(() => {
+                            const mealCategoryMap = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
+                            const cat = mealCategoryMap[meal];
+                            const hasFreeInCategory = isPremium || recipes.some(
+                              (r) => r.category === cat && freeRecipeIds.includes(r.id)
+                            );
+                            return (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!hasFreeInCategory) return;
+                                  setReplaceTarget({ dayIndex, meal });
+                                  setSelectedFolder(null);
+                                  setSearchQuery("");
+                                }}
+                                disabled={!hasFreeInCategory}
+                                className={`p-1.5 rounded-lg transition ${hasFreeInCategory ? "hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] text-[#2D6A4F] dark:text-[#40916C]" : "text-gray-300 dark:text-gray-600 cursor-not-allowed"}`}>
+                                <Shuffle className="w-4 h-4" />
+                              </button>
+                            );
+                          })()}
                           {recipe &&
                           <button
                             onClick={(e) => {
@@ -373,11 +392,11 @@ export default function Planner() {
                             }}
                             disabled={!canEditRecipes}
                             className={`hover:bg-red-100 dark:hover:bg-red-950/30 p-1.5 rounded-lg transition ${canEditRecipes ? "text-red-500 dark:text-red-400" : "text-gray-300 dark:text-gray-600 cursor-not-allowed"}`}>
-                            <X className="w-4 h-4" />
+                             <X className="w-4 h-4" />
                           </button>
                           }
-                        </div>
-                      </div>
+                          </div>
+                          </div>
                     </div>);
 
               })}
