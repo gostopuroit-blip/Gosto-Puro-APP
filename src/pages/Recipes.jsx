@@ -26,7 +26,7 @@ export default function Recipes() {
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
-  const [unlockedConfig, setUnlockedConfig] = useState(null);
+  const [freeRecipeIds, setFreeRecipeIds] = useState(null);
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -41,36 +41,26 @@ export default function Recipes() {
   }, [location.search]);
 
   useEffect(() => {
-    loadRecipes();
     base44.auth.me().then(setUser).catch(() => setUser(null));
-    loadUnlockedConfig();
+    loadRecipes();
   }, []);
-
-  const loadUnlockedConfig = async () => {
-    try {
-      const config = await base44.entities.AppConfig.filter({ key: "base_free_unlocked_ids_final" });
-      if (config.length > 0) {
-        const parsed = JSON.parse(config[0].value);
-        setUnlockedConfig(parsed);
-      }
-    } catch (error) {
-      console.error("Failed to load unlocked config:", error);
-      setUnlockedConfig({});
-    }
-  };
 
   const loadRecipes = async () => {
     const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000);
     setRecipes(data);
+    // Store the IDs of the 9 most recent recipes as free
+    const ids = new Set(data.slice(0, 9).map((r) => r.id));
+    setFreeRecipeIds(ids);
     setLoading(false);
   };
+
+
 
   // Define constants before useMemo
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
   const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero"];
   const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Proteiche", "Senza zucchero"];
-  const FREE_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero", "Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Con amici", "Festeggiare", "Romantico", "Famiglia"];
-  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
+  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
 
   const filteredRecipes = useMemo(() => {
     let result = [...recipes];
@@ -156,26 +146,7 @@ export default function Recipes() {
     goToPage(1);
   };
 
-  // Determine if current view is speciale/stile_vita
-  const isSpecialView = activeTags.occasion && (SPECIAL_OCCASIONS.includes(activeTags.occasion) || LIFESTYLE_TAGS.includes(activeTags.occasion));
 
-  // Unlock recipes based on static AppConfig
-  const unlockedIds = useMemo(() => {
-    if (isPremium || !unlockedConfig) return null;
-    
-    const ids = new Set();
-    const activeTag = activeTags.occasion || activeTags.lifestyle;
-
-    if (isSpecialView && activeTag && unlockedConfig[activeTag]) {
-      // Use static list from AppConfig for speciale/stile_vita
-      unlockedConfig[activeTag].forEach((id) => ids.add(id));
-    } else if (!isSpecialView && activeTag && FREE_CATEGORIES.includes(activeTag) && unlockedConfig[activeTag]) {
-      // Use static list from AppConfig for categories
-      unlockedConfig[activeTag].forEach((id) => ids.add(id));
-    }
-    
-    return ids;
-  }, [unlockedConfig, isPremium, isSpecialView, activeTags]);
 
   // Keep filteredRecipes in natural order (most recent first)
   const orderedRecipes = filteredRecipes;
@@ -281,27 +252,26 @@ export default function Recipes() {
            </div> :
           <>
              {paginatedRecipes.map((recipe) => {
-              const isLocked = !isPremium && unlockedIds && !unlockedIds.has(recipe.id);
-              if (isLocked) {
-                return (
-                  <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">
-                     <div className="pointer-events-none select-none blur-[2px] opacity-40">
-                       <RecipeCard recipe={recipe} />
-                     </div>
-                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                       <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center">
-                         <Lock className="w-5 h-5 text-amber-500" />
-                       </div>
-                       <p className="bg-zinc-50 text-slate-950 text-xs font-bold rounded drop-shadow">Ricetta Premium</p>
-                       <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl flex items-center gap-1">
-                         <Crown className="w-3.5 h-3.5" /> Sblocca Premium
-                       </span>
-                     </div>
-                   </a>);
-
-              }
-              return <RecipeCard key={recipe.id} recipe={recipe} />;
-            })}
+               const isLocked = !isPremium && freeRecipeIds && !freeRecipeIds.has(recipe.id);
+               if (isLocked) {
+                 return (
+                   <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">
+                      <div className="pointer-events-none select-none blur-[2px] opacity-40">
+                        <RecipeCard recipe={recipe} />
+                      </div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                        <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center">
+                          <Lock className="w-5 h-5 text-amber-500" />
+                        </div>
+                        <p className="bg-zinc-50 text-slate-950 text-xs font-bold rounded drop-shadow">Ricetta Premium</p>
+                        <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl flex items-center gap-1">
+                          <Crown className="w-3.5 h-3.5" /> Sblocca Premium
+                        </span>
+                      </div>
+                    </a>);
+               }
+               return <RecipeCard key={recipe.id} recipe={recipe} />;
+             })}
            </>
           }
        </div>

@@ -58,6 +58,7 @@ export default function RecipeDetail() {
   const [user, setUser] = useState(null);
   const [savedCount, setSavedCount] = useState(0);
   const [preparedCount, setPreparedCount] = useState(0);
+  const [freeRecipeIds, setFreeRecipeIds] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -108,7 +109,7 @@ export default function RecipeDetail() {
 
   const loadRecipe = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
-    const [recipes, userRecipes, allSaved, allPrepared] = await Promise.all([
+    const [recipes, userRecipes, allSaved, allPrepared, recentRecipes] = await Promise.all([
       base44.entities.Recipe.filter({ id: recipeId }),
       currentUser
         ? base44.entities.UserRecipe.filter({ recipe_id: recipeId, created_by: currentUser.email })
@@ -119,7 +120,9 @@ export default function RecipeDetail() {
       currentUser
         ? base44.entities.UserRecipe.filter({ is_prepared: true, created_by: currentUser.email })
         : Promise.resolve([]),
+      base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 9),
     ]);
+    setFreeRecipeIds(new Set(recentRecipes.map((r) => r.id)));
     if (recipes.length > 0) {
       setRecipe(recipes[0]);
       setServings(recipes[0].servings || 4);
@@ -133,11 +136,8 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
-  const FREE_OCCASIONS_SET = new Set(["Colazione", "Pranzo", "Cena", "Leggera", "Dolci", "Instagram", "In famiglia", "Per due", "Con amici"]);
   const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
-  const occasionParam = params.get("occasion") || "";
-  const isOccasionPremium = occasionParam && !FREE_OCCASIONS_SET.has(occasionParam);
-  const isContentLocked = !isPremium && isOccasionPremium;
+  const isContentLocked = !isPremium && freeRecipeIds !== null && !freeRecipeIds.has(recipeId);
 
   const handlePrint = () => {
     const ratio = servings / (recipe.servings || 4);

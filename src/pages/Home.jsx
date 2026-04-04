@@ -119,6 +119,9 @@ export default function Home() {
 
   const FREE_OCCASIONS_SET = new Set(["Colazione", "Pranzo", "Cena", "Leggera", "Dolci", "Instagram", "In famiglia", "Per due", "Con amici"]);
 
+  // The 9 most recent recipes are always free
+  const freeRecipeIds = useMemo(() => new Set(topRecipes.slice(0, 9).map((r) => r.id)), [topRecipes]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -197,7 +200,7 @@ export default function Home() {
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {topRecipes.map((recipe) => {
-            const isLocked = !isPremium;
+            const isLocked = !isPremium && !freeRecipeIds.has(recipe.id);
             if (isLocked) {
               return (
                 <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group" style={{ width: "200px", height: "250px" }}>
