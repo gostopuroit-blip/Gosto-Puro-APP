@@ -17,6 +17,7 @@ export default function Planner() {
   const [user, setUser] = useState(null);
   const [plan, setPlan] = useState(null);
   const [totalPlansCount, setTotalPlansCount] = useState(0);
+  const [freeRecipeIds, setFreeRecipeIds] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [folders, setFolders] = useState([]);
   const [userRecipes, setUserRecipes] = useState([]);
@@ -34,24 +35,31 @@ export default function Planner() {
   const loadData = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
     setUser(currentUser);
-    const [plans, allPlans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
+    const [plans, allPlans, allRecipes, allFolders, allUserRecipes, freeRecipes] = await Promise.all([
     base44.entities.MealPlan.filter({ is_active: true, created_by: currentUser?.email }),
     base44.entities.MealPlan.filter({ created_by: currentUser?.email }),
     base44.entities.Recipe.list("-created_date", 1000),
     base44.entities.Folder.list(),
-    base44.entities.UserRecipe.list()]
+    base44.entities.UserRecipe.list(),
+    base44.entities.FreeRecipe.list("-created_date", 500)]
     );
     if (plans.length > 0) setPlan(plans[0]);
     setTotalPlansCount(allPlans.length);
     setRecipes(allRecipes);
     setFolders(allFolders);
     setUserRecipes(allUserRecipes);
+    setFreeRecipeIds(freeRecipes.map((r) => r.recipe_id));
     setLoading(false);
   };
 
   const getRecipeById = (id) => recipes.find((r) => r.id === id);
 
   const createPlan = async ({ days, focus, maxTime, servings }) => {
+    // Block creation server-side for Basic users at limit
+    if (!isPremium && totalPlansCount >= 3) {
+      toast.error("Hai raggiunto il limite di 3 piani per il piano Basic.");
+      return;
+    }
     setCreating(true);
     setShowModal(false);
 
@@ -133,10 +141,6 @@ export default function Planner() {
   };
 
   const replaceWithRecipe = async (recipe) => {
-    if (!canEditRecipes) {
-      toast.error("I piani Base non possono essere modificati. Passa a Premium!");
-      return;
-    }
     if (!replaceTarget || !plan) return;
     const { dayIndex, meal } = replaceTarget;
     const newPlanData = [...plan.plan_data];
@@ -221,6 +225,11 @@ export default function Planner() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Il mio Piano</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Pianifica i tuoi pasti</p>
+            {!isPremium && (
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-semibold">
+                {totalPlansCount}/3 piani utilizzati
+              </p>
+            )}
           </div>
           <div className="flex flex-col items-end gap-2">
             {canCreateMorePlans ? (
@@ -233,8 +242,11 @@ export default function Planner() {
               </Button>
             ) : (
               <div className="text-right">
+                <Button size="sm" disabled className="rounded-xl bg-gray-200 text-gray-400 cursor-not-allowed opacity-60 mb-1">
+                  <Plus className="w-4 h-4" /> Nuovo piano
+                </Button>
                 <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[180px] leading-tight mb-1">
-                  Hai raggiunto il limite di 3 piani per il piano Basic. Passa a Premium per crearne altri! 🌟
+                  Hai usato tutti i 3 piani disponibili. Passa a Premium!
                 </p>
                 <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-amber-500 transition-colors">
@@ -342,16 +354,11 @@ export default function Planner() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (!canEditRecipes) {
-                                toast.error("I piani Base non possono essere modificati. Passa a Premium!");
-                                return;
-                              }
                               setReplaceTarget({ dayIndex, meal });
                               setSelectedFolder(null);
                               setSearchQuery("");
                             }}
-                            disabled={!canEditRecipes}
-                            className={`hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition ${canEditRecipes ? "text-[#2D6A4F] dark:text-[#40916C]" : "text-gray-300 dark:text-gray-600 cursor-not-allowed"}`}>
+                            className="hover:bg-[#F0F7F4] dark:hover:bg-[#1A2B20] p-1.5 rounded-lg transition text-[#2D6A4F] dark:text-[#40916C]">
                             <Shuffle className="w-4 h-4" />
                           </button>
                           {recipe &&
@@ -480,13 +487,12 @@ export default function Planner() {
               const matchSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
               const mealCategoryMap = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena" };
               const expectedCategory = mealCategoryMap[replaceTarget?.meal];
-              // Se selectedFolder === null mas há categoria esperada, filtra por categoria
-              // Se selectedFolder === "all", mostra tudo (sem filtro de categoria)
               const matchCategory = selectedFolder === "all" ? true : r.category === expectedCategory;
               const matchFolder = !selectedFolder || selectedFolder === "all" || userRecipes.some(
                 (ur) => ur.recipe_id === r.id && ur.folder_ids?.includes(selectedFolder)
               );
-              return matchSearch && matchCategory && matchFolder;
+              const matchFree = isPremium || freeRecipeIds.includes(r.id);
+              return matchSearch && matchCategory && matchFolder && matchFree;
             }).
             map((recipe) =>
             <button
