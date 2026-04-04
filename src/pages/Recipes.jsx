@@ -253,7 +253,7 @@ export default function Recipes() {
            </div> :
           <>
              {paginatedRecipes.map((recipe) => {
-               const isLocked = !isPremium && freeRecipeIds && !freeRecipeIds.has(recipe.id);
+               const isLocked = !isPremium && freeRecipeIds !== null && !freeRecipeIds.has(recipe.id);
                if (isLocked) {
                  return (
                    <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">

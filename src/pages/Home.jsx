@@ -203,8 +203,8 @@ export default function Home() {
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {topRecipes.map((recipe) => {
-            const isLocked = !isPremium && !freeRecipeIds.has(recipe.id);
-            if (isLocked) {
+            // Per Basic: TUTTE le ricette in questa sezione sono bloccate
+            if (!isPremium) {
               return (
                 <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
                   <img
@@ -219,7 +219,7 @@ export default function Home() {
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                     <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
-                    <span className="text-[10px] font-bold text-amber-300">🔒 Premium</span>
+                    <span className="text-[10px] font-bold text-amber-300">🔒 Passa a Premium</span>
                   </div>
                 </a>
               );
