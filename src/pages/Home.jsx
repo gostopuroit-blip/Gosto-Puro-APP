@@ -50,8 +50,6 @@ export default function Home() {
   const cardWidth = 188;
   const [dailyNotif, setDailyNotif] = useState(null);
   const [topRecipesFreeIds, setTopRecipesFreeIds] = useState(new Set());
-  const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
-
   useEffect(() => {
     loadData();
   }, []);
@@ -122,7 +120,7 @@ export default function Home() {
 
   const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
 
-  const FREE_OCCASIONS_SET = new Set(["Colazione", "Pranzo", "Cena", "Leggera", "Dolci", "Instagram", "In famiglia", "Per due", "Con amici"]);
+  // All occasions are free to browse — locking only applies to individual recipes inside
 
   // Free recipe IDs from FreeRecipe entity
   const freeRecipeIds = topRecipesFreeIds;
@@ -208,18 +206,20 @@ export default function Home() {
             const isLocked = !isPremium && !freeRecipeIds.has(recipe.id);
             if (isLocked) {
               return (
-                <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group" style={{ width: "200px", height: "250px" }}>
-                  <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] w-full h-full">
-                    <img
-                      src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                      alt={recipe.title}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover blur-sm opacity-40"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Lock className="w-6 h-6 text-white" />
-                    </div>
+                <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+                  <img
+                    src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                    alt={recipe.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover blur-sm opacity-40"
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <Lock className="w-6 h-6 text-white drop-shadow" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                    <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
+                    <span className="text-[10px] font-bold text-amber-300">🔒 Premium</span>
                   </div>
                 </a>
               );
@@ -247,33 +247,16 @@ export default function Home() {
       <div className="mt-8 px-5">
         <SectionHeader title="Occasioni Speciali" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {specialOccasions.map((occ) => {
-            const isOccPremium = !isPremium && !FREE_OCCASIONS_SET.has(occ.label);
-            if (isOccPremium) {
-              return (
-                <a key={occ.label} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                  <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center relative">
-                    {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover opacity-40" /> : <span className="text-3xl opacity-40">{occ.icon}</span>}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl">🔒</span>
-                    </div>
-                  </div>
-                  <span className="text-[13px] font-semibold text-gray-400 dark:text-gray-500 text-center">{occ.label}</span>
-                </a>
-              );
-            }
-            return (
-              <Link key={occ.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
-                onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
-                className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
-                  {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{occ.icon}</span>}
-                </div>
-                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
-              </Link>
-            );
-          })}
+          {specialOccasions.map((occ) => (
+            <Link key={occ.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+              onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
+              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
+                {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{occ.icon}</span>}
+              </div>
+              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -281,33 +264,16 @@ export default function Home() {
       <div className="mt-8 px-5">
         <SectionHeader title="Stile di Vita e Salute" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {lifestyleTags.map((tag) => {
-            const isTagPremium = !isPremium && !FREE_OCCASIONS_SET.has(tag.label);
-            if (isTagPremium) {
-              return (
-                <a key={tag.label} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                  <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center relative">
-                    {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover opacity-40" /> : <span className="text-3xl opacity-40">{tag.icon}</span>}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl">🔒</span>
-                    </div>
-                  </div>
-                  <span className="text-[13px] font-semibold text-gray-400 dark:text-gray-500 text-center">{tag.label}</span>
-                </a>
-              );
-            }
-            return (
-              <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
-                onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
-                className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
-                  {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
-                </div>
-                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{tag.label}</span>
-              </Link>
-            );
-          })}
+          {lifestyleTags.map((tag) => (
+            <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
+              onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
+              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
+                {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
+              </div>
+              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{tag.label}</span>
+            </Link>
+          ))}
         </div>
       </div>
       </div>
