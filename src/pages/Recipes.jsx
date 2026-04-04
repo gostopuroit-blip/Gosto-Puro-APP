@@ -46,11 +46,12 @@ export default function Recipes() {
   }, []);
 
   const loadRecipes = async () => {
-    const data = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000);
+    const [data, freeRecipes] = await Promise.all([
+      base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000),
+      base44.entities.FreeRecipe.list("-created_date", 9),
+    ]);
     setRecipes(data);
-    // Store the IDs of the 9 most recent recipes as free
-    const ids = new Set(data.slice(0, 9).map((r) => r.id));
-    setFreeRecipeIds(ids);
+    setFreeRecipeIds(new Set(freeRecipes.map((r) => r.recipe_id)));
     setLoading(false);
   };
 

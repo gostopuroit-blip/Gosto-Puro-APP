@@ -49,6 +49,7 @@ export default function Home() {
   const carouselRef = useRef(null);
   const cardWidth = 188;
   const [dailyNotif, setDailyNotif] = useState(null);
+  const [topRecipesFreeIds, setTopRecipesFreeIds] = useState(new Set());
   const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 
   useEffect(() => {
@@ -57,11 +58,12 @@ export default function Home() {
 
   const loadData = async () => {
        const today = new Date().toISOString().split("T")[0];
-       const [recipes, user, notifs, occasions] = await Promise.all([
+       const [recipes, user, notifs, occasions, freeRecipes] = await Promise.all([
        base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
-    base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order")]
+    base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
+    base44.entities.FreeRecipe.list("-created_date", 9)]
     );
 
     setTopRecipes(recipes);
@@ -71,6 +73,9 @@ export default function Home() {
     setUserPlan(user?.plan || "free");
     setUserRole(user?.role || null);
     if (notifs?.length > 0) setDailyNotif(notifs[0]);
+    // Override freeRecipeIds with FreeRecipe entity IDs
+    // (stored in state via useMemo below — set directly here)
+    setTopRecipesFreeIds(new Set(freeRecipes.map((r) => r.recipe_id)));
 
     const occasionImages = {
       "Autunno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png",
@@ -119,8 +124,8 @@ export default function Home() {
 
   const FREE_OCCASIONS_SET = new Set(["Colazione", "Pranzo", "Cena", "Leggera", "Dolci", "Instagram", "In famiglia", "Per due", "Con amici"]);
 
-  // The 9 most recent recipes are always free
-  const freeRecipeIds = useMemo(() => new Set(topRecipes.slice(0, 9).map((r) => r.id)), [topRecipes]);
+  // Free recipe IDs from FreeRecipe entity
+  const freeRecipeIds = topRecipesFreeIds;
 
   if (loading) {
     return (

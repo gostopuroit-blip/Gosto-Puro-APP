@@ -16,6 +16,7 @@ const dayNames = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "
 export default function Planner() {
   const [user, setUser] = useState(null);
   const [plan, setPlan] = useState(null);
+  const [totalPlansCount, setTotalPlansCount] = useState(0);
   const [recipes, setRecipes] = useState([]);
   const [folders, setFolders] = useState([]);
   const [userRecipes, setUserRecipes] = useState([]);
@@ -33,13 +34,15 @@ export default function Planner() {
   const loadData = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
     setUser(currentUser);
-    const [plans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
+    const [plans, allPlans, allRecipes, allFolders, allUserRecipes] = await Promise.all([
     base44.entities.MealPlan.filter({ is_active: true, created_by: currentUser?.email }),
+    base44.entities.MealPlan.filter({ created_by: currentUser?.email }),
     base44.entities.Recipe.list("-created_date", 1000),
     base44.entities.Folder.list(),
     base44.entities.UserRecipe.list()]
     );
     if (plans.length > 0) setPlan(plans[0]);
+    setTotalPlansCount(allPlans.length);
     setRecipes(allRecipes);
     setFolders(allFolders);
     setUserRecipes(allUserRecipes);
@@ -195,10 +198,10 @@ export default function Planner() {
     toast.success("Ricette eliminate");
   };
 
-  const isPremium = user?.plan === "premium" || user?.role === "admin";
+  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.is_expert === true;
 
-  // Free users cannot edit recipes
-  const canCreateMorePlans = true;
+  // Basic users limited to 3 plans total
+  const canCreateMorePlans = isPremium || totalPlansCount < 3;
   const canEditRecipes = isPremium;
 
   // Track premium_view when non-premium user sees the paywall
@@ -245,21 +248,25 @@ export default function Planner() {
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Pianifica i tuoi pasti</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <Button
+            {canCreateMorePlans ? (
+              <Button
                 size="sm"
-                className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] disabled:opacity-50"
-                disabled={!canCreateMorePlans}
-                onClick={() => {
-                  if (!canCreateMorePlans) {
-                    toast.error("Hai raggiunto il limite di 3 piani. Passa a Premium per crearne altri!");
-                  } else {
-                    setShowModal(true);
-                  }
-                }}>
-
-              <Plus className="w-4 h-4" />
-              {plan ? "Nuovo piano" : "Crea piano"}
-            </Button>
+                className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43]"
+                onClick={() => setShowModal(true)}>
+                <Plus className="w-4 h-4" />
+                {plan ? "Nuovo piano" : "Crea piano"}
+              </Button>
+            ) : (
+              <div className="text-right">
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[160px] leading-tight mb-1">
+                  Hai raggiunto il limite di 3 piani. Passa a Premium per crearne altri!
+                </p>
+                <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-amber-500 transition-colors">
+                  <Crown className="w-3 h-3" /> Passa a Premium
+                </a>
+              </div>
+            )}
             {plan &&
               <>
                 <Link to={createPageUrl("ShoppingList")}>
