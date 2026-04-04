@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ChevronLeft, ChevronRight, Lock, Crown } from "lucide-react";
 
-const FREE_LIMIT = 4;
-
 const filters = [
   { key: "all", label: "Tutte" },
   { key: "salvate", label: "Più salvate" },
@@ -15,8 +13,9 @@ const filters = [
 ];
 
 export default function DailyRecipesSection({ occasion, user }) {
-  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.subscription_level === "premium";
+  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.is_expert === true;
   const [recipes, setRecipes] = useState([]);
+  const [freeIds, setFreeIds] = useState(new Set());
   const [activeFilter, setActiveFilter] = useState("all");
   const carouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -64,6 +63,12 @@ export default function DailyRecipesSection({ occasion, user }) {
     setRecipes(fallback);
     setActiveFilter("all");
   };
+
+  useEffect(() => {
+    base44.entities.FreeRecipe.list("-created_date", 100).then((fr) => {
+      setFreeIds(new Set(fr.map((r) => r.recipe_id)));
+    });
+  }, []);
 
   const filteredRecipes = (() => {
     let result = [...recipes];
@@ -133,12 +138,12 @@ export default function DailyRecipesSection({ occasion, user }) {
           ref={carouselRef}
           className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 scroll-smooth"
         >
-          {filteredRecipes.map((recipe, index) => {
-            const isLocked = !isPremium && index >= FREE_LIMIT;
+          {filteredRecipes.map((recipe) => {
+            const isLocked = !isPremium && !freeIds.has(recipe.id);
             return (
               <div key={recipe.id} className="flex-shrink-0 w-[200px]">
                 {isLocked ? (
-                  <a href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer">
+                  <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer">
                     <div className="relative overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-[#2D3F35] mb-2">
                       <img
                         src={recipe.image_url || "https://via.placeholder.com/200"}
