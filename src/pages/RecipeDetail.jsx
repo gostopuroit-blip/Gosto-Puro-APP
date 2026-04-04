@@ -133,7 +133,11 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
-  const isPremium = user?.plan === "premium" || user?.role === "admin";
+  const FREE_OCCASIONS_SET = new Set(["Colazione", "Pranzo", "Cena", "Leggera", "Dolci", "Instagram", "In famiglia", "Per due", "Con amici"]);
+  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
+  const occasionParam = params.get("occasion") || "";
+  const isOccasionPremium = occasionParam && !FREE_OCCASIONS_SET.has(occasionParam);
+  const isContentLocked = !isPremium && isOccasionPremium;
 
   const handlePrint = () => {
     const ratio = servings / (recipe.servings || 4);
@@ -338,31 +342,55 @@ export default function RecipeDetail() {
           <h2 className="text-lg font-bold text-gray-900">Ingredienti</h2>
           <span className="text-xs text-gray-400">per {servings} {servings === 1 ? "persona" : "persone"}</span>
         </div>
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-          {(recipe.ingredients || []).map((ing, i) => (
-            <IngredientRow
-              key={i}
-              ing={ing}
-              index={i}
-              total={(recipe.ingredients || []).length}
-              ratio={servings / (recipe.servings || 4)}
-            />
-          ))}
-        </div>
+        {isContentLocked ? (
+          <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+            className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+            <div className="p-6 flex flex-col items-center gap-3 text-center">
+              <span className="text-3xl">🔒</span>
+              <p className="font-bold text-gray-800 text-sm">Ingredienti disponibili con Premium</p>
+              <p className="text-xs text-gray-400">Sblocca questa e tutte le ricette Premium</p>
+              <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
+            </div>
+          </a>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+            {(recipe.ingredients || []).map((ing, i) => (
+              <IngredientRow
+                key={i}
+                ing={ing}
+                index={i}
+                total={(recipe.ingredients || []).length}
+                ratio={servings / (recipe.servings || 4)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="px-5 mt-6">
         <h2 className="text-lg font-bold text-gray-900 mb-3">Preparazione</h2>
-        <div className="space-y-3">
-          {(recipe.instructions || []).map((step, i) => (
-            <div key={i} className="flex gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
-              <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-xs text-white font-bold">{i + 1}</span>
-              </div>
-              <p className="text-sm text-gray-700 leading-relaxed flex-1">{step}</p>
+        {isContentLocked ? (
+          <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+            className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+            <div className="p-6 flex flex-col items-center gap-3 text-center">
+              <span className="text-3xl">🔒</span>
+              <p className="font-bold text-gray-800 text-sm">Istruzioni disponibili con Premium</p>
+              <p className="text-xs text-gray-400">Passa a Premium per accedere a questa ricetta completa</p>
+              <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
             </div>
-          ))}
-        </div>
+          </a>
+        ) : (
+          <div className="space-y-3">
+            {(recipe.instructions || []).map((step, i) => (
+              <div key={i} className="flex gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+                <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-xs text-white font-bold">{i + 1}</span>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed flex-1">{step}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="px-5 mt-6">
