@@ -43,7 +43,7 @@ export default function PremiumUpgradeModal({ onClose, reason = "pubblicare" }) 
         </div>
 
         <a
-          href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10"
+          href="https://gostopuro.it/upgrade/"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3.5 rounded-2xl text-base shadow-lg hover:opacity-90 transition"

@@ -100,8 +100,7 @@ export default function Home() {
       return true;
     });
 
-    const specialRaw = deduped(occasions.filter((o) => o.tipo === "speciale")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
-    const special = specialRaw.filter(o => o.label !== "Instagram");
+    const special = deduped(occasions.filter((o) => o.tipo === "speciale")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
     const lifestyle = deduped(occasions.filter((o) => o.tipo === "stile_vita")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label], isLifestyle: true }));
 
     setSpecialOccasions(special);
@@ -220,7 +219,7 @@ export default function Home() {
             const isLocked = !isPremium;
             if (isLocked) {
               return (
-                <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group" style={{ width: "200px", height: "250px" }}>
+                <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group" style={{ width: "200px", height: "250px" }}>
                   <div className="relative rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#111] w-full h-full">
                     <img
                       src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
