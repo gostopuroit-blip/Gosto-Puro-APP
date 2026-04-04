@@ -16,7 +16,7 @@ const dayNames = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "
 export default function Planner() {
   const [user, setUser] = useState(null);
   const [plan, setPlan] = useState(null);
-  const [totalPlansCount, setTotalPlansCount] = useState(0);
+  const [plannerUsage, setPlannerUsage] = useState(null);
   const [freeRecipeIds, setFreeRecipeIds] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [folders, setFolders] = useState([]);
@@ -35,19 +35,34 @@ export default function Planner() {
   const loadData = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
     setUser(currentUser);
-    // MealPlan RLS already scopes to current user — list() returns only own plans
-    const [allMealPlans, allRecipes, allFolders, allUserRecipes, freeRecipes] = await Promise.all([
+
+    const isUserPremium = currentUser?.plan === "premium" || currentUser?.role === "admin" || currentUser?.role === "premium" || currentUser?.is_expert === true;
+
+    const [allMealPlans, allRecipes, allFolders, allUserRecipes, freeRecipes, usageRecords] = await Promise.all([
       base44.entities.MealPlan.list("-created_date", 500),
       base44.entities.Recipe.list("-created_date", 1000),
       base44.entities.Folder.list(),
       base44.entities.UserRecipe.list(),
       base44.entities.FreeRecipe.list("-created_date", 500),
+      !isUserPremium ? base44.entities.PlannerUsage.list() : Promise.resolve([]),
     ]);
-    // Filter locally to be 100% sure we only count this user's plans
-    const myPlans = allMealPlans.filter((p) => p.created_by === currentUser?.email);
-    const activePlan = myPlans.find((p) => p.is_active);
+
+    const activePlan = allMealPlans.find((p) => p.is_active);
     if (activePlan) setPlan(activePlan);
-    setTotalPlansCount(myPlans.length);
+
+    // PlannerUsage: fetch or create for Basic users
+    if (!isUserPremium && currentUser?.email) {
+      let usage = usageRecords.find((u) => u.created_by === currentUser.email);
+      if (!usage) {
+        usage = await base44.entities.PlannerUsage.create({
+          user_email: currentUser.email,
+          plans_created: 0,
+          limit_reached: false,
+        });
+      }
+      setPlannerUsage(usage);
+    }
+
     setRecipes(allRecipes);
     setFolders(allFolders);
     setUserRecipes(allUserRecipes);
@@ -58,9 +73,9 @@ export default function Planner() {
   const getRecipeById = (id) => recipes.find((r) => r.id === id);
 
   const createPlan = async ({ days, focus, maxTime, servings }) => {
-    // Block creation server-side for Basic users at limit
-    if (!isPremium && totalPlansCount >= 3) {
-      toast.error("Hai raggiunto il limite di 3 piani per il piano Basic.");
+    // Block creation for Basic users at limit
+    if (!isPremium && (plannerUsage?.plans_created >= 3 || plannerUsage?.limit_reached)) {
+      toast.error("Hai usato tutti i 3 piani disponibili del piano Basic.");
       return;
     }
     setCreating(true);
@@ -138,6 +153,17 @@ export default function Planner() {
 
     const created = await base44.entities.MealPlan.create(newPlan);
     setPlan(created);
+
+    // Increment PlannerUsage for Basic users
+    if (!isPremium && plannerUsage) {
+      const newCount = (plannerUsage.plans_created || 0) + 1;
+      const updated = await base44.entities.PlannerUsage.update(plannerUsage.id, {
+        plans_created: newCount,
+        limit_reached: newCount >= 3,
+      });
+      setPlannerUsage(updated);
+    }
+
     setCreating(false);
     trackEvent("planner_created", { days, focus });
     toast.success("Piano creato!");
@@ -207,13 +233,10 @@ export default function Planner() {
 
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.is_expert === true;
 
-  // Basic users limited to 3 plans total
-  const canCreateMorePlans = isPremium || totalPlansCount < 3;
+  const plansCreated = plannerUsage?.plans_created || 0;
+  const canCreateMorePlans = isPremium || plansCreated < 3;
   const canEditRecipes = isPremium;
-
-
-
-  const isBasicBlocked = !isPremium && totalPlansCount >= 3;
+  const isBasicBlocked = !isPremium && (plannerUsage?.limit_reached === true || plansCreated >= 3);
 
   if (loading) {
     return (
@@ -232,7 +255,7 @@ export default function Planner() {
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Pianifica i tuoi pasti</p>
             {!isPremium && (
               <p className={`text-xs mt-1 font-semibold ${isBasicBlocked ? "text-red-400" : "text-gray-400 dark:text-gray-500"}`}>
-                {totalPlansCount}/3 piani utilizzati
+                {plansCreated}/3 piani utilizzati
               </p>
             )}
           </div>
