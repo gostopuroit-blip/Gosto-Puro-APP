@@ -204,12 +204,7 @@ export default function Planner() {
   const canCreateMorePlans = isPremium || totalPlansCount < 3;
   const canEditRecipes = isPremium;
 
-  // Track premium_view when non-premium user sees the paywall
-  useEffect(() => {
-    if (user && !isPremium) {
-      trackEvent("premium_view", { source: "planner" });
-    }
-  }, [user, isPremium]);
+
 
   if (loading) {
     return (
@@ -220,27 +215,7 @@ export default function Planner() {
 
   return (
     <div className="pb-4">
-      {!isPremium &&
-      <div className="fixed inset-0 bg-black/30 z-40 flex flex-col items-center justify-center px-6 text-center" style={{ bottom: "72px" }}>
-          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4">
-            <Crown className="w-7 h-7 text-amber-500" />
-          </div>
-          <p className="text-sm font-bold text-white mb-2">Funzionalità Premium</p>
-          <p className="text-white/80 mb-6 text-base font-semibold leading-relaxed">
-            Sblocca il Pianificatore Pasti com o plano Premium
-          </p>
-          <a
-            href="https://gostopuro.it/premium/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackEvent("premium_click", { source: "planner" })}
-            className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
-            <Crown className="w-4 h-4" />
-            Sblocca Premium
-          </a>
-        </div>
-      }
-      <div className={!isPremium ? "pointer-events-none opacity-20 select-none" : ""}>
+      <div>
       <div className="px-5 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <div>
@@ -258,8 +233,8 @@ export default function Planner() {
               </Button>
             ) : (
               <div className="text-right">
-                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[160px] leading-tight mb-1">
-                  Hai raggiunto il limite di 3 piani. Passa a Premium per crearne altri!
+                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[180px] leading-tight mb-1">
+                  Hai raggiunto il limite di 3 piani per il piano Basic. Passa a Premium per crearne altri! 🌟
                 </p>
                 <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-amber-500 transition-colors">
