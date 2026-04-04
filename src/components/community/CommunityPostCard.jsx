@@ -141,11 +141,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
       {post.video_url && post.media_type === "video" && (
         <div className={`w-full bg-gray-100 dark:bg-[#111] relative ${isBlurred ? "overflow-hidden" : ""}`}>
           {isBlurred ? (
-            <div className="w-full aspect-video bg-black/50 flex flex-col items-center justify-center gap-2">
+            <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="w-full aspect-video bg-black/50 flex flex-col items-center justify-center gap-2">
               <Lock className="w-8 h-8 text-white" />
               <p className="text-white font-bold text-sm">Contenuto Premium</p>
               <p className="text-white/80 text-xs">Abbonati per vedere</p>
-            </div>
+            </a>
           ) : (
             <div onClick={(e) => { e.stopPropagation(); setShowVideoLightbox(true); }}>
               <VideoPlayer src={post.video_url} autoplay={true} muted={true} onFullscreen={() => setShowVideoLightbox(true)} showIcon={true} />
@@ -169,11 +169,11 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
             />
           )}
           {isBlurred && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50">
+            <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50">
               <Lock className="w-8 h-8 text-white" />
               <p className="text-white font-bold text-sm">Contenuto Premium</p>
               <p className="text-white/80 text-xs">Abbonati per vedere</p>
-            </div>
+            </a>
           )}
         </div>
       )}
@@ -187,10 +187,10 @@ export default function CommunityPostCard({ post, currentUser, onUpdate, savedPo
           <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{post.content}</p>
         </div>
         {isBlurred && (
-          <div className="mt-2 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl px-3 py-2 text-center">
+          <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="mt-2 block bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl px-3 py-2 text-center">
             <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold">🔒 Contenuto esclusivo Premium</p>
             <p className="text-xs text-purple-500 mt-0.5">Passa a Premium per accedere a tutti i contenuti</p>
-          </div>
+          </a>
         )}
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>

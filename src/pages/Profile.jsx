@@ -461,7 +461,7 @@ export default function Profile() {
           </div>
           {(!user?.plan || user?.plan === "free") && user?.role !== "admin" && (
             <a
-              href="https://pay.hotmart.com/L104095305F?off=y6zj0nlm&checkoutMode=10"
+              href="https://gostopuro.it/upgrade/"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("premium_click", { source: "profile" })}
