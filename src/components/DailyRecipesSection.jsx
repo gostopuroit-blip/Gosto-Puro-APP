@@ -15,7 +15,7 @@ const filters = [
 export default function DailyRecipesSection({ occasion, user }) {
   const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.is_expert === true;
   const [recipes, setRecipes] = useState([]);
-  const [freeIds, setFreeIds] = useState(new Set());
+  const [freeIds, setFreeIds] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
   const carouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -65,8 +65,8 @@ export default function DailyRecipesSection({ occasion, user }) {
   };
 
   useEffect(() => {
-    base44.entities.FreeRecipe.list("-created_date", 100).then((fr) => {
-      setFreeIds(new Set(fr.map((r) => r.recipe_id)));
+    base44.entities.FreeRecipe.list("-created_date", 500).then((fr) => {
+      setFreeIds(fr.map((r) => r.recipe_id));
     });
   }, []);
 
@@ -139,7 +139,7 @@ export default function DailyRecipesSection({ occasion, user }) {
           className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 scroll-smooth"
         >
           {filteredRecipes.map((recipe) => {
-            const isLocked = !isPremium && !freeIds.has(recipe.id);
+            const isLocked = !isPremium && !freeIds.includes(recipe.id);
             return (
               <div key={recipe.id} className="flex-shrink-0 w-[200px]">
                 {isLocked ? (

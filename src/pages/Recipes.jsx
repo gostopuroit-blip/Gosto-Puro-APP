@@ -26,7 +26,7 @@ export default function Recipes() {
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
-  const [freeRecipeIds, setFreeRecipeIds] = useState(null);
+  const [freeIds, setFreeIds] = useState([]);
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -48,10 +48,10 @@ export default function Recipes() {
   const loadRecipes = async () => {
     const [data, freeRecipes] = await Promise.all([
       base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000),
-      base44.entities.FreeRecipe.list("-created_date", 9),
+      base44.entities.FreeRecipe.list("-created_date", 500),
     ]);
     setRecipes(data);
-    setFreeRecipeIds(new Set(freeRecipes.map((r) => r.recipe_id)));
+    setFreeIds(freeRecipes.map((r) => r.recipe_id));
     setLoading(false);
   };
 
@@ -151,11 +151,11 @@ export default function Recipes() {
 
   // For Basic: free recipes first, then locked — for Premium: natural order
   const orderedRecipes = useMemo(() => {
-    if (isPremium || !freeRecipeIds) return filteredRecipes;
-    const free = filteredRecipes.filter((r) => freeRecipeIds.has(r.id));
-    const locked = filteredRecipes.filter((r) => !freeRecipeIds.has(r.id));
+    if (isPremium) return filteredRecipes;
+    const free = filteredRecipes.filter((r) => freeIds.includes(r.id));
+    const locked = filteredRecipes.filter((r) => !freeIds.includes(r.id));
     return [...free, ...locked];
-  }, [filteredRecipes, isPremium, freeRecipeIds]);
+  }, [filteredRecipes, isPremium, freeIds]);
 
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -258,7 +258,7 @@ export default function Recipes() {
            </div> :
           <>
              {paginatedRecipes.map((recipe) => {
-               const isLocked = !isPremium && freeRecipeIds !== null && !freeRecipeIds.has(recipe.id);
+               const isLocked = !isPremium && !freeIds.includes(recipe.id);
                if (isLocked) {
                  return (
                    <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="block relative rounded-3xl overflow-hidden">

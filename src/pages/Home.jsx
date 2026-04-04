@@ -61,7 +61,7 @@ export default function Home() {
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
-    base44.entities.FreeRecipe.list("-created_date", 9)]
+    base44.entities.FreeRecipe.list("-created_date", 500)]
     );
 
     setTopRecipes(recipes);
@@ -73,7 +73,7 @@ export default function Home() {
     if (notifs?.length > 0) setDailyNotif(notifs[0]);
     // Override freeRecipeIds with FreeRecipe entity IDs
     // (stored in state via useMemo below — set directly here)
-    setTopRecipesFreeIds(new Set(freeRecipes.map((r) => r.recipe_id)));
+    setTopRecipesFreeIds(freeRecipes.map((r) => r.recipe_id));
 
     const occasionImages = {
       "Autunno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png",
