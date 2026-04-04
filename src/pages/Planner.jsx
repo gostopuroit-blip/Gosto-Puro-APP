@@ -35,16 +35,19 @@ export default function Planner() {
   const loadData = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
     setUser(currentUser);
-    const [plans, allPlans, allRecipes, allFolders, allUserRecipes, freeRecipes] = await Promise.all([
-    base44.entities.MealPlan.filter({ is_active: true, created_by: currentUser?.email }),
-    base44.entities.MealPlan.filter({ created_by: currentUser?.email }),
-    base44.entities.Recipe.list("-created_date", 1000),
-    base44.entities.Folder.list(),
-    base44.entities.UserRecipe.list(),
-    base44.entities.FreeRecipe.list("-created_date", 500)]
-    );
-    if (plans.length > 0) setPlan(plans[0]);
-    setTotalPlansCount(allPlans.length);
+    // MealPlan RLS already scopes to current user — list() returns only own plans
+    const [allMealPlans, allRecipes, allFolders, allUserRecipes, freeRecipes] = await Promise.all([
+      base44.entities.MealPlan.list("-created_date", 500),
+      base44.entities.Recipe.list("-created_date", 1000),
+      base44.entities.Folder.list(),
+      base44.entities.UserRecipe.list(),
+      base44.entities.FreeRecipe.list("-created_date", 500),
+    ]);
+    // Filter locally to be 100% sure we only count this user's plans
+    const myPlans = allMealPlans.filter((p) => p.created_by === currentUser?.email);
+    const activePlan = myPlans.find((p) => p.is_active);
+    if (activePlan) setPlan(activePlan);
+    setTotalPlansCount(myPlans.length);
     setRecipes(allRecipes);
     setFolders(allFolders);
     setUserRecipes(allUserRecipes);
@@ -409,9 +412,14 @@ export default function Planner() {
             <p className="text-gray-500 dark:text-gray-400 font-semibold mb-4">Nessun piano attivo</p>
             <Button
               size="sm"
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                if (isBasicBlocked) {
+                  toast.error("Hai usato tutti i 3 piani disponibili. Passa a Premium!");
+                  return;
+                }
+                setShowModal(true);
+              }}
               className="bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl">
-
               Crea il tuo primo piano
             </Button>
           </div>
