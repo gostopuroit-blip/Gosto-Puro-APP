@@ -149,8 +149,13 @@ export default function Recipes() {
 
 
 
-  // Keep filteredRecipes in natural order (most recent first)
-  const orderedRecipes = filteredRecipes;
+  // For Basic: free recipes first, then locked — for Premium: natural order
+  const orderedRecipes = useMemo(() => {
+    if (isPremium || !freeRecipeIds) return filteredRecipes;
+    const free = filteredRecipes.filter((r) => freeRecipeIds.has(r.id));
+    const locked = filteredRecipes.filter((r) => !freeRecipeIds.has(r.id));
+    return [...free, ...locked];
+  }, [filteredRecipes, isPremium, freeRecipeIds]);
 
   const paginatedRecipes = useMemo(() => {
     const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
