@@ -13,6 +13,7 @@ import AdminRecipeEngagement from "@/components/admin/AdminRecipeEngagement";
 import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
 import AdminAnalyticsReport from "@/components/admin/AdminAnalyticsReport";
 import AdminUTMGenerator from "@/components/admin/AdminUTMGenerator";
+import AdminEbookUTMs from "@/components/admin/AdminEbookUTMs";
 import AdminEbookFollowup from "@/components/admin/AdminEbookFollowup";
 import AdminPremiumIntelligence from "@/components/admin/AdminPremiumIntelligence";
 import AdminModeration from "@/components/admin/AdminModeration";
@@ -155,7 +156,18 @@ function AdminContent() {
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}
           {activeTab === "report"         && <AdminAnalyticsReport />}
-          {activeTab === "utm"            && <AdminUTMGenerator />}
+          {activeTab === "utm"            && (
+            <div className="space-y-8">
+              <div>
+                <p className="text-sm font-bold text-gray-700 mb-3">📱 Social / Canais</p>
+                <AdminUTMGenerator />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-700 mb-3">📚 E-books</p>
+                <AdminEbookUTMs />
+              </div>
+            </div>
+          )}
           {activeTab === "utenti"       && <AdminUsers />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "audit_ingredients" && <AdminRecipeIngredientAudit />}
