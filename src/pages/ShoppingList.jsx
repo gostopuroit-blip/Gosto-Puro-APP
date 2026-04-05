@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { Check, Loader2, ShoppingCart, RefreshCw, Trash2, Printer, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import PremiumGate from "@/components/PremiumGate";
 
 const categoryIcons = {
   "Ortofrutta": "🥬",
@@ -236,8 +235,7 @@ export default function ShoppingList() {
 
   return (
     <div className="pb-4">
-      <PremiumGate user={user} feature="la Lista della Spesa">
-        <div>
+      <div>
       <div className="px-5 pt-14 pb-4">
         <div className="flex items-center justify-between">
           <div>
@@ -369,8 +367,7 @@ export default function ShoppingList() {
           ))}
         </div>
       )}
-        </div>
-      </PremiumGate>
+      </div>
     </div>
   );
 }
