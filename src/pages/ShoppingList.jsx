@@ -31,10 +31,15 @@ export default function ShoppingList() {
     setUser(u);
     if (!u) { setLoading(false); return; }
 
-    // Load existing items first — only regenerate if none exist
+    // Get active plan first, then check if existing items match it
+    const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u.email }, "-created_date", 1);
+    const activePlanId = plans[0]?.id || null;
+
     const existing = await base44.entities.ShoppingItem.filter({ created_by: u.email }, "category", 200);
-    if (existing.length > 0) {
-      setItems(existing);
+    const matchingItems = activePlanId ? existing.filter(i => i.meal_plan_id === activePlanId) : [];
+
+    if (matchingItems.length > 0) {
+      setItems(matchingItems);
       setLoading(false);
     } else {
       await generateList(u);
@@ -42,7 +47,7 @@ export default function ShoppingList() {
   };
 
   const generateList = async (currentUser) => {
-    const u = currentUser || user;
+    const u = currentUser || user || await base44.auth.me().catch(() => null);
     if (!u) return;
     setGenerating(true);
     setLoading(false);
