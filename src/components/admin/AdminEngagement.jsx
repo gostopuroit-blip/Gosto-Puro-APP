@@ -161,15 +161,16 @@ export default function AdminEngagement() {
   });
   const topOccasions = Object.entries(occasionCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
 
-  // Avg session duration (per sessione)
-  const durations = sessionEnds.map(e => e.session_duration_seconds).filter(Boolean);
+  // Avg session duration (per sessione) — filtra outliers > 3h (10800s) que distorcem a média
+  const durations = sessionEnds.map(e => e.session_duration_seconds).filter(s => s > 0 && s < 10800);
   const avgDuration = avg(durations);
 
   // Avg time per user (soma das sessões de cada usuário, depois média entre usuários)
   const durationByUser = {};
   sessionEnds.forEach(e => {
     const key = uid(e);
-    if (key && e.session_duration_seconds > 0) {
+    // filtra outliers > 3h (10800s) para não distorcer a média por usuário
+    if (key && e.session_duration_seconds > 0 && e.session_duration_seconds < 10800) {
       durationByUser[key] = (durationByUser[key] || 0) + e.session_duration_seconds;
     }
   });
