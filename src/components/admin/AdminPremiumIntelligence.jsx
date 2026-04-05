@@ -34,19 +34,22 @@ export default function AdminPremiumIntelligence() {
     // Cliques no botão upgrade
     const clicksByEmail = {};
     for (const ev of filteredAnalytics) {
-      const email = ev.user_email || "anônimo";
-      if (!clicksByEmail[email]) clicksByEmail[email] = { email, count: 0, last_click: ev.created_date, source: ev.source };
-      clicksByEmail[email].count++;
-      if (ev.created_date > clicksByEmail[email].last_click) {
-        clicksByEmail[email].last_click = ev.created_date;
-        clicksByEmail[email].source = ev.source;
+      const email = ev.user_email && ev.user_email.trim() ? ev.user_email.trim() : null;
+      const key = email || `anon_${ev.session_id || ev.id}`;
+      if (!clicksByEmail[key]) clicksByEmail[key] = { email: email || "anônimo", count: 0, last_click: ev.created_date, source: ev.source, isAnon: !email };
+      clicksByEmail[key].count++;
+      if (ev.created_date > clicksByEmail[key].last_click) {
+        clicksByEmail[key].last_click = ev.created_date;
+        clicksByEmail[key].source = ev.source;
       }
     }
     const clicks = Object.values(clicksByEmail).sort((a, b) => b.count - a.count);
+    const totalClickEvents = filteredAnalytics.length;
+    const anonClicks = clicks.filter(c => c.isAnon).reduce((s, c) => s + c.count, 0);
 
     // Clicaram mas NÃO compraram = clicaram e não são premium
     const premiumEmails = new Set(users.filter(u => u.plan === "premium").map(u => u.email));
-    const clicouNaoComprou = clicks.filter(c => c.email !== "anônimo" && !premiumEmails.has(c.email));
+    const clicouNaoComprou = clicks.filter(c => !c.isAnon && !premiumEmails.has(c.email));
 
     // Usuários premium — separar automático (hotmart_product_id preenchido) vs manual
     const premiumUsers = users.filter(u => u.plan === "premium");
@@ -57,7 +60,7 @@ export default function AdminPremiumIntelligence() {
     // Ou: veio webhook mas o usuário não tem registro
     const comprouNaoEntrou = pending;
 
-    setData({ clicks, clicouNaoComprou, premiumAuto, premiumManual, comprouNaoEntrou, totalPremium: premiumUsers.length });
+    setData({ clicks, clicouNaoComprou, premiumAuto, premiumManual, comprouNaoEntrou, totalPremium: premiumUsers.length, totalClickEvents, anonClicks });
     setLoading(false);
   };
 
@@ -65,7 +68,7 @@ export default function AdminPremiumIntelligence() {
 
   const tabs = [
     { key: "nao_comprou", label: "Clicou, não comprou", icon: ShoppingCart, count: data.clicouNaoComprou.length, color: "orange" },
-    { key: "clicks", label: "Todos os cliques", icon: MousePointerClick, count: data.clicks.length, color: "blue" },
+    { key: "clicks", label: "Todos os cliques", icon: MousePointerClick, count: data.totalClickEvents, color: "blue" },
     { key: "auto", label: "Comprou + Entrou", icon: UserCheck, count: data.premiumAuto.length, color: "green" },
     { key: "manual", label: "Premium Manual", icon: Crown, count: data.premiumManual.length, color: "purple" },
     { key: "nao_entrou", label: "Comprou + Não entrou", icon: UserX, count: data.comprouNaoEntrou.length, color: "red" },
@@ -153,9 +156,13 @@ export default function AdminPremiumIntelligence() {
         {/* TODOS OS CLIQUES */}
         {tab === "clicks" && (
           <>
-            {data.clicks.length === 0 ? (
-              <EmptyState msg="Nenhum clique registrado ainda." />
-            ) : data.clicks.map((c, i) => (
+            <div className="bg-blue-50 rounded-xl p-3 text-[11px] text-blue-700 flex gap-4">
+              <span>📊 <strong>{data.totalClickEvents}</strong> cliques totais no período</span>
+              {data.anonClicks > 0 && <span>👤 <strong>{data.anonClicks}</strong> de usuários não logados</span>}
+            </div>
+            {data.clicks.filter(c => !c.isAnon).length === 0 ? (
+              <EmptyState msg="Nenhum clique identificado registrado ainda." />
+            ) : data.clicks.filter(c => !c.isAnon).map((c, i) => (
               <div key={i} className="bg-white rounded-2xl p-4 border border-gray-100">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -163,9 +170,15 @@ export default function AdminPremiumIntelligence() {
                     <p className="text-[10px] text-gray-400 mt-0.5">Última vez: {fmt(c.last_click)}</p>
                     {c.source && <p className="text-[10px] text-gray-300">Origem: {c.source}</p>}
                   </div>
-                  <span className="bg-blue-100 text-blue-700 text-[11px] font-bold px-2 py-1 rounded-full flex-shrink-0">
-                    {c.count}x clique{c.count > 1 ? "s" : ""}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="bg-blue-100 text-blue-700 text-[11px] font-bold px-2 py-1 rounded-full flex-shrink-0">
+                      {c.count}x clique{c.count > 1 ? "s" : ""}
+                    </span>
+                    {data.clicouNaoComprou.find(x => x.email === c.email)
+                      ? <span className="text-[9px] text-orange-500 font-semibold">não comprou</span>
+                      : <span className="text-[9px] text-green-600 font-semibold">✓ premium</span>
+                    }
+                  </div>
                 </div>
               </div>
             ))}
