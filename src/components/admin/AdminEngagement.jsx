@@ -73,15 +73,16 @@ export default function AdminEngagement() {
         return all;
       };
 
-      const [eventsResult, usersResult] = await Promise.all([
+      const [eventsResult, allTimeResult, usersResult] = await Promise.all([
         fetchEventsByPeriod(days === 0 ? null : cutoffStr),
+        days !== 0 ? fetchEventsByPeriod(null) : Promise.resolve(null), // só busca tudo se não estiver já em modo "todos"
         base44.functions.invoke('adminGetUsersV2').then(res => {
           const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
           return Array.isArray(raw) ? raw : [];
         }).catch(() => []),
       ]);
       setEvents(eventsResult || []);
-      setAllTimeEvents(eventsResult || []); // same data — allTime only used for TopUsers ranking
+      setAllTimeEvents(days === 0 ? eventsResult : (allTimeResult || eventsResult));
       setAllUsers(usersResult || []);
     } catch {
       setEvents([]);

@@ -42,7 +42,7 @@ function buildRanking(events, allUsers, limit = 50) {
       u._sessionIds.add(e.session_id || e.id || Math.random());
       u.sessions = u._sessionIds.size;
     }
-    if (e.event_type === "session_end" && e.session_duration_seconds > 0) {
+    if (e.event_type === "session_end" && e.session_duration_seconds > 0 && e.session_duration_seconds < 10800) {
       const key = e.session_id || e.id;
       if (key && !u._durationSessions.has(key)) {
         u._durationSessions.add(key);
