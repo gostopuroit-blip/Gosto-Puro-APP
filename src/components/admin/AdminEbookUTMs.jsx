@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Copy, Check, BookOpen } from "lucide-react";
 
-const BASE_URL = "https://app.gostopuro.it";
+const BASE_URL = "https://gostopuro.com";
 
 const EBOOKS = [
   {
