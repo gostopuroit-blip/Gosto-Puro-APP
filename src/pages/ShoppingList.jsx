@@ -32,7 +32,7 @@ export default function ShoppingList() {
     if (!u) { setLoading(false); return; }
 
     // Get active plan first, then check if existing items match it
-    const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u.email }, "-created_date", 1);
+    const plans = await base44.entities.MealPlan.filter({ is_active: true }, "-created_date", 1);
     const activePlanId = plans[0]?.id || null;
 
     const existing = await base44.entities.ShoppingItem.filter({ created_by: u.email }, "category", 200);
@@ -53,7 +53,7 @@ export default function ShoppingList() {
     setLoading(false);
     
     // Get active plan
-    const plans = await base44.entities.MealPlan.filter({ is_active: true, created_by: u?.email }, "-created_date", 1);
+    const plans = await base44.entities.MealPlan.filter({ is_active: true }, "-created_date", 1);
     
     if (plans.length === 0) {
       // Delete any orphaned items and show empty state
