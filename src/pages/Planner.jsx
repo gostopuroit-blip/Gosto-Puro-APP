@@ -320,6 +320,7 @@ export default function Planner() {
           <p className="font-bold text-gray-800 dark:text-white text-sm mb-1">Hai raggiunto il limite del piano Basic</p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Hai usato tutti i 3 piani disponibili. Passa a Premium per crearne altri.</p>
           <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+            onClick={() => trackEvent("premium_click", { source: "planner_limit" })}
             className="inline-flex items-center gap-1 bg-amber-400 text-amber-900 text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-amber-500 transition-colors">
             <Crown className="w-4 h-4" /> Passa a Premium
           </a>

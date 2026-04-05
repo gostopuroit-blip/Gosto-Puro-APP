@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { Crown, Lock } from "lucide-react";
+import { Crown } from "lucide-react";
+import { trackEvent } from "@/components/useAnalytics";
 
-export default function PremiumGate({ children, user, feature = "questa funzionalità" }) {
+export default function PremiumGate({ children, user, feature = "questa funzionalità", source = "premium_gate" }) {
   const isPremium = user?.plan === "premium" || user?.role === "admin";
 
   if (isPremium) return children;
@@ -24,6 +23,7 @@ export default function PremiumGate({ children, user, feature = "questa funziona
           href="https://gostopuro.it/upgrade/"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackEvent("premium_click", { source, occasion_label: feature })}
           className="flex items-center gap-2 bg-amber-400 text-neutral-950 px-6 py-3 text-sm font-bold rounded-xl hover:bg-amber-500 transition-colors">
           <Crown className="w-4 h-4" />
           Sblocca Premium
