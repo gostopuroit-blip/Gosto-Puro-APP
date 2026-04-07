@@ -4,23 +4,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Verifica se agora sao 07:00 em Europe/Rome (lida com DST automaticamente)
     const now = new Date();
-    const romeHour = parseInt(
-      new Intl.DateTimeFormat("it-IT", {
-        timeZone: "Europe/Rome",
-        hour: "2-digit",
-        hour12: false,
-      }).format(now),
-      10
-    );
-
-    if (romeHour !== 7) {
-      return Response.json({
-        skipped: true,
-        message: `Hora atual em Roma: ${romeHour}h. Envio programado para 07:00.`,
-      });
-    }
 
     // Busca todos os usuarios com email
     let allUsers = [];
