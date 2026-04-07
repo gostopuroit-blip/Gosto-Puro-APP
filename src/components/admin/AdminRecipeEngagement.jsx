@@ -14,14 +14,13 @@ export default function AdminRecipeEngagement() {
 
   const load = async () => {
     setLoading(true);
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const cutoffStr = days === 0 ? null : (() => { const d = new Date(); d.setDate(d.getDate() - days); return d.toISOString().slice(0, 10); })();
     try {
       let all = [];
       let skip = 0;
       while (true) {
-        const batch = await base44.entities.AppAnalytics.filter({ date: { $gte: cutoffStr } }, "-created_date", 500, skip).catch(() => []);
+        const filter = cutoffStr ? { date: { $gte: cutoffStr } } : {};
+        const batch = await base44.entities.AppAnalytics.filter(filter, "-created_date", 500, skip).catch(() => []);
         all = all.concat(batch);
         if (batch.length < 500) break;
         skip += 500;
@@ -216,8 +215,8 @@ export default function AdminRecipeEngagement() {
       <div className="flex items-center justify-between">
         <p className="text-sm font-bold text-gray-700">Recipe & Advanced Analytics</p>
         <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
-          {[7, 14, 30].map(d => (
-            <button key={d} onClick={() => setDays(d)} className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${days === d ? "bg-white text-purple-700 shadow-sm" : "text-gray-500"}`}>{d}g</button>
+          {[7, 14, 30, 0].map(d => (
+            <button key={d} onClick={() => setDays(d)} className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${days === d ? "bg-white text-purple-700 shadow-sm" : "text-gray-500"}`}>{d === 0 ? "∞" : `${d}g`}</button>
           ))}
           <button onClick={load} className="p-1 ml-1 text-gray-400 hover:text-purple-600"><RefreshCw className="w-3.5 h-3.5" /></button>
         </div>
