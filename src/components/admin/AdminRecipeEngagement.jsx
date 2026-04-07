@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 export default function AdminRecipeEngagement() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(7);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchFilter, setSearchFilter] = useState("");
 
   useEffect(() => { load(); }, [days]);
 
@@ -57,7 +59,8 @@ export default function AdminRecipeEngagement() {
     searchQueries[q].count++;
     if ((e.results_count || 0) === 0) searchQueries[q].noResults++;
   });
-  const topSearches = Object.entries(searchQueries).sort((a, b) => b[1].count - a[1].count).slice(0, 10);
+  const allSearchesSorted = Object.entries(searchQueries).sort((a, b) => b[1].count - a[1].count);
+  const topSearches = allSearchesSorted; // all, paginated in UI
   const noResultSearches = Object.entries(searchQueries).filter(([, v]) => v.noResults > 0).sort((a, b) => b[1].noResults - a[1].noResults).slice(0, 5);
 
   // Searches per day
@@ -221,42 +224,18 @@ export default function AdminRecipeEngagement() {
       </div>
 
       {/* 1. Search Analytics */}
-      <Section title="🔍 Search Analytics" subtitle={`${searches.length} buscas no período`}>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <Metric label="Total buscas" value={searches.length} />
-          <Metric label="Taxa clique" value={`${searchClickRate}%`} color="text-green-600 bg-green-50" />
-          <Metric label="Buscas sem resultado" value={noResultSearches.reduce((a, [, v]) => a + v.noResults, 0)} color="text-red-600 bg-red-50" />
-          <Metric label="Buscas únicas" value={Object.keys(searchQueries).length} color="text-blue-600 bg-blue-50" />
-        </div>
-        {topSearches.length > 0 ? (
-          <>
-            <p className="text-xs font-bold text-gray-500 mb-2">Top Search Queries</p>
-            <div className="space-y-1.5">
-              {topSearches.map(([q, d], i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-300 w-4">{i + 1}</span>
-                  <p className="text-xs flex-1 text-gray-700 truncate">{q}</p>
-                  <span className="text-xs font-bold text-gray-600">{d.count}</span>
-                  {d.noResults > 0 && <span className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">0 resultados</span>}
-                </div>
-              ))}
-            </div>
-            {searchDayData.length > 0 && (
-              <div className="mt-3">
-                <p className="text-xs font-bold text-gray-500 mb-2">Buscas por dia</p>
-                <ResponsiveContainer width="100%" height={100}>
-                  <BarChart data={searchDayData}>
-                    <XAxis dataKey="date" tick={{ fontSize: 9 }} />
-                    <YAxis tick={{ fontSize: 9 }} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#7c3aed" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </>
-        ) : <EmptyState text="Adicione tracking de recipe_search no app para ver dados." />}
-      </Section>
+      <SearchAnalyticsSection
+        searches={searches}
+        topSearches={topSearches}
+        noResultSearches={noResultSearches}
+        searchClickRate={searchClickRate}
+        searchQueries={searchQueries}
+        searchDayData={searchDayData}
+        searchPage={searchPage}
+        setSearchPage={setSearchPage}
+        searchFilter={searchFilter}
+        setSearchFilter={setSearchFilter}
+      />
 
       {/* 2. Recipe Time */}
       <Section title="⏱ Tempo dentro da Receita" subtitle="Quanto tempo os usuários passam lendo cada receita">
@@ -473,6 +452,115 @@ export default function AdminRecipeEngagement() {
         </div>
       </Section>
     </div>
+  );
+}
+
+const PAGE_SIZE = 15;
+
+function SearchAnalyticsSection({ searches, topSearches, noResultSearches, searchClickRate, searchQueries, searchDayData, searchPage, setSearchPage, searchFilter, setSearchFilter }) {
+  const filtered = searchFilter.trim()
+    ? topSearches.filter(([q]) => q.toLowerCase().includes(searchFilter.toLowerCase()))
+    : topSearches;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((searchPage - 1) * PAGE_SIZE, searchPage * PAGE_SIZE);
+
+  const handleFilter = (v) => { setSearchFilter(v); setSearchPage(1); };
+
+  return (
+    <Section title="🔍 Search Analytics" subtitle={`${searches.length} buscas — ${Object.keys(searchQueries).length} termos únicos`}>
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <Metric label="Total buscas" value={searches.length} />
+        <Metric label="Taxa clique" value={`${searchClickRate}%`} color="text-green-600 bg-green-50" />
+        <Metric label="Sem resultado" value={noResultSearches.reduce((a, [, v]) => a + v.noResults, 0)} color="text-red-600 bg-red-50" />
+        <Metric label="Termos únicos" value={Object.keys(searchQueries).length} color="text-blue-600 bg-blue-50" />
+      </div>
+
+      {topSearches.length > 0 ? (
+        <>
+          {/* Search filter input */}
+          <div className="relative mb-3">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Filtrar termos..."
+              value={searchFilter}
+              onChange={e => handleFilter(e.target.value)}
+              className="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-300"
+            />
+          </div>
+
+          <p className="text-xs font-bold text-gray-500 mb-2">
+            Todos os termos buscados ({filtered.length})
+          </p>
+          <div className="space-y-1.5">
+            {paginated.map(([q, d], i) => {
+              const globalIdx = (searchPage - 1) * PAGE_SIZE + i + 1;
+              const barPct = topSearches[0] ? Math.round((d.count / topSearches[0][1].count) * 100) : 0;
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-300 w-5 text-right">{globalIdx}</span>
+                  <p className="text-xs flex-1 text-gray-700 truncate">{q}</p>
+                  <div className="w-16 bg-gray-100 rounded-full h-1.5 hidden sm:block">
+                    <div className="bg-purple-400 h-1.5 rounded-full" style={{ width: `${barPct}%` }} />
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 w-6 text-right">{d.count}</span>
+                  {d.noResults > 0 && <span className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full flex-shrink-0">0 res</span>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+              <button
+                onClick={() => setSearchPage(p => Math.max(1, p - 1))}
+                disabled={searchPage === 1}
+                className="flex items-center gap-1 text-xs text-gray-500 disabled:opacity-30 hover:text-purple-600 transition"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" /> Anterior
+              </button>
+              <span className="text-xs text-gray-400">{searchPage} / {totalPages}</span>
+              <button
+                onClick={() => setSearchPage(p => Math.min(totalPages, p + 1))}
+                disabled={searchPage === totalPages}
+                className="flex items-center gap-1 text-xs text-gray-500 disabled:opacity-30 hover:text-purple-600 transition"
+              >
+                Próximo <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {searchDayData.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-bold text-gray-500 mb-2">Buscas por dia</p>
+              <ResponsiveContainer width="100%" height={100}>
+                <BarChart data={searchDayData}>
+                  <XAxis dataKey="date" tick={{ fontSize: 9 }} />
+                  <YAxis tick={{ fontSize: 9 }} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#7c3aed" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {noResultSearches.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-xs font-bold text-red-500 mb-2">⚠️ Termos sem resultado</p>
+              <div className="space-y-1">
+                {noResultSearches.map(([q, d], i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <p className="text-xs flex-1 text-gray-600 truncate">{q}</p>
+                    <span className="text-xs text-red-500 font-bold">{d.noResults}x sem resultado</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : <EmptyState text="Adicione tracking de recipe_search no app para ver dados." />}
+    </Section>
   );
 }
 
