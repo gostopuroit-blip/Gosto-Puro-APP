@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Lock } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
@@ -34,6 +34,7 @@ const dailyOccasions = [
 const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
 
 export default function Home() {
+  const [topRecipes, setTopRecipes] = useState([]);
   const [specialOccasions, setSpecialOccasions] = useState([]);
   const [lifestyleTags, setLifestyleTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,12 +50,14 @@ export default function Home() {
 
   const loadData = async () => {
        const today = new Date().toISOString().split("T")[0];
-       const [user, notifs, occasions] = await Promise.all([
+       const [user, notifs, occasions, recipes] = await Promise.all([
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
+    base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
     ]);
 
+    setTopRecipes(recipes);
     setUser(user);
     if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
@@ -172,6 +175,37 @@ export default function Home() {
               <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* Top Prepared — carousel with large cards */}
+      <div className="mt-8">
+        <div className="px-5">
+          <SectionHeader title="Le più preparate" linkPage="Recipes" />
+        </div>
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
+          {topRecipes.map((recipe) => {
+            if (!isPremium) {
+              return (
+                <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+                  <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover blur-sm opacity-40" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <Lock className="w-7 h-7 text-white drop-shadow-lg" />
+                    <span className="bg-amber-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">Passa a Premium</span>
+                  </div>
+                </a>
+              );
+            }
+            return (
+              <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+                <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
+                  <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
