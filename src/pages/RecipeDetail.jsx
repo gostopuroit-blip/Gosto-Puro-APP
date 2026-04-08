@@ -136,7 +136,7 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
-  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
+  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
   const isContentLocked = !isPremium && freeRecipeIds !== null && !freeRecipeIds.has(recipeId);
 
   const handlePrint = () => {
