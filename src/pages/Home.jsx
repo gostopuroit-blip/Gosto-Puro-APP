@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles, Lock, Crown } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
-import EnableNotificationsBanner from "@/components/EnableNotificationsBanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 
@@ -36,7 +34,6 @@ const dailyOccasions = [
 const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
 
 export default function Home() {
-  const [topRecipes, setTopRecipes] = useState([]);
   const [specialOccasions, setSpecialOccasions] = useState([]);
   const [lifestyleTags, setLifestyleTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,35 +42,25 @@ export default function Home() {
   const [userPlan, setUserPlan] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [user, setUser] = useState(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
-  const carouselRef = useRef(null);
-  const cardWidth = 188;
   const [dailyNotif, setDailyNotif] = useState(null);
-  const [topRecipesFreeIds, setTopRecipesFreeIds] = useState(new Set());
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
        const today = new Date().toISOString().split("T")[0];
-       const [recipes, user, notifs, occasions, freeRecipes] = await Promise.all([
-       base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
+       const [user, notifs, occasions] = await Promise.all([
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
-    base44.entities.FreeRecipe.list("-created_date", 500)]
-    );
+    ]);
 
-    setTopRecipes(recipes);
     setUser(user);
     if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
     setUserPlan(user?.plan || "free");
     setUserRole(user?.role || null);
     if (notifs?.length > 0) setDailyNotif(notifs[0]);
-    // Override freeRecipeIds with FreeRecipe entity IDs
-    // (stored in state via useMemo below — set directly here)
-    setTopRecipesFreeIds(freeRecipes.map((r) => r.recipe_id));
 
     const occasionImages = {
       "Autunno": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png",
@@ -120,11 +107,6 @@ export default function Home() {
 
   const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
 
-  // All occasions are free to browse — locking only applies to individual recipes inside
-
-  // Free recipe IDs from FreeRecipe entity
-  const freeRecipeIds = topRecipesFreeIds;
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -167,9 +149,6 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Notifications banner — shown to PWA users who haven't enabled yet */}
-      <EnableNotificationsBanner />
-
       {/* Daily Message */}
         <div className="mx-5 mb-4 mt-2 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />
@@ -193,50 +172,6 @@ export default function Home() {
               <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
             </Link>
           ))}
-        </div>
-      </div>
-
-      {/* Top Prepared — carousel with large cards */}
-      <div className="mt-8">
-        <div className="px-5">
-          <SectionHeader title="Le più preparate" linkPage="Recipes" />
-        </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {topRecipes.map((recipe) => {
-            // Per Basic: TUTTE le ricette in questa sezione sono bloccate, senza mostrare il nome
-            if (!isPremium) {
-              return (
-                <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                  <img
-                    src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover blur-sm opacity-40"
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                    <Lock className="w-7 h-7 text-white drop-shadow-lg" />
-                    <span className="bg-amber-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">Passa a Premium</span>
-                  </div>
-                </a>
-              );
-            }
-            return (
-              <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                <img
-                  src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
-                  alt={recipe.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                  <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
-                  <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
-                </div>
-              </Link>
-            );
-          })}
         </div>
       </div>
 
