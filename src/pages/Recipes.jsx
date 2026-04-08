@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { trackEvent } from "@/components/useAnalytics";
 import RecipeCard from "@/components/RecipeCard";
@@ -16,101 +16,18 @@ const filters = [
 { key: "valutate", label: "Meglio valutate" }];
 
 
-const FREE_CATEGORIES_CONST = ["Colazione", "Pranzo", "Cena"];
-const ITEMS_PER_PAGE = 12;
-
 export default function Recipes() {
   const location = useLocation();
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const [user, setUser] = useState(null);
   const [freeIds, setFreeIds] = useState([]);
-
-  // Build DB filter based on active tags
-  const buildFilter = (tags) => {
-    const filter = { status: "pubblicata" };
-    if (tags?.occasion) {
-      if (FREE_CATEGORIES_CONST.includes(tags.occasion)) {
-        filter.category = tags.occasion;
-      } else {
-        // occasions or lifestyle match — we'll fetch a broader set and filter client-side
-        // but limit to 100 max for performance
-      }
-    }
-    return filter;
-  };
-
-  // Load a specific page from the server
-  const loadPage = async (page, tags, filters, q, currentFreeIds) => {
-    const filter = { status: "pubblicata" };
-
-    // Category filter (Colazione/Pranzo/Cena) can be sent to DB directly
-    if (tags?.occasion && FREE_CATEGORIES_CONST.includes(tags.occasion)) {
-      filter.category = tags.occasion;
-    }
-
-    // Sort based on active filters
-    let sort = "-created_date";
-    if (filters.has("valutate")) sort = "-media_rating";
-    else if (filters.has("preparate")) sort = "-numero_preparate";
-    else if (filters.has("salvate")) sort = "-numero_salvate";
-
-    // For occasion/lifestyle tags that require array matching or search, we fetch more and filter client-side
-    const needsClientFilter = (tags?.occasion && !FREE_CATEGORIES_CONST.includes(tags.occasion)) || tags?.lifestyle || q?.trim() || filters.has("veloci");
-
-    if (needsClientFilter) {
-      // Fetch up to 300 and filter client-side (much less than 5000)
-      const data = await base44.entities.Recipe.filter(filter, sort, 300);
-      let result = data;
-
-      if (q?.trim()) {
-        const ql = q.toLowerCase();
-        result = result.filter(r =>
-          r.title.toLowerCase().includes(ql) ||
-          (r.description || "").toLowerCase().includes(ql) ||
-          (r.category || "").toLowerCase().includes(ql) ||
-          (r.occasions || []).some(o => o.toLowerCase().includes(ql)) ||
-          (r.lifestyle || []).some(l => l.toLowerCase().includes(ql)) ||
-          (r.ingredients || []).some(i => (i.name || "").toLowerCase().includes(ql))
-        );
-      }
-      if (tags?.occasion && !FREE_CATEGORIES_CONST.includes(tags.occasion)) {
-        result = result.filter(r =>
-          (r.occasions && r.occasions.includes(tags.occasion)) ||
-          (r.lifestyle && r.lifestyle.includes(tags.occasion))
-        );
-      }
-      if (tags?.lifestyle) {
-        result = result.filter(r =>
-          (r.lifestyle && r.lifestyle.includes(tags.lifestyle)) ||
-          (r.occasions && r.occasions.includes(tags.lifestyle))
-        );
-      }
-      if (filters.has("veloci")) {
-        result = result.filter(r => r.prep_time <= 15);
-      }
-
-      setTotalCount(result.length);
-      const start = (page - 1) * ITEMS_PER_PAGE;
-      return result.slice(start, start + ITEMS_PER_PAGE);
-    } else {
-      // Pure DB pagination — fast path, both calls in parallel
-      const skip = (page - 1) * ITEMS_PER_PAGE;
-      const [data, countData] = await Promise.all([
-        base44.entities.Recipe.filter(filter, sort, ITEMS_PER_PAGE, skip),
-        base44.entities.Recipe.filter(filter, "-created_date", 5000)
-      ]);
-      setTotalCount(countData.length);
-      return data;
-    }
-  };
+  const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -118,58 +35,92 @@ export default function Recipes() {
     const life = params.get("lifestyle");
     const page = parseInt(params.get("page") || "1", 10);
     const q = params.get("search") || "";
-    const filterParam = params.get("filter");
     setActiveTags({ occasion: occ || null, lifestyle: life || null });
     setCurrentPage(page);
     setSearch(q);
-    if (filterParam) {
-      setActiveFilters(new Set([filterParam]));
-    }
   }, [location.search]);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
-    base44.entities.FreeRecipe.list("-created_date", 500).then(r => setFreeIds(r.map(x => x.recipe_id)));
+    loadRecipes();
   }, []);
 
-  // Reload when page/tags/filters/search change
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const occ = params.get("occasion");
-    const life = params.get("lifestyle");
-    const page = parseInt(params.get("page") || "1", 10);
-    const q = params.get("search") || "";
-    const tags = { occasion: occ || null, lifestyle: life || null };
-
-    setLoading(true);
-    loadPage(page, tags, activeFilters, q, freeIds).then(data => {
-      setRecipes(data);
-      setLoading(false);
-    });
-  }, [location.search, activeFilters]);
-
   const loadRecipes = async () => {
-    const params = new URLSearchParams(location.search);
-    const occ = params.get("occasion");
-    const life = params.get("lifestyle");
-    const page = parseInt(params.get("page") || "1", 10);
-    const q = params.get("search") || "";
-    const tags = { occasion: occ || null, lifestyle: life || null };
-    setLoading(true);
-    const data = await loadPage(page, tags, activeFilters, q, freeIds);
+    const [data, freeRecipes] = await Promise.all([
+      base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000),
+      base44.entities.FreeRecipe.list("-created_date", 500),
+    ]);
     setRecipes(data);
+    setFreeIds(freeRecipes.map((r) => r.recipe_id));
     setLoading(false);
   };
 
 
 
+  // Define constants before useMemo
+  const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
+  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero"];
+  const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Proteiche", "Senza zucchero"];
   const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
 
+  const filteredRecipes = useMemo(() => {
+    let result = [...recipes];
+
+    // Search
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (r) =>
+        r.title.toLowerCase().includes(q) ||
+        (r.description || "").toLowerCase().includes(q) ||
+        (r.category || "").toLowerCase().includes(q) ||
+        (r.occasions || []).some((o) => o.toLowerCase().includes(q)) ||
+        (r.lifestyle || []).some((l) => l.toLowerCase().includes(q)) ||
+        (r.ingredients || []).some((i) => (i.name || "").toLowerCase().includes(q))
+      );
+    }
+
+    // Tags — filter by category for Colazione/Pranzo/Cena, or by occasions/lifestyle for others
+    if (activeTags.occasion) {
+      if (FREE_CATEGORIES.includes(activeTags.occasion)) {
+        // Filter by category
+        result = result.filter((r) => r.category === activeTags.occasion);
+      } else {
+        // Filter by occasions or lifestyle
+        result = result.filter(
+          (r) =>
+          r.occasions && r.occasions.includes(activeTags.occasion) ||
+          r.lifestyle && r.lifestyle.includes(activeTags.occasion)
+        );
+      }
+    }
+    if (activeTags.lifestyle) {
+      result = result.filter(
+        (r) =>
+        r.lifestyle && r.lifestyle.includes(activeTags.lifestyle) ||
+        r.occasions && r.occasions.includes(activeTags.lifestyle)
+      );
+    }
+
+    // Apply sort filters (only one at a time — last active wins)
+    const hasSort = activeFilters.has("salvate") || activeFilters.has("preparate") || activeFilters.has("valutate");
+    if (activeFilters.has("valutate")) {
+      result.sort((a, b) => (b.media_rating || 0) - (a.media_rating || 0));
+    } else if (activeFilters.has("preparate")) {
+      result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
+    } else if (activeFilters.has("salvate")) {
+      result.sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0));
+    }
+
+    if (activeFilters.has("veloci")) {
+      result = result.filter((r) => r.prep_time <= 15);
+    }
+
+    return result;
+  }, [recipes, search, activeFilters, activeTags]);
+
   const clearTag = (type) => {
-    const params = new URLSearchParams(location.search);
-    params.delete(type === "occasion" ? "occasion" : "lifestyle");
-    params.set("page", "1");
-    navigate({ search: params.toString() }, { replace: true });
+    setActiveTags((prev) => ({ ...prev, [type]: null }));
   };
 
   const goToPage = (page) => {
@@ -196,10 +147,23 @@ export default function Recipes() {
     goToPage(1);
   };
 
-  // recipes already paginated from server
-  const orderedRecipes = recipes;
-  const paginatedRecipes = recipes;
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+
+  // For Basic: free recipes first, then locked — for Premium: natural order
+  const orderedRecipes = useMemo(() => {
+    if (isPremium) return filteredRecipes;
+    const free = filteredRecipes.filter((r) => freeIds.includes(r.id));
+    const locked = filteredRecipes.filter((r) => !freeIds.includes(r.id));
+    return [...free, ...locked];
+  }, [filteredRecipes, isPremium, freeIds]);
+
+  const paginatedRecipes = useMemo(() => {
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    return orderedRecipes.slice(startIdx, endIdx);
+  }, [orderedRecipes, currentPage]);
+
+  const totalPages = Math.ceil(orderedRecipes.length / ITEMS_PER_PAGE);
 
   if (loading) {
     return (
@@ -236,7 +200,7 @@ export default function Recipes() {
                 }}
                 onBlur={() => {
                   if (search.trim().length >= 2) {
-                    trackEvent("recipe_search", { occasion_label: search.trim(), results_count: totalCount });
+                    trackEvent("recipe_search", { occasion_label: search.trim(), results_count: filteredRecipes.length });
                   }
                 }}
               className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#2D3F35] rounded-2xl border border-gray-100 dark:border-[#3D5246] text-sm placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F]/30 transition-all" />
