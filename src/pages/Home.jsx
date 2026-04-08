@@ -54,7 +54,7 @@ export default function Home() {
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
-    base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 10),
+    base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
     ]);
 
     setTopRecipes(recipes);
@@ -108,7 +108,7 @@ export default function Home() {
     return "Buonasera";
   };
 
-  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
+  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
 
   if (loading) {
     return (
