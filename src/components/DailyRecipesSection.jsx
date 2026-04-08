@@ -13,7 +13,7 @@ const filters = [
 ];
 
 export default function DailyRecipesSection({ occasion, user }) {
-  const isPremium = user?.plan === "premium" || user?.role === "admin" || user?.role === "premium" || user?.is_expert === true;
+  const isPremium = user?.plan === "premium" || user?.plan === "basic" || user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.is_expert === true;
   const [recipes, setRecipes] = useState([]);
   const [freeIds, setFreeIds] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");
