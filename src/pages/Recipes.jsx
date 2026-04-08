@@ -62,7 +62,7 @@ export default function Recipes() {
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
   const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero"];
   const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Proteiche", "Senza zucchero"];
-  const isPremium = !!user;
+  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
 
   const filteredRecipes = useMemo(() => {
     let result = [...recipes];
