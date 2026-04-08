@@ -30,6 +30,19 @@ export default function AdminDashboard({ onNavigate }) {
       const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
       usersResult = Array.isArray(raw) ? raw : [];
     } catch {}
+    // Fallback: busca direta via entidade User se a função backend falhou
+    if (usersResult.length === 0) {
+      let allUsers = [];
+      let skip = 0;
+      while (true) {
+        const batch = await base44.entities.User.list("-created_date", 200, skip).catch(() => []);
+        allUsers = allUsers.concat(batch);
+        if (batch.length < 200) break;
+        skip += 200;
+        if (skip > 5000) break;
+      }
+      usersResult = allUsers;
+    }
 
     const [webhooks] = await Promise.all([
       base44.entities.WebhookLog.filter({ status: "error" }).catch(() => []),
