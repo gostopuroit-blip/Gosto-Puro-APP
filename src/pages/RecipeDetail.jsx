@@ -120,7 +120,7 @@ export default function RecipeDetail() {
       currentUser
         ? base44.entities.UserRecipe.filter({ is_prepared: true, created_by: currentUser.email })
         : Promise.resolve([]),
-      base44.entities.FreeRecipe.list("-created_date", 9),
+      base44.entities.FreeRecipe.list("-created_date", 500),
     ]);
     setFreeRecipeIds(new Set(recentRecipes.map((r) => r.recipe_id)));
     if (recipes.length > 0) {
