@@ -101,11 +101,12 @@ export default function Recipes() {
       const start = (page - 1) * ITEMS_PER_PAGE;
       return result.slice(start, start + ITEMS_PER_PAGE);
     } else {
-      // Pure DB pagination — fast path
+      // Pure DB pagination — fast path, both calls in parallel
       const skip = (page - 1) * ITEMS_PER_PAGE;
-      const data = await base44.entities.Recipe.filter(filter, sort, ITEMS_PER_PAGE, skip);
-      // For total count estimate, fetch one extra batch to know if there's more
-      const countData = await base44.entities.Recipe.filter(filter, sort, 1000);
+      const [data, countData] = await Promise.all([
+        base44.entities.Recipe.filter(filter, sort, ITEMS_PER_PAGE, skip),
+        base44.entities.Recipe.filter(filter, "-created_date", 2000)
+      ]);
       setTotalCount(countData.length);
       return data;
     }
