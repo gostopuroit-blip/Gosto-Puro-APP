@@ -41,17 +41,18 @@ export default function Recipes() {
   }, [location.search]);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => setUser(null));
     loadRecipes();
   }, []);
 
   const loadRecipes = async () => {
-    const [data, freeRecipes] = await Promise.all([
+    const [data, freeRecipes, currentUser] = await Promise.all([
       base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000),
       base44.entities.FreeRecipe.list("-created_date", 500),
+      base44.auth.me().catch(() => null),
     ]);
     setRecipes(data);
     setFreeIds(freeRecipes.map((r) => r.recipe_id));
+    setUser(currentUser);
     setLoading(false);
   };
 
