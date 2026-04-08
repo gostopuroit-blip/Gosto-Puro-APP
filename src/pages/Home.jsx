@@ -194,6 +194,24 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Più preparate */}
+      <div className="mt-8 px-5">
+        <SectionHeader title="Le più preparate" linkPage="Recipes?filter=preparate" />
+        <div className="mt-3">
+          <Link
+            to={createPageUrl("Recipes?filter=preparate")}
+            onClick={() => trackEvent("occasion_click", { occasion_label: "preparate" })}
+            className="flex items-center gap-3 bg-white dark:bg-[#1A2B20] rounded-2xl px-4 py-3.5 shadow-sm border border-gray-100 dark:border-[#2D4A38] active:scale-95 transition-transform duration-150">
+            <span className="text-2xl">🍳</span>
+            <div>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Le più preparate dalla community</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Scopri le ricette più amate</p>
+            </div>
+            <span className="ml-auto text-gray-300 dark:text-gray-600">→</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Lifestyle — carousel */}
       <div className="mt-8 px-5">
         <SectionHeader title="Stile di Vita e Salute" />

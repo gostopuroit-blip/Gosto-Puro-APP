@@ -105,7 +105,7 @@ export default function Recipes() {
       const skip = (page - 1) * ITEMS_PER_PAGE;
       const [data, countData] = await Promise.all([
         base44.entities.Recipe.filter(filter, sort, ITEMS_PER_PAGE, skip),
-        base44.entities.Recipe.filter(filter, "-created_date", 2000)
+        base44.entities.Recipe.filter(filter, "-created_date", 5000)
       ]);
       setTotalCount(countData.length);
       return data;
@@ -118,9 +118,13 @@ export default function Recipes() {
     const life = params.get("lifestyle");
     const page = parseInt(params.get("page") || "1", 10);
     const q = params.get("search") || "";
+    const filterParam = params.get("filter");
     setActiveTags({ occasion: occ || null, lifestyle: life || null });
     setCurrentPage(page);
     setSearch(q);
+    if (filterParam) {
+      setActiveFilters(new Set([filterParam]));
+    }
   }, [location.search]);
 
   useEffect(() => {
