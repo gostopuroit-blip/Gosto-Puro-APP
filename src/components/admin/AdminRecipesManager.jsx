@@ -90,7 +90,7 @@ export default function AdminRecipesManager() {
     if (!form.gen_prompt.trim()) return toast.error("Inserisci un prompt prima di generare");
     setGenerating(true);
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Sei un cuoco italiano esperto. Crea una ricetta italiana autentica basata su questo contesto:\n\n${form.gen_prompt}\n\nRispondi SOLO in formato JSON con questa struttura esatta:\n{\n  "title": "...",\n  "description": "Una frase breve e invitante (max 20 parole)",\n  "prep_time": 25,\n  "servings": 4,\n  "calories": 320,\n  "difficulty": "Facile",\n  "ingredients": [\n    { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }\n  ],\n  "instructions": [\n    "Primo passo...",\n    "Secondo passo..."\n  ]\n}\n\nCategorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.\nDifficoltà valide: Facile, Media, Difficile.\nUsa ingredienti tipici italiani. Le istruzioni siano chiare e dettagliate.`,
+      prompt: `Sei un cuoco italiano esperto. Crea una ricetta italiana autentica basata su questo contesto:\n\n${form.gen_prompt}\n\nRispondi SOLO in formato JSON con questa struttura esatta:\n{\n  "title": "...",\n  "description": "Una frase breve e invitante (max 20 parole)",\n  "prep_time": 25,\n  "servings": 4,\n  "calories": 320,\n  "difficulty": "Facile",\n  "ingredients": [\n    { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }\n  ],\n  "instructions": [\n    "Primo passo...",\n    "Secondo passo..."\n  ],\n  "calorie": 320,\n  "proteine": 12,\n  "carboidrati": 45,\n  "grassi": 8,\n  "fibre": 3,\n  "zuccheri": 5,\n  "sodio": 420\n}\n\nCategorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.\nDifficoltà valide: Facile, Media, Difficile.\nUsa ingredienti tipici italiani. Le istruzioni siano chiare e dettagliate.\nCalcola i valori nutrizionali (calorie, proteine, carboidrati, grassi, fibre, zuccheri, sodio) in modo realistico e preciso per porzione, basandoti sugli ingredienti e quantità della ricetta.`,
       response_json_schema: {
         type: "object",
         properties: {
@@ -102,6 +102,13 @@ export default function AdminRecipesManager() {
           difficulty: { type: "string" },
           ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
           instructions: { type: "array", items: { type: "string" } },
+          calorie: { type: "number" },
+          proteine: { type: "number" },
+          carboidrati: { type: "number" },
+          grassi: { type: "number" },
+          fibre: { type: "number" },
+          zuccheri: { type: "number" },
+          sodio: { type: "number" },
         },
       },
     });
@@ -115,6 +122,13 @@ export default function AdminRecipesManager() {
       difficulty: result.difficulty || f.difficulty,
       ingredients: result.ingredients?.length ? result.ingredients : f.ingredients,
       instructions: result.instructions?.length ? result.instructions : f.instructions,
+      calorie: result.calorie || f.calorie,
+      proteine: result.proteine || f.proteine,
+      carboidrati: result.carboidrati || f.carboidrati,
+      grassi: result.grassi || f.grassi,
+      fibre: result.fibre || f.fibre,
+      zuccheri: result.zuccheri || f.zuccheri,
+      sodio: result.sodio || f.sodio,
     }));
     setGenerating(false);
     toast.success("Ricetta generata! Controlla e modifica se necessario.");
