@@ -1,0 +1,197 @@
+{
+  "name": "Recipe",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Recipe name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Recipe image URL"
+    },
+    "gen_prompt": {
+      "type": "string",
+      "description": "AI generation prompt for this recipe"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pubblicata",
+        "bozza"
+      ],
+      "description": "Publication status"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Colazione",
+        "Pranzo",
+        "Cena",
+        "Dolce",
+        "Snack",
+        "Bevanda"
+      ],
+      "description": "Meal category"
+    },
+    "occasions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Occasions tags"
+    },
+    "lifestyle": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lifestyle tags like Fitness, Detox"
+    },
+    "paese": {
+      "type": "string",
+      "enum": [
+        "Giappone",
+        "Messico",
+        "India",
+        "Thailandia",
+        "Spagna",
+        "Grecia",
+        "Stati Uniti",
+        "Francia",
+        "Cina",
+        "Marocco",
+        "Portogallo",
+        "Turchia",
+        "Libano",
+        "Per\u00f9",
+        "Vietnam"
+      ],
+      "description": "Country for Cucina Internazionale recipes"
+    },
+    "prep_time": {
+      "type": "number",
+      "description": "Preparation time in minutes"
+    },
+    "servings": {
+      "type": "number",
+      "description": "Base number of servings (original recipe)"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "Facile",
+        "Media",
+        "Difficile"
+      ],
+      "description": "Difficulty level"
+    },
+    "calories": {
+      "type": "number",
+      "description": "Calories per serving in kcal"
+    },
+    "calorie": {
+      "type": "number",
+      "description": "Calorie per porzione (kcal)"
+    },
+    "proteine": {
+      "type": "number",
+      "description": "Proteine (g)"
+    },
+    "carboidrati": {
+      "type": "number",
+      "description": "Carboidrati (g)"
+    },
+    "grassi": {
+      "type": "number",
+      "description": "Grassi (g)"
+    },
+    "fibre": {
+      "type": "number",
+      "description": "Fibre (g)"
+    },
+    "zuccheri": {
+      "type": "number",
+      "description": "Zuccheri (g)"
+    },
+    "sodio": {
+      "type": "number",
+      "description": "Sodio (mg)"
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "List of ingredients (for base servings)"
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Step by step instructions"
+    },
+    "numero_salvate": {
+      "type": "number",
+      "description": "Number of saves"
+    },
+    "numero_preparate": {
+      "type": "number",
+      "description": "Number of preparations"
+    },
+    "total_rating": {
+      "type": "number",
+      "description": "Sum of all ratings"
+    },
+    "rating_count": {
+      "type": "number",
+      "description": "Number of ratings"
+    },
+    "media_rating": {
+      "type": "number",
+      "description": "Average rating"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "category",
+    "prep_time",
+    "ingredients",
+    "instructions"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

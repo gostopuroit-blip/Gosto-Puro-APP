@@ -448,6 +448,29 @@ export default function RecipeDetail() {
         </Button>
       </div>
 
+      {/* Informazioni Nutrizionali */}
+      {(recipe.calorie || recipe.proteine || recipe.carboidrati || recipe.grassi || recipe.fibre || recipe.zuccheri || recipe.sodio) && (
+        <div className="px-5 mt-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-3">Informazioni Nutrizionali</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+            {[
+              { label: "Calorie per porzione", value: recipe.calorie, unit: "kcal" },
+              { label: "Proteine", value: recipe.proteine, unit: "g" },
+              { label: "Carboidrati", value: recipe.carboidrati, unit: "g" },
+              { label: "Grassi", value: recipe.grassi, unit: "g" },
+              { label: "Fibre", value: recipe.fibre, unit: "g" },
+              { label: "Zuccheri", value: recipe.zuccheri, unit: "g" },
+              { label: "Sodio", value: recipe.sodio, unit: "mg" },
+            ].filter(row => row.value != null).map((row, i, arr) => (
+              <div key={row.label} className={`flex items-center justify-between px-4 py-3 ${i < arr.length - 1 ? "border-b border-gray-50" : ""}`}>
+                <span className="text-sm text-gray-600">{row.label}</span>
+                <span className="text-sm font-bold text-gray-800">{row.value} {row.unit}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Comments */}
       <div className="px-5 mt-6">
         <RecipeComments recipeId={recipeId} currentUser={user} />

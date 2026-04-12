@@ -307,6 +307,27 @@ export default function AdminRecipesManager() {
               </div>
             </div>
 
+            {/* Valori Nutrizionali */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Valori Nutrizionali (per porzione)</label>
+              <div className="grid grid-cols-2 gap-2 mt-1.5">
+                {[
+                  { key: "calorie", label: "Calorie (kcal)" },
+                  { key: "proteine", label: "Proteine (g)" },
+                  { key: "carboidrati", label: "Carboidrati (g)" },
+                  { key: "grassi", label: "Grassi (g)" },
+                  { key: "fibre", label: "Fibre (g)" },
+                  { key: "zuccheri", label: "Zuccheri (g)" },
+                  { key: "sodio", label: "Sodio (mg)" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="text-[10px] text-gray-400">{label}</label>
+                    <Input type="number" placeholder="—" value={form[key] || ""} onChange={(e) => setForm({ ...form, [key]: e.target.value ? Number(e.target.value) : null })} className="rounded-xl mt-0.5" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Occasions */}
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Occasioni</label>
