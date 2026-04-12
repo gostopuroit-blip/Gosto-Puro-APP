@@ -172,10 +172,10 @@ export default function Home() {
               to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
               onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
               className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-              <div style={{ width: 160, height: 160, minWidth: 160, maxWidth: 160, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+              <div style={{ width: 130, height: 130, minWidth: 130, maxWidth: 130, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
                 <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
               </div>
-              <span style={{ fontSize: 12, textAlign: "center", maxWidth: 160, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{occ.label}</span>
+              <span style={{ fontSize: 11, textAlign: "center", maxWidth: 130, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{occ.label}</span>
             </Link>
           ))}
         </div>
@@ -220,7 +220,7 @@ export default function Home() {
             const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
             return (
               <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
-                <div style={{ width: 160, height: 160, minWidth: 160, maxWidth: 160, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                <div style={{ width: 130, height: 130, minWidth: 130, maxWidth: 130, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.nome} className="w-full h-full object-cover" />
                   ) : (
@@ -232,7 +232,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <span style={{ fontSize: 12, textAlign: "center", maxWidth: 160, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{product.nome}</span>
+                <span style={{ fontSize: 11, textAlign: "center", maxWidth: 130, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{product.nome}</span>
               </div>
             );
           })}
@@ -247,10 +247,10 @@ export default function Home() {
             <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
               onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
               className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-              <div style={{ width: 160, height: 160, minWidth: 160, maxWidth: 160, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
+              <div style={{ width: 130, height: 130, minWidth: 130, maxWidth: 130, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
                 {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
               </div>
-              <span style={{ fontSize: 12, textAlign: "center", maxWidth: 160, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{tag.label}</span>
+              <span style={{ fontSize: 11, textAlign: "center", maxWidth: 130, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{tag.label}</span>
             </Link>
           ))}
         </div>
