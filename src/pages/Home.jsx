@@ -215,26 +215,24 @@ export default function Home() {
       {/* Prodotti Gosto Puro */}
       <div className="mt-8 px-5">
         <SectionHeader title="Prodotti Gosto Puro" />
-        <div className="flex flex-col gap-3 mt-3">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
           {gostoPuroProducts.map((product) => {
             const isUnlocked = product.is_free || (user?.purchased_products || []).includes(product.slug);
             return (
-              <div key={product.id} className={`relative rounded-2xl overflow-hidden ${isUnlocked ? "active:scale-[0.98] transition-transform duration-150 cursor-pointer" : "cursor-default"}`} style={{ height: "120px" }}>
-                {product.image_url ? (
-                  <img src={product.image_url} alt={product.nome} className={`w-full h-full object-cover ${isUnlocked ? "" : "blur-sm opacity-40"}`} />
-                ) : (
-                  <div className={`w-full h-full bg-gradient-to-r from-[#2D6A4F] to-[#40916C] ${isUnlocked ? "" : "opacity-40"}`} />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center px-4">
-                  <p className={`font-bold text-sm leading-snug flex-1 pr-12 ${isUnlocked ? "text-white" : "text-white/50"}`}>{product.nome}</p>
-                </div>
-                {!isUnlocked && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1">
-                    <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                      <Lock className="w-5 h-5 text-amber-500" />
+              <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
+                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.nome} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
+                  )}
+                  {!isUnlocked && (
+                    <div className="absolute top-1 right-1 w-5 h-5 bg-amber-50 rounded-lg flex items-center justify-center">
+                      <Lock className="w-3 h-3 text-amber-500" />
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center w-[78px] leading-tight">{product.nome}</span>
               </div>
             );
           })}
