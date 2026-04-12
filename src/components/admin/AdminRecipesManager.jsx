@@ -63,7 +63,14 @@ export default function AdminRecipesManager() {
     setLoading(false);
   };
 
-  const allOccasions = [...new Set(occasions.filter(o => o.tipo === "giorno" || o.tipo === "speciale").map(o => o.label))];
+  const EXTRA_OCCASIONS_MANAGER = [
+    "Friggitrice ad Aria", "Diabetici", "Nutrizionista", "Dolci Fitness",
+    "Veloci 20min", "Cene Leggere", "Fitness Pratiche", "Pani e Dolci",
+    "Piano 35 Giorni", "Collezione Cucina", "Collezione Instagram",
+    "Pasti Congelati", "Pane Fatto in Casa",
+  ];
+  const dbOccasions = [...new Set(occasions.filter(o => o.tipo === "giorno" || o.tipo === "speciale").map(o => o.label))];
+  const allOccasions = [...new Set([...dbOccasions, ...EXTRA_OCCASIONS_MANAGER])];
   const allLifestyle = [...new Set(occasions.filter(o => o.tipo === "stile_vita").map(o => o.label))];
 
   const openNew = () => { setForm(emptyForm); setEditId(null); setShowForm(true); };

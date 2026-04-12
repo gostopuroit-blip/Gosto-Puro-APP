@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Image, Save, Loader2, ChevronDown, Plus, X } from "lucide-react";
+import { Sparkles, Image, Save, Loader2, ChevronDown, Plus, X, BookmarkCheck } from "lucide-react";
 import { toast } from "sonner";
 
 const difficulties = ["Facile", "Media", "Difficile"];
@@ -144,6 +144,13 @@ const countryProfiles = {
   },
 };
 
+const EXTRA_OCCASIONS = [
+  "Friggitrice ad Aria", "Diabetici", "Nutrizionista", "Dolci Fitness",
+  "Veloci 20min", "Cene Leggere", "Fitness Pratiche", "Pani e Dolci",
+  "Piano 35 Giorni", "Collezione Cucina", "Collezione Instagram",
+  "Pasti Congelati", "Pane Fatto in Casa",
+];
+
 export default function AdminRecipeGenerator() {
   const [occasions, setOccasions] = useState([]);
   const [loadingOcc, setLoadingOcc] = useState(true);
@@ -156,6 +163,8 @@ export default function AdminRecipeGenerator() {
   const [maxTime, setMaxTime] = useState(30);
   const [servings, setServings] = useState(4);
   const [extraNote, setExtraNote] = useState("");
+  const [masterPrompt, setMasterPrompt] = useState("");
+  const [savingPrompt, setSavingPrompt] = useState(false);
 
   const isInternational = selectedOcc?.label?.toLowerCase().includes("cucina internazionale") || selectedOcc?.label?.toLowerCase().includes("dal mondo");
 
@@ -172,7 +181,10 @@ export default function AdminRecipeGenerator() {
   useEffect(() => {
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 50)
       .then(setOccasions).finally(() => setLoadingOcc(false));
-    // Load ALL existing recipe titles to avoid duplicates
+    // Load prompt master from AppConfig
+    base44.entities.AppConfig.filter({ key: "prompt_mestre" }).then(configs => {
+      if (configs?.length > 0 && configs[0].value) setMasterPrompt(configs[0].value);
+    });
     const loadAllTitles = async () => {
       let all = [];
       let skip = 0;
@@ -540,12 +552,27 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
     return `${base} ${ingredients} ${colorHints} ${textureHints} ${nataleVisual}${capodannoVisual}${pranzoVisual}${cenaVisual} ${sandwichVisual} ${pastaVisual} ${fishVisual} ${peperonataVisual} ${lemonRule} ${modifiers}, ${fixed}.`;
   };
 
+  const savePromptMaster = async () => {
+    setSavingPrompt(true);
+    const existing = await base44.entities.AppConfig.filter({ key: "prompt_mestre" });
+    if (existing?.length > 0) {
+      await base44.entities.AppConfig.update(existing[0].id, { value: masterPrompt });
+    } else {
+      await base44.entities.AppConfig.create({ key: "prompt_mestre", value: masterPrompt, label: "Prompt Mestre Generatore" });
+    }
+    setSavingPrompt(false);
+    toast.success("Prompt salvato come default!");
+  };
+
   const handleGenerate = async () => {
     if (!selectedOcc) return toast.error("Seleziona un'occasione prima");
     setGenerating(true);
     setRecipe(null);
     setImageUrl("");
-    const prompt = buildRecipePrompt(selectedOcc, selectedCountry);
+    const basePrompt = buildRecipePrompt(selectedOcc, selectedCountry);
+    const prompt = masterPrompt.trim()
+      ? `${masterPrompt.trim()}\n\n===ISTRUZIONI RICETTA===\n\n${basePrompt}`
+      : basePrompt;
     const result = await base44.integrations.Core.InvokeLLM({
       prompt,
       response_json_schema: {
@@ -567,7 +594,6 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
     });
     // Force prep_time to match the user's selected value — the LLM often ignores it
     const normalizedResult = result ? { ...result, prep_time: maxTime } : result;
-    
     // Sanitize ingredient names
     if (normalizedResult?.ingredients) {
       normalizedResult.ingredients = normalizedResult.ingredients.map(ing => ({
@@ -635,6 +661,28 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
 
   return (
     <div className="space-y-5">
+      {/* Prompt Mestre */}
+      <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100 space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-bold text-amber-800">🧠 Prompt Mestre (opzionale)</p>
+          <button
+            onClick={savePromptMaster}
+            disabled={savingPrompt}
+            className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-xl transition-all disabled:opacity-50"
+          >
+            {savingPrompt ? <Loader2 className="w-3 h-3 animate-spin" /> : <BookmarkCheck className="w-3 h-3" />}
+            Salva come default
+          </button>
+        </div>
+        <textarea
+          value={masterPrompt}
+          onChange={e => setMasterPrompt(e.target.value)}
+          placeholder="Incolla qui il tuo prompt master con tutte le istruzioni di stile e formato..."
+          rows={4}
+          className="w-full text-xs px-3 py-2.5 rounded-xl border border-amber-200 bg-white focus:outline-none resize-none"
+        />
+        <p className="text-[10px] text-amber-600">Quando compilato, viene iniettato come istruzione principale prima di ogni generazione.</p>
+      </div>
       {/* Occasion selector */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-4">
         <p className="text-sm font-bold text-gray-800">1. Seleziona l'occasione</p>
@@ -662,6 +710,29 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
             </div>
           </div>
         ))}
+        {/* Prodotti GP — hardcoded */}
+        <div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">📦 Prodotti e Collezioni GP</p>
+          <div className="flex flex-wrap gap-2">
+            {EXTRA_OCCASIONS.map(label => {
+              const syntheticId = `extra_${label}`;
+              const isActive = selectedOcc?.id === syntheticId;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setSelectedOcc({ id: syntheticId, label, tipo: "speciale", icon: "📦", linee_guida: [], mood: "", categoria_principale: "all", stagione: "all" })}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                    isActive
+                      ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                      : "bg-gray-50 text-gray-600 border-gray-100 hover:border-[#2D6A4F]/30"
+                  }`}
+                >
+                  📦 {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Selected occasion preview */}
