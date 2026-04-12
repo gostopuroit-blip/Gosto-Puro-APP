@@ -220,7 +220,7 @@ export default function Home() {
             const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
             return (
               <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
-                <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                <div className="w-[110px] h-[110px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.nome} className="w-full h-full object-cover" />
                   ) : (
@@ -232,7 +232,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center w-[78px] leading-tight">{product.nome}</span>
+                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center w-[110px] leading-tight">{product.nome}</span>
               </div>
             );
           })}
