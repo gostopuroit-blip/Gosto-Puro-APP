@@ -215,24 +215,24 @@ export default function Home() {
       {/* Prodotti Gosto Puro */}
       <div className="mt-8 px-5">
         <SectionHeader title="Prodotti Gosto Puro" />
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
+        <div style={{ display: 'flex', flexDirection: 'row', overflowX: 'auto', gap: '12px', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '8px', marginLeft: '-20px', marginRight: '-20px' }}>
           {gostoPuroProducts.map((product) => {
             const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
             return (
-              <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
-                <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative flex-shrink-0" style={{ width: '110px', height: '110px', minWidth: '110px', minHeight: '110px' }}>
+              <div key={product.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0, cursor: 'pointer' }}>
+                <div style={{ width: '120px', height: '120px', minWidth: '120px', maxWidth: '120px', borderRadius: '12px', overflow: 'hidden', position: 'relative', flexShrink: 0, border: '1px solid #f3f4f6' }}>
                   {product.image_url ? (
-                    <img src={product.image_url} alt={product.nome} className="block w-full h-full" style={{ objectFit: 'cover', objectPosition: 'center' }} />
+                    <img src={product.image_url} alt={product.nome} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2D6A4F, #40916C)' }} />
                   )}
                   {!isUnlocked && (
-                    <div className="absolute top-1 right-1 w-5 h-5 bg-amber-50 rounded-lg flex items-center justify-center">
-                      <Lock className="w-3 h-3 text-amber-500" />
+                    <div style={{ position: 'absolute', top: '4px', right: '4px', width: '20px', height: '20px', background: '#fffbeb', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Lock style={{ width: '12px', height: '12px', color: '#f59e0b' }} />
                     </div>
                   )}
                 </div>
-                <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center w-[110px] leading-tight">{product.nome}</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--gusto-text-primary)', textAlign: 'center', width: '120px', lineHeight: '1.3' }}>{product.nome}</span>
               </div>
             );
           })}
