@@ -220,9 +220,9 @@ export default function Home() {
             const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
             return (
               <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
-                <div className="w-[110px] h-[110px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative flex-shrink-0" style={{ width: '110px', height: '110px', minWidth: '110px', minHeight: '110px' }}>
                   {product.image_url ? (
-                    <img src={product.image_url} alt={product.nome} className="w-full h-full object-cover" />
+                    <img src={product.image_url} alt={product.nome} className="block w-full h-full" style={{ objectFit: 'cover', objectPosition: 'center' }} />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
                   )}
