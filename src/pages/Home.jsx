@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles, Lock } from "lucide-react";
+import { Loader2, Sparkles, Lock, Crown } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
@@ -35,6 +35,7 @@ const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
 
 export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
+  const [gostoPuroProducts, setGostoPuroProducts] = useState([]);
   const [specialOccasions, setSpecialOccasions] = useState([]);
   const [lifestyleTags, setLifestyleTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,14 +51,16 @@ export default function Home() {
 
   const loadData = async () => {
        const today = new Date().toISOString().split("T")[0];
-       const [user, notifs, occasions, recipes] = await Promise.all([
+       const [user, notifs, occasions, recipes, products] = await Promise.all([
     base44.auth.me().catch(() => null),
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order"),
     base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
+    base44.entities.GostoPuroProduct.filter({ is_active: true }, "sort_order"),
     ]);
 
     setTopRecipes(recipes);
+    setGostoPuroProducts(products);
     setUser(user);
     if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
     if (user?.photo_url) setUserPhoto(user.photo_url);
@@ -209,20 +212,32 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Special Occasions — carousel */}
+      {/* Prodotti Gosto Puro */}
       <div className="mt-8 px-5">
-        <SectionHeader title="Occasioni Speciali" />
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {specialOccasions.map((occ) => (
-            <Link key={occ.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
-              onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
-              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-              <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
-                {occ.img ? <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{occ.icon}</span>}
+        <SectionHeader title="Prodotti Gosto Puro" />
+        <div className="flex flex-col gap-3 mt-3">
+          {gostoPuroProducts.map((product) => {
+            const isUnlocked = product.is_free || (user?.purchased_products || []).includes(product.slug);
+            return (
+              <div key={product.id} className={`relative rounded-2xl overflow-hidden ${isUnlocked ? "active:scale-[0.98] transition-transform duration-150 cursor-pointer" : "cursor-default"}`} style={{ height: "120px" }}>
+                {product.image_url ? (
+                  <img src={product.image_url} alt={product.nome} className={`w-full h-full object-cover ${isUnlocked ? "" : "blur-sm opacity-40"}`} />
+                ) : (
+                  <div className={`w-full h-full bg-gradient-to-r from-[#2D6A4F] to-[#40916C] ${isUnlocked ? "" : "opacity-40"}`} />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center px-4">
+                  <p className={`font-bold text-sm leading-snug flex-1 pr-12 ${isUnlocked ? "text-white" : "text-white/50"}`}>{product.nome}</p>
+                </div>
+                {!isUnlocked && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1">
+                    <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-amber-500" />
+                    </div>
+                  </div>
+                )}
               </div>
-              <span className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 text-center">{occ.label}</span>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
 
