@@ -175,7 +175,7 @@ export default function Home() {
               <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
                 <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
               </div>
-              <span style={{ fontSize: 10, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{occ.label}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
             </Link>
           ))}
         </div>
@@ -232,7 +232,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <span style={{ fontSize: 10, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{product.nome}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{product.nome}</span>
               </div>
             );
           })}
@@ -250,7 +250,7 @@ export default function Home() {
               <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
                 {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
               </div>
-              <span style={{ fontSize: 10, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word" }} className="font-semibold text-gray-700 dark:text-gray-300">{tag.label}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{tag.label}</span>
             </Link>
           ))}
         </div>
