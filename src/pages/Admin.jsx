@@ -22,9 +22,11 @@ import AdminBaseFreeRecipes from "@/components/admin/AdminBaseFreeRecipes";
 import AdminExperts from "@/components/admin/AdminExperts";
 import AdminBadWords from "@/components/admin/AdminBadWords";
 import AdminRecipeIngredientAudit from "@/components/admin/AdminRecipeIngredientAudit";
+import AdminUserProducts from "@/components/admin/AdminUserProducts";
+import AdminGostoPuroProducts from "@/components/admin/AdminGostoPuroProducts";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare, Gift, UserCheck, Filter } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Shield, MessageSquare, Gift, UserCheck, Filter, Package } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
@@ -47,6 +49,8 @@ const tabs = [
   { key: "webhooks",     label: "Webhook",        icon: Webhook },
   { key: "ebook",          label: "E-book Followup",  icon: BookOpen },
   { key: "premium_intel", label: "Intelligence Premium",    icon: Crown },
+  { key: "user_products",  label: "Prodotti Utenti", icon: Package },
+  { key: "gp_products",    label: "Prodotti GP",    icon: Package },
   { key: "impostazioni", label: "Impostazioni",   icon: Settings },
 ];
 
@@ -179,6 +183,8 @@ function AdminContent() {
           {activeTab === "webhooks"     && <AdminWebhooks />}
           {activeTab === "ebook"          && <AdminEbookFollowup />}
           {activeTab === "premium_intel"  && <AdminPremiumIntelligence />}
+          {activeTab === "user_products"  && <AdminUserProducts />}
+          {activeTab === "gp_products"    && <AdminGostoPuroProducts />}
           {activeTab === "impostazioni" && <AdminSettings />}
         </main>
       </div>
