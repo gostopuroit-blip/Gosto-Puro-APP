@@ -97,6 +97,20 @@
     "hotmart_product_id": {
       "type": "string",
       "description": "Hotmart product ID that granted premium access"
+    },
+    "purchased_products": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of Gosto Puro product IDs purchased by the user (e.g. frigo_aria, diabetici, piano35)"
+    },
+    "hotmart_product_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All historical Hotmart product IDs associated with this user (can have multiple purchases)"
     }
   },
   "required": [

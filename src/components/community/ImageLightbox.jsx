@@ -8,6 +8,7 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }) {
   const [touchStart, setTouchStart] = useState(null);
   const containerRef = useRef(null);
   const imageRef = useRef(null);
+  const lastPinchDistance = useRef(null);
 
   const currentImage = images[currentIdx];
   const isMultiple = images.length > 1;
@@ -77,13 +78,13 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }) {
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
-      const lastDistance = useRef(distance);
-      
-      if (lastDistance.current) {
-        const scale = distance / lastDistance.current;
+      if (lastPinchDistance.current) {
+        const scale = distance / lastPinchDistance.current;
         setZoom((z) => Math.max(1, Math.min(z * scale, 3)));
       }
-      lastDistance.current = distance;
+      lastPinchDistance.current = distance;
+    } else {
+      lastPinchDistance.current = null;
     }
   };
 
