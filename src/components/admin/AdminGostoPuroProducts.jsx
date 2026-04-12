@@ -87,9 +87,13 @@ export default function AdminGostoPuroProducts() {
                   </span>
                 </div>
                 {p.descricao && <p className="text-xs text-gray-400 mt-1 line-clamp-1">{p.descricao}</p>}
-                {p.webhook_url && (
-                  <p className="text-[10px] text-gray-400 mt-1 font-mono break-all line-clamp-1">🔗 {p.webhook_url}</p>
-                )}
+                <div className="mt-1">
+                  <p className="text-[10px] text-gray-400 font-semibold">Webhook Hotmart:</p>
+                  <p className="text-[10px] text-purple-600 font-mono break-all bg-purple-50 rounded px-1.5 py-0.5 mt-0.5 select-all">
+                    {`${window.location.origin}/api/hotmartProductWebhook`}
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Hotmart Product ID configurato: <span className="font-mono text-gray-600">{p.hotmart_product_id || '—'}</span></p>
+                </div>
               </div>
               <div className="flex gap-1.5 flex-shrink-0">
                 <button onClick={() => toggleActive(p)} className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold ${p.is_active ? "bg-blue-50 text-blue-500" : "bg-gray-100 text-gray-400"}`}>
