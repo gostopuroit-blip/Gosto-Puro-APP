@@ -52,7 +52,7 @@ export default function AdminUserProducts() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500">{users.length} utenti totali</p>
+      <p className="text-sm text-gray-500">{users.length} utenti totali · clicca su un utente per gestire i suoi prodotti</p>
       <div className="space-y-2">
         {users.map((u) => (
           <div key={u.id} className="bg-white rounded-2xl p-3 shadow-sm border border-gray-50 flex items-center gap-3">

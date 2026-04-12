@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,9 +90,11 @@ export default function AdminGostoPuroProducts() {
                 <div className="mt-1">
                   <p className="text-[10px] text-gray-400 font-semibold">Webhook Hotmart:</p>
                   <p className="text-[10px] text-purple-600 font-mono break-all bg-purple-50 rounded px-1.5 py-0.5 mt-0.5 select-all">
-                    {`${window.location.origin}/api/hotmartProductWebhook`}
+                    {window.location.origin}/api/hotmartProductWebhook
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Hotmart Product ID configurato: <span className="font-mono text-gray-600">{p.hotmart_product_id || '—'}</span></p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">
+                    ID Prodotto Hotmart: <span className="font-mono text-gray-600">{p.hotmart_product_id || "—"}</span>
+                  </p>
                 </div>
               </div>
               <div className="flex gap-1.5 flex-shrink-0">
@@ -126,7 +128,7 @@ export default function AdminGostoPuroProducts() {
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Occasioni (una per riga)</label>
               <textarea
-                placeholder="Natale&#10;Estate&#10;Capodanno"
+                placeholder={"Natale\nEstate\nCapodanno"}
                 value={(form.occasioni || []).join("\n")}
                 onChange={(e) => setForm({ ...form, occasioni: e.target.value.split("\n").map(s => s.trim()).filter(Boolean) })}
                 className="w-full mt-1 rounded-xl border border-gray-100 px-3 py-2 text-sm resize-none h-20 focus:outline-none"
