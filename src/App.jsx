@@ -5,11 +5,7 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import Community from './pages/Community';
-import CommunityRanking from './pages/CommunityRanking';
 import WhatToCook from './pages/WhatToCook';
-import ExpertProfile from './pages/ExpertProfile';
-import HashtagPage from './pages/HashtagPage';
 import Search from './pages/Search';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -64,11 +60,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/Community" element={<LayoutWrapper currentPageName="Community"><Community /></LayoutWrapper>} />
-      <Route path="/CommunityRanking" element={<LayoutWrapper currentPageName="CommunityRanking"><CommunityRanking /></LayoutWrapper>} />
       <Route path="/WhatToCook" element={<LayoutWrapper currentPageName="WhatToCook"><WhatToCook /></LayoutWrapper>} />
-      <Route path="/ExpertProfile" element={<LayoutWrapper currentPageName="ExpertProfile"><ExpertProfile /></LayoutWrapper>} />
-      <Route path="/Hashtag" element={<LayoutWrapper currentPageName="Hashtag"><HashtagPage /></LayoutWrapper>} />
       <Route path="/Search" element={<LayoutWrapper currentPageName="Search"><Search /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

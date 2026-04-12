@@ -11,9 +11,10 @@ const navItems = [
 { name: "Ricette", icon: BookOpen, page: "Recipes" },
 { name: "Cartelle", icon: FolderHeart, page: "Folders" },
 { name: "Planner", icon: CalendarDays, page: "Planner" },
-{ name: "Profilo", icon: UserCircle2, page: "Profile" }];
+{ name: "Profilo", icon: UserCircle2, page: "Profile" }
+];
 
-const communityPages = ["Community", "ExpertProfile"];
+
 
 
 // Capture PWA install prompt globally as early as possible
@@ -76,19 +77,7 @@ export default function Layout({ children, currentPageName }) {
     return <>{children}</>;
   }
 
-  // Community pages: only visible to admins, experts, and premium users
-  const canSeeCommunity = !user || user?.role === "admin" || user?.role === "expert" || user?.role === "premium" || user?.plan === "premium" || user?.is_expert === true;
-  if (communityPages.includes(currentPageName) && user !== null && !canSeeCommunity) {
-    return (
-      <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex items-center justify-center px-6">
-        <div className="text-center">
-          <p className="text-4xl mb-4">🔒</p>
-          <p className="text-gray-700 dark:text-gray-300 font-semibold text-lg">Em breve</p>
-          <p className="text-gray-400 text-sm mt-1">A Comunità sarà disponibile presto</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] flex flex-col overflow-x-hidden">
