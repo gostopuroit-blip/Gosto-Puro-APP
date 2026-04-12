@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Search, Loader2, X, Check, Upload, Sparkles, Image } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Loader2, X, Check, Upload, Sparkles, Image, ClipboardPaste } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,8 @@ export default function AdminRecipesManager() {
   const [deleting, setDeleting] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [showPaste, setShowPaste] = useState(true);
 
   useEffect(() => { load(); }, []);
 
@@ -73,7 +75,7 @@ export default function AdminRecipesManager() {
   const allOccasions = [...new Set([...dbOccasions, ...EXTRA_OCCASIONS_MANAGER])];
   const allLifestyle = [...new Set(occasions.filter(o => o.tipo === "stile_vita").map(o => o.label))];
 
-  const openNew = () => { setForm(emptyForm); setEditId(null); setShowForm(true); };
+  const openNew = () => { setForm(emptyForm); setEditId(null); setPasteText(""); setShowPaste(true); setShowForm(true); };
   const openEdit = (r) => {
     setForm({
       ...emptyForm, ...r,
@@ -81,6 +83,7 @@ export default function AdminRecipesManager() {
       instructions: r.instructions?.length ? r.instructions : [""],
     });
     setEditId(r.id);
+    setPasteText(""); setShowPaste(false);
     setShowForm(true);
   };
 
@@ -199,6 +202,101 @@ export default function AdminRecipesManager() {
     setForm((f) => ({ ...f, instructions: steps }));
   };
 
+  const handleParsePaste = () => {
+    const text = pasteText;
+    if (!text.trim()) return;
+
+    const get = (emoji) => {
+      const re = new RegExp(`${emoji}[^\\n]*[:\-]?\\s*([^\n]+)`, 'i');
+      const m = text.match(re);
+      return m ? m[1].trim() : null;
+    };
+
+    // Category
+    const catRaw = get('📂') || get('CATEGORIA');
+    const category = categories.find(c => catRaw?.toLowerCase().includes(c.toLowerCase())) || "Pranzo";
+
+    // Difficulty
+    const diffRaw = get('🎯') || get('DIFFICOLT');
+    const difficulty = difficulties.find(d => diffRaw?.toLowerCase().includes(d.toLowerCase())) || "Facile";
+
+    // Numeric fields
+    const getNum = (emoji, fallback) => {
+      const raw = get(emoji);
+      const n = parseInt(raw);
+      return isNaN(n) ? fallback : n;
+    };
+    const prep_time = getNum('⏱', 30);
+    const servings = getNum('🍽', 4);
+    const calories = getNum('🔥', null);
+
+    // Description / title
+    const description = get('📝') || "";
+    const titleMatch = text.match(/^(?:🍴|\*\*)?([^\n📂🎯⏱🍽🔥🧄👨‍🍳📝\*]+)/);
+    const title = description.length > 5 ? description.substring(0, 60) : (titleMatch ? titleMatch[1].trim().replace(/\*+/g, '') : "");
+
+    // Ingredients — lines after 🧄 section until next emoji section
+    let ingredients = [];
+    const ingSection = text.match(/🧄[^\n]*\n([\s\S]*?)(?=\n[👨📝🔋💪🍞🧂💧]|\n---|\.{3}|$)/);
+    if (ingSection) {
+      ingredients = ingSection[1].split('\n')
+        .map(l => l.trim().replace(/^[•\-\*]+\s*/, ''))
+        .filter(l => l.length > 2)
+        .map(l => {
+          const parts = l.split(/\s*[—–-]\s*/);
+          if (parts.length >= 2) {
+            return { name: parts[0].trim(), quantity: parts.slice(1).join(' ').trim(), category: "Altro" };
+          }
+          return { name: l, quantity: "", category: "Altro" };
+        });
+    }
+
+    // Instructions — lines after 👨‍🍳 section
+    let instructions = [];
+    const procSection = text.match(/👨[^\n]*\n([\s\S]*?)(?=\n📝|\n🔋|\n💪|\n---|\.{3}|$)/);
+    if (procSection) {
+      instructions = procSection[1].split('\n')
+        .map(l => l.trim().replace(/^(?:Passo\s*\d+[:\.]?|\d+[\.)\s]+)/, '').trim())
+        .filter(l => l.length > 5);
+    }
+
+    // Nutritional values
+    const parseNut = (label) => {
+      const re = new RegExp(`${label}[^\\d]*(\\d+(?:[.,]\\d+)?)`, 'i');
+      const m = text.match(re);
+      return m ? parseFloat(m[1].replace(',', '.')) : null;
+    };
+    const proteine = parseNut('Proteine');
+    const carboidrati = parseNut('Carboidrati');
+    const grassi = parseNut('Grassi');
+    const fibre = parseNut('Fibre');
+    const zuccheri = parseNut('Zuccheri');
+    const sodio = parseNut('Sodio');
+    const calorie = parseNut('Calorie') || parseNut('kcal');
+
+    setForm(f => ({
+      ...f,
+      title: title || f.title,
+      description: description || f.description,
+      category,
+      difficulty,
+      prep_time,
+      servings,
+      calories,
+      ingredients: ingredients.length ? ingredients : f.ingredients,
+      instructions: instructions.length ? instructions : f.instructions,
+      ...(calorie ? { calorie } : {}),
+      ...(proteine ? { proteine } : {}),
+      ...(carboidrati ? { carboidrati } : {}),
+      ...(grassi ? { grassi } : {}),
+      ...(fibre ? { fibre } : {}),
+      ...(zuccheri ? { zuccheri } : {}),
+      ...(sodio ? { sodio } : {}),
+    }));
+    setShowPaste(false);
+    toast.success("Ricetta interpretata! Controlla e modifica se necessario.");
+  };
+
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
 
   return (
@@ -255,6 +353,38 @@ export default function AdminRecipesManager() {
             <DialogTitle>{editId ? "Modifica Ricetta" : "Nuova Ricetta"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {/* Incolla Ricetta */}
+            {showPaste && (
+              <div className="bg-blue-50 rounded-2xl p-3 border border-blue-100 space-y-2">
+                <label className="text-[10px] text-blue-600 font-semibold uppercase">📋 Incolla la ricetta formattata</label>
+                <textarea
+                  value={pasteText}
+                  onChange={e => setPasteText(e.target.value)}
+                  placeholder="Incolla qui la ricetta nel formato Gosto Puro..."
+                  rows={5}
+                  className="w-full text-xs px-3 py-2.5 rounded-xl border border-blue-200 bg-white focus:outline-none resize-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleParsePaste}
+                    disabled={!pasteText.trim()}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold disabled:opacity-50"
+                  >
+                    <ClipboardPaste className="w-3.5 h-3.5" />
+                    Interpreta e Compila
+                  </button>
+                  <button type="button" onClick={() => setShowPaste(false)} className="px-3 py-2 rounded-xl border border-blue-200 text-blue-500 text-xs font-semibold">
+                    Salta
+                  </button>
+                </div>
+              </div>
+            )}
+            {!showPaste && (
+              <button type="button" onClick={() => setShowPaste(true)} className="text-[10px] text-blue-500 font-semibold flex items-center gap-1">
+                <ClipboardPaste className="w-3 h-3" /> Mostra campo incolla ricetta
+              </button>
+            )}
             {/* Prompt AI */}
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Prompt di generazione AI</label>
@@ -366,24 +496,6 @@ export default function AdminRecipesManager() {
               </div>
             </div>
 
-            {/* Country / Paese */}
-            <div>
-              <label className="text-[10px] text-gray-400 font-semibold uppercase">Paese (per bandiera 🌍)</label>
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                <button type="button"
-                  onClick={() => setForm((f) => ({ ...f, paese: "" }))}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${!form.paese ? "bg-[#2D6A4F] text-white border-[#2D6A4F]" : "border-gray-100 text-gray-500 bg-white"}`}>
-                  Nessuno
-                </button>
-                {countries.map((c) => (
-                  <button key={c.label} type="button"
-                    onClick={() => setForm((f) => ({ ...f, paese: c.label }))}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${form.paese === c.label ? "bg-[#2D6A4F] text-white border-[#2D6A4F]" : "border-gray-100 text-gray-500 bg-white"}`}>
-                    {c.flag} {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Lifestyle */}
             <div>
