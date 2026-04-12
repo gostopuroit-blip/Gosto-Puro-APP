@@ -217,7 +217,7 @@ export default function Home() {
         <SectionHeader title="Prodotti Gosto Puro" />
         <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
           {gostoPuroProducts.map((product) => {
-            const isUnlocked = product.is_free || (user?.purchased_products || []).includes(product.slug);
+            const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
             return (
               <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
                 <div className="w-[78px] h-[78px] rounded-2xl overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
