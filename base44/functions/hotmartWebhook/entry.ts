@@ -1,9 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Product IDs (assinatura premium)
-const PRODUCT_LIFETIME = "7079227";
-const PRODUCT_SUBSCRIPTION = "6991197";
-// Todos os outros produtos são tratados como e-book
+const PREMIUM_PRODUCT_IDS = ["7079227", "6991197"];
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -64,40 +61,14 @@ Deno.serve(async (req) => {
     return (Array.isArray(users) && users.length > 0) ? users[0] : null;
   };
 
-  // --- Ebook purchase handler ---
-  const handleEbookPurchase = async () => {
-    if (!email) return;
-    const transactionId = body.data?.purchase?.transaction || body.data?.purchase?.order_date || `${email}-${Date.now()}`;
-    const transactionStr = String(transactionId);
-
-    // Evitar duplicidade
-    const existing = await base44.asServiceRole.entities.EbookPurchaseTrigger.filter(
-      { hotmart_transaction_id: transactionStr },
-      "-created_date",
-      1
-    ).catch(() => []);
-
-    if (existing && existing.length > 0) {
-      await logEvent(event, "success", email, rawBody, "Ebook duplicate — ignored");
-      return Response.json({ success: true, action: "ebook_duplicate_ignored", email });
-    }
-
-    const approvedAt = new Date().toISOString();
-    const triggerAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-
-    await base44.asServiceRole.entities.EbookPurchaseTrigger.create({
-      user_email: email,
-      user_name: buyer.name || buyer.full_name || "",
-      hotmart_product_id: productId,
-      hotmart_transaction_id: transactionStr,
-      purchase_status: "approved",
-      purchase_approved_at: approvedAt,
-      email_trigger_at: triggerAt,
-      followup_email_sent: false,
-    });
-
-    await logEvent(event, "success", email, rawBody, "Ebook purchase registered — followup scheduled 48h");
-    return Response.json({ success: true, action: "ebook_purchase_registered", email, trigger_at: triggerAt });
+  // Find GostoPuroProduct by hotmart_product_id (compare as string AND number)
+  const findGPProduct = async (productId) => {
+    const allProducts = await base44.asServiceRole.entities.GostoPuroProduct.list("-created_date", 200);
+    return allProducts.find(p =>
+      String(p.hotmart_product_id) === String(productId) ||
+      p.hotmart_product_id === productId ||
+      p.hotmart_product_id === Number(productId)
+    ) || null;
   };
 
   const PURCHASE_EVENTS = ["PURCHASE_APPROVED", "SUBSCRIPTION_REACTIVATED", "PURCHASE_REACTIVATED"];
@@ -106,50 +77,99 @@ Deno.serve(async (req) => {
 
   try {
     if (PURCHASE_EVENTS.includes(event)) {
-      // Se não é produto de assinatura conhecido, trata como e-book
-      if (productId !== PRODUCT_LIFETIME && productId !== PRODUCT_SUBSCRIPTION) {
-        return await handleEbookPurchase();
-      }
       if (!email) {
         await logEvent(event, "error", "", rawBody, "No buyer email");
         return Response.json({ error: "No email" }, { status: 400 });
       }
 
-      let updateData = {
-        plan: "premium",
-        subscription_level: "premium",
-        subscription_status: "active",
+      // Step 1: Check if this is a GostoPuroProduct (addon/ebook product)
+      const gpProduct = await findGPProduct(productId);
+
+      if (gpProduct) {
+        // Add the product slug to the user's purchased_products
+        const user = await findUser(email);
+        if (user) {
+          const current = user.purchased_products || [];
+          const merged = [...new Set([...current, gpProduct.slug])];
+          await base44.asServiceRole.entities.User.update(user.id, { purchased_products: merged });
+          await logEvent(event, "success", email, rawBody, `Product slug '${gpProduct.slug}' added to user`);
+          return Response.json({ success: true, action: "product_slug_added", email, slug: gpProduct.slug });
+        } else {
+          // User not registered yet — save as pending
+          await base44.asServiceRole.entities.PendingPremium.create({
+            email,
+            product_id: productId,
+            event_type: event,
+            raw_payload: rawBody,
+            status: "pending",
+          });
+          await logEvent(event, "success", email, rawBody, `User not found — pending for slug '${gpProduct.slug}'`);
+          return Response.json({ success: true, action: "pending_created_for_product", email, slug: gpProduct.slug });
+        }
+      }
+
+      // Step 2: Not a GostoPuro product — check if it's a premium subscription product
+      if (PREMIUM_PRODUCT_IDS.includes(productId)) {
+        let updateData = {
+          plan: "premium",
+          subscription_level: "premium",
+          subscription_status: "active",
+          hotmart_product_id: productId,
+        };
+
+        if (productId === "7079227") {
+          updateData.subscription_plan = "lifetime";
+          updateData.expiration_date = null;
+        } else {
+          const planType = detectPlanType();
+          updateData.subscription_plan = planType;
+          updateData.expiration_date = getExpirationDate(planType);
+        }
+
+        const user = await findUser(email);
+        if (user) {
+          await base44.asServiceRole.entities.User.update(user.id, updateData);
+          await logEvent(event, "success", email, rawBody, "");
+          return Response.json({ success: true, action: "plan_upgraded", email, plan: updateData.subscription_plan });
+        } else {
+          await base44.asServiceRole.entities.PendingPremium.create({
+            email,
+            product_id: productId,
+            event_type: event,
+            raw_payload: rawBody,
+            status: "pending",
+          });
+          await logEvent(event, "success", email, rawBody, "User not found — saved as pending premium");
+          return Response.json({ success: true, action: "pending_created", email });
+        }
+      }
+
+      // Step 3: Unknown product — register ebook followup trigger as before
+      const transactionId = body.data?.purchase?.transaction || body.data?.purchase?.order_date || `${email}-${Date.now()}`;
+      const transactionStr = String(transactionId);
+      const existing = await base44.asServiceRole.entities.EbookPurchaseTrigger.filter(
+        { hotmart_transaction_id: transactionStr }, "-created_date", 1
+      ).catch(() => []);
+
+      if (existing && existing.length > 0) {
+        await logEvent(event, "success", email, rawBody, "Unknown product ebook duplicate — ignored");
+        return Response.json({ success: true, action: "ebook_duplicate_ignored", email });
+      }
+
+      const approvedAt = new Date().toISOString();
+      const triggerAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+      await base44.asServiceRole.entities.EbookPurchaseTrigger.create({
+        user_email: email,
+        user_name: buyer.name || buyer.full_name || "",
         hotmart_product_id: productId,
-      };
-
-      if (productId === PRODUCT_LIFETIME) {
-        updateData.subscription_plan = "lifetime";
-        updateData.expiration_date = null;
-      } else if (productId === PRODUCT_SUBSCRIPTION) {
-        const planType = detectPlanType();
-        updateData.subscription_plan = planType;
-        updateData.expiration_date = getExpirationDate(planType);
-      } else {
-        updateData.subscription_plan = "lifetime";
-        updateData.expiration_date = null;
-      }
-
-      const user = await findUser(email);
-      if (user) {
-        await base44.asServiceRole.entities.User.update(user.id, updateData);
-        await logEvent(event, "success", email, rawBody, "");
-        return Response.json({ success: true, action: "plan_upgraded", email, plan: updateData.subscription_plan });
-      } else {
-        await base44.asServiceRole.entities.PendingPremium.create({
-          email,
-          product_id: productId,
-          event_type: event,
-          raw_payload: rawBody,
-          status: "pending",
-        });
-        await logEvent(event, "success", email, rawBody, "User not found — saved as pending");
-        return Response.json({ success: true, action: "pending_created", email });
-      }
+        hotmart_transaction_id: transactionStr,
+        purchase_status: "approved",
+        purchase_approved_at: approvedAt,
+        email_trigger_at: triggerAt,
+        followup_email_sent: false,
+      });
+      await logEvent(event, "success", email, rawBody, `Unknown product ${productId} — ebook followup registered`);
+      return Response.json({ success: true, action: "ebook_purchase_registered", email, product_id: productId });
 
     } else if (REVOKE_EVENTS.includes(event)) {
       if (!email) {

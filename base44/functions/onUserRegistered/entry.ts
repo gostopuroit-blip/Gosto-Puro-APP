@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     return Response.json({ skipped: "no email" });
   }
 
-  // Look for a pending premium entry for this email
+  // Look for pending entries for this email
   const pending = await base44.asServiceRole.entities.PendingPremium.filter({
     email,
     status: "pending",
@@ -22,51 +22,58 @@ Deno.serve(async (req) => {
     return Response.json({ skipped: "no pending premium for " + email });
   }
 
-  // Apply purchased_products slugs for all pending entries
   const slugsToAdd = [];
+  let grantPremium = false;
+  let premiumProductId = null;
+
   for (const entry of pending) {
-    const productId = entry.product_id;
+    const productId = String(entry.product_id || "");
 
-    // Try to find GostoPuroProduct and add slug
-    const gpProducts = await base44.asServiceRole.entities.GostoPuroProduct.filter({ hotmart_product_id: productId });
-    if (gpProducts.length > 0) {
-      slugsToAdd.push(gpProducts[0].slug);
+    // Try to find matching GostoPuroProduct
+    const allProducts = await base44.asServiceRole.entities.GostoPuroProduct.list("-created_date", 200);
+    const gpProduct = allProducts.find(p => String(p.hotmart_product_id) === productId);
+
+    if (gpProduct) {
+      slugsToAdd.push(gpProduct.slug);
+    } else {
+      // It's a premium plan product
+      grantPremium = true;
+      premiumProductId = productId;
     }
 
-    // Legacy premium logic for first entry
-    const PRODUCT_LIFETIME = "7079227";
-    let updateData = {
-      plan: "premium",
-      subscription_level: "premium",
-      subscription_status: "active",
-      hotmart_product_id: productId,
-      subscription_plan: "lifetime",
-      expiration_date: null,
-    };
-
-    await base44.asServiceRole.entities.User.update(entityId, updateData);
     await base44.asServiceRole.entities.PendingPremium.update(entry.id, { status: "applied" });
-
-    await base44.asServiceRole.entities.WebhookLog.create({
-      source: "onUserRegistered",
-      event_type: "AUTO_APPLY_PREMIUM",
-      status: "success",
-      user_email: email,
-      payload: JSON.stringify({ pending_id: entry.id, product_id: productId }),
-      error_message: "",
-      timestamp: new Date().toISOString(),
-    });
   }
 
-  // Apply all slugs to purchased_products
+  // Build update object
+  const updateData = {};
+
+  if (grantPremium) {
+    updateData.plan = "premium";
+    updateData.subscription_level = "premium";
+    updateData.subscription_status = "active";
+    updateData.subscription_plan = "lifetime";
+    updateData.expiration_date = null;
+    if (premiumProductId) updateData.hotmart_product_id = premiumProductId;
+  }
+
   if (slugsToAdd.length > 0) {
-    const currentUser = await base44.asServiceRole.entities.User.filter({ email });
-    if (currentUser.length > 0) {
-      const current = currentUser[0].purchased_products || [];
-      const merged = [...new Set([...current, ...slugsToAdd])];
-      await base44.asServiceRole.entities.User.update(entityId, { purchased_products: merged });
-    }
+    const current = userData?.purchased_products || [];
+    updateData.purchased_products = [...new Set([...current, ...slugsToAdd])];
   }
 
-  return Response.json({ success: true, email, applied: pending.length, slugs: slugsToAdd });
+  if (Object.keys(updateData).length > 0) {
+    await base44.asServiceRole.entities.User.update(entityId, updateData);
+  }
+
+  await base44.asServiceRole.entities.WebhookLog.create({
+    source: "onUserRegistered",
+    event_type: "AUTO_APPLY_PENDING",
+    status: "success",
+    user_email: email,
+    payload: JSON.stringify({ applied: pending.length, slugs: slugsToAdd, premium: grantPremium }),
+    error_message: "",
+    timestamp: new Date().toISOString(),
+  });
+
+  return Response.json({ success: true, email, applied: pending.length, slugs: slugsToAdd, premium: grantPremium });
 });
