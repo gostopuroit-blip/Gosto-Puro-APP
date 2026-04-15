@@ -28,6 +28,7 @@ const countries = [
 ];
 
 const SOSTITUZIONE_TAGS = ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio", "Low carb", "Proteico", "Economico", "Facile da trovare"];
+const DIETARY_TAGS_OPTIONS = ["Senza glutine", "Senza lattosio", "Senza zucchero", "Vegano", "Vegetariano", "Low carb", "Alto contenuto proteico", "Diabetico", "Detox", "Fit", "Senza uova", "Senza frutti di mare"];
 
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
@@ -618,6 +619,23 @@ Testo della ricetta:\n${text}`,
                       onClick={() => setForm((f) => ({ ...f, lifestyle: selected ? f.lifestyle.filter((x) => x !== l) : [...(f.lifestyle || []), l] }))}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${selected ? "bg-[#E07A3A] text-white border-[#E07A3A]" : "border-gray-100 text-gray-500 bg-white"}`}>
                       {l}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Dietary Tags */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Tag Dietetici</label>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {DIETARY_TAGS_OPTIONS.map((tag) => {
+                  const selected = (form.dietary_tags || []).includes(tag);
+                  return (
+                    <button key={tag} type="button"
+                      onClick={() => setForm((f) => ({ ...f, dietary_tags: selected ? (f.dietary_tags || []).filter((x) => x !== tag) : [...(f.dietary_tags || []), tag] }))}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${selected ? "bg-green-600 text-white border-green-600" : "border-gray-100 text-gray-500 bg-white"}`}>
+                      {tag}
                     </button>
                   );
                 })}

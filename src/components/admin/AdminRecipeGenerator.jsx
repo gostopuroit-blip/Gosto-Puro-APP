@@ -379,6 +379,7 @@ Rispondi SOLO in formato JSON con questa struttura:
   "difficulty": "Facile",
   "occasions": ["${occ.label}"],
   "paese": "${country || ""}",
+  "dietary_tags": [],
   "ingredients": [
     { "name": "farina 00", "quantity": "200g", "category": "Dispensa" }
   ],
@@ -391,6 +392,28 @@ Rispondi SOLO in formato JSON con questa struttura:
 Categorie valide per ingredienti: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
 Categorie valide per la ricetta: Colazione, Pranzo, Cena, Dolce, Snack, Bevanda.
 Difficoltà valide: Facile, Media, Difficile.
+
+═══════════════════════════════════════
+ANALISI AUTOMATICA DIETARY_TAGS — OBBLIGATORIA
+═══════════════════════════════════════
+Analizza gli ingredienti e i macros della ricetta e popola il campo "dietary_tags" con tutte le tag applicabili tra queste (array di stringhe):
+["Senza glutine", "Senza lattosio", "Senza zucchero", "Vegano", "Vegetariano", "Low carb", "Alto contenuto proteico", "Diabetico", "Detox", "Fit", "Senza uova", "Senza frutti di mare"]
+
+Regole per applicare ogni tag:
+- "Senza glutine" → nessun ingrediente contiene frumento, segale, orzo, avena, farina di frumento, pane normale, pasta normale
+- "Senza lattosio" → nessun ingrediente contiene latte, formaggio, burro, panna, yogurt, mozzarella, ricotta, mascarpone, parmigiano, latticini
+- "Senza zucchero" → nessun ingrediente contiene zucchero, miele, sciroppo, frutta secca zuccherata in quantità
+- "Vegano" → nessun prodotto animale: niente carne, pesce, uova, latticini, miele
+- "Vegetariano" → niente carne né pesce (ma può avere uova e latticini)
+- "Low carb" → carboidrati < 20g per porzione
+- "Alto contenuto proteico" → proteine > 20g per porzione
+- "Diabetico" → zuccheri < 10g E carboidrati < 30g per porzione, senza zucchero raffinato
+- "Detox" → ricetta basata principalmente su verdure fresche, frutta, erbe, senza ingredienti processati
+- "Fit" → calorie < 400 per porzione E bilanciata nei macros
+- "Senza uova" → nessun ingrediente contiene uova
+- "Senza frutti di mare" → nessun ingrediente contiene gamberi, cozze, vongole, calamari, polpo, frutti di mare, crostacei
+Applica TUTTE le tag che si applicano correttamente. Lascia array vuoto [] se nessuna si applica.
+═══════════════════════════════════════
 
 REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
 - TUTTI gli ingredienti DEVONO avere nomi italiani corretti e reali.
@@ -587,6 +610,7 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
           difficulty: { type: "string" },
           occasions: { type: "array", items: { type: "string" } },
           paese: { type: "string" },
+          dietary_tags: { type: "array", items: { type: "string" } },
           ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
           instructions: { type: "array", items: { type: "string" } },
         },
@@ -635,6 +659,7 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
         servings: recipe.servings,
         difficulty: recipe.difficulty,
         occasions: recipe.occasions,
+        dietary_tags: recipe.dietary_tags || [],
         ingredients: recipe.ingredients,
         instructions: recipe.instructions,
         calories: editedCalories ? Number(editedCalories) : recipe.calories,
@@ -841,6 +866,14 @@ REGOLA CRITICA INGREDIENTI — NOMI ITALIANI CORRETTI:
               </span>
             </div>
           </div>
+
+          {recipe.dietary_tags?.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {recipe.dietary_tags.map(tag => (
+                <span key={tag} className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{tag}</span>
+              ))}
+            </div>
+          )}
 
           <div>
             <p className="text-xs font-bold text-gray-600 mb-1">Ingredienti ({recipe.ingredients?.length})</p>
