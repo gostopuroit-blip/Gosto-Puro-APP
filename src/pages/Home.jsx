@@ -207,6 +207,22 @@ export default function Home() {
               </div>
             );
           })}
+          {lifestyleTags.map((tag) => (
+            <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
+              onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
+              className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+              {tag.img ? (
+                <img src={tag.img} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+              ) : (
+                <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
+                  <span className="text-5xl">{tag.icon}</span>
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -241,22 +257,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Lifestyle — carousel */}
-      <div className="mt-8 px-5">
-        <SectionHeader title="Stile di Vita e Salute" />
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {lifestyleTags.map((tag) => (
-            <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
-              onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
-              className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-              <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] flex items-center justify-center">
-                {tag.img ? <img src={tag.img} alt={tag.label} className="w-full h-full object-cover" /> : <span className="text-3xl">{tag.icon}</span>}
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{tag.label}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
+
       </div>
     </PullToRefresh>);
 
