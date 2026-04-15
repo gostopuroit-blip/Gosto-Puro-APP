@@ -15,7 +15,7 @@ const TAG_COLORS = {
 
 const ALL_FILTER_TAGS = ["Tutti", "Vegano", "Vegetariano", "Senza glutine", "Low carb", "Economico", "Alta proteina"];
 
-export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSaved }) {
+export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSaved, onApplied }) {
   const sostituzioni = recipe.sostituzioni || [];
   const ingredientiSenza = (recipe.ingredients || []).filter(
     (ing) => !sostituzioni.find((s) => s.ingrediente_nome === ing.name)
@@ -108,7 +108,8 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
         await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate, macros_personalizzati });
       }
 
-      toast.success("✅ Sostituzioni salvate!");
+      toast.success("✅ Sostituzioni applicate con successo!");
+      if (onApplied) onApplied({ sostituzioni_applicate, macros_personalizzati });
       if (onSaved) onSaved();
     } catch (err) {
       console.error("APPLICA ERROR", err);

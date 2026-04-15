@@ -28,7 +28,7 @@ function scaleQty(qtyStr, ratio) {
   return unit ? `${formatted} ${unit}` : `${formatted}`;
 }
 
-function IngredientRow({ ing, index, total, ratio }) {
+function IngredientRow({ ing, index, total, ratio, activeSostituzione }) {
   const [checked, setChecked] = useState(false);
   const displayQty = scaleQty(ing.quantity, ratio);
   return (
@@ -45,6 +45,11 @@ function IngredientRow({ ing, index, total, ratio }) {
       </div>
       <span className={`text-sm flex-1 transition-all ${checked ? "line-through text-gray-300" : "text-gray-700"}`}>
         {ing.name}
+        {activeSostituzione && (
+          <span className="ml-2 text-[10px] font-bold bg-[#2D6A4F]/10 text-[#2D6A4F] px-1.5 py-0.5 rounded-full">
+            → {activeSostituzione}
+          </span>
+        )}
       </span>
       <span className={`text-sm font-medium flex-shrink-0 ${checked ? "text-gray-200" : "text-gray-400"}`}>
         {displayQty}
@@ -438,15 +443,21 @@ export default function RecipeDetail() {
               </a>
             ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-                {(recipe.ingredients || []).map((ing, i) => (
+                {(recipe.ingredients || []).map((ing, i) => {
+                  const sostApplied = (userRecipe?.sostituzioni_applicate || []).find(
+                    (s) => s.ingrediente_nome === ing.name
+                  );
+                  return (
                   <IngredientRow
                     key={i}
                     ing={ing}
                     index={i}
                     total={(recipe.ingredients || []).length}
                     ratio={servings / (recipe.servings || 4)}
+                    activeSostituzione={sostApplied?.sostituto_scelto}
                   />
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -488,6 +499,13 @@ export default function RecipeDetail() {
             userRecipe={userRecipe}
             recipeId={recipeId}
             onSaved={loadRecipe}
+            onApplied={({ sostituzioni_applicate, macros_personalizzati }) => {
+              setUserRecipe((prev) => ({
+                ...(prev || { recipe_id: recipeId }),
+                sostituzioni_applicate,
+                macros_personalizzati,
+              }));
+            }}
           />
         )}
 
