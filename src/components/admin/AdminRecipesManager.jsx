@@ -205,6 +205,8 @@ export default function AdminRecipesManager() {
     setForm((f) => ({ ...f, instructions: steps }));
   };
 
+  const [interpreting, setInterpreting] = useState(false);
+
   const parseReceitaPrompt = (text) => {
     const result = {};
 
@@ -320,19 +322,69 @@ export default function AdminRecipesManager() {
     return result;
   };
 
-  const handleParsePaste = () => {
+  const handleParsePaste = async () => {
     const text = pasteText;
     if (!text.trim()) return;
 
-    const parsed = parseReceitaPrompt(text);
+    setInterpreting(true);
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Analizza il seguente testo di una ricetta e restituisci SOLO un oggetto JSON valido, senza markdown, senza backtick, senza testo extra. Il JSON deve avere esattamente questi campi:
+{
+  "title": "string",
+  "description": "string (testo della DESCRIZIONE BREVE)",
+  "category": "string (Colazione|Pranzo|Cena|Dolce|Snack|Bevanda)",
+  "difficulty": "string (Facile|Media|Difficile)",
+  "prep_time": number,
+  "servings": number,
+  "calorie": number,
+  "proteine": number,
+  "carboidrati": number,
+  "grassi": number,
+  "fibre": number,
+  "zuccheri": number,
+  "sodio": number,
+  "occasions": ["array di stringhe con le occasioni rilevate"],
+  "ingredients": [{"name": "string", "quantity": "string", "category": "Dispensa"}],
+  "instructions": ["array di stringhe, un passo per elemento"],
+  "sostituzioni": [{"ingrediente_nome": "string", "opzioni": [{"nome": "string", "quantita": "string", "tags": ["string"], "impatto_calorie": number, "impatto_proteine": number, "impatto_carboidrati": number, "impatto_grassi": number}]}]
+}
+Testo della ricetta:\n${text}`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          category: { type: "string" },
+          difficulty: { type: "string" },
+          prep_time: { type: "number" },
+          servings: { type: "number" },
+          calorie: { type: "number" },
+          proteine: { type: "number" },
+          carboidrati: { type: "number" },
+          grassi: { type: "number" },
+          fibre: { type: "number" },
+          zuccheri: { type: "number" },
+          sodio: { type: "number" },
+          occasions: { type: "array", items: { type: "string" } },
+          ingredients: { type: "array", items: { type: "object" } },
+          instructions: { type: "array", items: { type: "string" } },
+          sostituzioni: { type: "array", items: { type: "object" } },
+        },
+      },
+    });
+    setInterpreting(false);
+
+    const parsed = result;
+    console.log('[AI Parser] result:', parsed);
 
     setForm(f => ({
       ...f,
+      ...(parsed.title ? { title: parsed.title } : {}),
+      ...(parsed.description ? { description: parsed.description } : {}),
       ...(parsed.category ? { category: parsed.category } : {}),
       ...(parsed.difficulty ? { difficulty: parsed.difficulty } : {}),
       ...(parsed.prep_time != null ? { prep_time: parsed.prep_time } : {}),
       ...(parsed.servings != null ? { servings: parsed.servings } : {}),
-      ...(parsed.description ? { description: parsed.description } : {}),
       ...(parsed.calorie != null ? { calorie: parsed.calorie } : {}),
       ...(parsed.proteine != null ? { proteine: parsed.proteine } : {}),
       ...(parsed.carboidrati != null ? { carboidrati: parsed.carboidrati } : {}),
@@ -420,11 +472,11 @@ export default function AdminRecipesManager() {
                   <button
                     type="button"
                     onClick={handleParsePaste}
-                    disabled={!pasteText.trim()}
+                    disabled={!pasteText.trim() || interpreting}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold disabled:opacity-50"
                   >
-                    <ClipboardPaste className="w-3.5 h-3.5" />
-                    Interpreta e Compila
+                    {interpreting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ClipboardPaste className="w-3.5 h-3.5" />}
+                    {interpreting ? "Interpretazione in corso..." : "Interpreta e Compila"}
                   </button>
                   <button type="button" onClick={() => setShowPaste(false)} className="px-3 py-2 rounded-xl border border-blue-200 text-blue-500 text-xs font-semibold">
                     Salta
