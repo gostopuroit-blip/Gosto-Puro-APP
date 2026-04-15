@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Check, RotateCcw } from "lucide-react";
@@ -22,15 +22,18 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
   );
 
   const [expanded, setExpanded] = useState({});
-  const [selected, setSelected] = useState(() => {
+  const [selected, setSelected] = useState({});
+  const [filterTag, setFilterTag] = useState("Tutti");
+  const [saving, setSaving] = useState(false);
+
+  // Sincronizza selected quando userRecipe cambia (es. dopo reload)
+  useEffect(() => {
     const init = {};
     (userRecipe?.sostituzioni_applicate || []).forEach((s) => {
       init[s.ingrediente_nome] = s.sostituto_scelto;
     });
-    return init;
-  });
-  const [filterTag, setFilterTag] = useState("Tutti");
-  const [saving, setSaving] = useState(false);
+    setSelected(init);
+  }, [userRecipe?.id, (userRecipe?.sostituzioni_applicate || []).length]);
 
   const toggleExpand = (nome) => setExpanded((e) => ({ ...e, [nome]: !e[nome] }));
 
@@ -86,29 +89,28 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
     });
 
     // Calcola macros personalizzati
-    const baseCalorie = recipe.calorie ?? recipe.calories ?? null;
     const macros_personalizzati = {
-      calorie: baseCalorie != null ? Math.round(baseCalorie + impatto.calorie) : null,
-      proteine: recipe.proteine != null ? Math.round(recipe.proteine + impatto.proteine) : null,
-      carboidrati: recipe.carboidrati != null ? Math.round(recipe.carboidrati + impatto.carboidrati) : null,
-      grassi: recipe.grassi != null ? Math.round(recipe.grassi + impatto.grassi) : null,
+      calorie: Math.round((recipe.calories || recipe.calorie || 0) + impatto.calorie),
+      proteine: Math.round((recipe.proteine || 0) + impatto.proteine),
+      carboidrati: Math.round((recipe.carboidrati || 0) + impatto.carboidrati),
+      grassi: Math.round((recipe.grassi || 0) + impatto.grassi),
     };
 
-    if (userRecipe) {
+    if (userRecipe?.id) {
       await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate, macros_personalizzati });
     } else {
       await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate, macros_personalizzati });
     }
 
     setSaving(false);
-    toast.success("Sostituzioni salvate! ✅");
+    toast.success("Sostituzioni applicate con successo! ✅");
     if (onSaved) onSaved();
   };
 
   const handleRipristina = async () => {
     setSaving(true);
     setSelected({});
-    if (userRecipe) {
+    if (userRecipe?.id) {
       await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate: [], macros_personalizzati: null });
     }
     setSaving(false);
