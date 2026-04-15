@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Search, Heart, Star, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,7 +15,9 @@ const OCCASION_ICONS = {
   "Per due": "💑", "Natale e Capodanno": "🎄",
 };
 
+const DAILY_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 const CATEGORY_PILLS = ["Tutte", "Colazione", "Pranzo", "Cena", "Snack", "Dolce", "Bevanda"];
+const PAGE_SIZE = 6;
 
 const DIETARY_TAG_COLORS = {
   "Senza glutine": "bg-green-900/40 text-green-300",
@@ -32,36 +34,68 @@ const DIETARY_TAG_COLORS = {
   "Senza frutti di mare": "bg-purple-900/40 text-purple-300",
 };
 
+// Fetch all pages of published recipes
+async function fetchAllRecipes() {
+  const batchSize = 500;
+  let all = [];
+  let skip = 0;
+  while (true) {
+    const batch = await base44.entities.Recipe.filter(
+      { status: "pubblicata" },
+      "-created_date",
+      batchSize,
+      skip
+    );
+    all = all.concat(batch);
+    if (batch.length < batchSize) break;
+    skip += batchSize;
+  }
+  return all;
+}
+
+// Pick N random unique items from array
+function pickRandom(arr, n) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
 export default function OccasionRecipesPage() {
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const occasion = params.get("occasion") || "";
 
-  const [recipes, setRecipes] = useState([]);
+  const [allOccasionRecipes, setAllOccasionRecipes] = useState([]); // all recipes for this occasion
+  const [dailyRecipes, setDailyRecipes] = useState([]);
   const [userRecipes, setUserRecipes] = useState({});
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tutte");
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 6;
+
+  const showDaily = DAILY_OCCASIONS.includes(occasion);
 
   useEffect(() => {
-    if (occasion) loadRecipes();
+    if (occasion) loadData();
   }, [occasion]);
 
-  const loadRecipes = async () => {
+  const loadData = async () => {
     setLoading(true);
     const [allRecipes, user] = await Promise.all([
-      base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 300),
+      fetchAllRecipes(),
       base44.auth.me().catch(() => null),
     ]);
 
-    // Filter by occasion (in occasions array OR lifestyle array)
+    // Filter by occasion (in occasions OR lifestyle array)
     const filtered = allRecipes.filter((r) =>
       (r.occasions || []).includes(occasion) ||
       (r.lifestyle || []).includes(occasion)
     );
-    setRecipes(filtered);
+    setAllOccasionRecipes(filtered);
+
+    // Pick 3 random for "Ricette del Giorno"
+    if (DAILY_OCCASIONS.includes(occasion)) {
+      setDailyRecipes(pickRandom(filtered, 3));
+    }
 
     // Load user favorites
     if (user) {
@@ -74,13 +108,19 @@ export default function OccasionRecipesPage() {
     setLoading(false);
   };
 
-  const filteredRecipes = recipes.filter((r) => {
-    const matchesQuery = !query.trim() ||
-      r.title?.toLowerCase().includes(query.toLowerCase()) ||
-      r.description?.toLowerCase().includes(query.toLowerCase());
-    const matchesCategory = activeCategory === "Tutte" || r.category === activeCategory;
-    return matchesQuery && matchesCategory;
-  });
+  // Client-side filter (search + category), excluding daily recipes from main list
+  const dailyIds = useMemo(() => new Set(dailyRecipes.map((r) => r.id)), [dailyRecipes]);
+
+  const filteredRecipes = useMemo(() => {
+    return allOccasionRecipes.filter((r) => {
+      if (showDaily && dailyIds.has(r.id)) return false;
+      const matchesQuery = !query.trim() ||
+        r.title?.toLowerCase().includes(query.toLowerCase()) ||
+        r.description?.toLowerCase().includes(query.toLowerCase());
+      const matchesCategory = activeCategory === "Tutte" || r.category === activeCategory;
+      return matchesQuery && matchesCategory;
+    });
+  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -91,11 +131,10 @@ export default function OccasionRecipesPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Reset to page 1 when filters change
   const handleQueryChange = (val) => { setQuery(val); setPage(1); };
   const handleCategoryChange = (cat) => { setActiveCategory(cat); setPage(1); };
 
-  const categories = [...new Set(recipes.map((r) => r.category).filter(Boolean))];
+  const categories = [...new Set(allOccasionRecipes.map((r) => r.category).filter(Boolean))];
   const icon = OCCASION_ICONS[occasion] || "🍽️";
 
   return (
@@ -111,15 +150,17 @@ export default function OccasionRecipesPage() {
               <span className="text-2xl">{icon}</span>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">{occasion}</h1>
             </div>
-            <p className="text-sm text-gray-400 mt-0.5">Collezione completa · {recipes.length} ricette</p>
+            <p className="text-sm text-gray-400 mt-0.5">
+              Collezione completa · {loading ? "…" : allOccasionRecipes.length} ricette
+            </p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="flex gap-4 mb-4">
           {[
-            { label: "Ricette", value: recipes.length },
-            { label: "Categorie", value: categories.length },
+            { label: "Ricette", value: loading ? "…" : allOccasionRecipes.length },
+            { label: "Categorie", value: loading ? "…" : categories.length },
             { label: "Preferite", value: Object.keys(userRecipes).length },
           ].map((s) => (
             <div key={s.label} className="flex-1 bg-gray-50 dark:bg-white/5 rounded-xl py-2 px-3 text-center">
@@ -165,54 +206,116 @@ export default function OccasionRecipesPage() {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
           </div>
-        ) : filteredRecipes.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-4xl mb-3">🍽️</p>
-            <p className="text-gray-400 font-semibold">Nessuna ricetta trovata</p>
-            {query && <p className="text-gray-500 text-sm mt-1">Prova a modificare la ricerca</p>}
-          </div>
         ) : (
           <>
-            <p className="text-xs text-gray-400 mb-3">
-              Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
-            </p>
-            <div className="space-y-3">
-              {pagedRecipes.map((recipe) => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  occasion={occasion}
-                  isSaved={!!userRecipes[recipe.id]}
-                />
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-6">
-                <button
-                  onClick={() => handlePageChange(safePage - 1)}
-                  disabled={safePage === 1}
-                  className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  ← Anterior
-                </button>
-                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  {safePage} / {totalPages}
-                </span>
-                <button
-                  onClick={() => handlePageChange(safePage + 1)}
-                  disabled={safePage === totalPages}
-                  className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Próxima →
-                </button>
+            {/* Ricette del Giorno — only for Colazione, Pranzo, Cena */}
+            {showDaily && dailyRecipes.length > 0 && !query && activeCategory === "Tutte" && (
+              <div className="mb-6">
+                <h2 className="text-base font-bold text-gray-900 dark:text-white mb-3">
+                  Ricette del Giorno 🍽️
+                </h2>
+                <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-1 px-1 pb-1">
+                  {dailyRecipes.map((recipe) => (
+                    <DailyRecipeCard
+                      key={recipe.id}
+                      recipe={recipe}
+                      isSaved={!!userRecipes[recipe.id]}
+                    />
+                  ))}
+                </div>
+                <div className="mt-5 border-t border-gray-100 dark:border-[#2A2A2A]" />
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-4 mb-3">
+                  Tutte le ricette
+                </p>
               </div>
+            )}
+
+            {filteredRecipes.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-4xl mb-3">🍽️</p>
+                <p className="text-gray-400 font-semibold">Nessuna ricetta trovata</p>
+                {query && <p className="text-gray-500 text-sm mt-1">Prova a modificare la ricerca</p>}
+              </div>
+            ) : (
+              <>
+                <p className="text-xs text-gray-400 mb-3">
+                  Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
+                </p>
+                <div className="space-y-3">
+                  {pagedRecipes.map((recipe) => (
+                    <RecipeCard
+                      key={recipe.id}
+                      recipe={recipe}
+                      occasion={occasion}
+                      isSaved={!!userRecipes[recipe.id]}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-6">
+                    <button
+                      onClick={() => handlePageChange(safePage - 1)}
+                      disabled={safePage === 1}
+                      className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      ← Anterior
+                    </button>
+                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                      {safePage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(safePage + 1)}
+                      disabled={safePage === totalPages}
+                      className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Próxima →
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
       </div>
     </div>
+  );
+}
+
+function DailyRecipeCard({ recipe, isSaved }) {
+  const kcal = recipe.calorie ?? recipe.calories;
+  return (
+    <Link
+      to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}
+      className="flex-shrink-0 w-44 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden shadow-sm active:scale-[0.97] transition-transform"
+    >
+      <div className="relative w-full h-28">
+        <img
+          src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=300"}
+          alt={recipe.title}
+          className="w-full h-full object-cover"
+        />
+        {isSaved && (
+          <div className="absolute top-2 right-2 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
+            <Heart className="w-3 h-3 text-white fill-white" />
+          </div>
+        )}
+        {kcal && (
+          <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            🔥 {kcal} kcal
+          </div>
+        )}
+      </div>
+      <div className="p-2.5">
+        <p className="text-xs font-bold text-gray-900 dark:text-white leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {recipe.title}
+        </p>
+        {recipe.prep_time && (
+          <p className="text-[10px] text-gray-400 mt-1">⏱ {recipe.prep_time} min</p>
+        )}
+      </div>
+    </Link>
   );
 }
 
@@ -225,7 +328,7 @@ function RecipeCard({ recipe, occasion, isSaved }) {
       className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm"
     >
       {/* Thumbnail */}
-      <div className="w-24 h-24 flex-shrink-0 relative">
+      <div className="w-24 flex-shrink-0 relative self-stretch">
         <img
           src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200"}
           alt={recipe.title}
@@ -252,8 +355,9 @@ function RecipeCard({ recipe, occasion, isSaved }) {
           )}
         </div>
 
-        {/* Title */}
-        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 mb-1.5">
+        {/* Title — never truncated, up to 2 lines */}
+        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug mb-1.5"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {recipe.title}
         </p>
 
