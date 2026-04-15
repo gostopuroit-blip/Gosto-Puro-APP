@@ -348,6 +348,7 @@ export default function AdminRecipesManager() {
   "instructions": ["array di stringhe, un passo per elemento"],
   "sostituzioni": [{"ingrediente_nome": "string", "opzioni": [{"nome": "string", "quantita": "string", "tags": ["string"], "impatto_calorie": number, "impatto_proteine": number, "impatto_carboidrati": number, "impatto_grassi": number}]}]
 }
+IMPORTANTE: Il campo 'calorie' deve essere estratto dalla riga 'KCAL: 320' o 'KCAL 320'. È un numero intero. NON lasciare null. Se trovi 'KCAL' seguito da un numero, quel numero VA nel campo 'calorie'.
 Testo della ricetta:\n${text}`,
       response_json_schema: {
         type: "object",
@@ -375,6 +376,11 @@ Testo della ricetta:\n${text}`,
     setInterpreting(false);
 
     const parsed = result;
+    // Fallback: se calorie è null/undefined/0, estrarre dal testo originale
+    if (!parsed.calorie) {
+      const kcalMatch = text.match(/KCAL[:\s]+(\d+)/i);
+      if (kcalMatch) parsed.calorie = parseInt(kcalMatch[1]);
+    }
     console.log('[AI Parser] result:', parsed);
 
     setForm(f => ({
