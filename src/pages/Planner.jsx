@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const MEAL_TIMES = {
@@ -30,6 +31,7 @@ export default function Planner() {
   const [recipes, setRecipes] = useState({});
   const [weekStartDay, setWeekStartDay] = useState(0);
   const [user, setUser] = useState(null);
+  const [showDurationModal, setShowDurationModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -83,12 +85,12 @@ export default function Planner() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
         <p className="text-gray-400 text-center">Nenhum planner ativo. Crie um novo!</p>
         <Button
-          onClick={() => navigate(createPageUrl("WhatToCook"))}
+          onClick={() => setShowDurationModal(true)}
           className="bg-[#2D6A4F] hover:bg-[#235c43] text-white"
         >
-          <Sparkles className="w-4 h-4 mr-2" />
-          Gerar Novo Planner
+          Genera nuovo planner
         </Button>
+        <DurationModal open={showDurationModal} onOpenChange={setShowDurationModal} navigate={navigate} />
       </div>
     );
   }
@@ -360,13 +362,41 @@ export default function Planner() {
       {/* Bottom button */}
       <div className="fixed bottom-24 left-0 right-0 px-5 max-w-lg mx-auto">
         <Button
-          onClick={() => navigate(createPageUrl("WhatToCook"))}
+          onClick={() => setShowDurationModal(true)}
           className="w-full bg-[#2D6A4F] hover:bg-[#235c43] text-white rounded-xl py-6"
         >
-          <Sparkles className="w-5 h-5 mr-2" />
-          Genera nuovo planner con IA
+          Genera nuovo planner
         </Button>
+        <DurationModal open={showDurationModal} onOpenChange={setShowDurationModal} navigate={navigate} />
       </div>
     </div>
+  );
+}
+
+function DurationModal({ open, onOpenChange, navigate }) {
+  const durations = [7, 15, 30];
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-full max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Quanti giorni desideri?</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3">
+          {durations.map((days) => (
+            <Button
+              key={days}
+              onClick={() => {
+                onOpenChange(false);
+                navigate(createPageUrl(`WhatToCook?days=${days}`));
+              }}
+              className="bg-[#2D6A4F] hover:bg-[#235c43] text-white py-6 text-base font-semibold"
+            >
+              {days} giorni
+            </Button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
