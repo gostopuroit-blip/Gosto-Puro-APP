@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Loader2, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Check, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,18 @@ export default function AdminGostoPuroProducts() {
   const [editId, setEditId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm((prev) => ({ ...prev, image_url: file_url }));
+    setUploading(false);
+    toast.success("Immagine caricata!");
+  };
 
   useEffect(() => { load(); }, []);
 
@@ -122,7 +134,25 @@ export default function AdminGostoPuroProducts() {
             <Input placeholder="Nome *" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="rounded-xl" />
             <Input placeholder="Slug * (es: frigo_aria)" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className="rounded-xl" />
             <textarea placeholder="Descrizione" value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className="w-full rounded-xl border border-gray-100 px-3 py-2 text-sm resize-none h-16 focus:outline-none" />
-            <Input placeholder="URL Immagine" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="rounded-xl" />
+            <div className="space-y-1.5">
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Immagine di copertina</label>
+              {form.image_url && (
+                <img src={form.image_url} alt="preview" className="w-full h-32 object-cover rounded-xl border border-gray-100" />
+              )}
+              <div className="flex gap-2">
+                <Input placeholder="URL Immagine" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="rounded-xl flex-1" />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex-shrink-0 flex items-center gap-1.5 bg-purple-50 text-purple-600 border border-purple-200 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-100 transition-colors disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {uploading ? "..." : "Upload"}
+                </button>
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            </div>
             <Input placeholder="Webhook URL" value={form.webhook_url} onChange={(e) => setForm({ ...form, webhook_url: e.target.value })} className="rounded-xl" />
             <Input placeholder="Hotmart Product ID" value={form.hotmart_product_id} onChange={(e) => setForm({ ...form, hotmart_product_id: e.target.value })} className="rounded-xl" />
             <div>
