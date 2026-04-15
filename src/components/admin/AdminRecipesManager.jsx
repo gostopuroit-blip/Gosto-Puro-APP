@@ -391,7 +391,7 @@ Testo della ricetta:\n${text}`,
       ...(parsed.difficulty ? { difficulty: parsed.difficulty } : {}),
       ...(parsed.prep_time != null ? { prep_time: parsed.prep_time } : {}),
       ...(parsed.servings != null ? { servings: parsed.servings } : {}),
-      ...(parsed.calorie != null ? { calorie: parsed.calorie } : {}),
+      ...(parsed.calorie != null ? { calorie: parsed.calorie, calories: parsed.calorie } : {}),
       ...(parsed.proteine != null ? { proteine: parsed.proteine } : {}),
       ...(parsed.carboidrati != null ? { carboidrati: parsed.carboidrati } : {}),
       ...(parsed.grassi != null ? { grassi: parsed.grassi } : {}),
@@ -564,7 +564,7 @@ Testo della ricetta:\n${text}`,
               </div>
               <div>
                 <label className="text-[10px] text-gray-400 font-semibold uppercase">kcal</label>
-                <Input type="number" value={form.calories || ""} onChange={(e) => setForm({ ...form, calories: e.target.value })} className="rounded-xl mt-1" />
+                <Input type="number" value={form.calories || form.calorie || ""} onChange={(e) => { const v = e.target.value ? Number(e.target.value) : null; setForm({ ...form, calories: v, calorie: v }); }} className="rounded-xl mt-1" />
               </div>
             </div>
 

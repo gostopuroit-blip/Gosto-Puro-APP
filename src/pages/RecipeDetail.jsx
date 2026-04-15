@@ -361,13 +361,13 @@ export default function RecipeDetail() {
           </div>
 
           <p className="text-sm text-gray-600 mt-4 leading-relaxed">{recipe.description}</p>
-          {recipe.calories && (
+          {(recipe.calories || recipe.calorie) && (
             <div className="flex items-center gap-3 mt-3 bg-orange-50 rounded-xl px-3 py-2.5 w-fit">
               <span className="text-base">🔥</span>
               <div>
-                <div className="text-xs font-bold text-orange-600">{recipe.calories} kcal / porzione</div>
+                <div className="text-xs font-bold text-orange-600">{recipe.calories || recipe.calorie} kcal / porzione</div>
                 <div className="text-xs text-orange-400 mt-0.5">
-                  Totale: {Math.round(recipe.calories * servings)} kcal ({servings} {servings === 1 ? "porzione" : "porzioni"})
+                  Totale: {Math.round((recipe.calories || recipe.calorie) * servings)} kcal ({servings} {servings === 1 ? "porzione" : "porzioni"})
                 </div>
               </div>
             </div>
