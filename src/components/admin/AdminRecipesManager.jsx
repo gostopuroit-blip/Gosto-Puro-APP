@@ -209,38 +209,54 @@ export default function AdminRecipesManager() {
     const text = pasteText;
     if (!text.trim()) return;
 
-    const get = (emoji) => {
-      const re = new RegExp(`${emoji}[^\\n]*[:\-]?\\s*([^\n]+)`, 'i');
+    const getLine = (pattern) => {
+      const re = new RegExp(pattern + '[^\\n]*[:\\-]?\\s*([^\\n]+)', 'i');
       const m = text.match(re);
       return m ? m[1].trim() : null;
     };
 
-    // Category
-    const catRaw = get('📂') || get('CATEGORIA');
+    const parseNum = (pattern) => {
+      const re = new RegExp(pattern + '[^\\d]*(\\d+(?:[.,]\\d+)?)', 'i');
+      const m = text.match(re);
+      return m ? parseFloat(m[1].replace(',', '.')) : null;
+    };
+
+    // --- Category ---
+    const catRaw = getLine('📂') || getLine('CATEGORIA');
     const category = categories.find(c => catRaw?.toLowerCase().includes(c.toLowerCase())) || "Pranzo";
 
-    // Difficulty
-    const diffRaw = get('🎯') || get('DIFFICOLT');
+    // --- Difficulty ---
+    const diffRaw = getLine('🎯') || getLine('DIFFICOLT');
     const difficulty = difficulties.find(d => diffRaw?.toLowerCase().includes(d.toLowerCase())) || "Facile";
 
-    // Numeric fields
-    const getNum = (emoji, fallback) => {
-      const raw = get(emoji);
-      const n = parseInt(raw);
-      return isNaN(n) ? fallback : n;
-    };
-    const prep_time = getNum('⏱', 30);
-    const servings = getNum('🍽', 4);
-    const calories = getNum('🔥', null);
+    // --- Prep time & servings ---
+    const prep_time = parseNum('⏱') || parseNum('TEMPO') || 30;
+    const servings = parseNum('🍽') || parseNum('PORZIONI') || 4;
 
-    // Description / title
-    const description = get('📝') || "";
-    const titleMatch = text.match(/^(?:🍴|\*\*)?([^\n📂🎯⏱🍽🔥🧄👨‍🍳📝\*]+)/);
+    // --- Description / title ---
+    const description = getLine('📝') || getLine('DESCRIZIONE') || "";
+    const titleMatch = text.match(/^(?:🍴|\*\*)?([^\n📂🎯⏱🍽🔥🧄👨‍🍳📝🔄💊\*]+)/);
     const title = description.length > 5 ? description.substring(0, 60) : (titleMatch ? titleMatch[1].trim().replace(/\*+/g, '') : "");
 
-    // Ingredients — lines after 🧄 section until next emoji section
+    // --- Calorie (🔥 KCAL) ---
+    const calorie =
+      parseNum('🔥\\s*KCAL') ||
+      parseNum('KCAL') ||
+      parseNum('Calorie') ||
+      parseNum('🔥') ||
+      null;
+
+    // --- Nutritional values ---
+    const proteine = parseNum('Proteine');
+    const carboidrati = parseNum('Carboidrati');
+    const grassi = parseNum('Grassi');
+    const fibre = parseNum('Fibre');
+    const zuccheri = parseNum('Zuccheri');
+    const sodio = parseNum('Sodio');
+
+    // --- Ingredients ---
     let ingredients = [];
-    const ingSection = text.match(/🧄[^\n]*\n([\s\S]*?)(?=\n[👨📝🔋💪🍞🧂💧]|\n---|\.{3}|$)/);
+    const ingSection = text.match(/🧄[^\n]*\n([\s\S]*?)(?=\n[👨📝🔋💪🍞🧂💧🔄💊]|\n---|\.{3}|$)/);
     if (ingSection) {
       ingredients = ingSection[1].split('\n')
         .map(l => l.trim().replace(/^[•\-\*]+\s*/, ''))
@@ -254,28 +270,82 @@ export default function AdminRecipesManager() {
         });
     }
 
-    // Instructions — lines after 👨‍🍳 section
+    // --- Instructions ---
     let instructions = [];
-    const procSection = text.match(/👨[^\n]*\n([\s\S]*?)(?=\n📝|\n🔋|\n💪|\n---|\.{3}|$)/);
+    const procSection = text.match(/👨[^\n]*\n([\s\S]*?)(?=\n📝|\n🔋|\n💪|\n🔄|\n💊|\n---|\.{3}|$)/);
     if (procSection) {
       instructions = procSection[1].split('\n')
         .map(l => l.trim().replace(/^(?:Passo\s*\d+[:\.]?|\d+[\.)\s]+)/, '').trim())
         .filter(l => l.length > 5);
     }
 
-    // Nutritional values
-    const parseNut = (label) => {
-      const re = new RegExp(`${label}[^\\d]*(\\d+(?:[.,]\\d+)?)`, 'i');
-      const m = text.match(re);
-      return m ? parseFloat(m[1].replace(',', '.')) : null;
-    };
-    const proteine = parseNut('Proteine');
-    const carboidrati = parseNut('Carboidrati');
-    const grassi = parseNut('Grassi');
-    const fibre = parseNut('Fibre');
-    const zuccheri = parseNut('Zuccheri');
-    const sodio = parseNut('Sodio');
-    const calorie = parseNut('Calorie') || parseNut('kcal');
+    // --- Sostituzioni ---
+    // Format: "NomeIngrediente → NomeSostituto (quantità) | tags: Tag1, Tag2 | impatto: +Xkcal, +Xg proteine, ..."
+    let sostituzioni = [];
+    const sostSection = text.match(/🔄[^\n]*\n([\s\S]*?)(?=\n[📂🎯⏱🍽🔥🧄👨📝💊]|\n---|\.{3}|$)/);
+    if (sostSection) {
+      const lines = sostSection[1].split('\n').map(l => l.trim()).filter(l => l.includes('→'));
+      const byIngredient = {};
+      lines.forEach(line => {
+        const arrowParts = line.split('→');
+        if (arrowParts.length < 2) return;
+        const ingNome = arrowParts[0].trim().replace(/^[•\-\*]+\s*/, '');
+        const rest = arrowParts.slice(1).join('→');
+
+        // Extract parts separated by |
+        const segments = rest.split('|').map(s => s.trim());
+        const firstSeg = segments[0] || "";
+        // nome (quantità)
+        const qMatch = firstSeg.match(/^(.+?)\s*\(([^)]+)\)/);
+        const nome = qMatch ? qMatch[1].trim() : firstSeg.trim();
+        const quantita = qMatch ? qMatch[2].trim() : "";
+
+        // tags: Tag1, Tag2
+        let tags = [];
+        const tagSeg = segments.find(s => /^tags?:/i.test(s));
+        if (tagSeg) {
+          tags = tagSeg.replace(/^tags?:\s*/i, '').split(',').map(t => t.trim()).filter(Boolean);
+        }
+
+        // impatto: +Xkcal, +Xg proteine, +Xg carboidrati, +Xg grassi
+        let impatto_calorie = 0, impatto_proteine = 0, impatto_carboidrati = 0, impatto_grassi = 0;
+        const impattoSeg = segments.find(s => /^impatto:/i.test(s));
+        if (impattoSeg) {
+          const imp = impattoSeg.replace(/^impatto:\s*/i, '');
+          const kcalM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*kcal/i);
+          const protM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*g?\s*prot/i);
+          const carbM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*g?\s*carb/i);
+          const grassM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*g?\s*gras/i);
+          if (kcalM) impatto_calorie = parseFloat(kcalM[1].replace(',', '.'));
+          if (protM) impatto_proteine = parseFloat(protM[1].replace(',', '.'));
+          if (carbM) impatto_carboidrati = parseFloat(carbM[1].replace(',', '.'));
+          if (grassM) impatto_grassi = parseFloat(grassM[1].replace(',', '.'));
+        }
+
+        if (!byIngredient[ingNome]) byIngredient[ingNome] = [];
+        byIngredient[ingNome].push({ nome, quantita, tags, impatto_calorie, impatto_proteine, impatto_carboidrati, impatto_grassi });
+      });
+      sostituzioni = Object.entries(byIngredient).map(([ingrediente_nome, opzioni]) => ({ ingrediente_nome, opzioni }));
+    }
+
+    // --- Occasions auto-mapping ---
+    const catOccasionMap = { "Colazione": "Colazione", "Pranzo": "Pranzo", "Cena": "Cena", "Dolce": "Dolci" };
+    const keywordOccasions = [
+      { keywords: ["fit", "fitness", "proteic"], occasion: "Fit" },
+      { keywords: ["diabet"], occasion: "Diabete" },
+      { keywords: ["detox"], occasion: "Detox" },
+      { keywords: ["low carb", "lowcarb"], occasion: "Low carb" },
+      { keywords: ["friggitric", "friggitrice"], occasion: "Friggitrice ad Aria" },
+      { keywords: ["vegano", "vegan"], occasion: "Vegano" },
+      { keywords: ["senza glutine", "gluten"], occasion: "Senza glutine" },
+      { keywords: ["veloce", "veloci", "20 min"], occasion: "Veloci" },
+    ];
+    const textLower = text.toLowerCase();
+    const autoOccasions = [];
+    if (catOccasionMap[category]) autoOccasions.push(catOccasionMap[category]);
+    keywordOccasions.forEach(({ keywords, occasion }) => {
+      if (keywords.some(kw => textLower.includes(kw))) autoOccasions.push(occasion);
+    });
 
     setForm(f => ({
       ...f,
@@ -285,16 +355,17 @@ export default function AdminRecipesManager() {
       difficulty,
       prep_time,
       servings,
-      calories,
+      occasions: autoOccasions.length ? [...new Set([...(f.occasions || []), ...autoOccasions])] : f.occasions,
       ingredients: ingredients.length ? ingredients : f.ingredients,
       instructions: instructions.length ? instructions : f.instructions,
-      ...(calorie ? { calorie } : {}),
-      ...(proteine ? { proteine } : {}),
-      ...(carboidrati ? { carboidrati } : {}),
-      ...(grassi ? { grassi } : {}),
-      ...(fibre ? { fibre } : {}),
-      ...(zuccheri ? { zuccheri } : {}),
-      ...(sodio ? { sodio } : {}),
+      ...(calorie != null ? { calorie } : {}),
+      ...(proteine != null ? { proteine } : {}),
+      ...(carboidrati != null ? { carboidrati } : {}),
+      ...(grassi != null ? { grassi } : {}),
+      ...(fibre != null ? { fibre } : {}),
+      ...(zuccheri != null ? { zuccheri } : {}),
+      ...(sodio != null ? { sodio } : {}),
+      ...(sostituzioni.length ? { sostituzioni } : {}),
     }));
     setShowPaste(false);
     toast.success("Ricetta interpretata! Controlla e modifica se necessario.");
