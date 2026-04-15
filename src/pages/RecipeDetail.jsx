@@ -323,6 +323,24 @@ export default function RecipeDetail() {
             </div>
           </div>
 
+          {/* Macros box */}
+          <div className="flex gap-2 mt-4">
+            {[
+              { label: "Calorie", value: recipe.calorie ?? recipe.calories, unit: "kcal" },
+              { label: "Proteine", value: recipe.proteine, unit: "g" },
+              { label: "Carboidrati", value: recipe.carboidrati, unit: "g" },
+              { label: "Grassi", value: recipe.grassi, unit: "g" },
+            ].map((macro) => (
+              <div key={macro.label} className="flex-1 bg-gray-50 rounded-xl py-2.5 px-1 flex flex-col items-center gap-0.5">
+                <span className="text-base font-bold text-gray-800 leading-tight">
+                  {macro.value != null ? macro.value : "—"}
+                </span>
+                <span className="text-[10px] text-gray-400 font-medium text-center leading-tight">{macro.label}</span>
+                {macro.value != null && <span className="text-[10px] text-gray-300">{macro.unit}</span>}
+              </div>
+            ))}
+          </div>
+
           <p className="text-sm text-gray-600 mt-4 leading-relaxed">{recipe.description}</p>
           {recipe.calories && (
             <div className="flex items-center gap-3 mt-3 bg-orange-50 rounded-xl px-3 py-2.5 w-fit">
