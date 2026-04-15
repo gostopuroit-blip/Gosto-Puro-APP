@@ -193,18 +193,38 @@ export default function Home() {
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {gostoPuroProducts.map((product) => {
             const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
-            return (
-              <div key={product.id} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden cursor-pointer" style={{ width: "200px", height: "250px" }}>
-                {product.image_url ? (
+            const hasOccasion = product.occasioni && product.occasioni.length > 0;
+            const canNavigate = hasOccasion && product.image_url;
+            
+            return canNavigate ? (
+              <Link 
+                key={product.id} 
+                to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
+                className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
+                style={{ width: "200px", height: "250px" }}
+              >
+                {product.image_url && (
                   <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                ) : (
-                  <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
                 )}
                 {!isUnlocked && (
                   <div className="absolute top-2 right-2 w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center shadow">
                     <Lock className="w-4 h-4 text-amber-500" />
                   </div>
                 )}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
+                </div>
+              </Link>
+            ) : (
+              <div key={product.id} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden cursor-not-allowed" style={{ width: "200px", height: "250px" }}>
+                {product.image_url ? (
+                  <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0, opacity: 0.4 }} className="grayscale" />
+                ) : (
+                  <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center" />
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Em breve</p>
+                </div>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                   <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
                 </div>
