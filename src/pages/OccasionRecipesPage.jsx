@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Search, Heart, Star, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,6 +18,8 @@ const OCCASION_ICONS = {
 const DAILY_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 const CATEGORY_PILLS = ["Tutte", "Colazione", "Pranzo", "Cena", "Snack", "Dolce", "Bevanda"];
 const PAGE_SIZE = 6;
+// Max recipes to fetch in a single query — covers all known occasions
+const FETCH_LIMIT = 1000;
 
 const DIETARY_TAG_COLORS = {
   "Senza glutine": "bg-green-900/40 text-green-300",
@@ -34,37 +36,15 @@ const DIETARY_TAG_COLORS = {
   "Senza frutti di mare": "bg-purple-900/40 text-purple-300",
 };
 
-// Fetch all pages of published recipes
-async function fetchAllRecipes() {
-  const batchSize = 500;
-  let all = [];
-  let skip = 0;
-  while (true) {
-    const batch = await base44.entities.Recipe.filter(
-      { status: "pubblicata" },
-      "-created_date",
-      batchSize,
-      skip
-    );
-    all = all.concat(batch);
-    if (batch.length < batchSize) break;
-    skip += batchSize;
-  }
-  return all;
-}
-
-// Pick N random unique items from array
-function pickRandom(arr, n) {
-  const shuffled = [...arr].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n);
-}
+// Module-level cache so navigating back doesn't re-fetch
+const recipesCache = {};
 
 export default function OccasionRecipesPage() {
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const occasion = params.get("occasion") || "";
 
-  const [allOccasionRecipes, setAllOccasionRecipes] = useState([]); // all recipes for this occasion
+  const [allOccasionRecipes, setAllOccasionRecipes] = useState([]);
   const [dailyRecipes, setDailyRecipes] = useState([]);
   const [userRecipes, setUserRecipes] = useState({});
   const [loading, setLoading] = useState(true);
@@ -75,42 +55,56 @@ export default function OccasionRecipesPage() {
   const showDaily = DAILY_OCCASIONS.includes(occasion);
 
   useEffect(() => {
-    if (occasion) loadData();
+    if (!occasion) return;
+    loadData();
   }, [occasion]);
 
   const loadData = async () => {
     setLoading(true);
-    const [allRecipes, user] = await Promise.all([
-      fetchAllRecipes(),
-      base44.auth.me().catch(() => null),
-    ]);
 
-    // Filter by occasion (in occasions OR lifestyle array)
-    const filtered = allRecipes.filter((r) =>
-      (r.occasions || []).includes(occasion) ||
-      (r.lifestyle || []).includes(occasion)
-    );
-    setAllOccasionRecipes(filtered);
-
-    // Pick 3 random for "Ricette del Giorno"
-    if (DAILY_OCCASIONS.includes(occasion)) {
-      setDailyRecipes(pickRandom(filtered, 3));
+    // Use cache to avoid re-fetching on back navigation
+    if (!recipesCache[occasion]) {
+      const batch = await base44.entities.Recipe.filter(
+        { status: "pubblicata" },
+        "-created_date",
+        FETCH_LIMIT
+      );
+      const filtered = batch.filter((r) =>
+        (r.occasions || []).includes(occasion) ||
+        (r.lifestyle || []).includes(occasion)
+      );
+      recipesCache[occasion] = filtered;
     }
 
-    // Load user favorites
-    if (user) {
+    const occasionRecipes = recipesCache[occasion];
+    setAllOccasionRecipes(occasionRecipes);
+
+    // Pick 3 stable "daily" recipes (deterministic based on today's date)
+    if (showDaily && occasionRecipes.length > 0) {
+      const today = new Date().toISOString().slice(0, 10);
+      const seed = today.split("-").reduce((a, b) => a + parseInt(b), 0);
+      const picked = [];
+      for (let i = 0; i < Math.min(3, occasionRecipes.length); i++) {
+        picked.push(occasionRecipes[(seed + i * 37) % occasionRecipes.length]);
+      }
+      setDailyRecipes(picked);
+    }
+
+    // Load user favorites in parallel (non-blocking)
+    base44.auth.me().then(async (user) => {
+      if (!user) return;
       const saved = await base44.entities.UserRecipe.filter({ is_saved: true, created_by: user.email }).catch(() => []);
       const map = {};
       saved.forEach((ur) => { map[ur.recipe_id] = ur; });
       setUserRecipes(map);
-    }
+    }).catch(() => {});
 
     setLoading(false);
   };
 
-  // Client-side filter (search + category), excluding daily recipes from main list
   const dailyIds = useMemo(() => new Set(dailyRecipes.map((r) => r.id)), [dailyRecipes]);
 
+  // All filtering is instant (in-memory) — no re-fetch on page/filter changes
   const filteredRecipes = useMemo(() => {
     return allOccasionRecipes.filter((r) => {
       if (showDaily && dailyIds.has(r.id)) return false;
@@ -124,6 +118,7 @@ export default function OccasionRecipesPage() {
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
+  // Slice for current page — O(1), instant
   const pagedRecipes = filteredRecipes.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   const handlePageChange = (newPage) => {
@@ -134,8 +129,8 @@ export default function OccasionRecipesPage() {
   const handleQueryChange = (val) => { setQuery(val); setPage(1); };
   const handleCategoryChange = (cat) => { setActiveCategory(cat); setPage(1); };
 
-  const categories = [...new Set(allOccasionRecipes.map((r) => r.category).filter(Boolean))];
   const icon = OCCASION_ICONS[occasion] || "🍽️";
+  const totalCount = allOccasionRecipes.length;
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] pb-24">
@@ -151,7 +146,7 @@ export default function OccasionRecipesPage() {
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">{occasion}</h1>
             </div>
             <p className="text-sm text-gray-400 mt-0.5">
-              Collezione completa · {loading ? "…" : allOccasionRecipes.length} ricette
+              Collezione completa · {loading ? "…" : totalCount} ricette
             </p>
           </div>
         </div>
@@ -159,8 +154,8 @@ export default function OccasionRecipesPage() {
         {/* Stats */}
         <div className="flex gap-4 mb-4">
           {[
-            { label: "Ricette", value: loading ? "…" : allOccasionRecipes.length },
-            { label: "Categorie", value: loading ? "…" : categories.length },
+            { label: "Ricette", value: loading ? "…" : totalCount },
+            { label: "Filtrate", value: loading ? "…" : filteredRecipes.length },
             { label: "Preferite", value: Object.keys(userRecipes).length },
           ].map((s) => (
             <div key={s.label} className="flex-1 bg-gray-50 dark:bg-white/5 rounded-xl py-2 px-3 text-center">
@@ -252,7 +247,6 @@ export default function OccasionRecipesPage() {
                   ))}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-4 mt-6">
                     <button
@@ -308,7 +302,8 @@ function DailyRecipeCard({ recipe, isSaved }) {
         )}
       </div>
       <div className="p-2.5">
-        <p className="text-xs font-bold text-gray-900 dark:text-white leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        <p className="text-xs font-bold text-gray-900 dark:text-white leading-snug"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {recipe.title}
         </p>
         {recipe.prep_time && (
@@ -321,13 +316,11 @@ function DailyRecipeCard({ recipe, isSaved }) {
 
 function RecipeCard({ recipe, occasion, isSaved }) {
   const kcal = recipe.calorie ?? recipe.calories;
-
   return (
     <Link
       to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}
       className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm"
     >
-      {/* Thumbnail */}
       <div className="w-24 flex-shrink-0 relative self-stretch">
         <img
           src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200"}
@@ -341,9 +334,7 @@ function RecipeCard({ recipe, occasion, isSaved }) {
         )}
       </div>
 
-      {/* Info */}
       <div className="flex-1 py-3 pr-3 min-w-0">
-        {/* Badges */}
         <div className="flex gap-1.5 flex-wrap mb-1.5">
           <span className="text-[10px] font-bold bg-[#2D6A4F]/30 text-[#52b788] px-2 py-0.5 rounded-full">
             {occasion}
@@ -355,13 +346,11 @@ function RecipeCard({ recipe, occasion, isSaved }) {
           )}
         </div>
 
-        {/* Title — never truncated, up to 2 lines */}
         <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug mb-1.5"
           style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {recipe.title}
         </p>
 
-        {/* Meta */}
         <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mb-1.5">
           {recipe.prep_time && <span>⏱ {recipe.prep_time} min</span>}
           {kcal && <span>🔥 {kcal} kcal</span>}
@@ -374,7 +363,6 @@ function RecipeCard({ recipe, occasion, isSaved }) {
           )}
         </div>
 
-        {/* Dietary tags */}
         {(recipe.dietary_tags || []).length > 0 && (
           <div className="flex gap-1 flex-wrap">
             {recipe.dietary_tags.slice(0, 3).map((tag) => (
