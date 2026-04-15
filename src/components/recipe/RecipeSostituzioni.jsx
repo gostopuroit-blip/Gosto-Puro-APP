@@ -75,7 +75,6 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
     console.log("APPLICA CLICKED", { selected, recipeId, userRecipeId: userRecipe?.id });
     setSaving(true);
     try {
-      // Build sostituzioni_applicate with full impatto info
       const sostituzioni_applicate = Object.entries(selected).map(([ingrediente_nome, sostituto_scelto]) => {
         const sost = sostituzioni.find((s) => s.ingrediente_nome === ingrediente_nome);
         const opt = (sost?.opzioni || []).find((o) => o.nome === sostituto_scelto);
@@ -89,7 +88,6 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
         };
       });
 
-      // Calcola macros personalizzati
       const currentImpatto = calcImpatto(selected);
       const macros_personalizzati = {
         calorie: Math.round((recipe.calories || recipe.calorie || 0) + currentImpatto.calorie),
@@ -98,10 +96,14 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
         grassi: Math.round((recipe.grassi || 0) + currentImpatto.grassi),
       };
 
-      console.log("Saving:", { sostituzioni_applicate, macros_personalizzati, hasUserRecipe: !!userRecipe?.id });
+      // Sempre busca o UserRecipe mais atualizado do servidor para garantir o ID correto
+      const existingList = await base44.entities.UserRecipe.filter({ recipe_id: recipeId });
+      const existing = existingList?.[0];
 
-      if (userRecipe?.id) {
-        await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate, macros_personalizzati });
+      console.log("Saving:", { sostituzioni_applicate, macros_personalizzati, existingId: existing?.id });
+
+      if (existing?.id) {
+        await base44.entities.UserRecipe.update(existing.id, { sostituzioni_applicate, macros_personalizzati });
       } else {
         await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate, macros_personalizzati });
       }
