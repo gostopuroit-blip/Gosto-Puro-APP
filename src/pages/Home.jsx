@@ -201,7 +201,7 @@ export default function Home() {
             }
             return (
               <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                   <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
                   <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
