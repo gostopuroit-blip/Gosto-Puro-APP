@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
 import { trackEvent } from "@/components/useAnalytics";
 import RecipeComments from "@/components/recipe/RecipeComments";
+import RecipeSostituzioni from "@/components/recipe/RecipeSostituzioni";
 
 const countryFlags = {
   "Giappone": "🇯🇵", "Messico": "🇲🇽", "India": "🇮🇳", "Thailandia": "🇹🇭",
@@ -377,11 +378,12 @@ export default function RecipeDetail() {
 
       {/* Tabs */}
       <div className="px-5 mt-6">
-        <div className="flex border-b border-gray-100">
+        <div className="flex border-b border-gray-100 overflow-x-auto hide-scrollbar">
           {[
             { key: "ingredienti", label: "Ingredienti" },
             { key: "preparazione", label: "Preparazione" },
             { key: "nutrizione", label: "Nutrizione" },
+            ...((recipe.sostituzioni || []).length > 0 ? [{ key: "sostituzioni", label: "Sostituzioni" }] : []),
           ].map((tab) => (
             <button
               key={tab.key}
@@ -457,6 +459,16 @@ export default function RecipeDetail() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Tab: Sostituzioni */}
+        {activeTab === "sostituzioni" && (
+          <RecipeSostituzioni
+            recipe={recipe}
+            userRecipe={userRecipe}
+            recipeId={recipeId}
+            onSaved={loadRecipe}
+          />
         )}
 
         {/* Tab: Nutrizione */}

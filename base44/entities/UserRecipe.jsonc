@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": {
+    "recipe_id": {
+      "type": "string",
+      "description": "Reference to Recipe ID"
+    },
+    "is_saved": {
+      "type": "boolean",
+      "description": "User saved this recipe"
+    },
+    "is_prepared": {
+      "type": "boolean",
+      "description": "User prepared this recipe"
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "description": "User favorited this recipe"
+    },
+    "user_rating": {
+      "type": "number",
+      "description": "User rating 1-5"
+    },
+    "folder_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Custom folder IDs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "per_fare",
+        "fatta"
+      ],
+      "description": "Status of the recipe for user"
+    },
+    "sostituzioni_applicate": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ingrediente_nome": {
+            "type": "string"
+          },
+          "sostituto_scelto": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Sostituzioni ingredienti scelte dall'utente"
+    }
+  },
+  "required": [
+    "recipe_id"
+  ],
+  "name": "UserRecipe",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
