@@ -21,6 +21,12 @@ const PAGE_SIZE = 6;
 // Max recipes to fetch in a single query — covers all known occasions
 const FETCH_LIMIT = 1000;
 
+// Occasione aliases para buscar receitas com labels antigos/novos
+const occasionAliases = {
+  "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
+  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"]
+};
+
 const DIETARY_TAG_COLORS = {
   "Senza glutine": "bg-green-900/40 text-green-300",
   "Diabetico": "bg-orange-900/40 text-orange-300",
@@ -71,9 +77,13 @@ export default function OccasionRecipesPage() {
         "-created_date",
         FETCH_LIMIT
       );
+      // Use occasion aliases if available, otherwise use the occasion directly
+      const searchTerms = occasionAliases[occasion] || [occasion];
       const filtered = batch.filter((r) =>
-        (r.occasions || []).includes(occasion) ||
-        (r.lifestyle || []).includes(occasion)
+        searchTerms.some(term => 
+          (r.occasions || []).includes(term) ||
+          (r.lifestyle || []).includes(term)
+        )
       );
       recipesCache[occasion] = filtered;
     }
