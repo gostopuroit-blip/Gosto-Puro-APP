@@ -181,6 +181,33 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Prodotti Gosto Puro */}
+      <div className="mt-8 px-5">
+        <SectionHeader title="Prodotti Gosto Puro" />
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
+          {gostoPuroProducts.map((product) => {
+            const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
+            return (
+              <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
+                <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                  {product.image_url ? (
+                    <img src={product.image_url} alt={product.nome} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
+                  )}
+                  {!isUnlocked && (
+                    <div className="absolute top-1 right-1 w-5 h-5 bg-amber-50 rounded-lg flex items-center justify-center">
+                      <Lock className="w-3 h-3 text-amber-500" />
+                    </div>
+                  )}
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{product.nome}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Top Prepared — carousel with large cards */}
       <div className="mt-8">
         <div className="px-5">
@@ -207,33 +234,6 @@ export default function Home() {
                   <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
                 </div>
               </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Prodotti Gosto Puro */}
-      <div className="mt-8 px-5">
-        <SectionHeader title="Prodotti Gosto Puro" />
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 mt-3">
-          {gostoPuroProducts.map((product) => {
-            const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
-            return (
-              <div key={product.id} className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150 cursor-pointer">
-                <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
-                  {product.image_url ? (
-                    <img src={product.image_url} alt={product.nome} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
-                  )}
-                  {!isUnlocked && (
-                    <div className="absolute top-1 right-1 w-5 h-5 bg-amber-50 rounded-lg flex items-center justify-center">
-                      <Lock className="w-3 h-3 text-amber-500" />
-                    </div>
-                  )}
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{product.nome}</span>
-              </div>
             );
           })}
         </div>
