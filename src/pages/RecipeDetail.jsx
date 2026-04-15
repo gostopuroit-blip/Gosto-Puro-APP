@@ -63,6 +63,7 @@ export default function RecipeDetail() {
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [servings, setServings] = useState(null);
+  const [activeTab, setActiveTab] = useState("ingredienti");
   const scrollTracked = useRef(new Set());
   const viewStartRef = useRef(null);
 
@@ -374,58 +375,120 @@ export default function RecipeDetail() {
         </div>
       </div>
 
+      {/* Tabs */}
       <div className="px-5 mt-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-gray-900">Ingredienti</h2>
-          <span className="text-xs text-gray-400">per {servings} {servings === 1 ? "persona" : "persone"}</span>
+        <div className="flex border-b border-gray-100">
+          {[
+            { key: "ingredienti", label: "Ingredienti" },
+            { key: "preparazione", label: "Preparazione" },
+            { key: "nutrizione", label: "Nutrizione" },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                activeTab === tab.key
+                  ? "text-[#2D6A4F] border-b-2 border-[#2D6A4F]"
+                  : "text-gray-400"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-        {isContentLocked ? (
-          <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-            className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-            <div className="p-6 flex flex-col items-center gap-3 text-center">
-              <span className="text-3xl">🔒</span>
-              <p className="font-bold text-gray-800 text-sm">Ingredienti disponibili con Premium</p>
-              <p className="text-xs text-gray-400">Sblocca questa e tutte le ricette Premium</p>
-              <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
+
+        {/* Tab: Ingredienti */}
+        {activeTab === "ingredienti" && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-bold text-gray-400 tracking-widest uppercase">Lista Ingredienti</p>
+              <span className="text-xs text-gray-400">per {servings} {servings === 1 ? "persona" : "persone"}</span>
             </div>
-          </a>
-        ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-            {(recipe.ingredients || []).map((ing, i) => (
-              <IngredientRow
-                key={i}
-                ing={ing}
-                index={i}
-                total={(recipe.ingredients || []).length}
-                ratio={servings / (recipe.servings || 4)}
-              />
-            ))}
+            {isContentLocked ? (
+              <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+                className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+                <div className="p-6 flex flex-col items-center gap-3 text-center">
+                  <span className="text-3xl">🔒</span>
+                  <p className="font-bold text-gray-800 text-sm">Ingredienti disponibili con Premium</p>
+                  <p className="text-xs text-gray-400">Sblocca questa e tutte le ricette Premium</p>
+                  <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
+                </div>
+              </a>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+                {(recipe.ingredients || []).map((ing, i) => (
+                  <IngredientRow
+                    key={i}
+                    ing={ing}
+                    index={i}
+                    total={(recipe.ingredients || []).length}
+                    ratio={servings / (recipe.servings || 4)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
 
-      <div className="px-5 mt-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">Preparazione</h2>
-        {isContentLocked ? (
-          <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-            className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-            <div className="p-6 flex flex-col items-center gap-3 text-center">
-              <span className="text-3xl">🔒</span>
-              <p className="font-bold text-gray-800 text-sm">Istruzioni disponibili con Premium</p>
-              <p className="text-xs text-gray-400">Passa a Premium per accedere a questa ricetta completa</p>
-              <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
-            </div>
-          </a>
-        ) : (
-          <div className="space-y-3">
-            {(recipe.instructions || []).map((step, i) => (
-              <div key={i} className="flex gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
-                <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs text-white font-bold">{i + 1}</span>
+        {/* Tab: Preparazione */}
+        {activeTab === "preparazione" && (
+          <div className="mt-4">
+            <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-3">Passo per Passo</p>
+            {isContentLocked ? (
+              <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+                className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+                <div className="p-6 flex flex-col items-center gap-3 text-center">
+                  <span className="text-3xl">🔒</span>
+                  <p className="font-bold text-gray-800 text-sm">Istruzioni disponibili con Premium</p>
+                  <p className="text-xs text-gray-400">Passa a Premium per accedere a questa ricetta completa</p>
+                  <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed flex-1">{step}</p>
+              </a>
+            ) : (
+              <div className="space-y-3">
+                {(recipe.instructions || []).map((step, i) => (
+                  <div key={i} className="flex gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+                    <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs text-white font-bold">{i + 1}</span>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed flex-1">{step}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+          </div>
+        )}
+
+        {/* Tab: Nutrizione */}
+        {activeTab === "nutrizione" && (
+          <div className="mt-4">
+            {!(recipe.calorie || recipe.proteine || recipe.carboidrati || recipe.grassi || recipe.fibre || recipe.sodio) ? (
+              <div className="bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-50">
+                <p className="text-sm text-gray-400">Valori nutrizionali non disponibili per questa ricetta.</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Calorie", value: recipe.calorie ?? recipe.calories, unit: "kcal" },
+                    { label: "Proteine", value: recipe.proteine, unit: "g" },
+                    { label: "Carboidrati", value: recipe.carboidrati, unit: "g" },
+                    { label: "Grassi", value: recipe.grassi, unit: "g" },
+                    { label: "Fibre", value: recipe.fibre, unit: "g" },
+                    { label: "Sodio", value: recipe.sodio, unit: "mg" },
+                  ].map((n) => (
+                    <div key={n.label} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-0.5">
+                      <span className="text-xl font-bold text-gray-800">{n.value != null ? n.value : "—"}</span>
+                      {n.value != null && <span className="text-xs text-gray-400">{n.unit}</span>}
+                      <span className="text-xs text-gray-500 font-medium">{n.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-gray-400 text-center mt-3 leading-relaxed">
+                  Valori stimati per 1 porzione. Possono variare in base agli ingredienti utilizzati.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -484,28 +547,7 @@ export default function RecipeDetail() {
         </Button>
       </div>
 
-      {/* Informazioni Nutrizionali */}
-      {(recipe.calorie || recipe.proteine || recipe.carboidrati || recipe.grassi || recipe.fibre || recipe.zuccheri || recipe.sodio) && (
-        <div className="px-5 mt-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-3">Informazioni Nutrizionali</h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-            {[
-              { label: "Calorie per porzione", value: recipe.calorie, unit: "kcal" },
-              { label: "Proteine", value: recipe.proteine, unit: "g" },
-              { label: "Carboidrati", value: recipe.carboidrati, unit: "g" },
-              { label: "Grassi", value: recipe.grassi, unit: "g" },
-              { label: "Fibre", value: recipe.fibre, unit: "g" },
-              { label: "Zuccheri", value: recipe.zuccheri, unit: "g" },
-              { label: "Sodio", value: recipe.sodio, unit: "mg" },
-            ].filter(row => row.value != null).map((row, i, arr) => (
-              <div key={row.label} className={`flex items-center justify-between px-4 py-3 ${i < arr.length - 1 ? "border-b border-gray-50" : ""}`}>
-                <span className="text-sm text-gray-600">{row.label}</span>
-                <span className="text-sm font-bold text-gray-800">{row.value} {row.unit}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* Comments */}
       <div className="px-5 mt-6">
