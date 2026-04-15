@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import WhatToCook from './pages/WhatToCook';
 import Search from './pages/Search';
+import OccasionRecipesPage from './pages/OccasionRecipesPage';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -62,6 +63,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/WhatToCook" element={<LayoutWrapper currentPageName="WhatToCook"><WhatToCook /></LayoutWrapper>} />
       <Route path="/Search" element={<LayoutWrapper currentPageName="Search"><Search /></LayoutWrapper>} />
+      <Route path="/OccasionRecipes" element={<LayoutWrapper currentPageName="OccasionRecipes"><OccasionRecipesPage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

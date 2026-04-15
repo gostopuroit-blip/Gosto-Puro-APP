@@ -46,6 +46,27 @@
       "type": "string",
       "description": "Dietary restrictions text"
     },
+    "dietary_tags_profile": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Senza glutine",
+          "Senza lattosio",
+          "Senza zucchero",
+          "Vegano",
+          "Vegetariano",
+          "Low carb",
+          "Alto contenuto proteico",
+          "Diabetico",
+          "Detox",
+          "Fit",
+          "Senza uova",
+          "Senza frutti di mare"
+        ]
+      },
+      "description": "User dietary restrictions/preferences for personalized recipe filtering"
+    },
     "health_conditions": {
       "type": "array",
       "items": {

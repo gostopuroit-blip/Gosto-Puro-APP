@@ -169,7 +169,7 @@ export default function Home() {
           {dailyOccasions.map((occ) => (
             <Link
               key={occ.label}
-              to={createPageUrl(`Recipes?occasion=${encodeURIComponent(occ.label)}`)}
+              to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.label)}`}
               onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
               className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
               <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
@@ -208,7 +208,7 @@ export default function Home() {
             );
           })}
           {lifestyleTags.map((tag) => (
-            <Link key={tag.label} to={createPageUrl(`Recipes?occasion=${encodeURIComponent(tag.label)}`)}
+            <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
               onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
               className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
               {tag.img ? (

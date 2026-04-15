@@ -52,6 +52,27 @@
       },
       "description": "Lifestyle tags like Fitness, Detox"
     },
+    "dietary_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Senza glutine",
+          "Senza lattosio",
+          "Senza zucchero",
+          "Vegano",
+          "Vegetariano",
+          "Low carb",
+          "Alto contenuto proteico",
+          "Diabetico",
+          "Detox",
+          "Fit",
+          "Senza uova",
+          "Senza frutti di mare"
+        ]
+      },
+      "description": "Dietary restriction and lifestyle tags"
+    },
     "paese": {
       "type": "string",
       "enum": [
