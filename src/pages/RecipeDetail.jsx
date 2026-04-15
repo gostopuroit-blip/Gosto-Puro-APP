@@ -341,6 +341,24 @@ export default function RecipeDetail() {
             ))}
           </div>
 
+          {/* Info box */}
+          <div className="flex gap-2 mt-3">
+            {[
+              { label: "Tempo", value: recipe.prep_time, unit: "min", icon: "⏱" },
+              { label: "Difficoltà", value: recipe.difficulty, unit: null, icon: "⭐" },
+              { label: "Porzioni", value: recipe.servings, unit: null, icon: "🍽" },
+              { label: "Ingredienti", value: (recipe.ingredients || []).length || "—", unit: null, icon: "🥗" },
+            ].map((info) => (
+              <div key={info.label} className="flex-1 bg-gray-50 rounded-xl py-2.5 px-1 flex flex-col items-center gap-0.5">
+                <span className="text-base font-bold text-gray-800 leading-tight">
+                  {info.value != null && info.value !== "" ? info.value : "—"}
+                </span>
+                {info.unit && info.value != null && <span className="text-[10px] text-gray-300">{info.unit}</span>}
+                <span className="text-[10px] text-gray-400 font-medium text-center leading-tight">{info.icon} {info.label}</span>
+              </div>
+            ))}
+          </div>
+
           <p className="text-sm text-gray-600 mt-4 leading-relaxed">{recipe.description}</p>
           {recipe.calories && (
             <div className="flex items-center gap-3 mt-3 bg-orange-50 rounded-xl px-3 py-2.5 w-fit">
