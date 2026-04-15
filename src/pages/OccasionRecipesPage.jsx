@@ -245,7 +245,7 @@ function RecipeCard({ recipe, occasion, isSaved }) {
           <span className="text-[10px] font-bold bg-[#2D6A4F]/30 text-[#52b788] px-2 py-0.5 rounded-full">
             {occasion}
           </span>
-          {recipe.category && (
+          {recipe.category && recipe.category !== occasion && (
             <span className="text-[10px] font-bold bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded-full">
               {recipe.category}
             </span>
@@ -253,7 +253,7 @@ function RecipeCard({ recipe, occasion, isSaved }) {
         </div>
 
         {/* Title */}
-        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1.5">
+        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 mb-1.5">
           {recipe.title}
         </p>
 
