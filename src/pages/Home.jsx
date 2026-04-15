@@ -7,6 +7,7 @@ import { Loader2, Sparkles, Lock, Crown } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
+import DietaryBanner from "@/components/DietaryBanner";
 
 // Daily occasions with image-style food icons (SVG inline or Unicode with styling)
 const dailyOccasions = [
@@ -154,6 +155,9 @@ export default function Home() {
           Ricette organizzate per decidere senza perdere tempo
         </p>
       </div>
+
+      {/* Dietary Banner */}
+      <DietaryBanner userName={userName} dietaryTags={user?.dietary_tags_profile} />
 
       {/* Daily Message */}
         <div className="mx-5 mb-4 mt-2 flex items-center gap-2">

@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 import { trackEvent } from "@/components/useAnalytics";
+import DietaryTagsSection from "@/components/profile/DietaryTagsSection";
 
 
 
@@ -429,6 +430,9 @@ export default function Profile() {
           </div>
         </a>
       </div>
+
+      {/* Dietary Tags */}
+      <DietaryTagsSection initialTags={user?.dietary_tags_profile || []} />
 
       {/* Save Button */}
       <div className="px-5 mt-8">

@@ -51,6 +51,8 @@ export default function OccasionRecipesPage() {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tutte");
   const [page, setPage] = useState(1);
+  const [soloPerMe, setSoloPerMe] = useState(false);
+  const [userDietaryTags, setUserDietaryTags] = useState([]);
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
 
@@ -90,13 +92,16 @@ export default function OccasionRecipesPage() {
       setDailyRecipes(picked);
     }
 
-    // Load user favorites in parallel (non-blocking)
+    // Load user favorites + dietary tags in parallel (non-blocking)
     base44.auth.me().then(async (user) => {
       if (!user) return;
       const saved = await base44.entities.UserRecipe.filter({ is_saved: true, created_by: user.email }).catch(() => []);
       const map = {};
       saved.forEach((ur) => { map[ur.recipe_id] = ur; });
       setUserRecipes(map);
+      if (user.dietary_tags_profile?.length > 0) {
+        setUserDietaryTags(user.dietary_tags_profile);
+      }
     }).catch(() => {});
 
     setLoading(false);
@@ -112,9 +117,11 @@ export default function OccasionRecipesPage() {
         r.title?.toLowerCase().includes(query.toLowerCase()) ||
         r.description?.toLowerCase().includes(query.toLowerCase());
       const matchesCategory = activeCategory === "Tutte" || r.category === activeCategory;
-      return matchesQuery && matchesCategory;
+      const matchesDietary = !soloPerMe || userDietaryTags.length === 0 ||
+        userDietaryTags.every(tag => (r.dietary_tags || []).includes(tag));
+      return matchesQuery && matchesCategory && matchesDietary;
     });
-  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily]);
+  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -193,6 +200,21 @@ export default function OccasionRecipesPage() {
             </button>
           ))}
         </div>
+
+        {/* Solo per me toggle — only show if user has dietary tags */}
+        {userDietaryTags.length > 0 && (
+          <button
+            onClick={() => { setSoloPerMe(v => !v); setPage(1); }}
+            className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+              soloPerMe
+                ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300"
+            }`}
+          >
+            🎯 Solo per me
+            {soloPerMe && <span className="text-[10px] opacity-80">({userDietaryTags.length} restrizioni)</span>}
+          </button>
+        )}
       </div>
 
       {/* Content */}
