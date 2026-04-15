@@ -359,6 +359,17 @@ export default function Planner() {
         })}
       </div>
 
+      {/* Shopping list button */}
+      <div className="px-5 mb-4">
+        <Button
+          onClick={() => navigate(`/ShoppingList?meal_plan_id=${plan.id}`)}
+          variant="outline"
+          className="w-full py-6 rounded-2xl border-2 font-semibold text-sm"
+        >
+          🛒 Lista della spesa
+        </Button>
+      </div>
+
       {/* Bottom button */}
       <div className="fixed bottom-24 left-0 right-0 px-5 max-w-lg mx-auto">
         <Button

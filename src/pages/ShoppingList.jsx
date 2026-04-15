@@ -1,234 +1,121 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Check, Loader2, ShoppingCart, RefreshCw, Trash2, Printer, Filter } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const categoryIcons = {
+const CATEGORIES = {
   "Ortofrutta": "🥬",
-  "Carne e pesce": "🥩",
-  "Latticini": "🧀",
-  "Dispensa": "🏪",
-  "Surgelati": "🧊",
-  "Altro": "📦",
+  "Carne e pesce": "🍗",
+  "Latticini": "🧈",
+  "Dispensa": "🥫",
+  "Surgelati": "❄️",
+  "Altro": "🛍️"
 };
 
-const categoryOrder = ["Ortofrutta", "Carne e pesce", "Latticini", "Dispensa", "Surgelati", "Altro"];
+const CATEGORY_ORDER = ["Ortofrutta", "Carne e pesce", "Latticini", "Dispensa", "Surgelati", "Altro"];
 
 export default function ShoppingList() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
+  const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [user, setUser] = useState(null);
-  const [showOnlyMissing, setShowOnlyMissing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("Tutti");
+  const [updatingList, setUpdatingList] = useState(false);
+
+  const params = new URLSearchParams(window.location.search);
+  const mealPlanId = params.get("meal_plan_id");
 
   useEffect(() => {
-    loadItems();
-  }, []);
+    loadData();
+  }, [mealPlanId]);
 
-  const loadItems = async () => {
-    const u = await base44.auth.me().catch(() => null);
-    setUser(u);
-    if (!u) { setLoading(false); return; }
+  const loadData = async () => {
+    if (!mealPlanId) return;
 
-    // Get active plan first, then check if existing items match it
-    const plans = await base44.entities.MealPlan.filter({ is_active: true }, "-created_date", 1);
-    const activePlanId = plans[0]?.id || null;
+    const [planData, shoppingItems] = await Promise.all([
+      base44.entities.MealPlan.filter({ id: mealPlanId }),
+      base44.entities.ShoppingItem.filter({ meal_plan_id: mealPlanId })
+    ]);
 
-    const existing = await base44.entities.ShoppingItem.filter({ created_by: u.email }, "category", 200);
-    const matchingItems = activePlanId ? existing.filter(i => i.meal_plan_id === activePlanId) : [];
-
-    if (matchingItems.length > 0) {
-      setItems(matchingItems);
-      setLoading(false);
-    } else {
-      await generateList(u);
+    if (planData.length > 0) {
+      setPlan(planData[0]);
     }
+    setItems(shoppingItems);
+    setLoading(false);
   };
 
-  const generateList = async (currentUser) => {
-    const u = currentUser || user || await base44.auth.me().catch(() => null);
-    if (!u) return;
-    setGenerating(true);
-    setLoading(false);
+  const toggleItem = async (itemId, currentChecked) => {
+    const newChecked = !currentChecked;
+    setItems(items.map(item => 
+      item.id === itemId ? { ...item, is_checked: newChecked } : item
+    ));
     
-    // Get active plan
-    const plans = await base44.entities.MealPlan.filter({ is_active: true }, "-created_date", 1);
+    await base44.entities.ShoppingItem.update(itemId, { is_checked: newChecked });
+  };
+
+  const updateShoppingList = async () => {
+    if (!plan) return;
     
-    if (plans.length === 0) {
-      // Delete any orphaned items and show empty state
-      const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
-      for (let i = 0; i < oldItems.length; i += 5) {
-        await Promise.all(oldItems.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id)));
-      }
-      setItems([]);
-      setLoading(false);
-      setGenerating(false);
-      toast.error("Nessun piano attivo trovato");
-      return;
-    }
-
-    const plan = plans[0];
-    const recipeIds = [...new Set(
-      plan.plan_data
-        .flatMap((d) => [d.colazione_id, d.pranzo_id, d.cena_id])
-        .filter(Boolean)
-    )];
-
-    // Fetch all published recipes in one call and filter locally by ID
-    const allRecipes = await base44.entities.Recipe.list("-created_date", 1000);
-    const recipeMap = Object.fromEntries(allRecipes.map((r) => [r.id, r]));
-    const planRecipes = recipeIds.map((id) => recipeMap[id]).filter(Boolean);
-
-    // Merge ingredients — sum numeric quantities, deduplicate by normalized name
-    const merged = {};
-
-    const parseQty = (str) => {
-      if (!str) return { num: 0, unit: "" };
-      const s = String(str).trim();
-      const match = s.match(/^([\d.,]+)\s*(.*)/);
-      if (match) return { num: parseFloat(match[1].replace(",", ".")), unit: match[2].trim().toLowerCase() };
-      return { num: 0, unit: s.toLowerCase() };
-    };
-
-    const formatQty = (num, unit) => {
-      const n = Number.isInteger(num) ? num : parseFloat(num.toFixed(1));
-      return unit ? `${n} ${unit}` : `${n}`;
-    };
-
-    // Scale ratio: plan.servings / recipe.servings
-    const planServings = plan.servings || 2;
-    const scaleQty = (qtyStr, ratio) => {
-      if (!qtyStr) return "";
-      if (ratio === 1) return String(qtyStr);
-      const { num, unit } = parseQty(qtyStr);
-      if (num > 0) return formatQty(num * ratio, unit);
-      return String(qtyStr);
-    };
-
-    for (const recipe of planRecipes) {
-      const ratio = planServings / (recipe.servings || 4);
-      for (const ing of (recipe.ingredients || [])) {
-        const scaledQty = scaleQty(ing.quantity, ratio);
-        const key = ing.name.toLowerCase().trim().replace(/\s+/g, " ");
-        if (merged[key]) {
-          const existing = parseQty(merged[key].rawQty);
-          const incoming = parseQty(scaledQty);
-          if (existing.num > 0 && incoming.num > 0 && existing.unit === incoming.unit) {
-            merged[key].rawQty = formatQty(existing.num + incoming.num, existing.unit);
-          } else if (existing.num > 0 && incoming.num > 0) {
-            // different units — sum the numbers, keep first unit (best effort)
-            merged[key].rawQty = formatQty(existing.num + incoming.num, existing.unit || incoming.unit);
-          } else {
-            merged[key].rawQty = scaledQty || merged[key].rawQty;
+    setUpdatingList(true);
+    
+    try {
+      // Collect all ingredients from all recipes in the plan
+      const allIngredients = {};
+      
+      for (const day of plan.plan_data || []) {
+        const mealIds = [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id];
+        
+        for (const mealId of mealIds) {
+          if (!mealId) continue;
+          
+          const recipes = await base44.entities.Recipe.filter({ id: mealId });
+          if (recipes.length === 0) continue;
+          
+          const recipe = recipes[0];
+          
+          for (const ing of recipe.ingredients || []) {
+            const key = ing.name.toLowerCase();
+            if (!allIngredients[key]) {
+              allIngredients[key] = {
+                name: ing.name,
+                quantity: ing.quantity || "",
+                category: ing.category || "Altro"
+              };
+            }
           }
-        } else {
-          merged[key] = {
-            name: ing.name,
-            rawQty: scaledQty,
-            category: ing.category || "Altro",
-          };
         }
       }
+      
+      // Delete old items
+      const oldItems = await base44.entities.ShoppingItem.filter({ meal_plan_id: plan.id });
+      for (const item of oldItems) {
+        await base44.entities.ShoppingItem.delete(item.id);
+      }
+      
+      // Create new items
+      const newItems = Object.values(allIngredients).map(ing => ({
+        name: ing.name,
+        quantity: ing.quantity,
+        category: ing.category,
+        is_checked: false,
+        meal_plan_id: plan.id
+      }));
+      
+      if (newItems.length > 0) {
+        await base44.entities.ShoppingItem.bulkCreate(newItems);
+      }
+      
+      await loadData();
+      toast.success("Lista aggiornata! ✓");
+    } catch (error) {
+      toast.error("Errore nell'aggiornamento della lista");
+      console.error(error);
     }
-
-    // Delete old items in batches to avoid rate limit
-    const oldItems = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
-    for (let i = 0; i < oldItems.length; i += 5) {
-      await Promise.all(oldItems.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id).catch(() => null)));
-    }
-
-    // Create new items
-    const newItems = Object.values(merged).map((ing) => ({
-      name: ing.name,
-      quantity: ing.rawQty,
-      category: categoryOrder.includes(ing.category) ? ing.category : "Altro",
-      is_checked: false,
-      meal_plan_id: plan.id,
-    }));
-
-    if (newItems.length > 0) {
-      await base44.entities.ShoppingItem.bulkCreate(newItems);
-    }
-
-    const created = await base44.entities.ShoppingItem.filter({ created_by: u?.email }, "category", 200);
-    setItems(created);
-    setLoading(false);
-    setGenerating(false);
-    toast.success("Lista generata!");
+    
+    setUpdatingList(false);
   };
-
-  const toggleItem = async (item) => {
-    await base44.entities.ShoppingItem.update(item.id, { is_checked: !item.is_checked });
-    setItems((prev) =>
-      prev.map((i) => (i.id === item.id ? { ...i, is_checked: !i.is_checked } : i))
-    );
-  };
-
-  const clearChecked = async () => {
-    const checked = items.filter((i) => i.is_checked);
-    for (let i = 0; i < checked.length; i += 5) {
-      await Promise.all(checked.slice(i, i + 5).map((item) => base44.entities.ShoppingItem.delete(item.id).catch(() => null)));
-    }
-    setItems((prev) => prev.filter((i) => !i.is_checked));
-    toast.success("Elementi completati rimossi");
-  };
-
-  const batchUpdate = async (targetItems, checked) => {
-    // Update UI immediately
-    setItems(prev => prev.map(i => targetItems.find(t => t.id === i.id) ? { ...i, is_checked: checked } : i));
-    // Update in batches of 3 to avoid rate limit
-    for (let i = 0; i < targetItems.length; i += 3) {
-      await Promise.all(targetItems.slice(i, i + 3).map(item => base44.entities.ShoppingItem.update(item.id, { is_checked: checked }).catch(() => null)));
-    }
-  };
-
-  const selectAll = () => batchUpdate(items.filter(i => !i.is_checked), true);
-  const deselectAll = () => batchUpdate(items.filter(i => i.is_checked), false);
-
-  const handlePrint = () => {
-    const displayItems = showOnlyMissing ? items.filter(i => !i.is_checked) : items;
-    const grouped = categoryOrder.reduce((acc, cat) => {
-      const catItems = displayItems.filter(i => i.category === cat);
-      if (catItems.length > 0) acc[cat] = catItems;
-      return acc;
-    }, {});
-
-    const html = `
-      <html><head><title>Lista della Spesa</title>
-      <style>
-        body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
-        h1 { font-size: 22px; margin-bottom: 16px; }
-        h2 { font-size: 14px; text-transform: uppercase; color: #555; margin: 16px 0 6px; letter-spacing: 1px; }
-        ul { list-style: none; padding: 0; margin: 0; }
-        li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-        .qty { color: #888; }
-      </style></head>
-      <body>
-        <h1>🛒 Lista della Spesa</h1>
-        ${Object.entries(grouped).map(([cat, catItems]) => `
-          <h2>${categoryIcons[cat] || "📦"} ${cat}</h2>
-          <ul>${catItems.map(i => `<li><span>${i.name}</span><span class="qty">${i.quantity || ""}</span></li>`).join("")}</ul>
-        `).join("")}
-      </body></html>
-    `;
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    win.print();
-  };
-
-  const displayItems = showOnlyMissing ? items.filter(i => !i.is_checked) : items;
-
-  const groupedItems = categoryOrder.reduce((acc, cat) => {
-    const catItems = displayItems.filter((i) => i.category === cat);
-    if (catItems.length > 0) acc[cat] = catItems;
-    return acc;
-  }, {});
-
-  const checkedCount = items.filter((i) => i.is_checked).length;
-  const totalCount = items.length;
-  const missingCount = totalCount - checkedCount;
 
   if (loading) {
     return (
@@ -238,140 +125,159 @@ export default function ShoppingList() {
     );
   }
 
-  return (
-    <div className="pb-4">
-      <div>
-      <div className="px-5 pt-14 pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Lista della Spesa</h1>
-            <p className="text-sm text-gray-400 mt-0.5">
-              {totalCount > 0
-                ? `${checkedCount}/${totalCount} completati`
-                : "Genera dal tuo piano"}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {checkedCount > 0 && (
-              <Button size="sm" variant="outline" onClick={clearChecked} className="rounded-xl">
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            )}
-            {totalCount > 0 && (
-              <Button size="sm" variant="outline" onClick={handlePrint} className="rounded-xl">
-                <Printer className="w-4 h-4" />
-              </Button>
-            )}
-            <Button
-              size="sm"
-              onClick={generateList}
-              disabled={generating}
-              className="rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] gap-1.5"
-            >
-              <RefreshCw className={`w-4 h-4 ${generating ? "animate-spin" : ""}`} />
-              Aggiorna
-            </Button>
-          </div>
-        </div>
+  const groupedItems = {};
+  items.forEach(item => {
+    const cat = item.category || "Altro";
+    if (!groupedItems[cat]) groupedItems[cat] = [];
+    groupedItems[cat].push(item);
+  });
 
-        {/* Action row */}
-        {totalCount > 0 && (
-          <div className="flex gap-2 mt-3 flex-wrap">
-            <button onClick={selectAll} className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
-              Seleziona tutto
-            </button>
-            <button onClick={deselectAll} className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
-              Deseleziona tutto
-            </button>
+  const filteredCategories = selectedCategory === "Tutti" 
+    ? CATEGORY_ORDER.filter(cat => groupedItems[cat])
+    : [selectedCategory].filter(cat => groupedItems[cat]);
+
+  const checkedCount = items.filter(item => item.is_checked).length;
+
+  return (
+    <div className="pb-20">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-5 pb-4 sticky top-0 bg-white dark:bg-[#0F0F0F] z-40 border-b border-gray-100 dark:border-[#2A2A2A]">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+        </button>
+        <div>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-white">Lista della spesa</h1>
+          {plan && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {plan.name}
+            </p>
+          )}
+        </div>
+        <Button
+          onClick={updateShoppingList}
+          disabled={updatingList}
+          size="icon"
+          variant="ghost"
+          className="rounded-lg"
+        >
+          <RotateCcw className={`w-5 h-5 ${updatingList ? "animate-spin" : ""}`} />
+        </Button>
+      </div>
+
+      {/* Category filter */}
+      <div className="px-5 py-3 sticky top-16 bg-white dark:bg-[#0F0F0F] z-40 border-b border-gray-100 dark:border-[#2A2A2A]">
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+          {["Tutti", ...CATEGORY_ORDER].map(cat => (
             <button
-              onClick={() => setShowOnlyMissing(!showOnlyMissing)}
-              className={`text-xs px-3 py-1.5 rounded-lg border transition flex items-center gap-1 ${
-                showOnlyMissing
-                  ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
-                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full font-semibold text-sm transition-all whitespace-nowrap ${
+                selectedCategory === cat
+                  ? "bg-[#2D6A4F] text-white"
+                  : "bg-gray-100 dark:bg-[#2A2A2A] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#333333]"
               }`}
             >
-              <Filter className="w-3 h-3" />
-              Solo mancanti {showOnlyMissing && missingCount > 0 ? `(${missingCount})` : ""}
+              {cat === "Tutti" ? "Tutti" : `${CATEGORIES[cat]} ${cat}`}
             </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Shopping items */}
+      <div className="px-5 py-4">
+        {filteredCategories.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+            <p className="text-gray-400 text-sm">Nessun ingrediente</p>
+            <Button
+              onClick={updateShoppingList}
+              disabled={updatingList}
+              className="bg-[#2D6A4F] hover:bg-[#235c43] text-white text-sm"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Aggiorna lista
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredCategories.map(category => (
+              <div key={category}>
+                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100 dark:border-[#2A2A2A]">
+                  <span className="text-lg">{CATEGORIES[category]}</span>
+                  <span className="font-bold text-gray-700 dark:text-gray-300">{category}</span>
+                  <span className="text-xs text-gray-400 ml-auto">
+                    {groupedItems[category].length} {groupedItems[category].length === 1 ? "articolo" : "articoli"}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {groupedItems[category].map(item => (
+                    <div
+                      key={item.id}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-100 dark:border-[#2A2A2A] transition-all ${
+                        item.is_checked
+                          ? "bg-green-50 dark:bg-green-900/10 opacity-60"
+                          : "bg-white dark:bg-[#1A1A1A] hover:bg-gray-50 dark:hover:bg-[#222222]"
+                      }`}
+                    >
+                      <button
+                        onClick={() => toggleItem(item.id, item.is_checked)}
+                        className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                          item.is_checked
+                            ? "bg-green-500 border-green-500"
+                            : "border-gray-300 dark:border-[#444444] hover:border-[#2D6A4F] dark:hover:border-[#40916C]"
+                        }`}
+                      >
+                        {item.is_checked && (
+                          <span className="text-white text-xs font-bold">✓</span>
+                        )}
+                      </button>
+
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium transition-all ${
+                          item.is_checked
+                            ? "line-through text-gray-400 dark:text-gray-500"
+                            : "text-gray-900 dark:text-white"
+                        }`}>
+                          {item.name}
+                        </p>
+                      </div>
+
+                      {item.quantity && (
+                        <span className={`text-xs font-semibold flex-shrink-0 transition-all ${
+                          item.is_checked
+                            ? "text-gray-300 dark:text-gray-600"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}>
+                          {item.quantity}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Progress */}
-      {totalCount > 0 && (
-        <div className="px-5 mb-4">
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#2D6A4F] rounded-full transition-all duration-500"
-              style={{ width: `${(checkedCount / totalCount) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {items.length === 0 ? (
-        <div className="px-5 text-center py-20">
-          <div className="w-20 h-20 bg-[#F0F7F4] rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <ShoppingCart className="w-10 h-10 text-[#2D6A4F]" />
-          </div>
-          <h2 className="text-lg font-bold text-gray-900 mb-2">Nessun elemento</h2>
-          <p className="text-sm text-gray-400 max-w-xs mx-auto">
-            Crea un piano settimanale per generare automaticamente la lista della spesa
+      {/* Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-[#0F0F0F] border-t border-gray-100 dark:border-[#2A2A2A] px-5 py-4 max-w-lg mx-auto">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            {checkedCount} di {items.length} ingredienti aggiunti al carrello
           </p>
         </div>
-      ) : (
-        <div className="px-5 space-y-5">
-          {Object.entries(groupedItems).map(([category, catItems]) => (
-            <div key={category}>
-              <div className="flex items-center gap-2 mb-2.5">
-                <span className="text-base">{categoryIcons[category] || "📦"}</span>
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  {category}
-                </h3>
-                <span className="text-[10px] text-gray-300 font-medium">({catItems.length})</span>
-              </div>
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-50">
-                {catItems.map((item, idx) => (
-                  <button
-                    key={item.id}
-                    onClick={() => toggleItem(item)}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all ${
-                      idx < catItems.length - 1 ? "border-b border-gray-50" : ""
-                    } ${item.is_checked ? "bg-gray-50/50" : "hover:bg-gray-50/30"}`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        item.is_checked
-                          ? "bg-[#2D6A4F] border-[#2D6A4F]"
-                          : "border-gray-200"
-                      }`}
-                    >
-                      {item.is_checked && <Check className="w-3 h-3 text-white" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span
-                        className={`text-sm transition-all ${
-                          item.is_checked
-                            ? "text-gray-300 line-through"
-                            : "text-gray-800 font-medium"
-                        }`}
-                      >
-                        {item.name}
-                      </span>
-                    </div>
-                    {item.quantity && (
-                      <span className={`text-xs flex-shrink-0 ${item.is_checked ? "text-gray-200" : "text-gray-400"}`}>
-                        {item.quantity}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        <Button
+          onClick={updateShoppingList}
+          disabled={updatingList}
+          className="w-full bg-[#2D6A4F] hover:bg-[#235c43] text-white py-5 rounded-xl"
+        >
+          <RotateCcw className={`w-4 h-4 mr-2 ${updatingList ? "animate-spin" : ""}`} />
+          Aggiorna lista
+        </Button>
       </div>
     </div>
   );
