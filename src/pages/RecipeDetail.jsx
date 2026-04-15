@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus, Printer } from "lucide-react";
+import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus, Printer, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
@@ -253,7 +253,7 @@ export default function RecipeDetail() {
   }
 
   return (
-    <div className="pb-8">
+    <div className="pb-32">
       <div className="relative">
         <img
           src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800"}
@@ -560,6 +560,25 @@ export default function RecipeDetail() {
         recipeId={recipeId}
         onSaved={loadRecipe}
       />
+
+      {/* Fixed bottom action bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 px-5 py-3 flex gap-3 max-w-lg mx-auto">
+        <Button
+          onClick={() => navigate(createPageUrl("Planner"))}
+          className="flex-1 py-5 rounded-2xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold text-sm shadow-lg shadow-[#2D6A4F]/20"
+        >
+          <CalendarDays className="w-5 h-5 mr-2" />
+          Aggiungi al Planner
+        </Button>
+        <Button
+          onClick={handleSaveClick}
+          variant="outline"
+          className="flex-1 py-5 rounded-2xl border-2 border-[#2D6A4F] text-[#2D6A4F] font-bold text-sm hover:bg-[#2D6A4F]/5"
+        >
+          <Bookmark className="w-5 h-5 mr-2" />
+          {userRecipe?.is_saved ? "Salvata ✓" : "Salva Ricetta"}
+        </Button>
+      </div>
     </div>
   );
 }
