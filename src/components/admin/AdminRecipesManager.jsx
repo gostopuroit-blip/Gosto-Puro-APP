@@ -209,50 +209,67 @@ export default function AdminRecipesManager() {
     const text = pasteText;
     if (!text.trim()) return;
 
-    const getLine = (pattern) => {
-      const re = new RegExp(pattern + '[^\\n]*[:\\-]?\\s*([^\\n]+)', 'i');
+    // Generic: find the number on the same line as a keyword
+    const extractNum = (re) => {
       const m = text.match(re);
-      return m ? m[1].trim() : null;
+      const val = m ? parseInt(m[1], 10) : NaN;
+      return isNaN(val) ? null : val;
     };
 
-    const parseNum = (pattern) => {
-      const re = new RegExp(pattern + '[^\\d]*(\\d+(?:[.,]\\d+)?)', 'i');
+    const extractFloat = (re) => {
       const m = text.match(re);
       return m ? parseFloat(m[1].replace(',', '.')) : null;
     };
 
-    // --- Category ---
-    const catRaw = getLine('📂') || getLine('CATEGORIA');
+    // Generic: get the rest of the line after a keyword
+    const extractStr = (re) => {
+      const m = text.match(re);
+      return m ? m[1].trim() : null;
+    };
+
+    // --- Category (📂 CATEGORIA Colazione) ---
+    const catRaw = extractStr(/CATEGORIA\s+([^\n]+)/i) || extractStr(/📂[^\n]*?([A-Za-zÀ-ÿ]{3,})/);
     const category = categories.find(c => catRaw?.toLowerCase().includes(c.toLowerCase())) || "Pranzo";
 
-    // --- Difficulty ---
-    const diffRaw = getLine('🎯') || getLine('DIFFICOLT');
+    // --- Difficulty (🎯 DIFFICOLTÀ Facile) ---
+    const diffRaw = extractStr(/DIFFICOLT[AÀ]?\s+([^\n]+)/i) || extractStr(/🎯[^\n]*?([A-Za-z]{4,})/);
     const difficulty = difficulties.find(d => diffRaw?.toLowerCase().includes(d.toLowerCase())) || "Facile";
 
-    // --- Prep time & servings ---
-    const prep_time = parseNum('⏱') || parseNum('TEMPO') || 30;
-    const servings = parseNum('🍽') || parseNum('PORZIONI') || 4;
+    // --- Prep time (⏱ TEMPO (MIN) 15) ---
+    const prep_time =
+      extractNum(/TEMPO\s*\([^)]*\)\s*(\d+)/i) ||
+      extractNum(/TEMPO\s*(\d+)/i) ||
+      extractNum(/⏱[^\d\n]*(\d+)/) ||
+      30;
+
+    // --- Servings (🍽 PORZIONI 2) ---
+    const servings =
+      extractNum(/PORZIONI\s*(\d+)/i) ||
+      extractNum(/🍽[^\d\n]*(\d+)/) ||
+      4;
 
     // --- Description / title ---
-    const description = getLine('📝') || getLine('DESCRIZIONE') || "";
+    const description = extractStr(/📝[^\n]*?[:\-]?\s*([^\n]+)/) || extractStr(/DESCRIZIONE[^\n]*?[:\-]?\s*([^\n]+)/i) || "";
     const titleMatch = text.match(/^(?:🍴|\*\*)?([^\n📂🎯⏱🍽🔥🧄👨‍🍳📝🔄💊\*]+)/);
     const title = description.length > 5 ? description.substring(0, 60) : (titleMatch ? titleMatch[1].trim().replace(/\*+/g, '') : "");
 
-    // --- Calorie (🔥 KCAL) ---
+    // --- Calorie: 🔥 KCAL 320 ---
     const calorie =
-      parseNum('🔥\\s*KCAL') ||
-      parseNum('KCAL') ||
-      parseNum('Calorie') ||
-      parseNum('🔥') ||
+      extractNum(/KCAL\s*(\d+)/i) ||
+      extractNum(/🔥\s*(\d+)/) ||
+      extractFloat(/Calorie[^\d]*(\d+(?:[.,]\d+)?)/i) ||
       null;
 
     // --- Nutritional values ---
-    const proteine = parseNum('Proteine');
-    const carboidrati = parseNum('Carboidrati');
-    const grassi = parseNum('Grassi');
-    const fibre = parseNum('Fibre');
-    const zuccheri = parseNum('Zuccheri');
-    const sodio = parseNum('Sodio');
+    const proteine = extractFloat(/Proteine[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+    const carboidrati = extractFloat(/Carboidrati[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+    const grassi = extractFloat(/Grassi[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+    const fibre = extractFloat(/Fibre[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+    const zuccheri = extractFloat(/Zuccheri[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+    const sodio = extractFloat(/Sodio[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+
+    console.log('[Parser] category:', category, '| difficulty:', difficulty, '| prep_time:', prep_time, '| servings:', servings, '| calorie:', calorie);
+    console.log('[Parser] proteine:', proteine, '| carboidrati:', carboidrati, '| grassi:', grassi, '| fibre:', fibre, '| zuccheri:', zuccheri, '| sodio:', sodio);
 
     // --- Ingredients ---
     let ingredients = [];
