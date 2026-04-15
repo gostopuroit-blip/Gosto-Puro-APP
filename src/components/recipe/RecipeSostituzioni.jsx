@@ -72,39 +72,48 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
   };
 
   const handleApplica = async () => {
+    console.log("APPLICA CLICKED", { selected, recipeId, userRecipeId: userRecipe?.id });
     setSaving(true);
+    try {
+      // Build sostituzioni_applicate with full impatto info
+      const sostituzioni_applicate = Object.entries(selected).map(([ingrediente_nome, sostituto_scelto]) => {
+        const sost = sostituzioni.find((s) => s.ingrediente_nome === ingrediente_nome);
+        const opt = (sost?.opzioni || []).find((o) => o.nome === sostituto_scelto);
+        return {
+          ingrediente_nome,
+          sostituto_scelto,
+          impatto_calorie: opt?.impatto_calorie || 0,
+          impatto_proteine: opt?.impatto_proteine || 0,
+          impatto_carboidrati: opt?.impatto_carboidrati || 0,
+          impatto_grassi: opt?.impatto_grassi || 0,
+        };
+      });
 
-    // Build sostituzioni_applicate with full impatto info
-    const sostituzioni_applicate = Object.entries(selected).map(([ingrediente_nome, sostituto_scelto]) => {
-      const sost = sostituzioni.find((s) => s.ingrediente_nome === ingrediente_nome);
-      const opt = (sost?.opzioni || []).find((o) => o.nome === sostituto_scelto);
-      return {
-        ingrediente_nome,
-        sostituto_scelto,
-        impatto_calorie: opt?.impatto_calorie || 0,
-        impatto_proteine: opt?.impatto_proteine || 0,
-        impatto_carboidrati: opt?.impatto_carboidrati || 0,
-        impatto_grassi: opt?.impatto_grassi || 0,
+      // Calcola macros personalizzati
+      const currentImpatto = calcImpatto(selected);
+      const macros_personalizzati = {
+        calorie: Math.round((recipe.calories || recipe.calorie || 0) + currentImpatto.calorie),
+        proteine: Math.round((recipe.proteine || 0) + currentImpatto.proteine),
+        carboidrati: Math.round((recipe.carboidrati || 0) + currentImpatto.carboidrati),
+        grassi: Math.round((recipe.grassi || 0) + currentImpatto.grassi),
       };
-    });
 
-    // Calcola macros personalizzati
-    const macros_personalizzati = {
-      calorie: Math.round((recipe.calories || recipe.calorie || 0) + impatto.calorie),
-      proteine: Math.round((recipe.proteine || 0) + impatto.proteine),
-      carboidrati: Math.round((recipe.carboidrati || 0) + impatto.carboidrati),
-      grassi: Math.round((recipe.grassi || 0) + impatto.grassi),
-    };
+      console.log("Saving:", { sostituzioni_applicate, macros_personalizzati, hasUserRecipe: !!userRecipe?.id });
 
-    if (userRecipe?.id) {
-      await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate, macros_personalizzati });
-    } else {
-      await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate, macros_personalizzati });
+      if (userRecipe?.id) {
+        await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate, macros_personalizzati });
+      } else {
+        await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate, macros_personalizzati });
+      }
+
+      toast.success("✅ Sostituzioni salvate!");
+      if (onSaved) onSaved();
+    } catch (err) {
+      console.error("APPLICA ERROR", err);
+      toast.error("Errore nel salvataggio: " + (err?.message || "riprova"));
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
-    toast.success("Sostituzioni applicate con successo! ✅");
-    if (onSaved) onSaved();
   };
 
   const handleRipristina = async () => {
@@ -126,7 +135,7 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
       );
 
   return (
-    <div className="mt-4 pb-32">
+    <div className="mt-4 pb-48">
       {/* Avviso */}
       <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 mb-4 text-xs text-amber-700 leading-relaxed">
         💡 Tocca un ingrediente per vedere le opzioni di sostituzione. I macros si aggiornano in tempo reale.
@@ -298,25 +307,24 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
         </div>
       )}
 
-      {/* Bottoni */}
-      <div className="mt-4 space-y-2">
-        <Button
+      {/* Bottoni — z-10 para ficar acima de qualquer overlay */}
+      <div className="mt-4 space-y-2 relative z-10">
+        <button
+          type="button"
           onClick={handleApplica}
           disabled={saving || Object.keys(selected).length === 0}
-          className="w-full py-5 rounded-2xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold text-sm disabled:opacity-50"
+          style={{ width: "100%", padding: "14px", borderRadius: "16px", background: Object.keys(selected).length === 0 ? "#9CA3AF" : "#2D6A4F", color: "white", fontWeight: "bold", fontSize: "14px", border: "none", cursor: Object.keys(selected).length === 0 ? "not-allowed" : "pointer", opacity: saving ? 0.7 : 1 }}
         >
-          <Check className="w-4 h-4 mr-2" />
-          Applica Sostituzioni
-        </Button>
-        <Button
+          ✓ Applica Sostituzioni
+        </button>
+        <button
+          type="button"
           onClick={handleRipristina}
           disabled={saving}
-          variant="outline"
-          className="w-full py-5 rounded-2xl border-2 font-bold text-sm"
+          style={{ width: "100%", padding: "14px", borderRadius: "16px", background: "white", color: "#374151", fontWeight: "bold", fontSize: "14px", border: "2px solid #D1D5DB", cursor: "pointer", opacity: saving ? 0.7 : 1 }}
         >
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Ripristina Originale
-        </Button>
+          ↺ Ripristina Originale
+        </button>
       </div>
     </div>
   );
