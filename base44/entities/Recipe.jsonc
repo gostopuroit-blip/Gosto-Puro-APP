@@ -147,6 +147,58 @@
       },
       "description": "Step by step instructions"
     },
+    "sostituzioni": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ingrediente_nome": {
+            "type": "string",
+            "description": "Nome dell'ingrediente originale"
+          },
+          "opzioni": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Nome del sostituto"
+                },
+                "quantita": {
+                  "type": "string",
+                  "description": "Quantit\u00e0 (es: 150g, 2 unit\u00e0)"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Tag (Vegano, Senza glutine, ecc.)"
+                },
+                "impatto_calorie": {
+                  "type": "number",
+                  "description": "Differenza in kcal (pu\u00f2 essere negativo)"
+                },
+                "impatto_proteine": {
+                  "type": "number",
+                  "description": "Differenza in g di proteine"
+                },
+                "impatto_carboidrati": {
+                  "type": "number",
+                  "description": "Differenza in g di carboidrati"
+                },
+                "impatto_grassi": {
+                  "type": "number",
+                  "description": "Differenza in g di grassi"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Sostituzioni degli ingredienti con impatto sui macros"
+    },
     "numero_salvate": {
       "type": "number",
       "description": "Number of saves"

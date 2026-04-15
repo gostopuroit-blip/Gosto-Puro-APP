@@ -27,6 +27,8 @@ const countries = [
   { label: "Vietnam", flag: "🇻🇳" },
 ];
 
+const SOSTITUZIONE_TAGS = ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio", "Low carb", "Proteico", "Economico", "Facile da trovare"];
+
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
   prep_time: 30, servings: 4, difficulty: "Facile", calories: null,
@@ -34,6 +36,7 @@ const emptyForm = {
   instructions: [""], occasions: [], lifestyle: [],
   visibility: "all", numero_salvate: 0, numero_preparate: 0,
   gen_prompt: "", status: "pubblicata", paese: "",
+  sostituzioni: [],
 };
 
 export default function AdminRecipesManager() {
@@ -563,6 +566,59 @@ export default function AdminRecipesManager() {
                   </button>
                 </div>
               ))}
+            </div>
+
+            {/* Sostituzioni Ingredienti */}
+            <div>
+              <label className="text-[10px] text-gray-400 font-semibold uppercase">Sostituzioni Ingredienti</label>
+              <div className="mt-2 space-y-3">
+                {form.ingredients.filter(ing => ing.name.trim()).map((ing, ingIdx) => {
+                  const sostEntry = (form.sostituzioni || []).find(s => s.ingrediente_nome === ing.name);
+                  const opzioni = sostEntry?.opzioni || [];
+                  const updateSost = (newOpzioni) => {
+                    const existing = (form.sostituzioni || []).filter(s => s.ingrediente_nome !== ing.name);
+                    setForm(f => ({ ...f, sostituzioni: newOpzioni.length > 0 ? [...existing, { ingrediente_nome: ing.name, opzioni: newOpzioni }] : existing }));
+                  };
+                  return (
+                    <div key={ingIdx} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-gray-700">🥄 {ing.name}</span>
+                        <button type="button" onClick={() => updateSost([...opzioni, { nome: "", quantita: "", tags: [], impatto_calorie: 0, impatto_proteine: 0, impatto_carboidrati: 0, impatto_grassi: 0 }])}
+                          className="text-[10px] text-[#2D6A4F] font-bold">+ Aggiungi sostituzione</button>
+                      </div>
+                      {opzioni.map((opt, optIdx) => (
+                        <div key={optIdx} className="bg-white rounded-lg p-2.5 mb-2 border border-gray-100 space-y-2">
+                          <div className="flex gap-1.5 items-start">
+                            <Input placeholder="Nome sostituto" value={opt.nome} onChange={e => { const o=[...opzioni]; o[optIdx]={...o[optIdx],nome:e.target.value}; updateSost(o); }} className="rounded-lg flex-1 text-xs" />
+                            <Input placeholder="Quantità" value={opt.quantita} onChange={e => { const o=[...opzioni]; o[optIdx]={...o[optIdx],quantita:e.target.value}; updateSost(o); }} className="rounded-lg w-20 text-xs" />
+                            <button type="button" onClick={() => { const o=opzioni.filter((_,j)=>j!==optIdx); updateSost(o); }} className="text-gray-300 hover:text-red-400 mt-1.5"><X className="w-4 h-4" /></button>
+                          </div>
+                          <div className="grid grid-cols-4 gap-1">
+                            {[{k:"impatto_calorie",l:"kcal"},{k:"impatto_proteine",l:"Prot"},{k:"impatto_carboidrati",l:"Carb"},{k:"impatto_grassi",l:"Grass"}].map(({k,l}) => (
+                              <div key={k}>
+                                <label className="text-[9px] text-gray-400">{l}</label>
+                                <Input type="number" placeholder="0" value={opt[k] || ""} onChange={e => { const o=[...opzioni]; o[optIdx]={...o[optIdx],[k]:e.target.value?Number(e.target.value):0}; updateSost(o); }} className="rounded-lg text-xs mt-0.5" />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {SOSTITUZIONE_TAGS.map(tag => (
+                              <button key={tag} type="button"
+                                onClick={() => { const o=[...opzioni]; const tags=o[optIdx].tags||[]; o[optIdx]={...o[optIdx],tags:tags.includes(tag)?tags.filter(t=>t!==tag):[...tags,tag]}; updateSost(o); }}
+                                className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-all ${(opt.tags||[]).includes(tag)?"bg-[#2D6A4F] text-white border-[#2D6A4F]":"border-gray-100 text-gray-500 bg-white"}`}>
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+                {form.ingredients.filter(i => i.name.trim()).length === 0 && (
+                  <p className="text-[11px] text-gray-400 text-center py-2">Aggiungi prima gli ingredienti</p>
+                )}
+              </div>
             </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl bg-[#2D6A4F] hover:bg-[#235c43] font-bold">
