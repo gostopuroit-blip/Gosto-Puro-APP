@@ -42,6 +42,8 @@ export default function OccasionRecipesPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tutte");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 6;
 
   useEffect(() => {
     if (occasion) loadRecipes();
@@ -80,21 +82,34 @@ export default function OccasionRecipesPage() {
     return matchesQuery && matchesCategory;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedRecipes = filteredRecipes.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Reset to page 1 when filters change
+  const handleQueryChange = (val) => { setQuery(val); setPage(1); };
+  const handleCategoryChange = (cat) => { setActiveCategory(cat); setPage(1); };
+
   const categories = [...new Set(recipes.map((r) => r.category).filter(Boolean))];
   const icon = OCCASION_ICONS[occasion] || "🍽️";
 
   return (
-    <div className="min-h-screen bg-[#111] text-white pb-24">
+    <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] pb-24">
       {/* Header */}
-      <div className="bg-[#1A1A1A] px-5 pt-12 pb-5 border-b border-[#2A2A2A]">
+      <div className="bg-white dark:bg-[#1A1A1A] px-5 pt-12 pb-5 border-b border-gray-100 dark:border-[#2A2A2A]">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-            <ArrowLeft className="w-5 h-5 text-white" />
+          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center flex-shrink-0">
+            <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-white" />
           </button>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="text-2xl">{icon}</span>
-              <h1 className="text-xl font-bold text-white">{occasion}</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">{occasion}</h1>
             </div>
             <p className="text-sm text-gray-400 mt-0.5">Collezione completa · {recipes.length} ricette</p>
           </div>
@@ -107,8 +122,8 @@ export default function OccasionRecipesPage() {
             { label: "Categorie", value: categories.length },
             { label: "Preferite", value: Object.keys(userRecipes).length },
           ].map((s) => (
-            <div key={s.label} className="flex-1 bg-white/5 rounded-xl py-2 px-3 text-center">
-              <p className="text-lg font-bold text-white">{s.value}</p>
+            <div key={s.label} className="flex-1 bg-gray-50 dark:bg-white/5 rounded-xl py-2 px-3 text-center">
+              <p className="text-lg font-bold text-gray-900 dark:text-white">{s.value}</p>
               <p className="text-[11px] text-gray-400">{s.label}</p>
             </div>
           ))}
@@ -116,13 +131,13 @@ export default function OccasionRecipesPage() {
 
         {/* Search */}
         <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
             placeholder="Cerca ricette..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-white/8 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#2D6A4F]"
+            onChange={(e) => handleQueryChange(e.target.value)}
+            className="w-full bg-gray-100 dark:bg-white/8 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#2D6A4F]"
           />
         </div>
 
@@ -131,11 +146,11 @@ export default function OccasionRecipesPage() {
           {CATEGORY_PILLS.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => handleCategoryChange(cat)}
               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                 activeCategory === cat
                   ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
-                  : "bg-white/5 border-white/10 text-gray-400"
+                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400"
               }`}
             >
               {cat}
@@ -157,16 +172,44 @@ export default function OccasionRecipesPage() {
             {query && <p className="text-gray-500 text-sm mt-1">Prova a modificare la ricerca</p>}
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredRecipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                occasion={occasion}
-                isSaved={!!userRecipes[recipe.id]}
-              />
-            ))}
-          </div>
+          <>
+            <p className="text-xs text-gray-400 mb-3">
+              Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
+            </p>
+            <div className="space-y-3">
+              {pagedRecipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  occasion={occasion}
+                  isSaved={!!userRecipes[recipe.id]}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <button
+                  onClick={() => handlePageChange(safePage - 1)}
+                  disabled={safePage === 1}
+                  className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Anterior
+                </button>
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                  {safePage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(safePage + 1)}
+                  disabled={safePage === totalPages}
+                  className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Próxima →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -179,7 +222,7 @@ function RecipeCard({ recipe, occasion, isSaved }) {
   return (
     <Link
       to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}
-      className="flex gap-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
+      className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm"
     >
       {/* Thumbnail */}
       <div className="w-24 h-24 flex-shrink-0 relative">
@@ -210,12 +253,12 @@ function RecipeCard({ recipe, occasion, isSaved }) {
         </div>
 
         {/* Title */}
-        <p className="text-sm font-semibold text-white leading-tight line-clamp-2 mb-1.5">
+        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1.5">
           {recipe.title}
         </p>
 
         {/* Meta */}
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 mb-1.5">
+        <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mb-1.5">
           {recipe.prep_time && <span>⏱ {recipe.prep_time} min</span>}
           {kcal && <span>🔥 {kcal} kcal</span>}
           {recipe.difficulty && <span>{recipe.difficulty}</span>}
