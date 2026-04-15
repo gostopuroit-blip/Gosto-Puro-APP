@@ -445,7 +445,9 @@ export default function RecipeDetail() {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
                 {(recipe.ingredients || []).map((ing, i) => {
                   const sostApplied = (userRecipe?.sostituzioni_applicate || []).find(
-                    (s) => s.ingrediente_nome === ing.name
+                    (s) =>
+                      ing.name.toLowerCase().includes(s.ingrediente_nome.toLowerCase()) ||
+                      s.ingrediente_nome.toLowerCase().includes(ing.name.toLowerCase())
                   );
                   return (
                   <IngredientRow
