@@ -45,18 +45,23 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
     });
   };
 
-  // Calcola impatto totale
-  const impatto = { calorie: 0, proteine: 0, carboidrati: 0, grassi: 0 };
-  sostituzioni.forEach((sost) => {
-    const chosenNome = selected[sost.ingrediente_nome];
-    if (!chosenNome) return;
-    const opt = (sost.opzioni || []).find((o) => o.nome === chosenNome);
-    if (!opt) return;
-    impatto.calorie += opt.impatto_calorie || 0;
-    impatto.proteine += opt.impatto_proteine || 0;
-    impatto.carboidrati += opt.impatto_carboidrati || 0;
-    impatto.grassi += opt.impatto_grassi || 0;
-  });
+  // Calcola impatto totale dalle selezioni correnti
+  const calcImpatto = (sel) => {
+    const imp = { calorie: 0, proteine: 0, carboidrati: 0, grassi: 0 };
+    sostituzioni.forEach((sost) => {
+      const chosenNome = sel[sost.ingrediente_nome];
+      if (!chosenNome) return;
+      const opt = (sost.opzioni || []).find((o) => o.nome === chosenNome);
+      if (!opt) return;
+      imp.calorie += opt.impatto_calorie || 0;
+      imp.proteine += opt.impatto_proteine || 0;
+      imp.carboidrati += opt.impatto_carboidrati || 0;
+      imp.grassi += opt.impatto_grassi || 0;
+    });
+    return imp;
+  };
+
+  const impatto = calcImpatto(selected);
 
   const formatImpatto = (val) => {
     if (!val) return "0";
@@ -65,15 +70,36 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
 
   const handleApplica = async () => {
     setSaving(true);
-    const sostituzioni_applicate = Object.entries(selected).map(([ingrediente_nome, sostituto_scelto]) => ({
-      ingrediente_nome,
-      sostituto_scelto,
-    }));
+
+    // Build sostituzioni_applicate with full impatto info
+    const sostituzioni_applicate = Object.entries(selected).map(([ingrediente_nome, sostituto_scelto]) => {
+      const sost = sostituzioni.find((s) => s.ingrediente_nome === ingrediente_nome);
+      const opt = (sost?.opzioni || []).find((o) => o.nome === sostituto_scelto);
+      return {
+        ingrediente_nome,
+        sostituto_scelto,
+        impatto_calorie: opt?.impatto_calorie || 0,
+        impatto_proteine: opt?.impatto_proteine || 0,
+        impatto_carboidrati: opt?.impatto_carboidrati || 0,
+        impatto_grassi: opt?.impatto_grassi || 0,
+      };
+    });
+
+    // Calcola macros personalizzati
+    const baseCalorie = recipe.calorie ?? recipe.calories ?? null;
+    const macros_personalizzati = {
+      calorie: baseCalorie != null ? Math.round(baseCalorie + impatto.calorie) : null,
+      proteine: recipe.proteine != null ? Math.round(recipe.proteine + impatto.proteine) : null,
+      carboidrati: recipe.carboidrati != null ? Math.round(recipe.carboidrati + impatto.carboidrati) : null,
+      grassi: recipe.grassi != null ? Math.round(recipe.grassi + impatto.grassi) : null,
+    };
+
     if (userRecipe) {
-      await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate });
+      await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate, macros_personalizzati });
     } else {
-      await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate });
+      await base44.entities.UserRecipe.create({ recipe_id: recipeId, sostituzioni_applicate, macros_personalizzati });
     }
+
     setSaving(false);
     toast.success("Sostituzioni salvate! ✅");
     if (onSaved) onSaved();
@@ -83,7 +109,7 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
     setSaving(true);
     setSelected({});
     if (userRecipe) {
-      await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate: [] });
+      await base44.entities.UserRecipe.update(userRecipe.id, { sostituzioni_applicate: [], macros_personalizzati: null });
     }
     setSaving(false);
     toast.success("Ingredienti originali ripristinati.");
@@ -246,7 +272,7 @@ export default function RecipeSostituzioni({ recipe, userRecipe, recipeId, onSav
         </div>
       )}
 
-      {/* Barra impatto */}
+      {/* Barra impatto in tempo reale */}
       {Object.keys(selected).length > 0 && (
         <div className="mt-4 bg-gray-900 rounded-2xl px-4 py-3">
           <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-2">

@@ -46,10 +46,40 @@
           },
           "sostituto_scelto": {
             "type": "string"
+          },
+          "impatto_calorie": {
+            "type": "number"
+          },
+          "impatto_proteine": {
+            "type": "number"
+          },
+          "impatto_carboidrati": {
+            "type": "number"
+          },
+          "impatto_grassi": {
+            "type": "number"
           }
         }
       },
       "description": "Sostituzioni ingredienti scelte dall'utente"
+    },
+    "macros_personalizzati": {
+      "type": "object",
+      "properties": {
+        "calorie": {
+          "type": "number"
+        },
+        "proteine": {
+          "type": "number"
+        },
+        "carboidrati": {
+          "type": "number"
+        },
+        "grassi": {
+          "type": "number"
+        }
+      },
+      "description": "Macros ricalcolati con le sostituzioni applicate"
     }
   },
   "required": [

@@ -326,22 +326,38 @@ export default function RecipeDetail() {
           </div>
 
           {/* Macros box */}
-          <div className="flex gap-2 mt-4">
-            {[
-              { label: "Calorie", value: recipe.calorie ?? recipe.calories, unit: "kcal" },
-              { label: "Proteine", value: recipe.proteine, unit: "g" },
-              { label: "Carboidrati", value: recipe.carboidrati, unit: "g" },
-              { label: "Grassi", value: recipe.grassi, unit: "g" },
-            ].map((macro) => (
-              <div key={macro.label} className="flex-1 bg-gray-50 rounded-xl py-2.5 px-1 flex flex-col items-center gap-0.5">
-                <span className="text-base font-bold text-gray-800 leading-tight">
-                  {macro.value != null ? macro.value : "—"}
-                </span>
-                <span className="text-[10px] text-gray-400 font-medium text-center leading-tight">{macro.label}</span>
-                {macro.value != null && <span className="text-[10px] text-gray-300">{macro.unit}</span>}
-              </div>
-            ))}
-          </div>
+          {(() => {
+            const mp = userRecipe?.macros_personalizzati;
+            const hasPersonalized = mp && (mp.calorie != null || mp.proteine != null || mp.carboidrati != null || mp.grassi != null);
+            const macros = [
+              { label: "Calorie", value: hasPersonalized && mp.calorie != null ? mp.calorie : (recipe.calorie ?? recipe.calories), unit: "kcal" },
+              { label: "Proteine", value: hasPersonalized && mp.proteine != null ? mp.proteine : recipe.proteine, unit: "g" },
+              { label: "Carboidrati", value: hasPersonalized && mp.carboidrati != null ? mp.carboidrati : recipe.carboidrati, unit: "g" },
+              { label: "Grassi", value: hasPersonalized && mp.grassi != null ? mp.grassi : recipe.grassi, unit: "g" },
+            ];
+            return (
+              <>
+                {hasPersonalized && (
+                  <div className="mt-3 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold bg-[#2D6A4F]/10 text-[#2D6A4F] px-2.5 py-1 rounded-full">
+                      ✏️ Personalizzata
+                    </span>
+                  </div>
+                )}
+                <div className="flex gap-2 mt-3">
+                  {macros.map((macro) => (
+                    <div key={macro.label} className={`flex-1 rounded-xl py-2.5 px-1 flex flex-col items-center gap-0.5 ${hasPersonalized ? "bg-[#2D6A4F]/8 border border-[#2D6A4F]/20" : "bg-gray-50"}`}>
+                      <span className="text-base font-bold text-gray-800 leading-tight">
+                        {macro.value != null ? macro.value : "—"}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-medium text-center leading-tight">{macro.label}</span>
+                      {macro.value != null && <span className="text-[10px] text-gray-300">{macro.unit}</span>}
+                    </div>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
 
           {/* Info box */}
           <div className="flex gap-2 mt-3">
@@ -362,17 +378,21 @@ export default function RecipeDetail() {
           </div>
 
           <p className="text-sm text-gray-600 mt-4 leading-relaxed">{recipe.description}</p>
-          {(recipe.calories || recipe.calorie) && (
-            <div className="flex items-center gap-3 mt-3 bg-orange-50 rounded-xl px-3 py-2.5 w-fit">
-              <span className="text-base">🔥</span>
-              <div>
-                <div className="text-xs font-bold text-orange-600">{recipe.calories || recipe.calorie} kcal / porzione</div>
-                <div className="text-xs text-orange-400 mt-0.5">
-                  Totale: {Math.round((recipe.calories || recipe.calorie) * servings)} kcal ({servings} {servings === 1 ? "porzione" : "porzioni"})
+          {(recipe.calories || recipe.calorie) && (() => {
+            const mp = userRecipe?.macros_personalizzati;
+            const kcal = (mp?.calorie != null) ? mp.calorie : (recipe.calories || recipe.calorie);
+            return (
+              <div className="flex items-center gap-3 mt-3 bg-orange-50 rounded-xl px-3 py-2.5 w-fit">
+                <span className="text-base">🔥</span>
+                <div>
+                  <div className="text-xs font-bold text-orange-600">{kcal} kcal / porzione</div>
+                  <div className="text-xs text-orange-400 mt-0.5">
+                    Totale: {Math.round(kcal * servings)} kcal ({servings} {servings === 1 ? "porzione" : "porzioni"})
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 
