@@ -231,22 +231,27 @@ export default function Home() {
               </div>
             );
           })}
-          {lifestyleTags.map((tag) => (
-            <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
-              onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
-              className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-              {tag.img ? (
-                <img src={tag.img} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-              ) : (
-                <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
-                  <span className="text-5xl">{tag.icon}</span>
+          {lifestyleTags.map((tag) => {
+            const fitnessImageUrl = tag.label === "275 Ricette Fitness Pratiche ed Economiche" 
+              ? "https://media.base44.com/images/public/699707f25ff5e371dc9a1c99/d5ceb05aa_75RicetteFitnessPraticheedEconomiche.png"
+              : tag.img;
+            return (
+              <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
+                onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
+                className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+                {fitnessImageUrl ? (
+                  <img src={fitnessImageUrl} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+                ) : (
+                  <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
+                    <span className="text-5xl">{tag.icon}</span>
+                  </div>
+                )}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
                 </div>
-              )}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
