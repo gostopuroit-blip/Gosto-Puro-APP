@@ -205,101 +205,82 @@ export default function AdminRecipesManager() {
     setForm((f) => ({ ...f, instructions: steps }));
   };
 
-  const handleParsePaste = () => {
-    const text = pasteText;
-    if (!text.trim()) return;
+  const parseReceitaPrompt = (text) => {
+    const result = {};
 
-    // Generic: find the number on the same line as a keyword
-    const extractNum = (re) => {
-      const m = text.match(re);
-      const val = m ? parseInt(m[1], 10) : NaN;
-      return isNaN(val) ? null : val;
-    };
+    // CATEGORIA
+    const catMatch = text.match(/CATEGORIA\s+(\w+)/);
+    if (catMatch) result.category = catMatch[1];
 
-    const extractFloat = (re) => {
-      const m = text.match(re);
-      return m ? parseFloat(m[1].replace(',', '.')) : null;
-    };
+    // DIFFICOLTÀ
+    const diffMatch = text.match(/DIFFICOLT[ÀA]\s+(\w+)/);
+    if (diffMatch) result.difficulty = diffMatch[1];
 
-    // Generic: get the rest of the line after a keyword
-    const extractStr = (re) => {
-      const m = text.match(re);
-      return m ? m[1].trim() : null;
-    };
+    // TEMPO
+    const tempoMatch = text.match(/TEMPO[^0-9]*(\d+)/);
+    if (tempoMatch) result.prep_time = parseInt(tempoMatch[1]);
 
-    // --- Category (📂 CATEGORIA Colazione) ---
-    const catRaw = extractStr(/CATEGORIA\s+([^\n]+)/i) || extractStr(/📂[^\n]*?([A-Za-zÀ-ÿ]{3,})/);
-    const category = categories.find(c => catRaw?.toLowerCase().includes(c.toLowerCase())) || "Pranzo";
+    // PORZIONI
+    const porzioniMatch = text.match(/PORZIONI\s+(\d+)/);
+    if (porzioniMatch) result.servings = parseInt(porzioniMatch[1]);
 
-    // --- Difficulty (🎯 DIFFICOLTÀ Facile) ---
-    const diffRaw = extractStr(/DIFFICOLT[AÀ]?\s+([^\n]+)/i) || extractStr(/🎯[^\n]*?([A-Za-z]{4,})/);
-    const difficulty = difficulties.find(d => diffRaw?.toLowerCase().includes(d.toLowerCase())) || "Facile";
+    // KCAL - múltiplas tentativas
+    const kcalMatch = text.match(/KCAL\s+(\d+)/) || text.match(/(\d+)\s*kcal/i) || text.match(/🔥[^\d]*(\d+)/);
+    if (kcalMatch) result.calorie = parseInt(kcalMatch[1]);
 
-    // --- Prep time (⏱ TEMPO (MIN) 15) ---
-    const prep_time =
-      extractNum(/TEMPO\s*\([^)]*\)\s*(\d+)/i) ||
-      extractNum(/TEMPO\s*(\d+)/i) ||
-      extractNum(/⏱[^\d\n]*(\d+)/) ||
-      30;
+    // VALORI NUTRIZIONALI
+    const protMatch = text.match(/Proteine[:\s]+(\d+)/i);
+    if (protMatch) result.proteine = parseInt(protMatch[1]);
 
-    // --- Servings (🍽 PORZIONI 2) ---
-    const servings =
-      extractNum(/PORZIONI\s*(\d+)/i) ||
-      extractNum(/🍽[^\d\n]*(\d+)/) ||
-      4;
+    const carbMatch = text.match(/Carboidrati[:\s]+(\d+)/i);
+    if (carbMatch) result.carboidrati = parseInt(carbMatch[1]);
 
-    // --- Description / title ---
-    const description = extractStr(/📝[^\n]*?[:\-]?\s*([^\n]+)/) || extractStr(/DESCRIZIONE[^\n]*?[:\-]?\s*([^\n]+)/i) || "";
-    const titleMatch = text.match(/^(?:🍴|\*\*)?([^\n📂🎯⏱🍽🔥🧄👨‍🍳📝🔄💊\*]+)/);
-    const title = description.length > 5 ? description.substring(0, 60) : (titleMatch ? titleMatch[1].trim().replace(/\*+/g, '') : "");
+    const grassiMatch = text.match(/Grassi[:\s]+(\d+)/i);
+    if (grassiMatch) result.grassi = parseInt(grassiMatch[1]);
 
-    // --- Calorie: 🔥 KCAL 320 ---
-    const calorie =
-      extractNum(/KCAL\s*(\d+)/i) ||
-      extractNum(/🔥\s*(\d+)/) ||
-      extractFloat(/Calorie[^\d]*(\d+(?:[.,]\d+)?)/i) ||
-      null;
+    const fibreMatch = text.match(/Fibre[:\s]+(\d+)/i);
+    if (fibreMatch) result.fibre = parseInt(fibreMatch[1]);
 
-    // --- Nutritional values ---
-    const proteine = extractFloat(/Proteine[^\d\n]*(\d+(?:[.,]\d+)?)/i);
-    const carboidrati = extractFloat(/Carboidrati[^\d\n]*(\d+(?:[.,]\d+)?)/i);
-    const grassi = extractFloat(/Grassi[^\d\n]*(\d+(?:[.,]\d+)?)/i);
-    const fibre = extractFloat(/Fibre[^\d\n]*(\d+(?:[.,]\d+)?)/i);
-    const zuccheri = extractFloat(/Zuccheri[^\d\n]*(\d+(?:[.,]\d+)?)/i);
-    const sodio = extractFloat(/Sodio[^\d\n]*(\d+(?:[.,]\d+)?)/i);
+    const zuccheriMatch = text.match(/Zuccheri[:\s]+(\d+)/i);
+    if (zuccheriMatch) result.zuccheri = parseInt(zuccheriMatch[1]);
 
-    console.log('[Parser] category:', category, '| difficulty:', difficulty, '| prep_time:', prep_time, '| servings:', servings, '| calorie:', calorie);
-    console.log('[Parser] proteine:', proteine, '| carboidrati:', carboidrati, '| grassi:', grassi, '| fibre:', fibre, '| zuccheri:', zuccheri, '| sodio:', sodio);
+    const sodioMatch = text.match(/Sodio[:\s]+(\d+)/i);
+    if (sodioMatch) result.sodio = parseInt(sodioMatch[1]);
 
-    // --- Ingredients ---
-    let ingredients = [];
-    const ingSection = text.match(/🧄[^\n]*\n([\s\S]*?)(?=\n[👨📝🔋💪🍞🧂💧🔄💊]|\n---|\.{3}|$)/);
-    if (ingSection) {
-      ingredients = ingSection[1].split('\n')
-        .map(l => l.trim().replace(/^[•\-\*]+\s*/, ''))
-        .filter(l => l.length > 2)
-        .map(l => {
-          const parts = l.split(/\s*[—–-]\s*/);
-          if (parts.length >= 2) {
-            return { name: parts[0].trim(), quantity: parts.slice(1).join(' ').trim(), category: "Altro" };
-          }
-          return { name: l, quantity: "", category: "Altro" };
-        });
+    // TITOLO / DESCRIZIONE BREVE
+    const titleMatch = text.match(/DESCRIZIONE BREVE\s*\n([^\n]+)/i);
+    if (titleMatch) result.description = titleMatch[1].trim();
+
+    // INGREDIENTI
+    const ingredientiSection = text.match(/INGREDIENTI\s*\n([\s\S]*?)(?=👨|PROCEDIMENTO)/i);
+    if (ingredientiSection) {
+      const lines = ingredientiSection[1].split('\n').filter(l => l.trim());
+      result.ingredients = lines.map(line => {
+        const parts = line.split(/—|->/);
+        return { name: parts[0]?.trim(), quantity: parts[1]?.trim() || '', category: 'Dispensa' };
+      }).filter(i => i.name);
     }
 
-    // --- Instructions ---
-    let instructions = [];
-    const procSection = text.match(/👨[^\n]*\n([\s\S]*?)(?=\n📝|\n🔋|\n💪|\n🔄|\n💊|\n---|\.{3}|$)/);
-    if (procSection) {
-      instructions = procSection[1].split('\n')
-        .map(l => l.trim().replace(/^(?:Passo\s*\d+[:\.]?|\d+[\.)\s]+)/, '').trim())
-        .filter(l => l.length > 5);
+    // ISTRUZIONI
+    const procedimentoSection = text.match(/PROCEDIMENTO\s*\n([\s\S]*?)(?=📝|DESCRIZIONE|VALORI|💊|🔄|$)/i);
+    if (procedimentoSection) {
+      const lines = procedimentoSection[1].split(/Passo \d+\s*/i).filter(l => l.trim());
+      result.instructions = lines;
     }
 
-    // --- Sostituzioni ---
-    // Format: "NomeIngrediente → NomeSostituto (quantità) | tags: Tag1, Tag2 | impatto: +Xkcal, +Xg proteine, ..."
-    let sostituzioni = [];
-    const sostSection = text.match(/🔄[^\n]*\n([\s\S]*?)(?=\n[📂🎯⏱🍽🔥🧄👨📝💊]|\n---|\.{3}|$)/);
+    // OCCASIONI - basato sulla categoria + keywords
+    const occasioni = [];
+    const catOccasionMap = { "Colazione": "Colazione", "Pranzo": "Pranzo", "Cena": "Cena", "Dolce": "Dolci" };
+    if (result.category && catOccasionMap[result.category]) occasioni.push(catOccasionMap[result.category]);
+    if (text.match(/fit/i)) occasioni.push('Fit');
+    if (text.match(/diabet/i)) occasioni.push('Diabete');
+    if (text.match(/detox/i)) occasioni.push('Detox');
+    if (text.match(/low carb/i)) occasioni.push('Low carb');
+    if (text.match(/friggitrice/i)) occasioni.push('Friggitrice ad Aria');
+    result.occasions = occasioni;
+
+    // SOSTITUZIONI (🔄)
+    const sostSection = text.match(/🔄[^\n]*\n([\s\S]*?)(?=\n[📂🎯⏱🍽🔥🧄👨📝💊]|\n---|$)/);
     if (sostSection) {
       const lines = sostSection[1].split('\n').map(l => l.trim()).filter(l => l.includes('→'));
       const byIngredient = {};
@@ -308,81 +289,61 @@ export default function AdminRecipesManager() {
         if (arrowParts.length < 2) return;
         const ingNome = arrowParts[0].trim().replace(/^[•\-\*]+\s*/, '');
         const rest = arrowParts.slice(1).join('→');
-
-        // Extract parts separated by |
         const segments = rest.split('|').map(s => s.trim());
         const firstSeg = segments[0] || "";
-        // nome (quantità)
         const qMatch = firstSeg.match(/^(.+?)\s*\(([^)]+)\)/);
         const nome = qMatch ? qMatch[1].trim() : firstSeg.trim();
         const quantita = qMatch ? qMatch[2].trim() : "";
-
-        // tags: Tag1, Tag2
         let tags = [];
         const tagSeg = segments.find(s => /^tags?:/i.test(s));
-        if (tagSeg) {
-          tags = tagSeg.replace(/^tags?:\s*/i, '').split(',').map(t => t.trim()).filter(Boolean);
-        }
-
-        // impatto: +Xkcal, +Xg proteine, +Xg carboidrati, +Xg grassi
+        if (tagSeg) tags = tagSeg.replace(/^tags?:\s*/i, '').split(',').map(t => t.trim()).filter(Boolean);
         let impatto_calorie = 0, impatto_proteine = 0, impatto_carboidrati = 0, impatto_grassi = 0;
         const impattoSeg = segments.find(s => /^impatto:/i.test(s));
         if (impattoSeg) {
           const imp = impattoSeg.replace(/^impatto:\s*/i, '');
-          const kcalM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*kcal/i);
-          const protM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*g?\s*prot/i);
-          const carbM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*g?\s*carb/i);
-          const grassM = imp.match(/([+\-]?\d+(?:[.,]\d+)?)\s*g?\s*gras/i);
-          if (kcalM) impatto_calorie = parseFloat(kcalM[1].replace(',', '.'));
-          if (protM) impatto_proteine = parseFloat(protM[1].replace(',', '.'));
-          if (carbM) impatto_carboidrati = parseFloat(carbM[1].replace(',', '.'));
-          if (grassM) impatto_grassi = parseFloat(grassM[1].replace(',', '.'));
+          const km = imp.match(/([+\-]?\d+)\s*kcal/i);
+          const pm = imp.match(/([+\-]?\d+)\s*g?\s*prot/i);
+          const cm = imp.match(/([+\-]?\d+)\s*g?\s*carb/i);
+          const gm = imp.match(/([+\-]?\d+)\s*g?\s*gras/i);
+          if (km) impatto_calorie = parseInt(km[1]);
+          if (pm) impatto_proteine = parseInt(pm[1]);
+          if (cm) impatto_carboidrati = parseInt(cm[1]);
+          if (gm) impatto_grassi = parseInt(gm[1]);
         }
-
         if (!byIngredient[ingNome]) byIngredient[ingNome] = [];
         byIngredient[ingNome].push({ nome, quantita, tags, impatto_calorie, impatto_proteine, impatto_carboidrati, impatto_grassi });
       });
-      sostituzioni = Object.entries(byIngredient).map(([ingrediente_nome, opzioni]) => ({ ingrediente_nome, opzioni }));
+      result.sostituzioni = Object.entries(byIngredient).map(([ingrediente_nome, opzioni]) => ({ ingrediente_nome, opzioni }));
     }
 
-    // --- Occasions auto-mapping ---
-    const catOccasionMap = { "Colazione": "Colazione", "Pranzo": "Pranzo", "Cena": "Cena", "Dolce": "Dolci" };
-    const keywordOccasions = [
-      { keywords: ["fit", "fitness", "proteic"], occasion: "Fit" },
-      { keywords: ["diabet"], occasion: "Diabete" },
-      { keywords: ["detox"], occasion: "Detox" },
-      { keywords: ["low carb", "lowcarb"], occasion: "Low carb" },
-      { keywords: ["friggitric", "friggitrice"], occasion: "Friggitrice ad Aria" },
-      { keywords: ["vegano", "vegan"], occasion: "Vegano" },
-      { keywords: ["senza glutine", "gluten"], occasion: "Senza glutine" },
-      { keywords: ["veloce", "veloci", "20 min"], occasion: "Veloci" },
-    ];
-    const textLower = text.toLowerCase();
-    const autoOccasions = [];
-    if (catOccasionMap[category]) autoOccasions.push(catOccasionMap[category]);
-    keywordOccasions.forEach(({ keywords, occasion }) => {
-      if (keywords.some(kw => textLower.includes(kw))) autoOccasions.push(occasion);
-    });
+    console.log('[Parser] result:', result);
+    return result;
+  };
+
+  const handleParsePaste = () => {
+    const text = pasteText;
+    if (!text.trim()) return;
+
+    const parsed = parseReceitaPrompt(text);
 
     setForm(f => ({
       ...f,
-      title: title || f.title,
-      description: description || f.description,
-      category,
-      difficulty,
-      prep_time,
-      servings,
-      occasions: autoOccasions.length ? [...new Set([...(f.occasions || []), ...autoOccasions])] : f.occasions,
-      ingredients: ingredients.length ? ingredients : f.ingredients,
-      instructions: instructions.length ? instructions : f.instructions,
-      ...(calorie != null ? { calorie } : {}),
-      ...(proteine != null ? { proteine } : {}),
-      ...(carboidrati != null ? { carboidrati } : {}),
-      ...(grassi != null ? { grassi } : {}),
-      ...(fibre != null ? { fibre } : {}),
-      ...(zuccheri != null ? { zuccheri } : {}),
-      ...(sodio != null ? { sodio } : {}),
-      ...(sostituzioni.length ? { sostituzioni } : {}),
+      ...(parsed.category ? { category: parsed.category } : {}),
+      ...(parsed.difficulty ? { difficulty: parsed.difficulty } : {}),
+      ...(parsed.prep_time != null ? { prep_time: parsed.prep_time } : {}),
+      ...(parsed.servings != null ? { servings: parsed.servings } : {}),
+      ...(parsed.description ? { description: parsed.description } : {}),
+      ...(parsed.calorie != null ? { calorie: parsed.calorie } : {}),
+      ...(parsed.proteine != null ? { proteine: parsed.proteine } : {}),
+      ...(parsed.carboidrati != null ? { carboidrati: parsed.carboidrati } : {}),
+      ...(parsed.grassi != null ? { grassi: parsed.grassi } : {}),
+      ...(parsed.fibre != null ? { fibre: parsed.fibre } : {}),
+      ...(parsed.zuccheri != null ? { zuccheri: parsed.zuccheri } : {}),
+      ...(parsed.sodio != null ? { sodio: parsed.sodio } : {}),
+      ...(parsed.ingredients?.length ? { ingredients: parsed.ingredients } : {}),
+      ...(parsed.instructions?.length ? { instructions: parsed.instructions } : {}),
+      ...(parsed.occasions?.length ? { occasions: [...new Set([...(f.occasions || []), ...parsed.occasions])] } : {}),
+      ...(parsed.sostituzioni?.length ? { sostituzioni: parsed.sostituzioni } : {}),
     }));
     setShowPaste(false);
     toast.success("Ricetta interpretata! Controlla e modifica se necessario.");
