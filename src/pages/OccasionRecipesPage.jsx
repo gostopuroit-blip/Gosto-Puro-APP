@@ -29,18 +29,18 @@ const occasionAliases = {
 };
 
 const DIETARY_TAG_COLORS = {
-  "Senza glutine": "bg-green-900/40 text-green-300",
-  "Diabetico": "bg-orange-900/40 text-orange-300",
-  "Low carb": "bg-blue-900/40 text-blue-300",
-  "Alto contenuto proteico": "bg-blue-900/40 text-blue-300",
-  "Vegano": "bg-lime-900/40 text-lime-300",
-  "Vegetariano": "bg-lime-900/40 text-lime-300",
-  "Senza lattosio": "bg-red-900/40 text-red-300",
-  "Senza zucchero": "bg-red-900/40 text-red-300",
-  "Detox": "bg-teal-900/40 text-teal-300",
-  "Fit": "bg-teal-900/40 text-teal-300",
-  "Senza uova": "bg-yellow-900/40 text-yellow-300",
-  "Senza frutti di mare": "bg-purple-900/40 text-purple-300",
+  "Senza glutine": "bg-green-100 text-green-800",
+  "Diabetico": "bg-orange-100 text-orange-800",
+  "Low carb": "bg-blue-100 text-blue-800",
+  "Alto contenuto proteico": "bg-blue-100 text-blue-800",
+  "Vegano": "bg-lime-100 text-lime-800",
+  "Vegetariano": "bg-lime-100 text-lime-800",
+  "Senza lattosio": "bg-red-100 text-red-800",
+  "Senza zucchero": "bg-red-100 text-red-800",
+  "Detox": "bg-teal-100 text-teal-800",
+  "Fit": "bg-teal-100 text-teal-800",
+  "Senza uova": "bg-yellow-100 text-yellow-800",
+  "Senza frutti di mare": "bg-purple-100 text-purple-800",
 };
 
 // Module-level cache so navigating back doesn't re-fetch
@@ -461,7 +461,7 @@ function RecipeCard({ recipe, occasion, isSaved, user, isBlocked, onBlockedClick
             {recipe.dietary_tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${DIETARY_TAG_COLORS[tag] || "bg-gray-800 text-gray-400"}`}
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${DIETARY_TAG_COLORS[tag] || "bg-gray-100 text-gray-700"}`}
               >
                 {tag}
               </span>
@@ -525,7 +525,7 @@ function RecipeCard({ recipe, occasion, isSaved, user, isBlocked, onBlockedClick
              {recipe.dietary_tags.slice(0, 3).map((tag) => (
                <span
                  key={tag}
-                 className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${DIETARY_TAG_COLORS[tag] || "bg-gray-800 text-gray-400"}`}
+                 className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${DIETARY_TAG_COLORS[tag] || "bg-gray-100 text-gray-700"}`}
                >
                  {tag}
                </span>
