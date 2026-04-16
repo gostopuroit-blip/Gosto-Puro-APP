@@ -52,8 +52,10 @@ export default function Home() {
 
   const loadData = async () => {
        const today = new Date().toISOString().split("T")[0];
-       const [user, notifs, occasions, recipes, products] = await Promise.all([
-    base44.auth.me().catch(() => null),
+       const user = await base44.auth.me().catch(() => null);
+       await new Promise(r => setTimeout(r, 100));
+       
+       const [notifs, occasions, recipes, products] = await Promise.all([
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.RecipeOccasion.filter({ show_in_home: true }, "sort_order"),
     base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
