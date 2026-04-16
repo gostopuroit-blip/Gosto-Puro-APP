@@ -128,6 +128,7 @@ export default function Planner() {
         allRecipes = allRecipes.concat(batch);
         if (batch.length < 200) break;
         skip += 200;
+        await new Promise(r => setTimeout(r, 300));
       }
 
       // Filter by max time
