@@ -202,20 +202,55 @@ KCAL TARGET: ${kcalStr}`;
         },
       });
 
-      // Normalizza i tag confrontando case-insensitive con le liste fisse
-      const normalizeTags = (aiTags, fixedList) => {
-        if (!aiTags || !Array.isArray(aiTags)) return [];
-        return fixedList.filter(fixed =>
-          aiTags.some(ai => ai.trim().toLowerCase() === fixed.toLowerCase())
-        );
-      };
-
       const LIFESTYLE_LIST = ["Vegano", "Vegetariano", "Fit", "Alto contenuto proteico", "Low carb", "Detox"];
+
+      // Deriva i tag direttamente dai macros e dagli ingredienti calcolati dall'IA
+      const calorie = result.calorie || 0;
+      const proteine = result.proteine || 0;
+      const carboidrati = result.carboidrati || 0;
+      const grassi = result.grassi || 0;
+      const zuccheri = result.zuccheri || 0;
+      const ingredientNames = (result.ingredients || []).map(i => (i.name || "").toLowerCase()).join(" ");
+
+      const hasAnimalProducts = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|uov|burro|latte|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
+      const hasMeat = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|gamberi|frutti di mare|acciughe/.test(ingredientNames);
+      const hasGluten = /farina|pasta|pane|orzo|segale|avena|farro|semola|grano/.test(ingredientNames);
+      const hasLactose = /latte|formaggio|panna|burro|yogurt|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
+      const hasEggs = /uov/.test(ingredientNames);
+      const hasSeafood = /gamberi|frutti di mare|acciughe|vongole|cozze|calamari|polpo/.test(ingredientNames);
+      const hasSugar = /zucchero|miele|sciroppo|zucchero di canna/.test(ingredientNames);
+
+      const derivedDietaryTags = [];
+      if (!hasGluten) derivedDietaryTags.push("Senza glutine");
+      if (!hasLactose) derivedDietaryTags.push("Senza lattosio");
+      if (!hasSugar && zuccheri < 5) derivedDietaryTags.push("Senza zucchero");
+      if (!hasAnimalProducts) derivedDietaryTags.push("Vegano");
+      if (!hasMeat) derivedDietaryTags.push("Vegetariano");
+      if (carboidrati < 20) derivedDietaryTags.push("Low carb");
+      if (proteine > 20) derivedDietaryTags.push("Alto contenuto proteico");
+      if (zuccheri < 10 && carboidrati < 30) derivedDietaryTags.push("Diabetico");
+      if (!hasEggs) derivedDietaryTags.push("Senza uova");
+      if (!hasSeafood) derivedDietaryTags.push("Senza frutti di mare");
+
+      const derivedLifestyle = [];
+      if (!hasAnimalProducts) derivedLifestyle.push("Vegano");
+      if (!hasMeat) derivedLifestyle.push("Vegetariano");
+      if (calorie < 400 && proteine >= carboidrati) derivedLifestyle.push("Fit");
+      if (proteine > 20) derivedLifestyle.push("Alto contenuto proteico");
+      if (carboidrati < 20) derivedLifestyle.push("Low carb");
+
+      // Aggiungi anche i tag forzati dall'occasione selezionata
+      const occasionForcedDietary = formDietaryTags.filter(t => !derivedDietaryTags.includes(t));
+      const finalDietaryTags = [...derivedDietaryTags, ...occasionForcedDietary];
+
+      console.log("[Generator] macros:", { calorie, proteine, carboidrati, zuccheri });
+      console.log("[Generator] derivedDietaryTags:", derivedDietaryTags);
+      console.log("[Generator] derivedLifestyle:", derivedLifestyle);
 
       setRecipeState({
         recipe: result,
-        dietaryTags: normalizeTags(result.dietary_tags, DIETARY_TAGS),
-        lifestyle: normalizeTags(result.lifestyle, LIFESTYLE_LIST),
+        dietaryTags: finalDietaryTags,
+        lifestyle: derivedLifestyle,
         isPremium: true,
       });
       toast.success("Ricetta generata!");
