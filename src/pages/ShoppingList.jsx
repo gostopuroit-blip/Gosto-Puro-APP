@@ -69,16 +69,17 @@ export default function ShoppingList() {
           .forEach(id => recipeIdSet.add(id));
       }
 
-      // Fetch all unique recipes in parallel
-      const recipeResults = await Promise.all(
-        [...recipeIdSet].map(id => base44.entities.Recipe.filter({ id }))
+      // Fetch all unique recipes in one query using $in
+      const recipes = await base44.entities.Recipe.filter(
+        { id: { $in: [...recipeIdSet] } },
+        "-created_date",
+        100
       );
 
       // Aggregate ingredients — group by name (case-insensitive)
       const allIngredients = {};
-      for (const results of recipeResults) {
-        if (results.length === 0) continue;
-        const recipe = results[0];
+      for (const recipe of recipes) {
+        if (!recipe) continue;
         for (const ing of recipe.ingredients || []) {
           const key = ing.name.toLowerCase().trim();
           if (!allIngredients[key]) {
