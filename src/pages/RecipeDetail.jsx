@@ -187,6 +187,10 @@ export default function RecipeDetail() {
   };
 
   const handleSaveClick = () => {
+    if (!user) {
+      toast.error("Accedi per salvare le ricette");
+      return;
+    }
     if (!isPremium && !userRecipe?.is_saved && savedCount >= FREE_SAVE_LIMIT) {
       toast.error(`Piano Free: puoi salvare solo ${FREE_SAVE_LIMIT} ricette. Passa a Premium per salvarne di più! ✨`);
       trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
