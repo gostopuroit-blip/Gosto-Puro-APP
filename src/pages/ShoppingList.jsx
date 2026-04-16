@@ -96,10 +96,80 @@ export default function ShoppingList() {
       const oldItems = await base44.entities.ShoppingItem.filter({ meal_plan_id: plan.id });
       await Promise.all(oldItems.map(item => base44.entities.ShoppingItem.delete(item.id)));
 
-      // Create new items — merge quantities by joining unique values
+      // Merge quantities intelligently
+      const mergeQuantities = (quantities) => {
+        if (!quantities || quantities.length === 0) return "";
+
+        // Remove duplicates first
+        const unique = [...new Set(quantities.map(q => q.trim()))];
+
+        // Filter out "q.b." entries if there are numeric quantities too
+        const nonQb = unique.filter(q => !/^q\.?b\.?$/i.test(q));
+        const onlyQb = nonQb.length === 0;
+        if (onlyQb) return "q.b.";
+
+        // Try to parse each as number + unit
+        // Matches: "500g", "1.5 kg", "200 ml", "3", "2 L", "100 G"
+        const UNIT_REGEX = /^([\d.,]+)\s*(g|kg|ml|l|gr|cl|dl)?$/i;
+
+        const parsed = nonQb.map(q => {
+          const m = q.match(UNIT_REGEX);
+          if (m) {
+            const num = parseFloat(m[1].replace(",", "."));
+            const unit = m[2] ? m[2].toLowerCase() : "";
+            // Normalize units: gr→g, cl→g-scale not needed, just keep as-is
+            return { num, unit, original: q };
+          }
+          return { num: null, unit: null, original: q };
+        });
+
+        // Group by unit
+        const byUnit = {};
+        const unparsed = [];
+        for (const p of parsed) {
+          if (p.num !== null) {
+            const u = p.unit || "";
+            if (!byUnit[u]) byUnit[u] = 0;
+            byUnit[u] += p.num;
+          } else {
+            unparsed.push(p.original);
+          }
+        }
+
+        const parts = [];
+
+        // Format numeric totals
+        for (const [unit, total] of Object.entries(byUnit)) {
+          const formatted = Number.isInteger(total) ? String(total) : total.toFixed(1).replace(".0", "");
+          parts.push(formatted + unit);
+        }
+
+        // Add unparsed parts (e.g. "1 media", "2 medie") — try to count total
+        if (unparsed.length > 0) {
+          // Try to sum simple numeric-only entries among unparsed
+          const numericUnparsed = unparsed.map(u => {
+            const m = u.match(/^([\d.,]+)(.*)$/);
+            if (m) return { num: parseFloat(m[1].replace(",", ".")), suffix: m[2].trim() };
+            return null;
+          });
+
+          if (numericUnparsed.every(x => x !== null)) {
+            const totalNum = numericUnparsed.reduce((s, x) => s + x.num, 0);
+            const suffix = numericUnparsed[0].suffix || "";
+            const formatted = Number.isInteger(totalNum) ? String(totalNum) : totalNum.toFixed(1);
+            parts.push((formatted + (suffix ? " " + suffix : "")).trim());
+          } else {
+            // Mix of parseable and not — just join unparsed
+            parts.push(...unparsed);
+          }
+        }
+
+        return parts.join(" + ");
+      };
+
       const newItems = Object.values(allIngredients).map(ing => ({
         name: ing.name,
-        quantity: [...new Set(ing.quantities)].join(" + "),
+        quantity: mergeQuantities(ing.quantities),
         category: ing.category,
         is_checked: false,
         meal_plan_id: plan.id
