@@ -50,14 +50,27 @@ export default function Home() {
     loadData();
   }, []);
 
+  const OCCASIONS_LIST = [
+    "Colazione", "Pranzo", "Cena", "Leggera", "Dolci",
+    "In famiglia", "Per due", "Con amici", "Feste",
+    "Estate", "Autunno", "Inverno", "Primavera",
+    "Veloci", "Instagram", "Natale", "Capodanno", "Dal mondo",
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "Senza zucchero", "Detox",
+    "365 Ricette Deliziose per Diabetici",
+    "Proteiche", "Low carb",
+    "Friggitrice ad Aria",
+    "Facili da Congelare",
+    "Ricette Sane"
+  ];
+
   const loadData = async () => {
        const today = new Date().toISOString().split("T")[0];
        const user = await base44.auth.me().catch(() => null);
        await new Promise(r => setTimeout(r, 100));
        
-       const [notifs, occasions, recipes, products] = await Promise.all([
+       const [notifs, recipes, products] = await Promise.all([
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
-    base44.entities.RecipeOccasion.filter({ show_in_home: true }, "sort_order"),
     base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
     base44.entities.GostoPuroProduct.filter({ is_active: true }, "-created_date"),
     ]);
@@ -91,16 +104,29 @@ export default function Home() {
       "Instagram": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png",
     };
 
-    // Separate occasions by type
-    const seenLabels = new Set();
-    const deduped = (arr) => arr.filter((o) => {
-      if (seenLabels.has(o.label)) return false;
-      seenLabels.add(o.label);
-      return true;
-    });
-
-    const special = deduped(occasions.filter((o) => o.tipo === "speciale")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label] }));
-    const lifestyle = deduped(occasions.filter((o) => o.tipo === "stile_vita")).map((o) => ({ label: o.label, icon: o.icon, img: occasionImages[o.label], isLifestyle: true }));
+    // Build special occasions (everything except daily meals)
+    const specialOccasionsList = OCCASIONS_LIST.filter(
+      occ => !["Colazione", "Pranzo", "Cena"].includes(occ)
+    );
+    const special = specialOccasionsList.slice(0, 7).map((label) => ({ 
+      label, 
+      icon: "🍽️", 
+      img: occasionImages[label] 
+    }));
+    
+    // Lifestyle tags are a subset of OCCASIONS_LIST
+    const lifestyleSubset = [
+      "275 Ricette Fitness Pratiche ed Economiche",
+      "Senza zucchero", "Detox",
+      "365 Ricette Deliziose per Diabetici",
+      "Proteiche", "Low carb"
+    ];
+    const lifestyle = lifestyleSubset.map((label) => ({ 
+      label, 
+      icon: "🌟", 
+      img: occasionImages[label],
+      isLifestyle: true 
+    }));
 
     setSpecialOccasions(special);
     setLifestyleTags(lifestyle);

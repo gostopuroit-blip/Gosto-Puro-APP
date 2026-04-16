@@ -59,9 +59,27 @@ export default function Recipes() {
 
 
   // Define constants before useMemo
+  const OCCASIONS_LIST = [
+    "Colazione", "Pranzo", "Cena", "Leggera", "Dolci",
+    "In famiglia", "Per due", "Con amici", "Feste",
+    "Estate", "Autunno", "Inverno", "Primavera",
+    "Veloci", "Instagram", "Natale", "Capodanno", "Dal mondo",
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "Senza zucchero", "Detox",
+    "365 Ricette Deliziose per Diabetici",
+    "Proteiche", "Low carb",
+    "Friggitrice ad Aria",
+    "Facili da Congelare",
+    "Ricette Sane"
+  ];
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const SPECIAL_OCCASIONS = ["Instagram", "Veloci", "Inverno", "Primavera", "Estate", "Autunno", "Capodanno", "Natale", "Dal mondo", "Leggera", "Dolci", "Proteiche", "Senza zucchero"];
-  const LIFESTYLE_TAGS = ["Low carb", "Diabete", "Fitness", "Detox", "Vegan", "Vegetariano", "Proteiche", "Senza zucchero"];
+  const SPECIAL_OCCASIONS = OCCASIONS_LIST.filter(occ => !FREE_CATEGORIES.includes(occ));
+  const LIFESTYLE_TAGS = [
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "Senza zucchero", "Detox",
+    "365 Ricette Deliziose per Diabetici",
+    "Proteiche", "Low carb"
+  ];
   const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
 
   const filteredRecipes = useMemo(() => {
