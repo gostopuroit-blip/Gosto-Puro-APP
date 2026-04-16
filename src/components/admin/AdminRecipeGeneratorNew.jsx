@@ -196,12 +196,14 @@ KCAL TARGET: ${kcalStr}`;
         },
       });
 
-      setRecipe(result);
-      setSelectedDietaryTags([...(result.dietary_tags || [])]);
-      setSelectedLifestyle([...(result.lifestyle || [])]);
-      setIsPremium(true);
-      console.log("[Generator] dietary_tags:", result.dietary_tags);
-      console.log("[Generator] lifestyle:", result.lifestyle);
+      // Reset recipe first to force re-render, then set all state together
+      setRecipe(null);
+      setTimeout(() => {
+        setRecipe(result);
+        setSelectedDietaryTags(result.dietary_tags || []);
+        setSelectedLifestyle(result.lifestyle || []);
+        setIsPremium(true);
+      }, 0);
       toast.success("Ricetta generata!");
     } catch (error) {
       toast.error("Errore nella generazione: " + error.message);
@@ -414,7 +416,7 @@ KCAL TARGET: ${kcalStr}`;
                     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
                   )}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-                    (selectedDietaryTags.includes(tag) || recipe?.dietary_tags?.includes(tag))
+                    selectedDietaryTags.includes(tag)
                       ? "bg-green-100 text-green-700 border-green-300"
                       : "bg-gray-50 text-gray-400 border-gray-100"
                   }`}
@@ -436,7 +438,7 @@ KCAL TARGET: ${kcalStr}`;
                     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
                   )}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-                    (selectedLifestyle.includes(tag) || recipe?.lifestyle?.includes(tag))
+                    selectedLifestyle.includes(tag)
                       ? "bg-teal-100 text-teal-700 border-teal-300"
                       : "bg-gray-50 text-gray-400 border-gray-100"
                   }`}
