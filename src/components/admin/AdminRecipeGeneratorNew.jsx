@@ -61,16 +61,19 @@ export default function AdminRecipeGeneratorNew() {
 
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
+  // Estado separado para dietary tags do formulário (antes de gerar)
+  const [formDietaryTags, setFormDietaryTags] = useState([]);
+
   const handleOccasionChange = (occasion) => {
     setSelectedOccasion(occasion);
     const preselected = getDietaryPreselectionsForOccasion(occasion);
-    setSelectedDietaryTags(preselected);
+    setFormDietaryTags(preselected);
   };
 
   // PARTE 2 — CONSTRUIR E ENVIAR PROMPT
   const buildMasterPrompt = () => {
-    const dietaryTagsStr = selectedDietaryTags.length > 0
-      ? selectedDietaryTags.join(", ")
+    const dietaryTagsStr = formDietaryTags.length > 0
+      ? formDietaryTags.join(", ")
       : "automatico";
 
     const occasionStr = selectedOccasion || "generica";
@@ -338,14 +341,14 @@ KCAL TARGET: ${kcalStr}`;
                 <button
                   key={tag}
                   onClick={() => {
-                    setSelectedDietaryTags((prev) =>
+                    setFormDietaryTags((prev) =>
                       prev.includes(tag)
                         ? prev.filter((t) => t !== tag)
                         : [...prev, tag]
                     );
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                    selectedDietaryTags.includes(tag)
+                    formDietaryTags.includes(tag)
                       ? "bg-green-100 text-green-700 border-green-300"
                       : "bg-gray-50 text-gray-600 border-gray-100"
                   }`}
@@ -531,7 +534,7 @@ KCAL TARGET: ${kcalStr}`;
         <RecipeEditor 
           recipe={recipe} 
           onSave={(updated) => {
-            setRecipe(updated);
+            setRecipeState((prev) => ({ ...prev, recipe: updated }));
             setEditing(false);
           }}
           onCancel={() => setEditing(false)}
