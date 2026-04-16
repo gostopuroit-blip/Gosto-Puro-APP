@@ -388,12 +388,42 @@ Testo della ricetta:\n${text}`,
     setInterpreting(false);
 
     const parsed = result;
-    // Fallback: se calorie è null/undefined/0, estrarre dal testo originale
     if (!parsed.calorie) {
       const kcalMatch = text.match(/KCAL[:\s]+(\d+)/i);
       if (kcalMatch) parsed.calorie = parseInt(kcalMatch[1]);
     }
-    console.log('[AI Parser] result:', parsed);
+
+    // Deriva lifestyle e dietary_tags dagli ingredienti e macros
+    const ingNames = (parsed.ingredients || []).map(i => (i.name || "").toLowerCase()).join(" ");
+    const cal = parsed.calorie || 0;
+    const prot = parsed.proteine || 0;
+    const carb = parsed.carboidrati || 0;
+    const zucc = parsed.zuccheri || 0;
+
+    const hasAnimal = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|uov|burro|latte|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingNames);
+    const hasMeat = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|gamberi|acciughe/.test(ingNames);
+    const hasGluten = /farina 0|farina di grano|pasta\b|pane\b|orzo\b|segale|farro|semola/.test(ingNames);
+    const hasLactose = /latte\b|formaggio|panna|burro|yogurt|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingNames);
+    const hasEggs = /uov/.test(ingNames);
+    const hasSeafood = /gamberi|frutti di mare|acciughe|vongole|cozze|calamari|polpo/.test(ingNames);
+    const hasSugar = /zucchero|miele|sciroppo/.test(ingNames);
+
+    const derivedDietary = [];
+    if (!hasGluten) derivedDietary.push("Senza glutine");
+    if (!hasLactose) derivedDietary.push("Senza lattosio");
+    if (!hasSugar && zucc < 5) derivedDietary.push("Senza zucchero");
+    if (carb < 20) derivedDietary.push("Low carb");
+    if (prot > 20) derivedDietary.push("Alto contenuto proteico");
+    if (zucc < 10 && carb < 30) derivedDietary.push("Diabetico");
+    if (!hasEggs) derivedDietary.push("Senza uova");
+    if (!hasSeafood) derivedDietary.push("Senza frutti di mare");
+
+    const derivedLifestyle = [];
+    if (!hasAnimal) derivedLifestyle.push("Vegano");
+    if (!hasMeat) derivedLifestyle.push("Vegetariano");
+    if (cal < 400 && prot >= carb) derivedLifestyle.push("Fit");
+    if (prot > 20) derivedLifestyle.push("Alto contenuto proteico");
+    if (carb < 20) derivedLifestyle.push("Low carb");
 
     setForm(f => ({
       ...f,
@@ -414,6 +444,8 @@ Testo della ricetta:\n${text}`,
       ...(parsed.instructions?.length ? { instructions: parsed.instructions } : {}),
       ...(parsed.occasions?.length ? { occasions: [...new Set([...(f.occasions || []), ...parsed.occasions])] } : {}),
       ...(parsed.sostituzioni?.length ? { sostituzioni: parsed.sostituzioni } : {}),
+      lifestyle: derivedLifestyle,
+      dietary_tags: derivedDietary,
     }));
     setShowPaste(false);
     toast.success("Ricetta interpretata! Controlla e modifica se necessario.");
