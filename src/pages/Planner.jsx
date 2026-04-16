@@ -382,6 +382,7 @@ export default function Planner() {
       </div>
 
       {/* Macros */}
+      {(macros.proteina > 0 || macros.carboidrati > 0 || macros.grassi > 0 || macros.fibre > 0) && (
       <div className="px-5 mb-6">
         <div className="flex gap-2 flex-wrap">
           <div className="bg-[#2D6A4F]/10 text-[#2D6A4F] dark:bg-[#2D6A4F]/20 dark:text-[#40916C] px-3 py-1.5 rounded-full text-xs font-semibold">
@@ -401,6 +402,7 @@ export default function Planner() {
           {Math.round(macros.calorie)} kcal
         </div>
       </div>
+      )}
 
       {/* Meals */}
       <div className="px-5 space-y-4">
