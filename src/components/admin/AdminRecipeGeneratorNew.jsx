@@ -177,8 +177,8 @@ KCAL TARGET: ${kcalStr}`;
             description: { type: "string" },
             category: { type: "string" },
             occasions: { type: "array", items: { type: "string" } },
-            lifestyle: { type: "array", items: { type: "string" } },
-            dietary_tags: { type: "array", items: { type: "string" } },
+            lifestyle: { type: "array", items: { type: "string" }, description: "Lifestyle tags: Vegano, Vegetariano, Fit, Alto contenuto proteico, Low carb, Detox" },
+            dietary_tags: { type: "array", items: { type: "string" }, description: "Dietary tags: Senza glutine, Senza lattosio, Senza zucchero, Vegano, Vegetariano, Low carb, Alto contenuto proteico, Diabetico, Detox, Fit, Senza uova, Senza frutti di mare" },
             difficulty: { type: "string" },
             prep_time: { type: "number" },
             servings: { type: "number" },
@@ -203,9 +203,11 @@ KCAL TARGET: ${kcalStr}`;
       });
 
       setRecipe(result);
-      setSelectedDietaryTags(result.dietary_tags || []);
-      setSelectedLifestyle(result.lifestyle || []);
+      setSelectedDietaryTags([...(result.dietary_tags || [])]);
+      setSelectedLifestyle([...(result.lifestyle || [])]);
       setIsPremium(true);
+      console.log("[Generator] dietary_tags:", result.dietary_tags);
+      console.log("[Generator] lifestyle:", result.lifestyle);
       toast.success("Ricetta generata!");
     } catch (error) {
       toast.error("Errore nella generazione: " + error.message);
