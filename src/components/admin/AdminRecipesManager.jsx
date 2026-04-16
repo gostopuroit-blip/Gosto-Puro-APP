@@ -28,7 +28,8 @@ const countries = [
 ];
 
 const SOSTITUZIONE_TAGS = ["Vegano", "Vegetariano", "Senza glutine", "Senza lattosio", "Low carb", "Proteico", "Economico", "Facile da trovare"];
-const DIETARY_TAGS_OPTIONS = ["Senza glutine", "Senza lattosio", "Senza zucchero", "Vegano", "Vegetariano", "Low carb", "Alto contenuto proteico", "Diabetico", "Detox", "Fit", "Senza uova", "Senza frutti di mare"];
+const LIFESTYLE_OPTIONS = ["Vegano", "Vegetariano", "Low carb", "Alto contenuto proteico", "Detox", "Fit"];
+const DIETARY_TAGS_OPTIONS = ["Senza glutine", "Senza lattosio", "Senza uova", "Senza frutti di mare", "Diabetico", "Senza zucchero"];
 
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
@@ -71,9 +72,6 @@ export default function AdminRecipesManager() {
 
   const allOccasions = occasions
     .filter(o => o.show_in_home === true)
-    .map(o => o.label);
-  const allLifestyle = occasions
-    .filter(o => o.tipo === "stile_vita" && o.show_in_home === true)
     .map(o => o.label);
 
   const openNew = () => { setForm(emptyForm); setEditId(null); setPasteText(""); setShowPaste(true); setShowForm(true); };
@@ -609,16 +607,16 @@ Testo della ricetta:\n${text}`,
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase">Stile di vita</label>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {allLifestyle.map((l) => {
-                  const selected = form.lifestyle?.includes(l);
-                  return (
-                    <button key={l} type="button"
-                      onClick={() => setForm((f) => ({ ...f, lifestyle: selected ? f.lifestyle.filter((x) => x !== l) : [...(f.lifestyle || []), l] }))}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${selected ? "bg-[#E07A3A] text-white border-[#E07A3A]" : "border-gray-100 text-gray-500 bg-white"}`}>
-                      {l}
-                    </button>
-                  );
-                })}
+                {LIFESTYLE_OPTIONS.map((l) => {
+                   const selected = form.lifestyle?.includes(l);
+                   return (
+                     <button key={l} type="button"
+                       onClick={() => setForm((f) => ({ ...f, lifestyle: selected ? f.lifestyle.filter((x) => x !== l) : [...(f.lifestyle || []), l] }))}
+                       className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${selected ? "bg-[#E07A3A] text-white border-[#E07A3A]" : "border-gray-100 text-gray-500 bg-white"}`}>
+                       {l}
+                     </button>
+                   );
+                 })}
               </div>
             </div>
 
