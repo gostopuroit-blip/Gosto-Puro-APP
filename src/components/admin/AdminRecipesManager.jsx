@@ -31,6 +31,23 @@ const SOSTITUZIONE_TAGS = ["Vegano", "Vegetariano", "Senza glutine", "Senza latt
 const LIFESTYLE_OPTIONS = ["Vegano", "Vegetariano", "Low carb", "Alto contenuto proteico", "Detox", "Fit"];
 const DIETARY_TAGS_OPTIONS = ["Senza glutine", "Senza lattosio", "Senza uova", "Senza frutti di mare", "Diabetico", "Senza zucchero"];
 
+const FIXED_OCCASIONS = [
+  "Colazione",
+  "Pranzo",
+  "Cena",
+  "Leggera",
+  "Dolci",
+  "Senza zucchero",
+  "Detox",
+  "Low carb",
+  "365 Ricette Deliziose per Diabetici",
+  "275 Ricette Fitness Pratiche ed Economiche",
+  "Ricette Sane",
+  "Veloci",
+  "Friggitrice ad Aria",
+  "Facili da Congelare"
+];
+
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
   prep_time: 30, servings: 4, difficulty: "Facile", calories: null,
@@ -70,9 +87,7 @@ export default function AdminRecipesManager() {
     setLoading(false);
   };
 
-  const allOccasions = occasions
-    .filter(o => o.show_in_home === true)
-    .map(o => o.label);
+  const allOccasions = FIXED_OCCASIONS;
 
   const openNew = () => { setForm(emptyForm); setEditId(null); setPasteText(""); setShowPaste(true); setShowForm(true); };
   const openEdit = (r) => {
