@@ -56,7 +56,7 @@ export default function Planner() {
       setSelectedDay(0);
       setWeekStartDay(0);
 
-      // Fetch all recipes
+      // Collect all unique recipe IDs
       const recipeIds = new Set();
       activePlan.plan_data?.forEach(day => {
         if (day.colazione_id) recipeIds.add(day.colazione_id);
@@ -65,10 +65,13 @@ export default function Planner() {
         if (day.cena_id) recipeIds.add(day.cena_id);
       });
 
+      // Fetch all recipes in a single batch query
       const fetchedRecipes = {};
-      for (const id of recipeIds) {
-        const r = await base44.entities.Recipe.filter({ id });
-        if (r.length > 0) fetchedRecipes[id] = r[0];
+      if (recipeIds.size > 0) {
+        const allRecipes = await base44.entities.Recipe.list("-created_date", 500);
+        allRecipes.forEach(r => {
+          if (recipeIds.has(r.id)) fetchedRecipes[r.id] = r;
+        });
       }
       setRecipes(fetchedRecipes);
     }
