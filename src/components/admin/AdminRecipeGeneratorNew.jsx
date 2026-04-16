@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, Loader2, Check, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -50,67 +50,6 @@ export default function AdminRecipeGeneratorNew() {
   const [recipe, setRecipe] = useState(null);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-
-  // AUTO-GERAR com parâmetros exatos na montagem
-  useEffect(() => {
-    autoGenerateOnMount();
-  }, []);
-
-  const autoGenerateOnMount = () => {
-    setSelectedOccasion("Ricette Sane");
-    setSelectedCategory("Pranzo");
-    setSelectedDifficulty("Facile");
-    setSelectedDietaryTags([]);
-    setTargetKcal("");
-    
-    setTimeout(() => {
-      setGenerating(true);
-      const prompt = buildMasterPromptWithParams("Ricette Sane", "Pranzo", "Facile", [], "");
-      setGeneratedPrompt(prompt);
-      
-      base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            description: { type: "string" },
-            category: { type: "string" },
-            occasions: { type: "array", items: { type: "string" } },
-            lifestyle: { type: "array", items: { type: "string" } },
-            dietary_tags: { type: "array", items: { type: "string" } },
-            difficulty: { type: "string" },
-            prep_time: { type: "number" },
-            servings: { type: "number" },
-            calorie: { type: "number" },
-            proteine: { type: "number" },
-            carboidrati: { type: "number" },
-            grassi: { type: "number" },
-            fibre: { type: "number" },
-            zuccheri: { type: "number" },
-            sodio: { type: "number" },
-            numero_salvate: { type: "number" },
-            numero_preparate: { type: "number" },
-            total_rating: { type: "number" },
-            rating_count: { type: "number" },
-            media_rating: { type: "number" },
-            status: { type: "string" },
-            ingredients: { type: "array", items: { type: "object" } },
-            instructions: { type: "array", items: { type: "string" } },
-            sostituzioni: { type: "array", items: { type: "object" } },
-          },
-        },
-      }).then((result) => {
-        setRecipe(result);
-        setGenerating(false);
-        toast.success("Ricetta generata!");
-      }).catch((error) => {
-        setGenerating(false);
-        toast.error("Errore: " + error.message);
-      });
-    }, 300);
-  };
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
   const handleOccasionChange = (occasion) => {
@@ -120,15 +59,6 @@ export default function AdminRecipeGeneratorNew() {
   };
 
   // PARTE 2 — CONSTRUIR E ENVIAR PROMPT
-  const buildMasterPromptWithParams = (occ, cat, diff, tags, kcal) => {
-    const dietaryTagsStr = tags.length > 0 ? tags.join(", ") : "automatico";
-    const occasionStr = occ || "generica";
-    const categoryStr = cat || "generica";
-    const difficultyStr = diff || "Facile";
-    const kcalStr = kcal ? `${kcal}` : "libero";
-    return buildPromptContent(occasionStr, categoryStr, difficultyStr, dietaryTagsStr, kcalStr);
-  };
-
   const buildMasterPrompt = () => {
     const dietaryTagsStr = selectedDietaryTags.length > 0
       ? selectedDietaryTags.join(", ")
@@ -138,10 +68,6 @@ export default function AdminRecipeGeneratorNew() {
     const categoryStr = selectedCategory || "generica";
     const difficultyStr = selectedDifficulty || "Facile";
     const kcalStr = targetKcal ? `${targetKcal}` : "libero";
-    return buildPromptContent(occasionStr, categoryStr, difficultyStr, dietaryTagsStr, kcalStr);
-  };
-
-  const buildPromptContent = (occasionStr, categoryStr, difficultyStr, dietaryTagsStr, kcalStr) => {
 
     return `Genera una ricetta italiana originale. Rispondi SOLO con JSON puro, senza markdown, senza testo fuori dal JSON.
 
@@ -405,213 +331,8 @@ KCAL TARGET: ${kcalStr}`;
             {generating ? "Generando..." : "Genera Ricetta 🪄"}
           </button>
         </div>
-      ) : editMode ? (
-        // MODO MODIFICA — EDITOR COMPLETO
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-gray-900">✏️ Modifica Ricetta</p>
-            <button
-              onClick={() => setEditMode(false)}
-              className="text-xs px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200"
-            >
-              ← Indietro
-            </button>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
-            <div>
-              <label className="text-xs font-semibold text-gray-400 block mb-1">Titolo</label>
-              <input
-                type="text"
-                value={recipe.title}
-                onChange={(e) => setRecipe({ ...recipe, title: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-400 block mb-1">Descrizione</label>
-              <textarea
-                value={recipe.description}
-                onChange={(e) => setRecipe({ ...recipe, description: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50 resize-none h-16"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1">Categoria</label>
-                <select
-                  value={recipe.category}
-                  onChange={(e) => setRecipe({ ...recipe, category: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50"
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1">Difficoltà</label>
-                <select
-                  value={recipe.difficulty}
-                  onChange={(e) => setRecipe({ ...recipe, difficulty: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50"
-                >
-                  {DIFFICULTIES.map((diff) => (
-                    <option key={diff}>{diff}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1">Tempo (min)</label>
-                <input
-                  type="number"
-                  value={recipe.prep_time}
-                  onChange={(e) => setRecipe({ ...recipe, prep_time: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1">Porzioni</label>
-                <input
-                  type="number"
-                  value={recipe.servings}
-                  onChange={(e) => setRecipe({ ...recipe, servings: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-400 block mb-1">Calorie</label>
-                <input
-                  type="number"
-                  value={recipe.calorie}
-                  onChange={(e) => setRecipe({ ...recipe, calorie: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-100 text-sm bg-gray-50"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-400 block mb-2">Dietary Tags</label>
-              <div className="flex flex-wrap gap-2">
-                {DIETARY_TAGS.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => {
-                      const tags = recipe.dietary_tags || [];
-                      setRecipe({
-                        ...recipe,
-                        dietary_tags: tags.includes(tag)
-                          ? tags.filter((t) => t !== tag)
-                          : [...tags, tag],
-                      });
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                      (recipe.dietary_tags || []).includes(tag)
-                        ? "bg-green-100 text-green-700 border-green-300"
-                        : "bg-gray-50 text-gray-600 border-gray-100"
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-400 block mb-2">Macros (per porzione)</label>
-              <div className="grid grid-cols-4 gap-2">
-                {["proteine", "carboidrati", "grassi", "fibre"].map((key) => (
-                  <div key={key}>
-                    <label className="text-[10px] text-gray-400 block mb-1 capitalize">{key}</label>
-                    <input
-                      type="number"
-                      value={recipe[key]}
-                      onChange={(e) => setRecipe({ ...recipe, [key]: Number(e.target.value) })}
-                      className="w-full px-2 py-1 rounded-lg border border-gray-100 text-xs bg-gray-50"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-400 block mb-2">Ingredienti</label>
-              <div className="space-y-2">
-                {(recipe.ingredients || []).map((ing, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={ing.name}
-                      onChange={(e) => {
-                        const ings = [...(recipe.ingredients || [])];
-                        ings[idx] = { ...ings[idx], name: e.target.value };
-                        setRecipe({ ...recipe, ingredients: ings });
-                      }}
-                      placeholder="Nome"
-                      className="flex-1 px-2 py-1 rounded-lg border border-gray-100 text-xs bg-gray-50"
-                    />
-                    <input
-                      type="text"
-                      value={ing.quantity}
-                      onChange={(e) => {
-                        const ings = [...(recipe.ingredients || [])];
-                        ings[idx] = { ...ings[idx], quantity: e.target.value };
-                        setRecipe({ ...recipe, ingredients: ings });
-                      }}
-                      placeholder="Qtà"
-                      className="w-20 px-2 py-1 rounded-lg border border-gray-100 text-xs bg-gray-50"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-400 block mb-2">Istruzioni</label>
-              <div className="space-y-2">
-                {(recipe.instructions || []).map((step, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <span className="text-xs font-bold text-gray-400 w-6 flex-shrink-0 text-center mt-2">{idx + 1}</span>
-                    <textarea
-                      value={step}
-                      onChange={(e) => {
-                        const steps = [...(recipe.instructions || [])];
-                        steps[idx] = e.target.value;
-                        setRecipe({ ...recipe, instructions: steps });
-                      }}
-                      className="flex-1 px-2 py-1 rounded-lg border border-gray-100 text-xs bg-gray-50 resize-none h-12"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* AZIONI */}
-          <div className="flex gap-2">
-            <button
-              onClick={handlePublish}
-              disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#2D6A4F] text-white py-2.5 rounded-xl font-semibold text-sm disabled:opacity-50"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              ✅ Pubblica
-            </button>
-            <button
-              onClick={() => setEditMode(false)}
-              className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold text-sm"
-            >
-              ← Indietro
-            </button>
-          </div>
-        </div>
       ) : (
-        // PARTE 3 — PREVIEW (PRIMA DI MODIFICARE)
+        // PARTE 3 — PREENCHIMENTO AUTOMÁTICO E AÇÕES
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-4">
           <div>
             <p className="text-sm font-bold text-gray-900">{recipe.title}</p>
@@ -682,12 +403,6 @@ KCAL TARGET: ${kcalStr}`;
                 <RotateCcw className="w-4 h-4" />
               )}
               🔄 Rigenera
-            </button>
-            <button
-              onClick={() => setEditMode(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-sm"
-            >
-              ✏️ Modifica
             </button>
           </div>
         </div>
