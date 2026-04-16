@@ -104,68 +104,52 @@ export default function ShoppingList() {
         // Remove duplicates first
         const unique = [...new Set(quantities.map(q => q.trim()))];
 
-        // Filter out "q.b." entries if there are numeric quantities too
-        const nonQb = unique.filter(q => !/^q\.?b\.?$/i.test(q));
-        const onlyQb = nonQb.length === 0;
-        if (onlyQb) return "q.b.";
+        // Check for "a piacere" or "q.b." — if present, return that
+        const hasQb = unique.some(q => /^q\.?b\.?$/i.test(q) || /a\s*piacere/i.test(q));
+        if (hasQb) return "q.b.";
 
         // Try to parse each as number + unit
-        // Matches: "500g", "1.5 kg", "200 ml", "3", "2 L", "100 G"
         const UNIT_REGEX = /^([\d.,]+)\s*(g|kg|ml|l|gr|cl|dl)?$/i;
-
-        const parsed = nonQb.map(q => {
+        const parsed = unique.map(q => {
           const m = q.match(UNIT_REGEX);
           if (m) {
             const num = parseFloat(m[1].replace(",", "."));
             const unit = m[2] ? m[2].toLowerCase() : "";
-            // Normalize units: gr→g, cl→g-scale not needed, just keep as-is
-            return { num, unit, original: q };
+            return { num, unit, original: q, isParsed: true };
           }
-          return { num: null, unit: null, original: q };
+          return { num: null, unit: null, original: q, isParsed: false };
         });
 
-        // Group by unit
-        const byUnit = {};
-        const unparsed = [];
-        for (const p of parsed) {
-          if (p.num !== null) {
-            const u = p.unit || "";
-            if (!byUnit[u]) byUnit[u] = 0;
-            byUnit[u] += p.num;
-          } else {
-            unparsed.push(p.original);
+        // Separate parsed and unparsed
+        const parsedItems = parsed.filter(p => p.isParsed);
+        const unparsedItems = parsed.filter(p => !p.isParsed);
+
+        // If all items are parsed and share the same unit → sum them
+        if (unparsedItems.length === 0 && parsedItems.length > 0) {
+          const firstUnit = parsedItems[0].unit;
+          const allSameUnit = parsedItems.every(p => p.unit === firstUnit);
+          
+          if (allSameUnit) {
+            const total = parsedItems.reduce((sum, p) => sum + p.num, 0);
+            const formatted = Number.isInteger(total) ? String(total) : total.toFixed(1).replace(/\.0$/, "");
+            return formatted + firstUnit;
           }
         }
 
-        const parts = [];
-
-        // Format numeric totals
-        for (const [unit, total] of Object.entries(byUnit)) {
-          const formatted = Number.isInteger(total) ? String(total) : total.toFixed(1).replace(".0", "");
-          parts.push(formatted + unit);
+        // Mixed units or mixed with unparsed text
+        // If we have numeric items, prefer the largest one or first one
+        if (parsedItems.length > 0) {
+          const largest = parsedItems.reduce((max, p) => p.num > max.num ? p : max);
+          const formatted = Number.isInteger(largest.num) ? String(largest.num) : largest.num.toFixed(1).replace(/\.0$/, "");
+          return formatted + largest.unit;
         }
 
-        // Add unparsed parts (e.g. "1 media", "2 medie") — try to count total
-        if (unparsed.length > 0) {
-          // Try to sum simple numeric-only entries among unparsed
-          const numericUnparsed = unparsed.map(u => {
-            const m = u.match(/^([\d.,]+)(.*)$/);
-            if (m) return { num: parseFloat(m[1].replace(",", ".")), suffix: m[2].trim() };
-            return null;
-          });
-
-          if (numericUnparsed.every(x => x !== null)) {
-            const totalNum = numericUnparsed.reduce((s, x) => s + x.num, 0);
-            const suffix = numericUnparsed[0].suffix || "";
-            const formatted = Number.isInteger(totalNum) ? String(totalNum) : totalNum.toFixed(1);
-            parts.push((formatted + (suffix ? " " + suffix : "")).trim());
-          } else {
-            // Mix of parseable and not — just join unparsed
-            parts.push(...unparsed);
-          }
+        // All unparsed — return the first one
+        if (unparsedItems.length > 0) {
+          return unparsedItems[0].original;
         }
 
-        return parts.join(" + ");
+        return "";
       };
 
       const newItems = Object.values(allIngredients).map(ing => ({
