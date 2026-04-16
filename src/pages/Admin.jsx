@@ -3,7 +3,7 @@ import AdminGuard from "@/components/AdminGuard";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminRecipesManager from "@/components/admin/AdminRecipesManager";
-import AdminRecipeGenerator from "@/components/admin/AdminRecipeGenerator";
+import AdminRecipeGenerator from "@/components/admin/AdminRecipeGeneratorNew";
 import AdminPermissions from "@/components/admin/AdminPermissions";
 import AdminWebhooks from "@/components/admin/AdminWebhooks";
 import AdminSettings from "@/components/admin/AdminSettings";
