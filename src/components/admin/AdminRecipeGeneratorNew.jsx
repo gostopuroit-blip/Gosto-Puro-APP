@@ -52,6 +52,7 @@ export default function AdminRecipeGeneratorNew() {
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
   const handleOccasionChange = (occasion) => {
@@ -195,8 +196,34 @@ KCAL TARGET: ${kcalStr}`;
     setSaving(true);
 
     try {
+      // Costruzione esplicita del payload completo
       const data = {
-        ...recipe,
+        title: recipe.title || "",
+        description: recipe.description || "",
+        category: recipe.category || selectedCategory,
+        occasions: recipe.occasions || [],
+        lifestyle: recipe.lifestyle || [],
+        dietary_tags: recipe.dietary_tags || [],
+        difficulty: recipe.difficulty || selectedDifficulty,
+        prep_time: recipe.prep_time || 30,
+        servings: recipe.servings || 4,
+        calorie: recipe.calorie || 0,
+        proteine: recipe.proteine || 0,
+        carboidrati: recipe.carboidrati || 0,
+        grassi: recipe.grassi || 0,
+        fibre: recipe.fibre || 0,
+        zuccheri: recipe.zuccheri || 0,
+        sodio: recipe.sodio || 0,
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || [],
+        sostituzioni: recipe.sostituzioni || [],
+        numero_salvate: 0,
+        numero_preparate: 0,
+        total_rating: 0,
+        rating_count: 0,
+        media_rating: 0,
+        status: "pubblicata",
+        is_premium: isPremium,
         gen_prompt: generatedPrompt,
       };
       await base44.entities.Recipe.create(data);
@@ -208,6 +235,7 @@ KCAL TARGET: ${kcalStr}`;
       setSelectedDifficulty("Facile");
       setSelectedDietaryTags([]);
       setTargetKcal("");
+      setIsPremium(false);
     } catch (error) {
       toast.error("Errore: " + error.message);
     } finally {
@@ -367,6 +395,31 @@ KCAL TARGET: ${kcalStr}`;
               ))}
             </div>
           )}
+
+          {/* Visibilità Premium */}
+          <div className="flex items-center gap-3 py-2 border-t border-gray-100">
+            <label className="text-xs font-semibold text-gray-700">Visibilità:</label>
+            <button
+              onClick={() => setIsPremium(false)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                !isPremium
+                  ? "bg-gray-800 text-white border-gray-800"
+                  : "bg-gray-50 text-gray-600 border-gray-200"
+              }`}
+            >
+              🌐 Tutti
+            </button>
+            <button
+              onClick={() => setIsPremium(true)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                isPremium
+                  ? "bg-amber-500 text-white border-amber-500"
+                  : "bg-gray-50 text-gray-600 border-gray-200"
+              }`}
+            >
+              ⭐ Premium
+            </button>
+          </div>
 
           <div className="text-xs text-gray-600 space-y-1">
             <p>

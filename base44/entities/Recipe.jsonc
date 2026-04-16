@@ -26,6 +26,10 @@
       ],
       "description": "Publication status"
     },
+    "is_premium": {
+      "type": "boolean",
+      "description": "If true, recipe is only visible to premium users"
+    },
     "category": {
       "type": "string",
       "enum": [
