@@ -101,12 +101,38 @@ const countryProfiles = {
   },
 };
 
-const EXTRA_OCCASIONS = [
-  "Friggitrice ad Aria", "Diabetici", "Nutrizionista", "Dolci Fitness",
-  "Veloci 20min", "Cene Leggere", "Fitness Pratiche", "Pani e Dolci",
-  "Piano 35 Giorni", "Collezione Cucina", "Collezione Instagram",
-  "Pasti Congelati", "Pane Fatto in Casa",
-];
+const FIXED_OCCASIONS = {
+  giorno: [
+    { id: "1", label: "Colazione", tipo: "giorno", icon: "☕" },
+    { id: "2", label: "Pranzo", tipo: "giorno", icon: "🍝" },
+    { id: "3", label: "Cena", tipo: "giorno", icon: "🍷" },
+    { id: "4", label: "Leggera", tipo: "giorno", icon: "🥗" },
+    { id: "5", label: "Dolci", tipo: "giorno", icon: "🍰" },
+  ],
+  speciale: [
+    { id: "6", label: "In famiglia", tipo: "speciale", icon: "👨‍👩‍👧‍👦" },
+    { id: "7", label: "Per due", tipo: "speciale", icon: "💕" },
+    { id: "8", label: "Con amici", tipo: "speciale", icon: "🎉" },
+    { id: "9", label: "Feste", tipo: "speciale", icon: "🎊" },
+    { id: "10", label: "Estate", tipo: "speciale", icon: "☀️" },
+    { id: "11", label: "Autunno", tipo: "speciale", icon: "🍂" },
+    { id: "12", label: "Inverno", tipo: "speciale", icon: "❄️" },
+    { id: "13", label: "Primavera", tipo: "speciale", icon: "🌸" },
+    { id: "14", label: "Veloci", tipo: "speciale", icon: "⚡" },
+    { id: "15", label: "Instagram", tipo: "speciale", icon: "📸" },
+    { id: "16", label: "Natale", tipo: "speciale", icon: "🎄" },
+    { id: "17", label: "Capodanno", tipo: "speciale", icon: "🎆" },
+    { id: "18", label: "Dal mondo", tipo: "speciale", icon: "🌍" },
+  ],
+  stile_vita: [
+    { id: "19", label: "275 Ricette Fitness Pratiche ed Economiche", tipo: "stile_vita", icon: "💪" },
+    { id: "20", label: "Senza zucchero", tipo: "stile_vita", icon: "🍬" },
+    { id: "21", label: "Detox", tipo: "stile_vita", icon: "🌿" },
+    { id: "22", label: "365 Ricette Deliziose per Diabetici", tipo: "stile_vita", icon: "🩺" },
+    { id: "23", label: "Proteiche", tipo: "stile_vita", icon: "🥚" },
+    { id: "24", label: "Low carb", tipo: "stile_vita", icon: "🥗" },
+  ],
+};
 
 export default function AdminRecipeGenerator() {
   const [occasions, setOccasions] = useState([]);
@@ -140,8 +166,10 @@ export default function AdminRecipeGenerator() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    base44.entities.RecipeOccasion.filter({ is_active: true, show_in_home: true }, "sort_order", 100)
-      .then(setOccasions).finally(() => setLoadingOcc(false));
+    const flatOccasions = [...FIXED_OCCASIONS.giorno, ...FIXED_OCCASIONS.speciale, ...FIXED_OCCASIONS.stile_vita];
+    setOccasions(flatOccasions);
+    setLoadingOcc(false);
+    
     base44.entities.AppConfig.filter({ key: "prompt_mestre" }).then(configs => {
       if (configs?.length > 0 && configs[0].value) setMasterPrompt(configs[0].value);
     });
@@ -173,9 +201,9 @@ export default function AdminRecipeGenerator() {
   }, [selectedOcc?.id]);
 
   const grouped = {
-    giorno: occasions.filter(o => o.tipo === "giorno"),
-    speciale: occasions.filter((o, i, arr) => o.tipo === "speciale" && arr.findIndex(x => x.label === o.label && x.tipo === "speciale") === i),
-    stile_vita: occasions.filter((o, i, arr) => o.tipo === "stile_vita" && arr.findIndex(x => x.label === o.label && x.tipo === "stile_vita") === i),
+    giorno: FIXED_OCCASIONS.giorno,
+    speciale: FIXED_OCCASIONS.speciale,
+    stile_vita: FIXED_OCCASIONS.stile_vita,
   };
 
   const buildRecipePrompt = (occ, country = null) => {
