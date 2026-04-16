@@ -463,9 +463,17 @@ export default function Planner() {
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold text-gray-900 dark:text-white truncate ${isDone ? "line-through text-gray-400" : ""}`}>
-                    {mealTitle}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className={`text-sm font-semibold text-gray-900 dark:text-white truncate ${isDone ? "line-through text-gray-400" : ""}`}>
+                      {mealTitle}
+                    </p>
+                    {recipe && (user?.dietary_tags_profile || []).length > 0 &&
+                      (recipe.dietary_tags || []).some(tag => (user.dietary_tags_profile || []).includes(tag)) && (
+                      <span className="flex-shrink-0 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full">
+                        ✓ Per te
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     {recipe?.prep_time ? `⏱ ${recipe.prep_time} min` : ""}
                     {recipe?.proteine ? ` · ${Math.round(recipe.proteine)}g proteína` : ""}
