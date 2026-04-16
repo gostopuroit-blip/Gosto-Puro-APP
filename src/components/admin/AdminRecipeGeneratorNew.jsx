@@ -43,17 +43,20 @@ export default function AdminRecipeGeneratorNew() {
   const [selectedOccasion, setSelectedOccasion] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("Pranzo");
   const [selectedDifficulty, setSelectedDifficulty] = useState("Facile");
-  const [selectedDietaryTags, setSelectedDietaryTags] = useState([]);
-  const [selectedLifestyle, setSelectedLifestyle] = useState([]);
+
   const [targetKcal, setTargetKcal] = useState("");
   const [generating, setGenerating] = useState(false);
 
   // PARTE 3 — ESTADO APÓS GERAR
-  const [recipe, setRecipe] = useState(null);
+  const [recipeState, setRecipeState] = useState(null); // { recipe, dietaryTags, lifestyle, isPremium }
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [isPremium, setIsPremium] = useState(true);
+
+  const recipe = recipeState?.recipe || null;
+  const selectedDietaryTags = recipeState?.dietaryTags || [];
+  const selectedLifestyle = recipeState?.lifestyle || [];
+  const isPremium = recipeState?.isPremium ?? true;
 
 
 
@@ -196,14 +199,13 @@ KCAL TARGET: ${kcalStr}`;
         },
       });
 
-      // Reset recipe first to force re-render, then set all state together
-      setRecipe(null);
-      setTimeout(() => {
-        setRecipe(result);
-        setSelectedDietaryTags(result.dietary_tags || []);
-        setSelectedLifestyle(result.lifestyle || []);
-        setIsPremium(true);
-      }, 0);
+      // Set everything in one atomic state update
+      setRecipeState({
+        recipe: result,
+        dietaryTags: result.dietary_tags || [],
+        lifestyle: result.lifestyle || [],
+        isPremium: true,
+      });
       toast.success("Ricetta generata!");
     } catch (error) {
       toast.error("Errore nella generazione: " + error.message);
@@ -249,15 +251,12 @@ KCAL TARGET: ${kcalStr}`;
       };
       await base44.entities.Recipe.create(data);
       toast.success("Ricetta pubblicata!");
-      setRecipe(null);
+      setRecipeState(null);
       setGeneratedPrompt("");
       setSelectedOccasion(null);
       setSelectedCategory("Pranzo");
       setSelectedDifficulty("Facile");
-      setSelectedDietaryTags([]);
-      setSelectedLifestyle([]);
       setTargetKcal("");
-      setIsPremium(true);
     } catch (error) {
       toast.error("Errore: " + error.message);
     } finally {
@@ -412,9 +411,12 @@ KCAL TARGET: ${kcalStr}`;
               {DIETARY_TAGS.map((tag) => (
                 <button
                   key={tag}
-                  onClick={() => setSelectedDietaryTags((prev) =>
-                    prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-                  )}
+                  onClick={() => setRecipeState((prev) => ({
+                    ...prev,
+                    dietaryTags: prev.dietaryTags.includes(tag)
+                      ? prev.dietaryTags.filter((t) => t !== tag)
+                      : [...prev.dietaryTags, tag]
+                  }))}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
                     selectedDietaryTags.includes(tag)
                       ? "bg-green-100 text-green-700 border-green-300"
@@ -434,9 +436,12 @@ KCAL TARGET: ${kcalStr}`;
               {["Vegano", "Vegetariano", "Fit", "Alto contenuto proteico", "Low carb", "Detox"].map((tag) => (
                 <button
                   key={tag}
-                  onClick={() => setSelectedLifestyle((prev) =>
-                    prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-                  )}
+                  onClick={() => setRecipeState((prev) => ({
+                    ...prev,
+                    lifestyle: prev.lifestyle.includes(tag)
+                      ? prev.lifestyle.filter((t) => t !== tag)
+                      : [...prev.lifestyle, tag]
+                  }))}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
                     selectedLifestyle.includes(tag)
                       ? "bg-teal-100 text-teal-700 border-teal-300"
@@ -453,7 +458,7 @@ KCAL TARGET: ${kcalStr}`;
           <div className="flex items-center gap-3 py-2 border-t border-gray-100">
             <label className="text-xs font-semibold text-gray-700">Visibilità:</label>
             <button
-              onClick={() => setIsPremium(false)}
+              onClick={() => setRecipeState((prev) => ({ ...prev, isPremium: false }))}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                 !isPremium
                   ? "bg-gray-800 text-white border-gray-800"
@@ -463,7 +468,7 @@ KCAL TARGET: ${kcalStr}`;
               🌐 Tutti
             </button>
             <button
-              onClick={() => setIsPremium(true)}
+              onClick={() => setRecipeState((prev) => ({ ...prev, isPremium: true }))}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                 isPremium
                   ? "bg-amber-500 text-white border-amber-500"
