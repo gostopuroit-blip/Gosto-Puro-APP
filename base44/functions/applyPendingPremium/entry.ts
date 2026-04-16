@@ -30,23 +30,25 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   try {
-    // Fetch small batch of pending entries (5 per run to minimize quota)
+    // Fetch single pending entry (1 per run to minimize quota)
     const pendingList = await base44.asServiceRole.entities.PendingPremium.filter(
-      { status: "pending" }, "-created_date", 5
+      { status: "pending" }, "-created_date", 1
     ).catch(() => []);
 
     if (!pendingList || pendingList.length === 0) {
       return Response.json({ success: true, processed: 0, message: "No pending entries" });
     }
 
-    let applied = 0;
+    const pending = pendingList[0];
+    const email = pending.email?.toLowerCase()?.trim();
+    
+    if (!email) {
+      await base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {});
+      return Response.json({ success: true, processed: 0, message: "Invalid email" });
+    }
 
-    // Process each pending entry
-    for (const pending of pendingList) {
-      const email = pending.email?.toLowerCase()?.trim();
-      if (!email) continue;
-
-      // Get single user by email (minimizes quota usage)
+    try {
+      // Get single user by email
       const users = await base44.asServiceRole.entities.User.filter(
         { email },
         "-created_date",
@@ -54,7 +56,9 @@ Deno.serve(async (req) => {
       ).catch(() => []);
 
       if (!users || users.length === 0) {
-        continue; // User not found, skip this one
+        // User not found, mark as applied anyway to avoid retry loop
+        await base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {});
+        return Response.json({ success: true, processed: 0, message: "User not found" });
       }
 
       const user = users[0];
@@ -89,10 +93,11 @@ Deno.serve(async (req) => {
         base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {})
       ]);
 
-      applied++;
+      return Response.json({ success: true, processed: 1, applied: 1 });
+    } catch (procErr) {
+      console.error("Error processing pending premium:", procErr);
+      return Response.json({ success: false, error: procErr.message }, { status: 500 });
     }
-
-    return Response.json({ success: true, processed: pendingList.length, applied });
   } catch (err) {
     console.error("Error in applyPendingPremium:", err);
     return Response.json({ success: false, error: err.message }, { status: 500 });
