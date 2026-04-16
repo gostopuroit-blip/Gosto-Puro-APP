@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import ChangeRecipeModal from "@/components/planner/ChangeRecipeModal";
 
 const MEAL_TIMES = {
   colazione: "07:00",
@@ -32,6 +33,7 @@ export default function Planner() {
   const [weekStartDay, setWeekStartDay] = useState(0);
   const [user, setUser] = useState(null);
   const [showDurationModal, setShowDurationModal] = useState(false);
+  const [changeRecipeSlot, setChangeRecipeSlot] = useState(null); // { mealType }
 
   useEffect(() => {
     loadData();
@@ -155,6 +157,26 @@ export default function Planner() {
   };
 
   const isMealDone = (mealType) => (currentDay.meals_done || []).includes(mealType);
+
+  const swapRecipe = async (recipe) => {
+    const mealType = changeRecipeSlot?.mealType;
+    if (!mealType || !plan) return;
+
+    const updatedPlan = { ...plan, plan_data: plan.plan_data.map((d, i) => {
+      if (i !== selectedDay) return d;
+      return {
+        ...d,
+        [`${mealType}_id`]: recipe.id,
+        [`${mealType}_title`]: recipe.title
+      };
+    })};
+
+    setPlan(updatedPlan);
+    setRecipes(prev => ({ ...prev, [recipe.id]: recipe }));
+    await base44.entities.MealPlan.update(plan.id, { plan_data: updatedPlan.plan_data });
+    toast.success("Ricetta aggiornata! ✓");
+    setChangeRecipeSlot(null);
+  };
 
   const dayProgressPercent = Math.round(((selectedDay + 1) / plan.days) * 100);
   const daysCompletedCount = (plan.days_completed || []).length;
@@ -344,6 +366,13 @@ export default function Planner() {
                 </div>
 
                 <button
+                  onClick={() => setChangeRecipeSlot({ mealType })}
+                  className="flex-shrink-0 w-8 h-8 rounded-full border border-gray-200 dark:border-[#444444] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-all"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                </button>
+
+                <button
                   onClick={() => toggleMealDone(mealType)}
                   className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                     isDone
@@ -380,6 +409,13 @@ export default function Planner() {
         </Button>
         <DurationModal open={showDurationModal} onOpenChange={setShowDurationModal} navigate={navigate} />
       </div>
+
+      <ChangeRecipeModal
+        open={!!changeRecipeSlot}
+        onOpenChange={(v) => !v && setChangeRecipeSlot(null)}
+        mealType={changeRecipeSlot?.mealType}
+        onSelect={swapRecipe}
+      />
     </div>
   );
 }
