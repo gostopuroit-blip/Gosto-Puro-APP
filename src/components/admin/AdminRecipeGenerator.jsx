@@ -140,7 +140,7 @@ export default function AdminRecipeGenerator() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 50)
+    base44.entities.RecipeOccasion.filter({}, "sort_order", 100)
       .then(setOccasions).finally(() => setLoadingOcc(false));
     base44.entities.AppConfig.filter({ key: "prompt_mestre" }).then(configs => {
       if (configs?.length > 0 && configs[0].value) setMasterPrompt(configs[0].value);
