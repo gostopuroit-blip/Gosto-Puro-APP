@@ -53,7 +53,7 @@ const emptyForm = {
   prep_time: 30, servings: 4, difficulty: "Facile", calories: null,
   ingredients: [{ name: "", quantity: "", category: "" }],
   instructions: [""], occasions: [], lifestyle: [],
-  visibility: "all", numero_salvate: 0, numero_preparate: 0,
+  visibility: "premium", numero_salvate: 0, numero_preparate: 0,
   gen_prompt: "", status: "pubblicata", paese: "",
   sostituzioni: [],
 };
@@ -95,6 +95,7 @@ export default function AdminRecipesManager() {
       ...emptyForm, ...r,
       ingredients: r.ingredients?.length ? r.ingredients : [{ name: "", quantity: "", category: "" }],
       instructions: r.instructions?.length ? r.instructions : [""],
+      visibility: r.is_premium === true ? "premium" : r.is_premium === false ? "all" : "premium",
     });
     setEditId(r.id);
     setPasteText(""); setShowPaste(false);
@@ -175,7 +176,7 @@ export default function AdminRecipesManager() {
     setSaving(true);
     const cleanIngredients = form.ingredients.filter((i) => i.name.trim());
     const cleanInstructions = form.instructions.filter((s) => s.trim());
-    const data = { ...form, ingredients: cleanIngredients, instructions: cleanInstructions, prep_time: Number(form.prep_time) || 30 };
+    const data = { ...form, ingredients: cleanIngredients, instructions: cleanInstructions, prep_time: Number(form.prep_time) || 30, is_premium: form.visibility === "premium" };
     if (editId) {
       await base44.entities.Recipe.update(editId, data);
       setRecipes((prev) => prev.map((r) => r.id === editId ? { ...r, ...data } : r));
