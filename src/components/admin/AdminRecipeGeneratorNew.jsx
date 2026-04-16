@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Loader2, Check, RotateCcw } from "lucide-react";
+import { Sparkles, Loader2, Check, RotateCcw, Pencil, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+import RecipeEditor from "./RecipeEditor";
 
 const OCCASIONS_LIST = [
   "Colazione", "Pranzo", "Cena", "Leggera", "Dolci",
@@ -50,6 +51,7 @@ export default function AdminRecipeGeneratorNew() {
   const [recipe, setRecipe] = useState(null);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
   const handleOccasionChange = (occasion) => {
@@ -331,7 +333,7 @@ KCAL TARGET: ${kcalStr}`;
             {generating ? "Generando..." : "Genera Ricetta 🪄"}
           </button>
         </div>
-      ) : (
+      ) : !editing ? (
         // PARTE 3 — PREENCHIMENTO AUTOMÁTICO E AÇÕES
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-4">
           <div>
@@ -404,8 +406,25 @@ KCAL TARGET: ${kcalStr}`;
               )}
               🔄 Rigenera
             </button>
+            <button
+              onClick={() => setEditing(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-orange-600 text-white py-2.5 rounded-xl font-semibold text-sm"
+            >
+              <Pencil className="w-4 h-4" />
+              ✏️ Modifica
+            </button>
           </div>
         </div>
+      ) : (
+        // EDITOR MODE
+        <RecipeEditor 
+          recipe={recipe} 
+          onSave={(updated) => {
+            setRecipe(updated);
+            setEditing(false);
+          }}
+          onCancel={() => setEditing(false)}
+        />
       )}
     </div>
   );
