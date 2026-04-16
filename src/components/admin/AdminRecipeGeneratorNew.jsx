@@ -79,7 +79,7 @@ export default function AdminRecipeGeneratorNew() {
   "description": "Descrizione breve e appetitosa (max 2 righe)",
   "category": "${categoryStr}",
   "occasions": ["${occasionStr}"],
-  "lifestyle": [],
+  "lifestyle": [analizza e aggiungi automaticamente tutte le tag applicabili],
   "dietary_tags": [analizza ingredienti e aggiungi TUTTE le tag applicabili senza limite],
   "difficulty": "${difficultyStr}",
   "prep_time": [tempo TOTALE realistico in minuti],
@@ -115,6 +115,16 @@ REGOLE DIETARY_TAGS — aggiungi automaticamente TUTTE le applicabili:
 - "Fit" → calorie < 400 e macro equilibrati
 - "Senza uova" → niente uova
 - "Senza frutti di mare" → niente frutti di mare
+
+REGOLE LIFESTYLE — aggiungi automaticamente tutte le applicabili:
+- "Vegano" → se non contiene prodotti animali (carne, pesce, uova, latticini, miele)
+- "Vegetariano" → se non contiene carne né pesce
+- "Fit" → calorie < 400 e macro equilibrati (proteine >= carboidrati)
+- "Alto contenuto proteico" → proteine > 20g per porzione
+- "Low carb" → carboidrati < 20g per porzione
+- "Detox" → basata su verdure, frutta, erbe, legumi, niente processati né zuccheri
+
+NOTA: lifestyle e dietary_tags possono avere valori simili ma servono scopi diversi — compilare entrambi indipendentemente.
 
 ${selectedOccasion?.toLowerCase().includes("friggitrice") ? `[SE OCCASIONE = "Friggitrice ad Aria"]:
 Nelle instructions includere OBBLIGATORIAMENTE:
