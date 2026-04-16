@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, Loader2, Check, RotateCcw, Pencil, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -54,6 +54,14 @@ export default function AdminRecipeGeneratorNew() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [isPremium, setIsPremium] = useState(true);
+
+  useEffect(() => {
+    if (recipe) {
+      setSelectedDietaryTags(recipe.dietary_tags || []);
+      setSelectedLifestyle(recipe.lifestyle || []);
+      setIsPremium(true);
+    }
+  }, [recipe]);
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
   const handleOccasionChange = (occasion) => {
