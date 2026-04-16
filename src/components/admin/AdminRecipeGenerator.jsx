@@ -445,13 +445,13 @@ Rispondi SOLO in formato JSON:
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
                     selectedOcc?.id === occ.id
                       ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
-                      : occ.is_active
+                      : occ.show_in_home
                         ? "bg-gray-50 text-gray-600 border-green-400 hover:border-green-500"
                         : "bg-gray-50 text-gray-600 border-gray-100 hover:border-[#2D6A4F]/30"
                   }`}
                 >
                   {occ.icon} {occ.label}
-                  {occ.is_active && (
+                  {occ.show_in_home && (
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
                       selectedOcc?.id === occ.id ? "bg-white/20 text-white" : "bg-green-100 text-green-700"
                     }`}>
