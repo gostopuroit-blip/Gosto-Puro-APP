@@ -211,25 +211,21 @@ export default function Planner() {
   const weekDays = plan.plan_data.slice(weekStartDay, weekEnd);
 
   // Calcular macros do dia
-  const calculateMacros = () => {
-    let macros = { proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 };
+  const macros = (() => {
+    const m = { proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 };
     const mealIds = [currentDay.colazione_id, currentDay.pranzo_id, currentDay.snack_id, currentDay.cena_id];
-
     mealIds.forEach(id => {
-      if (id && recipes[id]) {
-        const r = recipes[id];
-        macros.proteina += r.proteine || 0;
-        macros.carboidrati += r.carboidrati || 0;
-        macros.grassi += r.grassi || 0;
-        macros.fibre += r.fibre || 0;
-        macros.calorie += r.calorie || r.calories || 0;
-      }
+      if (!id) return;
+      const r = recipes[id];
+      if (!r) return;
+      m.proteina += Number(r.proteine) || 0;
+      m.carboidrati += Number(r.carboidrati) || 0;
+      m.grassi += Number(r.grassi) || 0;
+      m.fibre += Number(r.fibre) || 0;
+      m.calorie += Number(r.calorie) || Number(r.calories) || 0;
     });
-
-    return macros;
-  };
-
-  const macros = calculateMacros();
+    return m;
+  })();
 
   // Toggle meal completion
   const toggleMealDone = async (mealType) => {
@@ -380,35 +376,25 @@ export default function Planner() {
       </div>
 
       {/* Macros */}
-      {macros.calorie > 0 && (
-        <div className="px-5 mb-6">
-          <div className="flex gap-2 flex-wrap">
-            {macros.proteina > 0 && (
-              <div className="bg-[#2D6A4F]/10 text-[#2D6A4F] dark:bg-[#2D6A4F]/20 dark:text-[#40916C] px-3 py-1.5 rounded-full text-xs font-semibold">
-                {Math.round(macros.proteina)}g Proteína
-              </div>
-            )}
-            {macros.carboidrati > 0 && (
-              <div className="bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 px-3 py-1.5 rounded-full text-xs font-semibold">
-                {Math.round(macros.carboidrati)}g Carbs
-              </div>
-            )}
-            {macros.grassi > 0 && (
-              <div className="bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 px-3 py-1.5 rounded-full text-xs font-semibold">
-                {Math.round(macros.grassi)}g Grassi
-              </div>
-            )}
-            {macros.fibre > 0 && (
-              <div className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 px-3 py-1.5 rounded-full text-xs font-semibold">
-                {Math.round(macros.fibre)}g Fibre
-              </div>
-            )}
+      <div className="px-5 mb-6">
+        <div className="flex gap-2 flex-wrap">
+          <div className="bg-[#2D6A4F]/10 text-[#2D6A4F] dark:bg-[#2D6A4F]/20 dark:text-[#40916C] px-3 py-1.5 rounded-full text-xs font-semibold">
+            {Math.round(macros.proteina)}g Proteína
           </div>
-          <div className="text-right text-sm font-bold text-gray-700 dark:text-gray-300 mt-2">
-            {Math.round(macros.calorie)} kcal
+          <div className="bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 px-3 py-1.5 rounded-full text-xs font-semibold">
+            {Math.round(macros.carboidrati)}g Carbs
+          </div>
+          <div className="bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 px-3 py-1.5 rounded-full text-xs font-semibold">
+            {Math.round(macros.grassi)}g Grassi
+          </div>
+          <div className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 px-3 py-1.5 rounded-full text-xs font-semibold">
+            {Math.round(macros.fibre)}g Fibre
           </div>
         </div>
-      )}
+        <div className="text-right text-sm font-bold text-gray-700 dark:text-gray-300 mt-2">
+          {Math.round(macros.calorie)} kcal
+        </div>
+      </div>
 
       {/* Meals */}
       <div className="px-5 space-y-4">
