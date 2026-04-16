@@ -25,6 +25,47 @@ const DIETARY_TAGS = [
   "Low carb", "Alto contenuto proteico", "Diabetico", "Detox", "Fit", "Senza uova", "Senza frutti di mare"
 ];
 
+// Calcola automaticamente dietary_tags e lifestyle dai macros della ricetta generata
+const computeAutoTags = (result) => {
+  const dietaryTags = new Set(result.dietary_tags || []);
+  const lifestyle = new Set(result.lifestyle || []);
+
+  const carb = result.carboidrati || 0;
+  const prot = result.proteine || 0;
+  const kcal = result.calorie || 0;
+  const zuccheri = result.zuccheri || 0;
+
+  // Controlla ingredienti per assenze
+  const ings = (result.ingredients || []).map(i => (i.name || "").toLowerCase()).join(" ");
+  const hasGluten = /farina|pane|pasta|orzo|segale|avena|semola|grano|cous/.test(ings);
+  const hasLactose = /latte|formaggio|burro|panna|yogurt|mozzarella|ricotta|besciamella/.test(ings);
+  const hasMeat = /pollo|manzo|maiale|agnello|vitello|salsiccia|prosciutto|pancetta|tacchino|coniglio|anatra/.test(ings);
+  const hasFish = /pesce|tonno|salmone|sgombro|acciughe|merluzzo|branzino|orata|gamberett|calamari|polipo|vongole|cozze|frutti di mare/.test(ings);
+  const hasAnimal = hasMeat || hasFish || /uova|uovo|miele/.test(ings) || hasLactose;
+  const hasEggs = /uov/.test(ings);
+  const hasSeafood = /gamberett|calamari|polipo|vongole|cozze|frutti di mare|aragosta|gambero/.test(ings);
+  const hasSugar = /zucchero|miele|sciroppo|fruttosio/.test(ings);
+  const hasProcessed = /dado|insaccati|surgelat|conserv|industriale/.test(ings);
+
+  if (!hasGluten) dietaryTags.add("Senza glutine");
+  if (!hasLactose) dietaryTags.add("Senza lattosio");
+  if (!hasEggs) dietaryTags.add("Senza uova");
+  if (!hasSeafood) dietaryTags.add("Senza frutti di mare");
+  if (!hasSugar) dietaryTags.add("Senza zucchero");
+  if (!hasMeat && !hasFish) { dietaryTags.add("Vegetariano"); lifestyle.add("Vegetariano"); }
+  if (!hasAnimal) { dietaryTags.add("Vegano"); lifestyle.add("Vegano"); }
+  if (carb < 20) { dietaryTags.add("Low carb"); lifestyle.add("Low carb"); }
+  if (prot > 20) { dietaryTags.add("Alto contenuto proteico"); lifestyle.add("Alto contenuto proteico"); }
+  if (zuccheri < 10 && carb < 30) dietaryTags.add("Diabetico");
+  if (kcal < 400) { dietaryTags.add("Fit"); lifestyle.add("Fit"); }
+  if (!hasProcessed && !hasSugar && !hasMeat && !hasFish) { dietaryTags.add("Detox"); lifestyle.add("Detox"); }
+
+  return {
+    dietaryTags: [...dietaryTags],
+    lifestyle: [...lifestyle],
+  };
+};
+
 // Pre-selezione automatica per occasione
 const getDietaryPreselectionsForOccasion = (occasion) => {
   const lower = occasion?.toLowerCase() || "";
@@ -202,11 +243,12 @@ KCAL TARGET: ${kcalStr}`;
         },
       });
 
-      // Set everything in one atomic state update
+      // Calcola automaticamente dietary_tags e lifestyle dai macros/ingredienti
+      const autoTags = computeAutoTags(result);
       setRecipeState({
         recipe: result,
-        dietaryTags: result.dietary_tags || [],
-        lifestyle: result.lifestyle || [],
+        dietaryTags: autoTags.dietaryTags,
+        lifestyle: autoTags.lifestyle,
         isPremium: true,
       });
       toast.success("Ricetta generata!");
