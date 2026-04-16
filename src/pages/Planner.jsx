@@ -41,6 +41,25 @@ export default function Planner() {
     loadData();
   }, []);
 
+  // When selectedDay changes, ensure all 4 meal recipes for that day are loaded
+  useEffect(() => {
+    if (!plan) return;
+    const day = plan.plan_data[selectedDay];
+    if (!day) return;
+    const ids = [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id].filter(
+      id => id && !recipes[id]
+    );
+    if (ids.length === 0) return;
+    Promise.all(ids.map(id => base44.entities.Recipe.filter({ id }, "-created_date", 1).then(res => res[0]).catch(() => null)))
+      .then(results => {
+        const newEntries = {};
+        results.forEach(r => { if (r) newEntries[r.id] = r; });
+        if (Object.keys(newEntries).length > 0) {
+          setRecipes(prev => ({ ...prev, ...newEntries }));
+        }
+      });
+  }, [selectedDay, plan]);
+
   // Recalculate macros whenever selected day or recipes change
   useEffect(() => {
     if (!plan) return;
