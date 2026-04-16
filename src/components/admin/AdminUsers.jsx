@@ -127,6 +127,38 @@ export default function AdminUsers() {
                 </div>
               </div>
 
+              {/* Prodotti Acquistati */}
+              <div className="mt-3 pt-3 border-t border-gray-50">
+                <p className="text-[10px] font-bold text-gray-500 mb-2">PRODOTTI ACQUISTATI</p>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {(u.purchased_products || []).length > 0 ? (
+                    (u.purchased_products || []).map((slug) => (
+                      <div key={slug} className="flex items-center gap-1 bg-green-50 rounded-lg px-2 py-1 border border-green-100">
+                        <span className="text-[11px] font-semibold text-green-700">{slug}</span>
+                        <button
+                          onClick={() => {
+                            const updated = u.purchased_products.filter(s => s !== slug);
+                            update(u.id, { purchased_products: updated }, "Prodotto rimosso");
+                          }}
+                          className="text-[11px] text-green-600 hover:text-red-600 font-bold"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-[11px] text-gray-400">Nessun prodotto</span>
+                  )}
+                </div>
+                <ProductDropdown
+                  onSelect={(slug) => {
+                    const updated = [...(u.purchased_products || []), slug];
+                    update(u.id, { purchased_products: updated }, "Prodotto aggiunto");
+                  }}
+                  current={u.purchased_products || []}
+                />
+              </div>
+
               {/* Actions */}
               <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-50">
                 <ActionBtn
@@ -164,6 +196,40 @@ export default function AdminUsers() {
         {filtered.length === 0 && <p className="text-center text-gray-400 text-sm py-10">Nessun utente trovato</p>}
       </div>
     </div>
+  );
+}
+
+function ProductDropdown({ onSelect, current }) {
+  const products = [
+    "diabetici",
+    "fitness_pratiche",
+    "ricette_sane_35",
+    "ricette_veloci_pratiche",
+    "cene_friggitrice",
+    "ricette_congelare"
+  ];
+  
+  const available = products.filter(p => !current.includes(p));
+  
+  if (available.length === 0) {
+    return <span className="text-[11px] text-gray-400">Tutti i prodotti aggiunti</span>;
+  }
+  
+  return (
+    <select
+      onChange={(e) => {
+        if (e.target.value) {
+          onSelect(e.target.value);
+          e.target.value = "";
+        }
+      }}
+      className="text-[11px] px-2.5 py-1.5 rounded-lg border border-blue-100 bg-blue-50 text-blue-700 font-semibold"
+    >
+      <option value="">+ Aggiungi prodotto</option>
+      {available.map((p) => (
+        <option key={p} value={p}>{p}</option>
+      ))}
+    </select>
   );
 }
 
