@@ -7,7 +7,6 @@ import FollowButton from "@/components/community/FollowButton";
 import { createPageUrl } from "@/utils";
 
 const RECIPE_CATEGORIES = ["Tutte", "Colazione", "Pranzo", "Cena", "Snack", "Dolce", "Bevanda"];
-const RECIPE_OCCASIONS = ["Tutte", "Colazione", "Pranzo", "Cena", "Fit", "Detox", "Low Carb", "Estate", "Primavera", "Diabete", "In famiglia", "Con amici", "Dal mondo", "Leggera", "Instagram", "Inverno", "Autunno", "Per due", "Natale e Capodanno"];
 const DIETARY_TAGS = ["Senza glutine", "Senza lattosio", "Senza zucchero", "Vegano", "Vegetariano", "Low carb", "Alto contenuto proteico", "Diabetico", "Detox", "Fit", "Senza uova", "Senza frutti di mare"];
 const RECIPE_PAGE_SIZE = 12;
 
@@ -46,7 +45,7 @@ export default function Search() {
   const [profileRestrictions, setProfileRestrictions] = useState([]);
   const recipeSearchRef = useRef(null);
 
-  // Load current user
+  // Load current user and occasions
   useEffect(() => {
     const init = async () => {
       const u = await base44.auth.me().catch(() => null);
@@ -126,6 +125,20 @@ export default function Search() {
   useEffect(() => {
     performSearch(query);
   }, [query, performSearch]);
+
+  // Load occasions list
+  const [recipeOccasions, setRecipeOccasions] = useState(["Tutte"]);
+  useEffect(() => {
+    const loadOccasions = async () => {
+      const homeOccasions = await base44.entities.RecipeOccasion.filter({ show_in_home: true }).catch(() => []);
+      const activeProducts = await base44.entities.GostoPuroProduct.filter({ is_active: true }).catch(() => []);
+      const homeLabels = homeOccasions.map(o => o.label);
+      const productLabels = activeProducts.flatMap(p => p.occasioni || []);
+      const allOccasions = [...new Set([...homeLabels, ...productLabels])].sort();
+      setRecipeOccasions(["Tutte", ...allOccasions]);
+    };
+    loadOccasions();
+  }, []);
 
   // Recipe search — runs when tab=ricette or filters change
   const searchRecipes = useCallback(async (searchQuery, category, occasion, dietaryTags, page) => {
@@ -446,10 +459,10 @@ export default function Search() {
             </div>
 
             {/* Occasion pills */}
-            <div className="mb-3">
+             <div className="mb-3">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Occasione</p>
               <div className="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1">
-                {RECIPE_OCCASIONS.map((occ) => (
+                {recipeOccasions.map((occ) => (
                   <button
                     key={occ}
                     onClick={() => setRecipeOccasion(occ)}
