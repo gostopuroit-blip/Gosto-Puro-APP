@@ -461,7 +461,6 @@ Rispondi SOLO in formato JSON:
         {[
           { key: "giorno", label: "🏠 Giorno" },
           { key: "speciale", label: "🎉 Speciale" },
-          { key: "stile_vita", label: "🌿 Stile di vita" },
         ].map(({ key, label }) => (
           <div key={key}>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{label}</p>
