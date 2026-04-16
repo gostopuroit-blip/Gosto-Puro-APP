@@ -52,7 +52,7 @@ export default function AdminRecipeGeneratorNew() {
   const [generatedPrompt, setGeneratedPrompt] = useState("");
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
+  const [isPremium, setIsPremium] = useState(true);
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
   const handleOccasionChange = (occasion) => {
@@ -96,6 +96,7 @@ export default function AdminRecipeGeneratorNew() {
   "total_rating": 0,
   "rating_count": 0,
   "media_rating": 0,
+  "is_premium": true,
   "status": "bozza",
   "ingredients": [{"name": "...", "quantity": "...", "category": "Ortofrutta|Carne e pesce|Latticini|Dispensa|Surgelati|Altro"}],
   "instructions": ["Passo 1...", "Passo 2...", "... minimo 8 passi"],
@@ -233,7 +234,7 @@ KCAL TARGET: ${kcalStr}`;
         rating_count: 0,
         media_rating: 0,
         status: "pubblicata",
-        is_premium: isPremium,
+        is_premium: isPremium === true,
         gen_prompt: generatedPrompt,
       };
       await base44.entities.Recipe.create(data);
@@ -245,7 +246,7 @@ KCAL TARGET: ${kcalStr}`;
       setSelectedDifficulty("Facile");
       setSelectedDietaryTags([]);
       setTargetKcal("");
-      setIsPremium(false);
+      setIsPremium(true);
     } catch (error) {
       toast.error("Errore: " + error.message);
     } finally {
