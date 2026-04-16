@@ -448,12 +448,16 @@ export default function Planner() {
                   isDone ? "opacity-60" : ""
                 }`}
               >
-                {recipe?.image_url && (
+                {recipe?.image_url ? (
                   <img
                     src={recipe.image_url}
                     alt={mealTitle}
                     className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                   />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-xl">
+                    {{ colazione: "🍳", pranzo: "🍝", snack: "🍎", cena: "🌙" }[mealType]}
+                  </div>
                 )}
 
                 <div className="flex-1 min-w-0">
