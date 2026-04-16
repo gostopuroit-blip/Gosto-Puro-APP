@@ -92,33 +92,6 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
           </div>
         </div>
 
-        {/* Focus */}
-        <div className="mb-5">
-          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
-            Stile
-          </label>
-          <div className="space-y-2">
-            {focusOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setFocus(opt.value)}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl text-left transition-all ${
-                  focus === opt.value
-                    ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                    : "bg-white dark:bg-[#1A2B20] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
-                }`}
-              >
-                <span className="text-xl">{opt.icon}</span>
-                <div>
-                  <div className="text-sm font-semibold">{opt.label}</div>
-                  <div className={`text-[11px] ${focus === opt.value ? "text-white/70" : "text-gray-400 dark:text-gray-500"}`}>
-                    {opt.desc}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Max Time */}
         <div className="mb-6">
