@@ -493,11 +493,11 @@ function RecipeCard({ recipe, occasion, isSaved, user, isBlocked, onBlockedClick
 
        <div className="flex-1 py-3 pr-3 min-w-0">
          <div className="flex gap-1.5 flex-wrap mb-1.5">
-           <span className="text-[10px] font-bold bg-[#2D6A4F]/30 text-[#52b788] px-2 py-0.5 rounded-full">
+           <span className="text-[10px] font-bold bg-[#2D6A4F]/20 text-[#1a4731] px-2 py-0.5 rounded-full">
              {occasion}
            </span>
            {recipe.category && recipe.category !== occasion && (
-             <span className="text-[10px] font-bold bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded-full">
+             <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
                {recipe.category}
              </span>
            )}
