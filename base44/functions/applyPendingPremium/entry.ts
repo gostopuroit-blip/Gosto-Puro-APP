@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const PRODUCT_LIFETIME = "7079227";
 
@@ -26,15 +26,12 @@ const getExpirationDate = (purchaseData, planType) => {
   return d.toISOString().split("T")[0];
 };
 
-Deno.serve(async (_req) => {
-  const base44 = createClient({
-    appId: Deno.env.get("BASE44_APP_ID"),
-    serviceRoleKey: true,
-  });
+Deno.serve(async (req) => {
+  const base44 = createClientFromRequest(req);
 
   try {
     // Fetch single pending entry (1 per run to minimize quota)
-    const pendingList = await base44.entities.PendingPremium.filter(
+    const pendingList = await base44.asServiceRole.entities.PendingPremium.filter(
       { status: "pending" }, "-created_date", 1
     ).catch(() => []);
 
@@ -46,16 +43,16 @@ Deno.serve(async (_req) => {
     const email = pending.email?.toLowerCase()?.trim();
 
     if (!email) {
-      await base44.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {});
+      await base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {});
       return Response.json({ success: true, processed: 0, message: "Invalid email" });
     }
 
-    const users = await base44.entities.User.filter(
+    const users = await base44.asServiceRole.entities.User.filter(
       { email }, "-created_date", 1
     ).catch(() => []);
 
     if (!users || users.length === 0) {
-      await base44.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {});
+      await base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {});
       return Response.json({ success: true, processed: 0, message: "User not found" });
     }
 
@@ -84,8 +81,8 @@ Deno.serve(async (_req) => {
     }
 
     await Promise.all([
-      base44.entities.User.update(user.id, updateData).catch(() => {}),
-      base44.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {})
+      base44.asServiceRole.entities.User.update(user.id, updateData).catch(() => {}),
+      base44.asServiceRole.entities.PendingPremium.update(pending.id, { status: "applied" }).catch(() => {})
     ]);
 
     return Response.json({ success: true, processed: 1, applied: 1 });
