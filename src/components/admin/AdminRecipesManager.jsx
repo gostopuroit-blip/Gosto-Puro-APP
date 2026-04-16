@@ -400,9 +400,9 @@ Testo della ricetta:\n${text}`,
     const carb = parsed.carboidrati || 0;
     const zucc = parsed.zuccheri || 0;
 
-    const hasAnimal = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|uov|burro|latte|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingNames);
-    const hasMeat = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|gamberi|acciughe/.test(ingNames);
-    const hasGluten = /farina 0|farina di grano|pasta\b|pane\b|orzo\b|segale|farro|semola/.test(ingNames);
+    const hasAnimal = /carne\b|pollo|manzo|maiale|salmone|tonno|pesce\b|prosciutto|pancetta|uov|burro|latte\b|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingNames);
+    const hasMeat = /carne\b|pollo|manzo|maiale|salmone|tonno|pesce\b|prosciutto|pancetta|gamberi|acciughe/.test(ingNames);
+    const hasGluten = /farina 0\b|farina di grano|farina di frumento|pasta\b|pane\b|orzo\b|segale|farro|semola/.test(ingNames);
     const hasLactose = /latte\b|formaggio|panna|burro|yogurt|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingNames);
     const hasEggs = /uov/.test(ingNames);
     const hasSeafood = /gamberi|frutti di mare|acciughe|vongole|cozze|calamari|polpo/.test(ingNames);

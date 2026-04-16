@@ -212,13 +212,13 @@ KCAL TARGET: ${kcalStr}`;
       const zuccheri = result.zuccheri || 0;
       const ingredientNames = (result.ingredients || []).map(i => (i.name || "").toLowerCase()).join(" ");
 
-      const hasAnimalProducts = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|uov|burro|latte|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
-      const hasMeat = /carne|pollo|manzo|maiale|salmone|tonno|pesce|prosciutto|pancetta|gamberi|frutti di mare|acciughe/.test(ingredientNames);
-      const hasGluten = /farina|pasta|pane|orzo|segale|avena|farro|semola|grano/.test(ingredientNames);
-      const hasLactose = /latte|formaggio|panna|burro|yogurt|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
+      const hasAnimalProducts = /carne\b|pollo|manzo|maiale|salmone|tonno|pesce\b|prosciutto|pancetta|uov|burro|latte\b|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
+      const hasMeat = /carne\b|pollo|manzo|maiale|salmone|tonno|pesce\b|prosciutto|pancetta|gamberi|frutti di mare|acciughe/.test(ingredientNames);
+      const hasGluten = /farina 0\b|farina di grano|farina di frumento|pasta\b|pane\b|orzo\b|segale|farro|semola/.test(ingredientNames);
+      const hasLactose = /latte\b|formaggio|panna|burro|yogurt|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
       const hasEggs = /uov/.test(ingredientNames);
       const hasSeafood = /gamberi|frutti di mare|acciughe|vongole|cozze|calamari|polpo/.test(ingredientNames);
-      const hasSugar = /zucchero|miele|sciroppo|zucchero di canna/.test(ingredientNames);
+      const hasSugar = /zucchero|miele|sciroppo/.test(ingredientNames);
 
       const derivedDietaryTags = [];
       if (!hasGluten) derivedDietaryTags.push("Senza glutine");
