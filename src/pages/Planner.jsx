@@ -35,10 +35,30 @@ export default function Planner() {
   const [showPlannerModal, setShowPlannerModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [changeRecipeSlot, setChangeRecipeSlot] = useState(null); // { mealType }
+  const [macros, setMacros] = useState({ proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 });
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Recalculate macros whenever selected day or recipes change
+  useEffect(() => {
+    if (!plan) return;
+    const day = plan.plan_data[selectedDay];
+    if (!day) return;
+    const m = { proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 };
+    [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id].forEach(id => {
+      if (!id) return;
+      const r = recipes[id];
+      if (!r) return;
+      m.proteina += Number(r.proteine) || 0;
+      m.carboidrati += Number(r.carboidrati) || 0;
+      m.grassi += Number(r.grassi) || 0;
+      m.fibre += Number(r.fibre) || 0;
+      m.calorie += Number(r.calorie) || Number(r.calories) || 0;
+    });
+    setMacros(m);
+  }, [selectedDay, recipes, plan]);
 
   const loadData = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
@@ -212,23 +232,6 @@ export default function Planner() {
 
   const weekEnd = Math.min(weekStartDay + 7, plan.days);
   const weekDays = plan.plan_data.slice(weekStartDay, weekEnd);
-
-  // Calcular macros do dia
-  const macros = (() => {
-    const m = { proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 };
-    const mealIds = [currentDay.colazione_id, currentDay.pranzo_id, currentDay.snack_id, currentDay.cena_id];
-    mealIds.forEach(id => {
-      if (!id) return;
-      const r = recipes[id];
-      if (!r) return;
-      m.proteina += Number(r.proteine) || 0;
-      m.carboidrati += Number(r.carboidrati) || 0;
-      m.grassi += Number(r.grassi) || 0;
-      m.fibre += Number(r.fibre) || 0;
-      m.calorie += Number(r.calorie) || Number(r.calories) || 0;
-    });
-    return m;
-  })();
 
   // Toggle meal completion
   const toggleMealDone = async (mealType) => {
