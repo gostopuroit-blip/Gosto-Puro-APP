@@ -418,7 +418,7 @@ KCAL TARGET: ${kcalStr}`;
                     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
                   )}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-                    selectedDietaryTags.includes(tag)
+                    (selectedDietaryTags.includes(tag) || recipe?.dietary_tags?.includes(tag))
                       ? "bg-green-100 text-green-700 border-green-300"
                       : "bg-gray-50 text-gray-400 border-gray-100"
                   }`}
@@ -440,7 +440,7 @@ KCAL TARGET: ${kcalStr}`;
                     prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
                   )}
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all ${
-                    selectedLifestyle.includes(tag)
+                    (selectedLifestyle.includes(tag) || recipe?.lifestyle?.includes(tag))
                       ? "bg-teal-100 text-teal-700 border-teal-300"
                       : "bg-gray-50 text-gray-400 border-gray-100"
                   }`}
