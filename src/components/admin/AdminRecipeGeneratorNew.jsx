@@ -214,7 +214,7 @@ KCAL TARGET: ${kcalStr}`;
 
       const hasAnimalProducts = /carne\b|pollo|manzo|maiale|salmone|tonno|pesce\b|prosciutto|pancetta|uov|burro|latte\b|formaggio|panna|yogurt|miele|gamberi|frutti di mare|acciughe|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
       const hasMeat = /carne\b|pollo|manzo|maiale|salmone|tonno|pesce\b|prosciutto|pancetta|gamberi|frutti di mare|acciughe/.test(ingredientNames);
-      const hasGluten = /farina 0\b|farina di grano|farina di frumento|pasta\b|pane\b|orzo\b|segale|farro|semola/.test(ingredientNames);
+      const hasGluten = /farina\s*0+\b|farina di grano|farina di frumento|farina integrale|pasta\b|pane\b|orzo\b|segale|farro|semola/.test(ingredientNames);
       const hasLactose = /latte\b|formaggio|panna|burro|yogurt|ricotta|mozzarella|parmigiano|pecorino|grana/.test(ingredientNames);
       const hasEggs = /uov/.test(ingredientNames);
       const hasSeafood = /gamberi|frutti di mare|acciughe|vongole|cozze|calamari|polpo/.test(ingredientNames);
