@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Search, Heart, Star, Loader2 } from "lucide-react";
+import { ArrowLeft, Search, Heart, Star, Loader2, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
 const OCCASION_ICONS = {
   "Fit": "🏋️", "Detox": "🌿", "Low carb": "🥗", "Low Carb": "🥗",
@@ -59,6 +60,8 @@ export default function OccasionRecipesPage() {
   const [page, setPage] = useState(1);
   const [soloPerMe, setSoloPerMe] = useState(false);
   const [userDietaryTags, setUserDietaryTags] = useState([]);
+  const [user, setUser] = useState(null);
+  const [isAccessible, setIsAccessible] = useState(true);
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
 
@@ -69,6 +72,20 @@ export default function OccasionRecipesPage() {
 
   const loadData = async () => {
     setLoading(true);
+    
+    // Fetch user e check acesso
+    const userData = await base44.auth.me().catch(() => null);
+    setUser(userData);
+    
+    const accessible = getUserAccessibleOccasions(userData);
+    const canAccess = accessible.includes("ALL") || accessible.includes(occasion);
+    setIsAccessible(canAccess);
+    
+    // Se não tem acesso, não carrega recipes
+    if (!canAccess) {
+      setLoading(false);
+      return;
+    }
 
     // Use cache to avoid re-fetching on back navigation
     if (!recipesCache[occasion]) {
@@ -103,16 +120,15 @@ export default function OccasionRecipesPage() {
     }
 
     // Load user favorites + dietary tags in parallel (non-blocking)
-    base44.auth.me().then(async (user) => {
-      if (!user) return;
-      const saved = await base44.entities.UserRecipe.filter({ is_saved: true, created_by: user.email }).catch(() => []);
+    if (userData) {
+      const saved = await base44.entities.UserRecipe.filter({ is_saved: true, created_by: userData.email }).catch(() => []);
       const map = {};
       saved.forEach((ur) => { map[ur.recipe_id] = ur; });
       setUserRecipes(map);
-      if (user.dietary_tags_profile?.length > 0) {
-        setUserDietaryTags(user.dietary_tags_profile);
+      if (userData.dietary_tags_profile?.length > 0) {
+        setUserDietaryTags(userData.dietary_tags_profile);
       }
-    }).catch(() => {});
+    }
 
     setLoading(false);
   };
@@ -232,6 +248,15 @@ export default function OccasionRecipesPage() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
+          </div>
+        ) : !isAccessible ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <Lock className="w-12 h-12 text-amber-500 mb-3" />
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Accesso Limitato</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Acquista un prodotto Gosto Puro per accedere a queste ricette.</p>
+            <Link to={createPageUrl("Home")} className="px-4 py-2 bg-[#2D6A4F] text-white rounded-xl font-semibold text-sm">
+              Scopri i Prodotti
+            </Link>
           </div>
         ) : (
           <>

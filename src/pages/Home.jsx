@@ -8,6 +8,7 @@ import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
+import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
 // Daily occasions with image-style food icons (SVG inline or Unicode with styling)
 const dailyOccasions = [
@@ -222,6 +223,10 @@ export default function Home() {
           {lifestyleTags.map((tag) => {
             const isProductAlready = gostoPuroProducts.some(p => p.occasioni && p.occasioni.includes(tag.label));
             if (isProductAlready) return null;
+
+            const accessibleOccasions = getUserAccessibleOccasions(user);
+            const isBlockedTag = !accessibleOccasions.includes("ALL") && !accessibleOccasions.includes(tag.label) && accessibleOccasions.length > 0;
+
             return (
               <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
                 onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
@@ -231,6 +236,11 @@ export default function Home() {
                 ) : (
                   <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
                     <span className="text-5xl">{tag.icon}</span>
+                  </div>
+                )}
+                {isBlockedTag && (
+                  <div className="absolute top-2 right-2 w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center shadow">
+                    <Lock className="w-4 h-4 text-amber-500" />
                   </div>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
@@ -243,7 +253,7 @@ export default function Home() {
             const isUnlocked = user?.role === "admin" || product.is_free || (user?.purchased_products || []).includes(product.slug);
             const hasOccasion = product.occasioni && product.occasioni.length > 0;
             const canNavigate = hasOccasion && product.image_url;
-            
+
             return canNavigate ? (
               <Link 
                 key={product.id} 
