@@ -59,25 +59,31 @@ export default function AdminRecipesManager() {
 
   useEffect(() => { load(); }, []);
 
+  const OCCASIONS_LIST = [
+    "Colazione", "Pranzo", "Cena", "Leggera", "Dolci",
+    "In famiglia", "Per due", "Con amici", "Feste",
+    "Estate", "Autunno", "Inverno", "Primavera",
+    "Veloci", "Instagram", "Natale", "Capodanno", "Dal mondo",
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "Senza zucchero", "Detox",
+    "365 Ricette Deliziose per Diabetici",
+    "Proteiche", "Low carb"
+  ];
+
   const load = async () => {
-    const [data, occs] = await Promise.all([
-      base44.entities.Recipe.list("-created_date", 1000),
-      base44.entities.RecipeOccasion.filter({ is_active: true }, "sort_order", 100),
-    ]);
+    const data = await base44.entities.Recipe.list("-created_date", 1000);
     setRecipes(data);
-    setOccasions(occs);
+    setOccasions([]);
     setLoading(false);
   };
 
-  const EXTRA_OCCASIONS_MANAGER = [
-    "Friggitrice ad Aria", "Diabetici", "Nutrizionista", "Dolci Fitness",
-    "Veloci 20min", "Cene Leggere", "Fitness Pratiche", "Pani e Dolci",
-    "Piano 35 Giorni", "Collezione Cucina", "Collezione Instagram",
-    "Pasti Congelati", "Pane Fatto in Casa",
+  const allOccasions = OCCASIONS_LIST;
+  const allLifestyle = [
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "Senza zucchero", "Detox",
+    "365 Ricette Deliziose per Diabetici",
+    "Proteiche", "Low carb"
   ];
-  const dbOccasions = [...new Set(occasions.filter(o => o.tipo === "giorno" || o.tipo === "speciale").map(o => o.label))];
-  const allOccasions = [...new Set([...dbOccasions, ...EXTRA_OCCASIONS_MANAGER])];
-  const allLifestyle = [...new Set(occasions.filter(o => o.tipo === "stile_vita").map(o => o.label))];
 
   const openNew = () => { setForm(emptyForm); setEditId(null); setPasteText(""); setShowPaste(true); setShowForm(true); };
   const openEdit = (r) => {
