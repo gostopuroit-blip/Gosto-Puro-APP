@@ -485,8 +485,54 @@ function RecipeCard({ recipe, occasion, isSaved, user, isBlocked, onBlockedClick
         className="w-full h-full object-cover"
       />
       {isSaved && (
-        <div className="absolute top-1.5 right-1.5 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
-          <Heart className="w-3 h-3 text-white fill-white" />
-        </div>
-      )}
-      </div>
+         <div className="absolute top-1.5 right-1.5 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
+           <Heart className="w-3 h-3 text-white fill-white" />
+         </div>
+       )}
+       </div>
+
+       <div className="flex-1 py-3 pr-3 min-w-0">
+         <div className="flex gap-1.5 flex-wrap mb-1.5">
+           <span className="text-[10px] font-bold bg-[#2D6A4F]/30 text-[#52b788] px-2 py-0.5 rounded-full">
+             {occasion}
+           </span>
+           {recipe.category && recipe.category !== occasion && (
+             <span className="text-[10px] font-bold bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded-full">
+               {recipe.category}
+             </span>
+           )}
+         </div>
+
+         <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug mb-1.5"
+           style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+           {recipe.title}
+         </p>
+
+         <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mb-1.5">
+           {recipe.prep_time && <span>⏱ {recipe.prep_time} min</span>}
+           {kcal && <span>🔥 {kcal} kcal</span>}
+           {recipe.difficulty && <span>{recipe.difficulty}</span>}
+           {recipe.media_rating && (
+             <span className="flex items-center gap-0.5">
+               <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+               {recipe.media_rating}
+             </span>
+           )}
+         </div>
+
+         {(recipe.dietary_tags || []).length > 0 && (
+           <div className="flex gap-1 flex-wrap">
+             {recipe.dietary_tags.slice(0, 3).map((tag) => (
+               <span
+                 key={tag}
+                 className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${DIETARY_TAG_COLORS[tag] || "bg-gray-800 text-gray-400"}`}
+               >
+                 {tag}
+               </span>
+             ))}
+           </div>
+         )}
+       </div>
+      </Link>
+      );
+      }
