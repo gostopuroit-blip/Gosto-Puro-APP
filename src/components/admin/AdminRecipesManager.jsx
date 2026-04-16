@@ -69,9 +69,11 @@ export default function AdminRecipesManager() {
     setLoading(false);
   };
 
-  const allOccasions = occasions.map(o => o.label);
+  const allOccasions = occasions
+    .filter(o => o.show_in_home === true)
+    .map(o => o.label);
   const allLifestyle = occasions
-    .filter(o => o.tipo === "stile_vita")
+    .filter(o => o.tipo === "stile_vita" && o.show_in_home === true)
     .map(o => o.label);
 
   const openNew = () => { setForm(emptyForm); setEditId(null); setPasteText(""); setShowPaste(true); setShowForm(true); };
