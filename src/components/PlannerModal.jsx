@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Clock, Minus, Plus, X } from "lucide-react";
 
@@ -28,6 +29,15 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
   const [maxTime, setMaxTime] = useState(20);
   const [maxTimeInput, setMaxTimeInput] = useState("20");
   const [servings, setServings] = useState(2);
+  const [dietaryTags, setDietaryTags] = useState([]);
+
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      if (u?.dietary_tags_profile?.length > 0) {
+        setDietaryTags(u.dietary_tags_profile);
+      }
+    }).catch(() => {});
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" style={{ paddingBottom: "72px" }} onClick={onClose}>
@@ -49,6 +59,17 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
+
+        {/* Dietary restrictions banner */}
+        {dietaryTags.length > 0 && (
+          <div className="mb-5 bg-[#F0F7F4] dark:bg-[#1A2B20] border border-[#2D6A4F]/20 rounded-xl px-4 py-3 flex items-start gap-2">
+            <span className="text-base flex-shrink-0">🎯</span>
+            <p className="text-xs text-[#2D6A4F] dark:text-[#40916C] font-medium leading-relaxed">
+              <span className="font-bold">Abbiamo rilevato le tue restrizioni:</span>{" "}
+              {dietaryTags.join(", ")}. Il piano verrà personalizzato per te 🎯
+            </p>
+          </div>
+        )}
 
         {/* Days */}
         <div className="mb-5">
