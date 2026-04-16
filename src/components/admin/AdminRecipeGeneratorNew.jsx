@@ -55,13 +55,7 @@ export default function AdminRecipeGeneratorNew() {
   const [editing, setEditing] = useState(false);
   const [isPremium, setIsPremium] = useState(true);
 
-  useEffect(() => {
-    if (recipe) {
-      setSelectedDietaryTags(recipe.dietary_tags || []);
-      setSelectedLifestyle(recipe.lifestyle || []);
-      setIsPremium(true);
-    }
-  }, [recipe]);
+
 
   // Quando seleciona ocasião, auto-seleciona dietary tags
   const handleOccasionChange = (occasion) => {
