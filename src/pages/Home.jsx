@@ -27,10 +27,6 @@ const dailyOccasions = [
 {
   label: "Leggera",
   img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/8ea268711_Insalata.png"
-},
-{
-  label: "Dolci",
-  img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/b1d974f23_Dolci.png"
 }];
 
 const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
@@ -120,7 +116,7 @@ export default function Home() {
       "275 Ricette Fitness Pratiche ed Economiche",
       "Senza zucchero", "Detox",
       "365 Ricette Deliziose per Diabetici",
-      "Proteiche", "Low carb"
+      "Low carb"
     ];
     const lifestyle = lifestyleSubset.map((label) => ({ 
       label, 
