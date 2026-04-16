@@ -202,10 +202,20 @@ KCAL TARGET: ${kcalStr}`;
         },
       });
 
+      // Normalizza i tag confrontando case-insensitive con le liste fisse
+      const normalizeTags = (aiTags, fixedList) => {
+        if (!aiTags || !Array.isArray(aiTags)) return [];
+        return fixedList.filter(fixed =>
+          aiTags.some(ai => ai.trim().toLowerCase() === fixed.toLowerCase())
+        );
+      };
+
+      const LIFESTYLE_LIST = ["Vegano", "Vegetariano", "Fit", "Alto contenuto proteico", "Low carb", "Detox"];
+
       setRecipeState({
         recipe: result,
-        dietaryTags: result.dietary_tags || [],
-        lifestyle: result.lifestyle || [],
+        dietaryTags: normalizeTags(result.dietary_tags, DIETARY_TAGS),
+        lifestyle: normalizeTags(result.lifestyle, LIFESTYLE_LIST),
         isPremium: true,
       });
       toast.success("Ricetta generata!");
