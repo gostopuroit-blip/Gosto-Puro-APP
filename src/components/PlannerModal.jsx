@@ -196,7 +196,7 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
         </div>
 
         <Button
-          onClick={() => onCreate({ days, focus, maxTime, servings })}
+          onClick={() => onCreate({ days, focus, maxTime, servings, dietaryTags })}
           disabled={isLoading}
           className="w-full py-6 rounded-2xl bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold text-sm shadow-lg shadow-[#2D6A4F]/20 disabled:opacity-50 disabled:cursor-not-allowed"
         >

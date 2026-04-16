@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import ChangeRecipeModal from "@/components/planner/ChangeRecipeModal";
+import PlannerModal from "@/components/PlannerModal";
 
 const MEAL_TIMES = {
   colazione: "07:00",
@@ -32,7 +32,8 @@ export default function Planner() {
   const [recipes, setRecipes] = useState({});
   const [weekStartDay, setWeekStartDay] = useState(0);
   const [user, setUser] = useState(null);
-  const [showDurationModal, setShowDurationModal] = useState(false);
+  const [showPlannerModal, setShowPlannerModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [changeRecipeSlot, setChangeRecipeSlot] = useState(null); // { mealType }
 
   useEffect(() => {
@@ -74,6 +75,106 @@ export default function Planner() {
     setLoading(false);
   };
 
+  const handleCreatePlan = async ({ days, focus, maxTime, servings, dietaryTags }) => {
+    setIsCreating(true);
+    try {
+      // Fetch published recipes
+      let allRecipes = [];
+      let skip = 0;
+      while (true) {
+        const batch = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 200, skip);
+        allRecipes = allRecipes.concat(batch);
+        if (batch.length < 200) break;
+        skip += 200;
+      }
+
+      // Filter by max time
+      const withinTime = allRecipes.filter(r => !r.prep_time || r.prep_time <= maxTime);
+      const fallback = allRecipes; // use all if filtered pool is too small
+
+      // Helper: pick a random recipe matching category, prefer dietary tags
+      const pickRecipe = (category, exclude = [], usedIds = new Set()) => {
+        const pool = (withinTime.length > 10 ? withinTime : fallback)
+          .filter(r => r.category === category && !usedIds.has(r.id));
+
+        if (pool.length === 0) return null;
+
+        // Prefer recipes matching dietary tags
+        if (dietaryTags && dietaryTags.length > 0) {
+          const preferred = pool.filter(r =>
+            (r.dietary_tags || []).some(tag => dietaryTags.includes(tag))
+          );
+          if (preferred.length > 0) {
+            return preferred[Math.floor(Math.random() * preferred.length)];
+          }
+        }
+
+        return pool[Math.floor(Math.random() * pool.length)];
+      };
+
+      const DAY_NAMES = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+      const usedPerCategory = { Colazione: new Set(), Pranzo: new Set(), Snack: new Set(), Cena: new Set() };
+
+      const plan_data = Array.from({ length: days }, (_, i) => {
+        const colazione = pickRecipe("Colazione", [], usedPerCategory["Colazione"]);
+        if (colazione) usedPerCategory["Colazione"].add(colazione.id);
+        const pranzo = pickRecipe("Pranzo", [], usedPerCategory["Pranzo"]);
+        if (pranzo) usedPerCategory["Pranzo"].add(pranzo.id);
+        const snack = pickRecipe("Snack", [], usedPerCategory["Snack"]);
+        if (snack) usedPerCategory["Snack"].add(snack.id);
+        const cena = pickRecipe("Cena", [], usedPerCategory["Cena"]);
+        if (cena) usedPerCategory["Cena"].add(cena.id);
+
+        return {
+          day: i + 1,
+          day_name: DAY_NAMES[i % 7],
+          colazione_id: colazione?.id || null,
+          colazione_title: colazione?.title || null,
+          colazione_time: "07:00",
+          pranzo_id: pranzo?.id || null,
+          pranzo_title: pranzo?.title || null,
+          pranzo_servings: servings,
+          pranzo_time: "12:30",
+          snack_id: snack?.id || null,
+          snack_title: snack?.title || null,
+          snack_servings: servings,
+          snack_time: "16:00",
+          cena_id: cena?.id || null,
+          cena_title: cena?.title || null,
+          cena_servings: servings,
+          cena_time: "20:00",
+          meals_done: [],
+        };
+      });
+
+      // Deactivate previous plans
+      const existingPlans = await base44.entities.MealPlan.filter({ is_active: true, created_by: user?.email });
+      await Promise.all(existingPlans.map(p => base44.entities.MealPlan.update(p.id, { is_active: false })));
+
+      // Create new plan
+      const focusLabels = { pratico: "Pratico", leggero: "Leggero", famiglia: "Famiglia" };
+      await base44.entities.MealPlan.create({
+        name: `Piano ${focusLabels[focus] || focus} – ${days} giorni`,
+        days,
+        focus,
+        max_time: maxTime,
+        servings,
+        plan_data,
+        is_active: true,
+        days_completed: [],
+      });
+
+      setShowPlannerModal(false);
+      toast.success("Piano creato con successo! ✓");
+      setLoading(true);
+      await loadData();
+    } catch (err) {
+      toast.error("Errore nella creazione del piano");
+      console.error(err);
+    }
+    setIsCreating(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -85,14 +186,20 @@ export default function Planner() {
   if (!plan) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-gray-400 text-center">Nenhum planner ativo. Crie um novo!</p>
+        <p className="text-gray-400 text-center">Nessun piano attivo. Crea il tuo primo piano!</p>
         <Button
-          onClick={() => setShowDurationModal(true)}
+          onClick={() => setShowPlannerModal(true)}
           className="bg-[#2D6A4F] hover:bg-[#235c43] text-white"
         >
           Genera nuovo planner
         </Button>
-        <DurationModal open={showDurationModal} onOpenChange={setShowDurationModal} navigate={navigate} />
+        {showPlannerModal && (
+          <PlannerModal
+            onCreate={handleCreatePlan}
+            onClose={() => setShowPlannerModal(false)}
+            isLoading={isCreating}
+          />
+        )}
       </div>
     );
   }
@@ -402,13 +509,20 @@ export default function Planner() {
       {/* Bottom button */}
       <div className="fixed bottom-24 left-0 right-0 px-5 max-w-lg mx-auto">
         <Button
-          onClick={() => setShowDurationModal(true)}
+          onClick={() => setShowPlannerModal(true)}
           className="w-full bg-[#2D6A4F] hover:bg-[#235c43] text-white rounded-xl py-6"
         >
           Genera nuovo planner
         </Button>
-        <DurationModal open={showDurationModal} onOpenChange={setShowDurationModal} navigate={navigate} />
       </div>
+
+      {showPlannerModal && (
+        <PlannerModal
+          onCreate={handleCreatePlan}
+          onClose={() => setShowPlannerModal(false)}
+          isLoading={isCreating}
+        />
+      )}
 
       <ChangeRecipeModal
         open={!!changeRecipeSlot}
@@ -417,33 +531,5 @@ export default function Planner() {
         onSelect={swapRecipe}
       />
     </div>
-  );
-}
-
-function DurationModal({ open, onOpenChange, navigate }) {
-  const durations = [7, 15, 30];
-  
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Quanti giorni desideri?</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-3">
-          {durations.map((days) => (
-            <Button
-              key={days}
-              onClick={() => {
-                onOpenChange(false);
-                navigate(createPageUrl(`WhatToCook?days=${days}`));
-              }}
-              className="bg-[#2D6A4F] hover:bg-[#235c43] text-white py-6 text-base font-semibold"
-            >
-              {days} giorni
-            </Button>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }
