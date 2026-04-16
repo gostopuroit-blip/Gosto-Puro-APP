@@ -61,52 +61,54 @@ export default function ShoppingList() {
     setUpdatingList(true);
     
     try {
-      // Collect all ingredients from all recipes in the plan
-      const allIngredients = {};
-      
+      // Collect all unique recipe IDs from ALL days
+      const recipeIdSet = new Set();
       for (const day of plan.plan_data || []) {
-        const mealIds = [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id];
-        
-        for (const mealId of mealIds) {
-          if (!mealId) continue;
-          
-          const recipes = await base44.entities.Recipe.filter({ id: mealId });
-          if (recipes.length === 0) continue;
-          
-          const recipe = recipes[0];
-          
-          for (const ing of recipe.ingredients || []) {
-            const key = ing.name.toLowerCase();
-            if (!allIngredients[key]) {
-              allIngredients[key] = {
-                name: ing.name,
-                quantity: ing.quantity || "",
-                category: ing.category || "Altro"
-              };
-            }
+        [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id]
+          .filter(Boolean)
+          .forEach(id => recipeIdSet.add(id));
+      }
+
+      // Fetch all unique recipes in parallel
+      const recipeResults = await Promise.all(
+        [...recipeIdSet].map(id => base44.entities.Recipe.filter({ id }))
+      );
+
+      // Aggregate ingredients — group by name (case-insensitive)
+      const allIngredients = {};
+      for (const results of recipeResults) {
+        if (results.length === 0) continue;
+        const recipe = results[0];
+        for (const ing of recipe.ingredients || []) {
+          const key = ing.name.toLowerCase().trim();
+          if (!allIngredients[key]) {
+            allIngredients[key] = {
+              name: ing.name,
+              quantities: [],
+              category: ing.category || "Altro"
+            };
           }
+          if (ing.quantity) allIngredients[key].quantities.push(ing.quantity);
         }
       }
-      
+
       // Delete old items
       const oldItems = await base44.entities.ShoppingItem.filter({ meal_plan_id: plan.id });
-      for (const item of oldItems) {
-        await base44.entities.ShoppingItem.delete(item.id);
-      }
-      
-      // Create new items
+      await Promise.all(oldItems.map(item => base44.entities.ShoppingItem.delete(item.id)));
+
+      // Create new items — merge quantities by joining unique values
       const newItems = Object.values(allIngredients).map(ing => ({
         name: ing.name,
-        quantity: ing.quantity,
+        quantity: [...new Set(ing.quantities)].join(" + "),
         category: ing.category,
         is_checked: false,
         meal_plan_id: plan.id
       }));
-      
+
       if (newItems.length > 0) {
         await base44.entities.ShoppingItem.bulkCreate(newItems);
       }
-      
+
       await loadData();
       toast.success("Lista aggiornata! ✓");
     } catch (error) {
