@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Clock, Minus, Plus, X } from "lucide-react";
 
 const dayOptions = [
-  { value: 3, label: "3 giorni" },
-  { value: 5, label: "5 giorni" },
   { value: 7, label: "7 giorni" },
+  { value: 15, label: "15 giorni" },
+  { value: 30, label: "30 giorni" },
 ];
 
 const focusOptions = [
   { value: "pratico", label: "Pratico", icon: "⚡", desc: "Ricette veloci e semplici" },
   { value: "leggero", label: "Leggero", icon: "🥗", desc: "Piatti freschi e light" },
-  { value: "famiglia", label: "Famiglia", icon: "👨‍👩‍👧", desc: "Per tutta la famiglia" },
 ];
 
 const timeOptions = [
@@ -24,7 +23,7 @@ const timeOptions = [
 ];
 
 export default function PlannerModal({ onCreate, onClose, isLoading }) {
-  const [days, setDays] = useState(5);
+  const [days, setDays] = useState(7);
   const [focus, setFocus] = useState("pratico");
   const [maxTime, setMaxTime] = useState(20);
   const [maxTimeInput, setMaxTimeInput] = useState("20");
