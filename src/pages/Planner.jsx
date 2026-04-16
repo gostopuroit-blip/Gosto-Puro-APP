@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -463,8 +463,9 @@ export default function Planner() {
                 )}
               </div>
 
-              <div
-                className={`bg-white dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A] flex items-center gap-3 ${
+              <Link
+                to={`/RecipeDetail?id=${mealId}`}
+                className={`bg-white dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A] flex items-center gap-3 flex-1 ${
                   isDone ? "opacity-60" : ""
                 }`}
               >
@@ -515,7 +516,7 @@ export default function Planner() {
                 >
                   {isDone && <Check className="w-4 h-4 text-white" />}
                 </button>
-              </div>
+              </Link>
             </div>
           );
         })}
@@ -524,7 +525,7 @@ export default function Planner() {
       {/* Shopping list button */}
       <div className="px-5 mb-4">
         <Button
-          onClick={() => navigate(`/ShoppingList?meal_plan_id=${plan.id}`)}
+          onClick={() => navigate(createPageUrl("ShoppingList") + `?meal_plan_id=${plan.id}`)}
           variant="outline"
           className="w-full py-6 rounded-2xl border-2 font-semibold text-sm"
         >
