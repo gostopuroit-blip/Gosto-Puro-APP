@@ -62,6 +62,7 @@ export default function OccasionRecipesPage() {
   const [userDietaryTags, setUserDietaryTags] = useState([]);
   const [user, setUser] = useState(null);
   const [isAccessible, setIsAccessible] = useState(true);
+  const [blockedRecipeId, setBlockedRecipeId] = useState(null);
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
 
@@ -137,7 +138,7 @@ export default function OccasionRecipesPage() {
 
   // All filtering is instant (in-memory) — no re-fetch on page/filter changes
   const filteredRecipes = useMemo(() => {
-    return allOccasionRecipes.filter((r) => {
+    const filtered = allOccasionRecipes.filter((r) => {
       if (showDaily && dailyIds.has(r.id)) return false;
       const matchesQuery = !query.trim() ||
         r.title?.toLowerCase().includes(query.toLowerCase()) ||
@@ -147,7 +148,17 @@ export default function OccasionRecipesPage() {
         userDietaryTags.every(tag => (r.dietary_tags || []).includes(tag));
       return matchesQuery && matchesCategory && matchesDietary;
     });
-  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags]);
+    
+    // Sort: desbloqueadas primeiro, depois bloqueadas
+    const accessible = getUserAccessibleOccasions(user);
+    const isPremium = accessible.includes("ALL");
+    
+    return filtered.sort((a, b) => {
+      const aBlocked = !isPremium && !accessible.some(occ => (a.occasions || []).includes(occ) || (a.lifestyle || []).includes(occ));
+      const bBlocked = !isPremium && !accessible.some(occ => (b.occasions || []).includes(occ) || (b.lifestyle || []).includes(occ));
+      return aBlocked - bBlocked;
+    });
+  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, user]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -258,6 +269,22 @@ export default function OccasionRecipesPage() {
               Scopri i Prodotti
             </Link>
           </div>
+        ) : blockedRecipeId ? (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 max-w-sm">
+              <Lock className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-2">Ricetta Bloccata</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Acquista un prodotto Gosto Puro per accedere a questa ricetta.</p>
+              <div className="flex gap-2">
+                <button onClick={() => setBlockedRecipeId(null)} className="flex-1 px-4 py-2 border border-gray-200 dark:border-[#2A2A2A] text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm">
+                  Chiudi
+                </button>
+                <Link to={createPageUrl("Home")} className="flex-1 px-4 py-2 bg-[#2D6A4F] text-white rounded-xl font-semibold text-sm text-center">
+                  Scopri i Prodotti
+                </Link>
+              </div>
+            </div>
+          </div>
         ) : (
           <>
             {/* Ricette del Giorno — only for Colazione, Pranzo, Cena */}
@@ -294,15 +321,24 @@ export default function OccasionRecipesPage() {
                   Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
                 </p>
                 <div className="space-y-3">
-                  {pagedRecipes.map((recipe) => (
-                    <RecipeCard
-                      key={recipe.id}
-                      recipe={recipe}
-                      occasion={occasion}
-                      isSaved={!!userRecipes[recipe.id]}
-                    />
-                  ))}
-                </div>
+                   {pagedRecipes.map((recipe) => {
+                     const accessible = getUserAccessibleOccasions(user);
+                     const isPremium = accessible.includes("ALL");
+                     const isBlocked = !isPremium && !accessible.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
+
+                     return (
+                       <RecipeCard
+                         key={recipe.id}
+                         recipe={recipe}
+                         occasion={occasion}
+                         isSaved={!!userRecipes[recipe.id]}
+                         user={user}
+                         isBlocked={isBlocked}
+                         onBlockedClick={() => setBlockedRecipeId(recipe.id)}
+                       />
+                     );
+                   })}
+                 </div>
 
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-4 mt-6">
@@ -371,25 +407,25 @@ function DailyRecipeCard({ recipe, isSaved }) {
   );
 }
 
-function RecipeCard({ recipe, occasion, isSaved }) {
+function RecipeCard({ recipe, occasion, isSaved, user, isBlocked, onBlockedClick }) {
   const kcal = recipe.calorie ?? recipe.calories;
-  return (
-    <Link
-      to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}
-      className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm"
-    >
-      <div className="w-24 flex-shrink-0 relative self-stretch">
-        <img
-          src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200"}
-          alt={recipe.title}
-          className="w-full h-full object-cover"
-        />
-        {isSaved && (
-          <div className="absolute top-1.5 right-1.5 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
-            <Heart className="w-3 h-3 text-white fill-white" />
+  
+  if (isBlocked) {
+    return (
+      <button
+        onClick={onBlockedClick}
+        className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm opacity-60 cursor-pointer w-full text-left"
+      >
+        <div className="w-24 flex-shrink-0 relative self-stretch">
+          <img
+            src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200"}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <Lock className="w-6 h-6 text-white" />
           </div>
-        )}
-      </div>
+        </div>
 
       <div className="flex-1 py-3 pr-3 min-w-0">
         <div className="flex gap-1.5 flex-wrap mb-1.5">
@@ -433,6 +469,24 @@ function RecipeCard({ recipe, occasion, isSaved }) {
           </div>
         )}
       </div>
-    </Link>
-  );
-}
+      </button>
+      );
+      }
+
+      return (
+      <Link
+      to={createPageUrl(`RecipeDetail?id=${recipe.id}`)}
+      className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm"
+      >
+      <div className="w-24 flex-shrink-0 relative self-stretch">
+      <img
+        src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200"}
+        alt={recipe.title}
+        className="w-full h-full object-cover"
+      />
+      {isSaved && (
+        <div className="absolute top-1.5 right-1.5 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center">
+          <Heart className="w-3 h-3 text-white fill-white" />
+        </div>
+      )}
+      </div>
