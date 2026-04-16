@@ -442,13 +442,22 @@ Rispondi SOLO in formato JSON:
                 <button
                   key={occ.id}
                   onClick={() => setSelectedOcc(occ)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5 ${
                     selectedOcc?.id === occ.id
                       ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
-                      : "bg-gray-50 text-gray-600 border-gray-100 hover:border-[#2D6A4F]/30"
+                      : occ.is_active
+                        ? "bg-gray-50 text-gray-600 border-green-400 hover:border-green-500"
+                        : "bg-gray-50 text-gray-600 border-gray-100 hover:border-[#2D6A4F]/30"
                   }`}
                 >
                   {occ.icon} {occ.label}
+                  {occ.is_active && (
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
+                      selectedOcc?.id === occ.id ? "bg-white/20 text-white" : "bg-green-100 text-green-700"
+                    }`}>
+                      ● Home
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
