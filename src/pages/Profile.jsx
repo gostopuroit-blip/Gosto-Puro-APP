@@ -508,10 +508,11 @@ export default function Profile() {
             <AlertDialogFooter>
               <AlertDialogCancel>Annulla</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => {
+                onClick={async () => {
                   localStorage.clear();
                   sessionStorage.clear();
-                  base44.auth.logout("/");
+                  await base44.auth.logout();
+                  window.location.href = "/";
                 }}
               >
                 Esci
