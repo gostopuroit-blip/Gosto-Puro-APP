@@ -172,12 +172,15 @@ export default function Profile() {
       setName(u.display_name || u.full_name || "");
       setAge(u.age != null ? String(u.age) : "");
       setPhotoUrl(u.photo_url || "");
-      // Restore theme preference saved on user
       if (u.dark_mode) {
         setDarkMode(true);
         document.documentElement.classList.add("dark");
         localStorage.setItem("theme", "dark");
       }
+    } else {
+      // Not authenticated — redirect to home
+      window.location.replace("/");
+      return;
     }
     setLoading(false);
   };
@@ -510,7 +513,9 @@ export default function Profile() {
               <AlertDialogCancel>Annulla</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
-                  base44.auth.logout();
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  base44.auth.logout("/");
                 }}
               >
                 Esci
