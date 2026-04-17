@@ -75,5 +75,37 @@ Deno.serve(async (req) => {
     timestamp: new Date().toISOString(),
   });
 
+  // Aplicar PendingPurchase (compras de produtos GostoPuro sem conta)
+  const pendingPurchases = await base44.asServiceRole.entities.PendingPurchase.filter({
+    email,
+    applied: false,
+  });
+
+  if (pendingPurchases && pendingPurchases.length > 0) {
+    const currentProducts = userData?.purchased_products || updateData.purchased_products || [];
+    const purchaseSlugs = pendingPurchases.map(p => p.slug).filter(Boolean);
+    const mergedProducts = [...new Set([...currentProducts, ...purchaseSlugs])];
+
+    await base44.asServiceRole.entities.User.update(entityId, {
+      purchased_products: mergedProducts,
+    });
+
+    for (const pp of pendingPurchases) {
+      await base44.asServiceRole.entities.PendingPurchase.update(pp.id, { applied: true });
+    }
+
+    await base44.asServiceRole.entities.WebhookLog.create({
+      source: "onUserRegistered",
+      event_type: "AUTO_APPLY_PENDING_PURCHASE",
+      status: "success",
+      user_email: email,
+      payload: JSON.stringify({ applied: pendingPurchases.length, slugs: purchaseSlugs }),
+      error_message: "",
+      timestamp: new Date().toISOString(),
+    });
+
+    console.log(`[onUserRegistered] PendingPurchase aplicadas: ${email} → ${purchaseSlugs.join(", ")}`);
+  }
+
   return Response.json({ success: true, email, applied: pending.length, slugs: slugsToAdd, premium: grantPremium });
 });
