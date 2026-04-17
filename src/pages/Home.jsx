@@ -355,42 +355,38 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Colezione Gosto Puro */}
-      <div className="mt-8">
-        <div className="px-5">
-          <SectionHeader title="Collezione Gosto Puro" />
-        </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {(() => {
-            const collectionOccasions = [
-              { label: "Instagram", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png" },
-              { label: "In famiglia", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/78bec7c3b_Infamiglia.png" },
-              { label: "Per due", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/90f0dad01_Perdue.png" },
-              { label: "Estate", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/029f21cd5_Estate.png" },
-              { label: "Autunno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png" },
-              { label: "Inverno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d0924a4a2_Inverno.png" },
-              { label: "Primavera", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/42185c523_Primavera.png" },
-            ];
+      {/* Colezione Gosto Puro — Only Premium */}
+      {isPremium && (
+        <div className="mt-8">
+          <div className="px-5">
+            <SectionHeader title="Collezione Gosto Puro" />
+          </div>
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+            {(() => {
+              const collectionOccasions = [
+                { label: "Instagram", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png" },
+                { label: "In famiglia", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/78bec7c3b_Infamiglia.png" },
+                { label: "Per due", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/90f0dad01_Perdue.png" },
+                { label: "Estate", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/029f21cd5_Estate.png" },
+                { label: "Autunno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png" },
+                { label: "Inverno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d0924a4a2_Inverno.png" },
+                { label: "Primavera", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/42185c523_Primavera.png" },
+              ];
 
-            return collectionOccasions.map(occ => (
-              <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.label)}`}
-                onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
-                className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                {occ.img ? (
-                  <img src={occ.img} alt={occ.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                ) : (
-                  <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
-                    <span className="text-5xl">🍽️</span>
+              return collectionOccasions.map(occ => (
+                <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.label)}`}
+                  onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
+                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                  <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+                    <img src={occ.img} alt={occ.label} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                  <p className="text-white font-semibold text-sm line-clamp-2">{occ.label}</p>
-                </div>
-              </Link>
-            ));
-          })()}
+                  <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
+                </Link>
+              ));
+            })()}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Top Prepared — carousel with large cards */}
       <div className="mt-8">
