@@ -65,9 +65,9 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.PendingPremium.create({
         email,
         product_id: hotmartProductId,
+        event_type: event,
+        raw_payload: payloadStr,
         status: "pending",
-        payload: payloadStr,
-        created_date: new Date().toISOString(),
       });
       await base44.asServiceRole.entities.WebhookLog.create({
         source: "Hotmart",
