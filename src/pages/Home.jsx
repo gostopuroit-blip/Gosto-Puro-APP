@@ -10,6 +10,21 @@ import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
 import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
+// Aliases: produto slug occasion → receitas podem ter o label antigo
+const OCCASION_ALIASES = {
+  "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
+  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"],
+};
+
+function expandOccasions(occasions) {
+  const expanded = [...occasions];
+  occasions.forEach(occ => {
+    const aliases = OCCASION_ALIASES[occ];
+    if (aliases) aliases.forEach(a => { if (!expanded.includes(a)) expanded.push(a); });
+  });
+  return expanded;
+}
+
 // Daily occasions with image-style food icons (SVG inline or Unicode with styling)
 const dailyOccasions = [
 {
@@ -375,7 +390,8 @@ export default function Home() {
           {topRecipes.map((recipe) => {
             const accessible = getUserAccessibleOccasions(user);
             const isPremiumUser = accessible.includes("ALL");
-            const isBlocked = !isPremiumUser && !accessible.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
+            const accessibleExpanded = isPremiumUser ? accessible : expandOccasions(accessible);
+            const isBlocked = !isPremiumUser && !accessibleExpanded.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
 
             if (!isPremium) {
               return (
