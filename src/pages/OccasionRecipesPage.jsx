@@ -79,7 +79,9 @@ export default function OccasionRecipesPage() {
     setUser(userData);
     
     const accessible = getUserAccessibleOccasions(userData);
-    const canAccess = accessible.includes("ALL") || accessible.includes(occasion);
+    // Check access using aliases too (e.g. "Diabete" alias for "365 Ricette Deliziose per Diabetici")
+    const occasionTerms = occasionAliases[occasion] || [occasion];
+    const canAccess = accessible.includes("ALL") || occasionTerms.some(term => accessible.includes(term));
     setIsAccessible(canAccess);
     
     // Use cache to avoid re-fetching on back navigation
@@ -130,6 +132,9 @@ export default function OccasionRecipesPage() {
 
   const dailyIds = useMemo(() => new Set(dailyRecipes.map((r) => r.id)), [dailyRecipes]);
 
+  // Helper: all terms (including aliases) for a given occasion label
+  const getOccasionTerms = (occ) => occasionAliases[occ] || [occ];
+
   // All filtering is instant (in-memory) — no re-fetch on page/filter changes
   const filteredRecipes = useMemo(() => {
     const filtered = allOccasionRecipes.filter((r) => {
@@ -147,9 +152,12 @@ export default function OccasionRecipesPage() {
     const accessible = getUserAccessibleOccasions(user);
     const isPremium = accessible.includes("ALL");
     
+    // Expand accessible occasions to include all aliases
+    const accessibleWithAliases = isPremium ? accessible : accessible.flatMap(getOccasionTerms);
+
     return filtered.sort((a, b) => {
-      const aBlocked = !isPremium && !accessible.some(occ => (a.occasions || []).includes(occ) || (a.lifestyle || []).includes(occ));
-      const bBlocked = !isPremium && !accessible.some(occ => (b.occasions || []).includes(occ) || (b.lifestyle || []).includes(occ));
+      const aBlocked = !isPremium && !accessibleWithAliases.some(occ => (a.occasions || []).includes(occ) || (a.lifestyle || []).includes(occ));
+      const bBlocked = !isPremium && !accessibleWithAliases.some(occ => (b.occasions || []).includes(occ) || (b.lifestyle || []).includes(occ));
       return aBlocked - bBlocked;
     });
   }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, user]);
@@ -326,7 +334,8 @@ export default function OccasionRecipesPage() {
                    {pagedRecipes.map((recipe) => {
                      const accessible = getUserAccessibleOccasions(user);
                      const isPremium = accessible.includes("ALL");
-                     const isBlocked = isAccessible && !isPremium && !accessible.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
+                     const accessibleWithAliases = isPremium ? accessible : accessible.flatMap(getOccasionTerms);
+                     const isBlocked = isAccessible && !isPremium && !accessibleWithAliases.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
 
                      return (
                        <RecipeCard
