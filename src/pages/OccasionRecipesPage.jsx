@@ -25,8 +25,18 @@ const FETCH_LIMIT = 1000;
 // Occasione aliases para buscar receitas com labels antigos/novos
 const occasionAliases = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
-  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"]
+  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"],
 };
+
+// Ocasiões que também devem ser buscadas em dietary_tags das receitas
+const DIETARY_TAG_OCCASIONS = new Set([
+  "Low carb",
+  "Senza zucchero",
+  "Detox",
+  "Proteiche",
+  "365 Ricette Deliziose per Diabetici",
+  "275 Ricette Fitness Pratiche ed Economiche",
+]);
 
 // Receitas que pertencem a estas occasions devem ser EXCLUÍDAS de outras coleções (evita overlap)
 const occasionExclusions = {
@@ -101,12 +111,18 @@ export default function OccasionRecipesPage() {
       const exclusions = occasionExclusions[occasion] || [];
       // For "275 Ricette Fitness": match "Fit" only in occasions (not lifestyle, to avoid false positives)
       const isFitnessOccasion = occasion === "275 Ricette Fitness Pratiche ed Economiche";
+      const isDietaryOccasion = DIETARY_TAG_OCCASIONS.has(occasion);
       const filtered = batch.filter((r) => {
         const rOccasions = r.occasions || [];
         const rLifestyle = r.lifestyle || [];
+        const rDietaryTags = r.dietary_tags || [];
         const matchesTerm = searchTerms.some(term => {
           if (isFitnessOccasion && term === "Fit") {
             return rOccasions.includes(term); // only occasions, not lifestyle
+          }
+          // For dietary-based occasions, also check dietary_tags
+          if (isDietaryOccasion) {
+            return rOccasions.includes(term) || rLifestyle.includes(term) || rDietaryTags.includes(term);
           }
           return rOccasions.includes(term) || rLifestyle.includes(term);
         });
@@ -169,9 +185,16 @@ export default function OccasionRecipesPage() {
     // Expand accessible occasions to include all aliases
     const accessibleWithAliases = isPremium ? accessible : accessible.flatMap(getOccasionTerms);
 
+    const recipeIsAccessible = (r) =>
+      accessibleWithAliases.some(occ =>
+        (r.occasions || []).includes(occ) ||
+        (r.lifestyle || []).includes(occ) ||
+        (DIETARY_TAG_OCCASIONS.has(occ) && (r.dietary_tags || []).includes(occ))
+      );
+
     return filtered.sort((a, b) => {
-      const aBlocked = !isPremium && !accessibleWithAliases.some(occ => (a.occasions || []).includes(occ) || (a.lifestyle || []).includes(occ));
-      const bBlocked = !isPremium && !accessibleWithAliases.some(occ => (b.occasions || []).includes(occ) || (b.lifestyle || []).includes(occ));
+      const aBlocked = !isPremium && !recipeIsAccessible(a);
+      const bBlocked = !isPremium && !recipeIsAccessible(b);
       return aBlocked - bBlocked;
     });
   }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, user]);
@@ -349,7 +372,11 @@ export default function OccasionRecipesPage() {
                      const accessible = getUserAccessibleOccasions(user);
                      const isPremium = accessible.includes("ALL");
                      const accessibleWithAliases = isPremium ? accessible : accessible.flatMap(getOccasionTerms);
-                     const isBlocked = isAccessible && !isPremium && !accessibleWithAliases.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
+                     const isBlocked = isAccessible && !isPremium && !accessibleWithAliases.some(occ =>
+                       (recipe.occasions || []).includes(occ) ||
+                       (recipe.lifestyle || []).includes(occ) ||
+                       (DIETARY_TAG_OCCASIONS.has(occ) && (recipe.dietary_tags || []).includes(occ))
+                     );
 
                      return (
                        <RecipeCard
