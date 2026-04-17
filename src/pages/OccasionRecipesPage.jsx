@@ -306,48 +306,34 @@ export default function OccasionRecipesPage() {
                   Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
                 </p>
 
-                {/* Blur overlay for locked occasions */}
-                {!isAccessible ? (
-                  <div className="relative">
-                    <div className="space-y-3" style={{ filter: "blur(5px)", pointerEvents: "none" }}>
-                      {filteredRecipes.slice(0, 6).map((recipe) => (
-                        <RecipeCard
-                          key={recipe.id}
-                          recipe={recipe}
-                          occasion={occasion}
-                          isSaved={false}
-                          user={user}
-                          isBlocked={false}
-                          onBlockedClick={() => {}}
-                        />
-                      ))}
-                    </div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center rounded-2xl" style={{ background: "rgba(255,255,255,0.85)" }}>
-                      <span className="text-4xl mb-3">🔒</span>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">Sblocca {occasion}</h3>
-                      <p className="text-sm text-gray-500 mb-4 px-6">Acquista questa collezione per accedere a tutte le ricette</p>
-                      <Link
-                        to={createPageUrl("Home")}
-                        className="px-5 py-2.5 rounded-xl font-bold text-sm text-white"
-                        style={{ background: "#2D6A4F" }}
-                      >
-                        Scopri come sbloccare →
-                      </Link>
-                    </div>
+                {/* Locked occasion: sticky overlay + all recipes blurred with pagination */}
+                {!isAccessible && (
+                  <div className="sticky top-0 z-20 mb-4 rounded-2xl p-5 text-center shadow-lg" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)" }}>
+                    <span className="text-4xl mb-2 block">🔒</span>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Sblocca {occasion}</h3>
+                    <p className="text-sm text-gray-500 mb-4">Acquista questa collezione per accedere a tutte le ricette</p>
+                    <Link
+                      to={createPageUrl("ProdottiGostoPuro")}
+                      className="inline-block px-5 py-2.5 rounded-xl font-bold text-sm text-white"
+                      style={{ background: "#2D6A4F" }}
+                    >
+                      Scopri come sbloccare →
+                    </Link>
                   </div>
-                ) : (
-                <div className="space-y-3">
+                )}
+
+                <div className="space-y-3" style={!isAccessible ? { filter: "blur(6px)", pointerEvents: "none" } : {}}>
                    {pagedRecipes.map((recipe) => {
                      const accessible = getUserAccessibleOccasions(user);
                      const isPremium = accessible.includes("ALL");
-                     const isBlocked = !isPremium && !accessible.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
+                     const isBlocked = isAccessible && !isPremium && !accessible.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
 
                      return (
                        <RecipeCard
                          key={recipe.id}
                          recipe={recipe}
                          occasion={occasion}
-                         isSaved={!!userRecipes[recipe.id]}
+                         isSaved={!isAccessible ? false : !!userRecipes[recipe.id]}
                          user={user}
                          isBlocked={isBlocked}
                          onBlockedClick={() => setBlockedRecipeId(recipe.id)}
@@ -355,9 +341,8 @@ export default function OccasionRecipesPage() {
                      );
                    })}
                  </div>
-                )}
 
-                {!isAccessible ? null : totalPages > 1 && (
+                {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-4 mt-6">
                     <button
                       onClick={() => handlePageChange(safePage - 1)}
