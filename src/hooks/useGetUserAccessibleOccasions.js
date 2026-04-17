@@ -7,6 +7,7 @@ const PRODUCT_OCCASION_MAP = {
   diabetici: "365 Ricette Deliziose per Diabetici",
   fitness_pratiche: "275 Ricette Fitness Pratiche ed Economiche",
   ricette_detox: "Detox",
+  low_carb: "Low carb",
 };
 
 // Ocasiões sempre acessíveis com qualquer compra
