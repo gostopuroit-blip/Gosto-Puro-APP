@@ -512,7 +512,7 @@ export default function Profile() {
                   localStorage.clear();
                   sessionStorage.clear();
                   await base44.auth.logout();
-                  window.location.href = "/";
+                  base44.auth.redirectToLogin();
                 }}
               >
                 Esci
