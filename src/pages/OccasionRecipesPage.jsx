@@ -82,12 +82,6 @@ export default function OccasionRecipesPage() {
     const canAccess = accessible.includes("ALL") || accessible.includes(occasion);
     setIsAccessible(canAccess);
     
-    // Se não tem acesso, não carrega recipes
-    if (!canAccess) {
-      setLoading(false);
-      return;
-    }
-
     // Use cache to avoid re-fetching on back navigation
     if (!recipesCache[occasion]) {
       const batch = await base44.entities.Recipe.filter(
@@ -260,15 +254,6 @@ export default function OccasionRecipesPage() {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
           </div>
-        ) : !isAccessible ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Lock className="w-12 h-12 text-amber-500 mb-3" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Accesso Limitato</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Acquista un prodotto Gosto Puro per accedere a queste ricette.</p>
-            <Link to={createPageUrl("Home")} className="px-4 py-2 bg-[#2D6A4F] text-white rounded-xl font-semibold text-sm">
-              Scopri i Prodotti
-            </Link>
-          </div>
         ) : blockedRecipeId ? (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 max-w-sm">
@@ -320,6 +305,37 @@ export default function OccasionRecipesPage() {
                 <p className="text-xs text-gray-400 mb-3">
                   Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
                 </p>
+
+                {/* Blur overlay for locked occasions */}
+                {!isAccessible ? (
+                  <div className="relative">
+                    <div className="space-y-3" style={{ filter: "blur(5px)", pointerEvents: "none" }}>
+                      {filteredRecipes.slice(0, 6).map((recipe) => (
+                        <RecipeCard
+                          key={recipe.id}
+                          recipe={recipe}
+                          occasion={occasion}
+                          isSaved={false}
+                          user={user}
+                          isBlocked={false}
+                          onBlockedClick={() => {}}
+                        />
+                      ))}
+                    </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center rounded-2xl" style={{ background: "rgba(255,255,255,0.85)" }}>
+                      <span className="text-4xl mb-3">🔒</span>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">Sblocca {occasion}</h3>
+                      <p className="text-sm text-gray-500 mb-4 px-6">Acquista questa collezione per accedere a tutte le ricette</p>
+                      <Link
+                        to={createPageUrl("Home")}
+                        className="px-5 py-2.5 rounded-xl font-bold text-sm text-white"
+                        style={{ background: "#2D6A4F" }}
+                      >
+                        Scopri come sbloccare →
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
                 <div className="space-y-3">
                    {pagedRecipes.map((recipe) => {
                      const accessible = getUserAccessibleOccasions(user);
@@ -339,8 +355,9 @@ export default function OccasionRecipesPage() {
                      );
                    })}
                  </div>
+                )}
 
-                {totalPages > 1 && (
+                {!isAccessible ? null : totalPages > 1 && (
                   <div className="flex items-center justify-center gap-4 mt-6">
                     <button
                       onClick={() => handlePageChange(safePage - 1)}
