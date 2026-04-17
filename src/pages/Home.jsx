@@ -395,7 +395,7 @@ export default function Home() {
 
             if (isBlocked) {
               return (
-                <button key={recipe.id} onClick={() => window.location.href = createPageUrl("Home")} className="flex-shrink-0 group relative rounded-2xl overflow-hidden cursor-pointer opacity-60" style={{ width: "200px", height: "250px" }}>
+                <button key={recipe.id} onClick={() => window.open("https://gostopuro.it/upgrade/", "_blank")} className="flex-shrink-0 group relative rounded-2xl overflow-hidden cursor-pointer opacity-60" style={{ width: "200px", height: "250px" }}>
                   <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} />
                   <div className="absolute inset-0 bg-black/30" />
                   <div className="absolute inset-0 flex items-center justify-center">
