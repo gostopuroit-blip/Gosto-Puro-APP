@@ -59,13 +59,13 @@ Deno.serve(async (req) => {
     const users = await base44.asServiceRole.entities.User.filter({ email });
 
     if (!users || users.length === 0) {
-      // Salvar em fila para aplicar quando o usuário se registrar
-      await base44.asServiceRole.entities.PendingPurchase.create({
+      // Salvar compra pendente para aplicar quando usuário criar conta
+      await base44.asServiceRole.entities.PendingPremium.create({
         email,
-        slug,
-        hotmart_product_id: hotmartProductId,
+        product_id: hotmartProductId,
+        status: "pending",
         payload: payloadStr,
-        applied: false,
+        created_date: new Date().toISOString(),
       });
       await base44.asServiceRole.entities.WebhookLog.create({
         source: "Hotmart",
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
         error_message: "Compra salva — usuário ainda não registrado",
         timestamp: new Date().toISOString(),
       });
-      console.log(`[hotmartWebhook] Usuário não encontrado, compra salva em fila: ${email} → ${slug}`);
+      console.log(`[hotmartWebhook] Usuário não encontrado, compra salva em PendingPremium: ${email}`);
       return Response.json({ status: "ok" });
     }
 
