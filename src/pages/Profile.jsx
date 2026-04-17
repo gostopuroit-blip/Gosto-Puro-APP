@@ -177,10 +177,6 @@ export default function Profile() {
         document.documentElement.classList.add("dark");
         localStorage.setItem("theme", "dark");
       }
-    } else {
-      // Not authenticated — redirect to home
-      window.location.replace("/");
-      return;
     }
     setLoading(false);
   };
