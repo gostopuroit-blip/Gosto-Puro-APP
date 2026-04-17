@@ -251,6 +251,39 @@ export default function Home() {
             });
 
             return [
+              ...unlockedProducts.map(product => (
+                <Link 
+                  key={product.id} 
+                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
+                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
+                  style={{ width: "200px", height: "250px" }}
+                >
+                  {product.image_url && (
+                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
+                  </div>
+                </Link>
+              )),
+              ...lockedProducts.map(product => (
+                <Link 
+                  key={product.id} 
+                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
+                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
+                  style={{ width: "200px", height: "250px", opacity: 0.6 }}
+                >
+                  {product.image_url && (
+                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+                  )}
+                  <div className="absolute top-2 right-2 w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center shadow">
+                    <Lock className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
+                  </div>
+                </Link>
+              )),
               ...unlockedTags.map(tag => (
                 <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
                   onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
@@ -264,21 +297,6 @@ export default function Home() {
                   )}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                     <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
-                  </div>
-                </Link>
-              )),
-              ...unlockedProducts.map(product => (
-                <Link 
-                  key={product.id} 
-                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
-                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
-                  style={{ width: "200px", height: "250px" }}
-                >
-                  {product.image_url && (
-                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
                   </div>
                 </Link>
               )),
@@ -298,24 +316,6 @@ export default function Home() {
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                     <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
-                  </div>
-                </Link>
-              )),
-              ...lockedProducts.map(product => (
-                <Link 
-                  key={product.id} 
-                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
-                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
-                  style={{ width: "200px", height: "250px", opacity: 0.6 }}
-                >
-                  {product.image_url && (
-                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                  )}
-                  <div className="absolute top-2 right-2 w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center shadow">
-                    <Lock className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
                   </div>
                 </Link>
               )),
