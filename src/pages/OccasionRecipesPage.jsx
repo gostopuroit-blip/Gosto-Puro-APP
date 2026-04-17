@@ -25,7 +25,12 @@ const FETCH_LIMIT = 1000;
 // Occasione aliases para buscar receitas com labels antigos/novos
 const occasionAliases = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
-  "275 Ricette Fitness Pratiche ed Economiche": ["275 Ricette Fitness Pratiche ed Economiche"]
+  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"]
+};
+
+// Receitas que pertencem a estas occasions devem ser EXCLUÍDAS de outras coleções (evita overlap)
+const occasionExclusions = {
+  "275 Ricette Fitness Pratiche ed Economiche": ["Friggitrice ad Aria"],
 };
 
 const DIETARY_TAG_COLORS = {
@@ -93,12 +98,17 @@ export default function OccasionRecipesPage() {
       );
       // Use occasion aliases if available, otherwise use the occasion directly
       const searchTerms = occasionAliases[occasion] || [occasion];
-      const filtered = batch.filter((r) =>
-        searchTerms.some(term => 
+      const exclusions = occasionExclusions[occasion] || [];
+      const filtered = batch.filter((r) => {
+        const matchesTerm = searchTerms.some(term =>
           (r.occasions || []).includes(term) ||
           (r.lifestyle || []).includes(term)
-        )
-      );
+        );
+        const isExcluded = exclusions.some(excl =>
+          (r.occasions || []).includes(excl)
+        );
+        return matchesTerm && !isExcluded;
+      });
       recipesCache[occasion] = filtered;
     }
 
