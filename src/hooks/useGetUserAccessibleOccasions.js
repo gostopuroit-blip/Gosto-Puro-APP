@@ -8,6 +8,7 @@ const PRODUCT_OCCASION_MAP = {
   fitness_pratiche: "275 Ricette Fitness Pratiche ed Economiche",
   ricette_detox: "Detox",
   low_carb: "Low carb",
+  senza_zucchero: "Senza zucchero",
 };
 
 // Ocasiões sempre acessíveis com qualquer compra
