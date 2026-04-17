@@ -99,14 +99,18 @@ export default function OccasionRecipesPage() {
       // Use occasion aliases if available, otherwise use the occasion directly
       const searchTerms = occasionAliases[occasion] || [occasion];
       const exclusions = occasionExclusions[occasion] || [];
+      // For "275 Ricette Fitness": match "Fit" only in occasions (not lifestyle, to avoid false positives)
+      const isFitnessOccasion = occasion === "275 Ricette Fitness Pratiche ed Economiche";
       const filtered = batch.filter((r) => {
-        const matchesTerm = searchTerms.some(term =>
-          (r.occasions || []).includes(term) ||
-          (r.lifestyle || []).includes(term)
-        );
-        const isExcluded = exclusions.some(excl =>
-          (r.occasions || []).includes(excl)
-        );
+        const rOccasions = r.occasions || [];
+        const rLifestyle = r.lifestyle || [];
+        const matchesTerm = searchTerms.some(term => {
+          if (isFitnessOccasion && term === "Fit") {
+            return rOccasions.includes(term); // only occasions, not lifestyle
+          }
+          return rOccasions.includes(term) || rLifestyle.includes(term);
+        });
+        const isExcluded = exclusions.some(excl => rOccasions.includes(excl));
         return matchesTerm && !isExcluded;
       });
       recipesCache[occasion] = filtered;
