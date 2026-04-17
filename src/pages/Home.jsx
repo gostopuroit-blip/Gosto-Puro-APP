@@ -69,7 +69,7 @@ export default function Home() {
        const [notifs, recipes, products] = await Promise.all([
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
     base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
-    base44.entities.GostoPuroProduct.filter({ is_active: true }, "-created_date"),
+    base44.entities.GostoPuroProduct.filter({ is_active: true }, "created_date"),
     ]);
 
     setTopRecipes(recipes);
