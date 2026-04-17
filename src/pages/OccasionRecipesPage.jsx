@@ -25,7 +25,7 @@ const FETCH_LIMIT = 1000;
 // Occasione aliases para buscar receitas com labels antigos/novos
 const occasionAliases = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
-  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"]
+  "275 Ricette Fitness Pratiche ed Economiche": ["275 Ricette Fitness Pratiche ed Economiche"]
 };
 
 const DIETARY_TAG_COLORS = {
