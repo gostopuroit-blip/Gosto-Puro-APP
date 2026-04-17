@@ -393,18 +393,6 @@ export default function Home() {
             const accessibleExpanded = isPremiumUser ? accessible : expandOccasions(accessible);
             const isBlocked = !isPremiumUser && !accessibleExpanded.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
 
-            if (!isPremium) {
-              return (
-                <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 group relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                  <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover blur-sm opacity-40" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                    <Lock className="w-7 h-7 text-white drop-shadow-lg" />
-                    <span className="bg-amber-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl">Passa a Premium</span>
-                  </div>
-                </a>
-              );
-            }
-
             if (isBlocked) {
               return (
                 <button key={recipe.id} onClick={() => window.location.href = createPageUrl("Home")} className="flex-shrink-0 group relative rounded-2xl overflow-hidden cursor-pointer opacity-60" style={{ width: "200px", height: "250px" }}>
