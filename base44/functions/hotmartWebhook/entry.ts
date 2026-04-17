@@ -15,8 +15,10 @@ Deno.serve(async (req) => {
     // Log a tentativa
     console.log(`[hotmartWebhook] Event: ${event}, Status: ${purchaseStatus}, Email: ${email}, ProductId: ${hotmartProductId}`);
 
-    // Verificar se é uma compra completa
-    if (event !== "PURCHASE_COMPLETE" || purchaseStatus !== "COMPLETED") {
+    // Aceitar PURCHASE_APPROVED ou PURCHASE_COMPLETE
+    const validEvents = ["PURCHASE_APPROVED", "PURCHASE_COMPLETE"];
+    const validStatuses = ["APPROVED", "COMPLETED"];
+    if (!validEvents.includes(event) || !validStatuses.includes(purchaseStatus)) {
       console.log(`[hotmartWebhook] Ignorando evento: event=${event}, status=${purchaseStatus}`);
       return Response.json({ status: "ok" });
     }
