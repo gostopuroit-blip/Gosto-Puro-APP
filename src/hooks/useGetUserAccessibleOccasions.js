@@ -6,6 +6,7 @@ const PRODUCT_OCCASION_MAP = {
   ricette_congelare: "Facili da Congelare",
   diabetici: "365 Ricette Deliziose per Diabetici",
   fitness_pratiche: "275 Ricette Fitness Pratiche ed Economiche",
+  ricette_detox: "Detox",
 };
 
 // Ocasiões sempre acessíveis com qualquer compra
