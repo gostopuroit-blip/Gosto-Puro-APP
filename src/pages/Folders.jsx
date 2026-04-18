@@ -35,14 +35,37 @@ export default function Folders() {
 
   useEffect(() => { loadData(); }, []);
 
+  const fetchAllPages = async (fetchFn) => {
+    const PAGE = 200;
+    let all = [];
+    let skip = 0;
+    while (true) {
+      const batch = await fetchFn(PAGE, skip);
+      all = all.concat(batch);
+      if (batch.length < PAGE) break;
+      skip += PAGE;
+    }
+    return all;
+  };
+
   const loadData = async () => {
     const user = await base44.auth.me().catch(() => null);
     setCurrentUser(user);
+
     const [ur, r, f] = await Promise.all([
-      user ? base44.entities.UserRecipe.filter({ created_by: user.email }, "-created_date", 200) : Promise.resolve([]),
-      base44.entities.Recipe.list("-numero_preparate", 200),
-      user ? base44.entities.Folder.filter({ is_system: false, created_by: user.email }) : Promise.resolve([]),
+      user
+        ? fetchAllPages((limit, skip) =>
+            base44.entities.UserRecipe.filter({ created_by: user.email }, "-created_date", limit, skip)
+          )
+        : Promise.resolve([]),
+      fetchAllPages((limit, skip) =>
+        base44.entities.Recipe.list("-numero_preparate", limit, skip)
+      ),
+      user
+        ? base44.entities.Folder.filter({ is_system: false, created_by: user.email })
+        : Promise.resolve([]),
     ]);
+
     setUserRecipes(ur);
     setRecipes(r);
     setCustomFolders(f.filter(folder => !folder.is_system));
