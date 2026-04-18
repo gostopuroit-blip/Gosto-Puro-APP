@@ -12,6 +12,10 @@ const dayOptions = [
 const focusOptions = [
   { value: "pratico", label: "Pratico", icon: "⚡", desc: "Ricette veloci e semplici" },
   { value: "leggero", label: "Leggero", icon: "🥗", desc: "Piatti freschi e light" },
+  { value: "equilibrato", label: "Equilibrato", icon: "⚖️", desc: "Bilanciato e completo" },
+  { value: "proteico", label: "Proteico", icon: "💪", desc: "Ricco di proteine" },
+  { value: "dimagrante", label: "Dimagrante", icon: "🔥", desc: "Basso contenuto calorico" },
+  { value: "famiglia", label: "Famiglia", icon: "👨‍👩‍👧", desc: "Per tutta la famiglia" },
 ];
 
 const timeOptions = [
@@ -57,6 +61,32 @@ export default function PlannerModal({ onCreate, onClose, isLoading }) {
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1A2B20]">
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
+        </div>
+
+        {/* Focus / Tipo di menu */}
+        <div className="mb-5">
+          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2.5 block">
+            Tipo di menu
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {focusOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setFocus(opt.value)}
+                className={`py-3 px-3 rounded-xl text-left transition-all flex items-center gap-2 ${
+                  focus === opt.value
+                    ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
+                    : "bg-white dark:bg-[#1A2B20] text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-[#3D5246]"
+                }`}
+              >
+                <span className="text-base">{opt.icon}</span>
+                <div>
+                  <p className="text-xs font-bold leading-tight">{opt.label}</p>
+                  <p className={`text-[10px] leading-tight ${focus === opt.value ? "text-white/70" : "text-gray-400 dark:text-gray-500"}`}>{opt.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Dietary restrictions banner */}

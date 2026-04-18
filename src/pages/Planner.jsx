@@ -155,7 +155,12 @@ export default function Planner() {
         return pool[Math.floor(Math.random() * pool.length)];
       };
 
-      const DAY_NAMES = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+      // BUG 1: start from tomorrow, not always Monday
+      const DAY_NAMES = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const startDayOfWeek = tomorrow.getDay(); // 0=Dom, 1=Lun, ...
+
       const usedPerCategory = { Colazione: new Set(), Pranzo: new Set(), Snack: new Set(), Cena: new Set() };
 
       const plan_data = Array.from({ length: days }, (_, i) => {
@@ -170,9 +175,10 @@ export default function Planner() {
 
         return {
           day: i + 1,
-          day_name: DAY_NAMES[i % 7],
+          day_name: DAY_NAMES[(startDayOfWeek + i) % 7],
           colazione_id: colazione?.id || null,
           colazione_title: colazione?.title || null,
+          colazione_servings: servings,
           colazione_time: "07:00",
           pranzo_id: pranzo?.id || null,
           pranzo_title: pranzo?.title || null,
@@ -463,52 +469,52 @@ export default function Planner() {
                 )}
               </div>
 
-              <Link
-                to={`/RecipeDetail?id=${mealId}`}
-                className={`bg-white dark:bg-[#1A1A1A] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A2A] flex items-center gap-3 flex-1 ${
-                  isDone ? "opacity-60" : ""
-                }`}
-              >
-                {recipe?.image_url ? (
-                  <img
-                    src={recipe.image_url}
-                    alt={mealTitle}
-                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-xl">
-                    {{ colazione: "🍳", pranzo: "🍝", snack: "🍎", cena: "🌙" }[mealType]}
-                  </div>
-                )}
+              <div className={`bg-white dark:bg-[#1A1A1A] rounded-xl border border-gray-100 dark:border-[#2A2A2A] flex items-center gap-3 ${isDone ? "opacity-60" : ""}`}>
+                <Link
+                  to={`/RecipeDetail?id=${mealId}`}
+                  className="flex items-center gap-3 flex-1 min-w-0 p-3"
+                >
+                  {recipe?.image_url ? (
+                    <img
+                      src={recipe.image_url}
+                      alt={mealTitle}
+                      className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-xl">
+                      {{ colazione: "🍳", pranzo: "🍝", snack: "🍎", cena: "🌙" }[mealType]}
+                    </div>
+                  )}
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className={`text-sm font-semibold text-gray-900 dark:text-white truncate ${isDone ? "line-through text-gray-400" : ""}`}>
-                      {mealTitle}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className={`text-sm font-semibold text-gray-900 dark:text-white truncate ${isDone ? "line-through text-gray-400" : ""}`}>
+                        {mealTitle}
+                      </p>
+                      {recipe && (user?.dietary_tags_profile || []).length > 0 &&
+                        (recipe.dietary_tags || []).some(tag => (user.dietary_tags_profile || []).includes(tag)) && (
+                        <span className="flex-shrink-0 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full">
+                          ✓ Per te
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {recipe?.prep_time ? `⏱ ${recipe.prep_time} min` : ""}
+                      {recipe?.proteine ? ` · ${Math.round(recipe.proteine)}g proteína` : ""}
                     </p>
-                    {recipe && (user?.dietary_tags_profile || []).length > 0 &&
-                      (recipe.dietary_tags || []).some(tag => (user.dietary_tags_profile || []).includes(tag)) && (
-                      <span className="flex-shrink-0 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded-full">
-                        ✓ Per te
-                      </span>
-                    )}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {recipe?.prep_time ? `⏱ ${recipe.prep_time} min` : ""}
-                    {recipe?.proteine ? ` · ${Math.round(recipe.proteine)}g proteína` : ""}
-                  </p>
-                </div>
+                </Link>
 
                 <button
-                  onClick={() => setChangeRecipeSlot({ mealType })}
-                  className="flex-shrink-0 w-8 h-8 rounded-full border border-gray-200 dark:border-[#444444] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-all"
+                  onClick={(e) => { e.preventDefault(); setChangeRecipeSlot({ mealType }); }}
+                  className="flex-shrink-0 w-8 h-8 rounded-full border border-gray-200 dark:border-[#444444] flex items-center justify-center hover:bg-gray-100 dark:hover:bg-[#2A2A2A] transition-all mr-1"
                 >
                   <RefreshCw className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
                 </button>
 
                 <button
-                  onClick={() => toggleMealDone(mealType)}
-                  className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                  onClick={(e) => { e.preventDefault(); toggleMealDone(mealType); }}
+                  className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all mr-2 ${
                     isDone
                       ? "bg-green-500 border-green-500"
                       : "border-gray-300 dark:border-[#444444] hover:border-[#2D6A4F] dark:hover:border-[#40916C]"
@@ -516,7 +522,7 @@ export default function Planner() {
                 >
                   {isDone && <Check className="w-4 h-4 text-white" />}
                 </button>
-              </Link>
+              </div>
             </div>
           );
         })}
