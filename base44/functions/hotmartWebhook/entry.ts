@@ -61,6 +61,16 @@ Deno.serve(async (req) => {
     const users = await base44.asServiceRole.entities.User.filter({ email });
 
     if (!users || users.length === 0) {
+      // Verificar se já existe PendingPremium com mesmo email + product_id
+      const existing = await base44.asServiceRole.entities.PendingPremium.filter({
+        email,
+        product_id: hotmartProductId,
+      });
+      if (existing && existing.length > 0) {
+        console.log(`[hotmartWebhook] PendingPremium já existe para ${email} / ${hotmartProductId}, ignorando duplicata`);
+        return Response.json({ status: "ok" });
+      }
+
       // Salvar compra pendente para aplicar quando usuário criar conta
       await base44.asServiceRole.entities.PendingPremium.create({
         email,
