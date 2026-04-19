@@ -66,15 +66,22 @@ export default function Planner() {
     const day = plan.plan_data[selectedDay];
     if (!day) return;
     const m = { proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 };
-    [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id].forEach(id => {
+    [
+      { id: day.colazione_id, s: day.colazione_servings },
+      { id: day.pranzo_id,    s: day.pranzo_servings },
+      { id: day.snack_id,     s: day.snack_servings },
+      { id: day.cena_id,      s: day.cena_servings },
+    ].forEach(({ id, s }) => {
       if (!id) return;
       const r = recipes[id];
       if (!r) return;
-      m.proteina += Number(r.proteine) || 0;
-      m.carboidrati += Number(r.carboidrati) || 0;
-      m.grassi += Number(r.grassi) || 0;
-      m.fibre += Number(r.fibre) || 0;
-      m.calorie += Number(r.calorie) || Number(r.calories) || 0;
+      const baseServings = r.servings || 1;
+      const ratio = s ? s / baseServings : 1;
+      m.proteina += (Number(r.proteine) || 0) * ratio;
+      m.carboidrati += (Number(r.carboidrati) || 0) * ratio;
+      m.grassi += (Number(r.grassi) || 0) * ratio;
+      m.fibre += (Number(r.fibre) || 0) * ratio;
+      m.calorie += ((Number(r.calorie) || Number(r.calories) || 0)) * ratio;
     });
     setMacros(m);
   }, [selectedDay, recipes, plan]);
@@ -464,7 +471,12 @@ export default function Planner() {
                 </span>
                 {recipe && (
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    {Math.round(recipe.calorie || recipe.calories || 0)} kcal
+                    {(() => {
+                      const baseKcal = recipe.calorie || recipe.calories || 0;
+                      const baseServings = recipe.servings || 1;
+                      const ratio = mealServings ? mealServings / baseServings : 1;
+                      return Math.round(baseKcal * ratio);
+                    })()} kcal
                   </span>
                 )}
               </div>
@@ -500,7 +512,7 @@ export default function Planner() {
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {recipe?.prep_time ? `⏱ ${recipe.prep_time} min` : ""}
-                      {recipe?.proteine ? ` · ${Math.round(recipe.proteine)}g proteína` : ""}
+                      {mealServings ? ` · ${mealServings} ${mealServings === 1 ? "porzione" : "porzioni"}` : ""}
                     </p>
                   </div>
                 </Link>
