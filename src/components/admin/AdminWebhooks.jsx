@@ -21,11 +21,10 @@ export default function AdminWebhooks() {
     setProcessing(true);
     try {
       const res = await base44.functions.invoke("processPendingPremium", {});
-      const { processed, total } = res.data;
-      const waiting = total - processed;
-      toast.success(`✅ ${processed} utenti aggiornati, ${waiting} ancora in attesa`);
+      const { processed, still_pending, total } = res.data;
+      toast.success(`✅ ${processed} utenti aggiornati, ${still_pending} ancora in attesa (totale: ${total})`);
     } catch (e) {
-      toast.error("Errore durante l'elaborazione");
+      toast.error("Errore durante l'elaborazione: " + (e.message || ""));
     } finally {
       setProcessing(false);
     }
