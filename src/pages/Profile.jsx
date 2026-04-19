@@ -232,6 +232,22 @@ export default function Profile() {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5 text-center">
+        <span className="text-5xl">🔒</span>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Accesso richiesto</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Effettua il login per accedere al tuo profilo.</p>
+        <Button
+          onClick={() => base44.auth.redirectToLogin(window.location.href)}
+          className="bg-[#2D6A4F] hover:bg-[#235c43] text-white rounded-2xl px-8 py-3"
+        >
+          Accedi
+        </Button>
+      </div>
+    );
+  }
+
 
 
   return (
