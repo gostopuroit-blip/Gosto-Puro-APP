@@ -147,43 +147,152 @@ export default function RecipeDetail() {
   const isPremium = isBasicOrAbove;
   const isContentLocked = !isBasicOrAbove && freeRecipeIds !== null && !freeRecipeIds.has(recipeId);
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 18;
+    const contentW = pageW - margin * 2;
+    let y = 20;
+
+    const addPageIfNeeded = (needed = 10) => {
+      if (y + needed > 275) {
+        doc.addPage();
+        y = 20;
+      }
+    };
+
+    const writeWrapped = (text, x, startY, maxW, lineH, color = [30, 30, 30]) => {
+      doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(text, maxW);
+      lines.forEach(line => {
+        addPageIfNeeded(lineH);
+        doc.text(line, x, y);
+        y += lineH;
+      });
+    };
+
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(45, 106, 79);
+    const titleLines = doc.splitTextToSize(recipe.title, contentW);
+    titleLines.forEach(line => { doc.text(line, margin, y); y += 9; });
+    y += 2;
+
+    // Meta
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    const meta = [recipe.category, recipe.difficulty || "Facile", `${recipe.prep_time} min`, `${servings} ${servings === 1 ? "porzione" : "porzioni"}`].filter(Boolean).join("  •  ");
+    doc.text(meta, margin, y);
+    y += 8;
+
+    // Description
+    if (recipe.description) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      writeWrapped(recipe.description, margin, y, contentW, 5, [80, 80, 80]);
+      y += 4;
+    }
+
+    // Macros
+    const kcal = recipe.calorie ?? recipe.calories;
+    if (kcal || recipe.proteine || recipe.carboidrati || recipe.grassi) {
+      addPageIfNeeded(14);
+      doc.setFillColor(240, 248, 244);
+      doc.roundedRect(margin, y, contentW, 12, 3, 3, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(45, 106, 79);
+      const macroText = [
+        kcal ? `${kcal} kcal` : null,
+        recipe.proteine ? `${recipe.proteine}g Prot` : null,
+        recipe.carboidrati ? `${recipe.carboidrati}g Carbs` : null,
+        recipe.grassi ? `${recipe.grassi}g Grassi` : null,
+      ].filter(Boolean).join("    ");
+      doc.text(macroText, margin + 4, y + 7.5);
+      y += 18;
+    }
+
+    // Ingredienti
+    addPageIfNeeded(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(45, 106, 79);
+    doc.text("Ingredienti", margin, y);
+    y += 2;
+    doc.setDrawColor(45, 106, 79);
+    doc.setLineWidth(0.4);
+    doc.line(margin, y, margin + contentW, y);
+    y += 6;
+
     const ratio = servings / (recipe.servings || 4);
-    const ingredientsList = (recipe.ingredients || []).map(ing => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    (recipe.ingredients || []).forEach(ing => {
+      addPageIfNeeded(7);
       const qty = scaleQty(ing.quantity, ratio);
-      return `<li>${ing.name}${qty ? ` — <strong>${qty}</strong>` : ""}</li>`;
-    }).join("");
-    const stepsList = (recipe.instructions || []).map((step, i) =>
-      `<li><strong>${i + 1}.</strong> ${step}</li>`
-    ).join("");
-    const html = `
-      <html><head><title>${recipe.title}</title>
-      <style>
-        body { font-family: Georgia, serif; max-width: 680px; margin: 40px auto; padding: 0 20px; color: #111; }
-        h1 { font-size: 28px; margin-bottom: 4px; }
-        .meta { color: #666; font-size: 14px; margin-bottom: 20px; }
-        h2 { font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin-top: 28px; }
-        ul, ol { padding-left: 20px; line-height: 2; }
-        li { margin-bottom: 4px; font-size: 15px; }
-        .calories { background: #fff3e0; padding: 8px 14px; border-radius: 8px; font-size: 14px; margin-top: 12px; display: inline-block; }
-        @media print { body { margin: 20px; } }
-      </style></head>
-      <body>
-        <h1>${recipe.title}</h1>
-        <p class="meta">${recipe.category} • ${recipe.difficulty || "Facile"} • ${recipe.prep_time} min • ${servings} ${servings === 1 ? "porzione" : "porzioni"}</p>
-        <p>${recipe.description || ""}</p>
-        ${recipe.calories ? `<div class="calories">🔥 ${recipe.calories} kcal/porzione — Totale: ${Math.round(recipe.calories * servings)} kcal</div>` : ""}
-        <h2>Ingredienti</h2>
-        <ul>${ingredientsList}</ul>
-        <h2>Preparazione</h2>
-        <ol style="list-style:none;padding-left:0">${stepsList}</ol>
-      </body></html>
-    `;
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 500);
+      doc.setTextColor(30, 30, 30);
+      doc.text(`• ${ing.name}`, margin + 2, y);
+      if (qty) {
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(45, 106, 79);
+        doc.text(qty, pageW - margin, y, { align: "right" });
+        doc.setFont("helvetica", "normal");
+      }
+      y += 6.5;
+    });
+    y += 4;
+
+    // Preparazione
+    addPageIfNeeded(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(45, 106, 79);
+    doc.text("Preparazione", margin, y);
+    y += 2;
+    doc.line(margin, y, margin + contentW, y);
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    (recipe.instructions || []).forEach((step, i) => {
+      addPageIfNeeded(8);
+      // Step number circle
+      doc.setFillColor(45, 106, 79);
+      doc.circle(margin + 3, y - 1.5, 3, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(255, 255, 255);
+      doc.text(String(i + 1), margin + 3, y - 0.3, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      const lines = doc.splitTextToSize(step, contentW - 8);
+      lines.forEach((line, li) => {
+        addPageIfNeeded(6);
+        doc.setTextColor(30, 30, 30);
+        doc.text(line, margin + 8, li === 0 ? y : y);
+        if (li === 0 && lines.length > 1) y += 5.5;
+        else if (li > 0) y += 5.5;
+      });
+      y += 7;
+    });
+
+    // Footer
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text("Gosto Puro — gusto-puro.com", margin, 290);
+      doc.text(`${p} / ${totalPages}`, pageW - margin, 290, { align: "right" });
+    }
+
+    const filename = recipe.title.replace(/[^a-zA-Z0-9À-ÿ\s]/g, "").trim().replace(/\s+/g, "_") + ".pdf";
+    doc.save(filename);
   };
 
   const handleSaveClick = () => {
