@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, ChevronDown, ChevronUp, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, CheckCircle, XCircle, Zap } from "lucide-react";
+import { toast } from "sonner";
 
 const sourceOptions = ["Tutti", "Hotmart", "Brevo", "Stripe", "Altro"];
 const rangeOptions = ["24h", "7gg", "30gg"];
@@ -12,8 +13,23 @@ export default function AdminWebhooks() {
   const [range, setRange] = useState("7gg");
   const [statusFilter, setStatusFilter] = useState("Tutti");
   const [expanded, setExpanded] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => { load(); }, []);
+
+  const handleProcessPending = async () => {
+    setProcessing(true);
+    try {
+      const res = await base44.functions.invoke("processPendingPremium", {});
+      const { processed, total } = res.data;
+      const waiting = total - processed;
+      toast.success(`✅ ${processed} utenti aggiornati, ${waiting} ancora in attesa`);
+    } catch (e) {
+      toast.error("Errore durante l'elaborazione");
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   const load = async () => {
     const data = await base44.entities.WebhookLog.list("-created_date", 200);
@@ -35,6 +51,16 @@ export default function AdminWebhooks() {
 
   return (
     <div className="space-y-4">
+      {/* Process Pending Button */}
+      <button
+        onClick={handleProcessPending}
+        disabled={processing}
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-2xl shadow-md transition-all"
+      >
+        {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+        ⚡ Processa Tutti i Pendenti
+      </button>
+
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
         {rangeOptions.map((r) => (
