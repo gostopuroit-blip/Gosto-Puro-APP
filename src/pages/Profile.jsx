@@ -509,10 +509,12 @@ export default function Profile() {
               <AlertDialogCancel>Annulla</AlertDialogCancel>
               <AlertDialogAction
                 onClick={async () => {
+                  try { await base44.auth.logout(); } catch {}
                   localStorage.clear();
                   sessionStorage.clear();
-                  await base44.auth.logout();
-                  base44.auth.redirectToLogin();
+                  // Force hard reload to clear all in-memory state and cookies
+                  window.location.href = "/";
+                  setTimeout(() => window.location.reload(true), 100);
                 }}
               >
                 Esci
