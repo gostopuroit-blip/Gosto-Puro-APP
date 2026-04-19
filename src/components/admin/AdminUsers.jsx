@@ -206,7 +206,10 @@ function ProductDropdown({ onSelect, current }) {
     "ricette_sane_35",
     "ricette_veloci_pratiche",
     "cene_friggitrice",
-    "ricette_congelare"
+    "ricette_congelare",
+    "senza_zucchero",
+    "ricette_detox",
+    "low_carb"
   ];
   
   const available = products.filter(p => !current.includes(p));
