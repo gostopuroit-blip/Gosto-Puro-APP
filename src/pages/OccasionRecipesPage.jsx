@@ -52,6 +52,15 @@ const occasionExclusions = {
   "275 Ricette Fitness Pratiche ed Economiche": ["Friggitrice ad Aria"],
 };
 
+// Ocasiões que são produtos GP: buscar SOMENTE em occasions (não em dietary_tags nem lifestyle)
+// Evita que receitas salgadas com dietary_tag "Senza zucchero" apareçam na coleção dolci_fitness
+const GP_PRODUCT_OCCASIONS = new Set([
+  "Senza zucchero",
+  "Low carb",
+  "Detox",
+  "Fit",
+]);
+
 const DIETARY_TAG_COLORS = {
   "Senza glutine": "bg-green-100 text-green-800",
   "Diabetico": "bg-orange-100 text-orange-800",
@@ -121,6 +130,7 @@ export default function OccasionRecipesPage() {
       // For "275 Ricette Fitness": match "Fit" only in occasions (not lifestyle, to avoid false positives)
       const isFitnessOccasion = occasion === "275 Ricette Fitness Pratiche ed Economiche";
       const isDietaryOccasion = DIETARY_TAG_OCCASIONS.has(occasion);
+      const isGpProductOccasion = GP_PRODUCT_OCCASIONS.has(occasion);
       const filtered = batch.filter((r) => {
         const rOccasions = r.occasions || [];
         const rLifestyle = r.lifestyle || [];
@@ -128,6 +138,11 @@ export default function OccasionRecipesPage() {
         const matchesTerm = searchTerms.some(term => {
           if (isFitnessOccasion && term === "Fit") {
             return rOccasions.includes(term); // only occasions, not lifestyle
+          }
+          // GP product occasions: match ONLY in occasions field (never in dietary_tags/lifestyle)
+          // This prevents savory recipes with dietary_tag "Senza zucchero" from appearing
+          if (isGpProductOccasion) {
+            return rOccasions.includes(term);
           }
           // For dietary-based occasions, also check dietary_tags
           if (isDietaryOccasion) {
