@@ -3,10 +3,9 @@ import { createClientFromRequest } from "npm:@base44/sdk";
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  const allPending = await base44.asServiceRole.entities.PendingPremium.filter({
+  const pending = await base44.asServiceRole.entities.PendingPremium.filter({
     status: "pending"
   });
-  const pending = allPending.slice(0, 20);
 
   console.log("Found pending:", pending.length);
 
