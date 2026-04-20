@@ -1,69 +1,79 @@
 import { createClientFromRequest } from "npm:@base44/sdk";
 
+// IDs de produtos que concedem plan=premium (vitalício ou anual/mensal)
+const PREMIUM_PLAN_PRODUCT_IDS = ["7079227", "6991197"];
+
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  const pending = await base44.asServiceRole.entities.PendingPremium.filter({
-    status: "pending"
-  });
+  // Busca tudo de uma vez para evitar timeout
+  const [pending, allUsers, allGpProducts] = await Promise.all([
+    base44.asServiceRole.entities.PendingPremium.filter({ status: "pending" }),
+    base44.asServiceRole.entities.User.list(),
+    base44.asServiceRole.entities.GostoPuroProduct.list(),
+  ]);
 
-  console.log("Found pending:", pending.length);
+  console.log("Found pending:", pending.length, "| users:", allUsers.length, "| products:", allGpProducts.length);
+
+  // Mapas para lookup rápido
+  const userByEmail = {};
+  for (const u of allUsers) {
+    userByEmail[(u.email || "").toLowerCase().trim()] = u;
+  }
+
+  const slugByProductId = {};
+  for (const p of allGpProducts) {
+    if (p.hotmart_product_id) {
+      slugByProductId[String(p.hotmart_product_id).trim()] = p.slug;
+    }
+  }
 
   let processedCount = 0;
+  let skippedNoUser = 0;
+  let skippedNoProduct = 0;
 
   for (const record of pending) {
-    console.log("Processing:", record.id, "| email:", record.email, "| product_id:", record.product_id);
+    const email = (record.email || "").toLowerCase().trim();
+    const productId = String(record.product_id || "").trim();
 
-    // Step 1: Look up the product by hotmart_product_id to get the slug
-    const products = await base44.asServiceRole.entities.GostoPuroProduct.filter({
-      hotmart_product_id: record.product_id
-    });
-
-    console.log("Products found for product_id", record.product_id, "->", products.length);
-
-    if (products.length === 0) {
-      console.log("No product found for hotmart_product_id:", record.product_id, "- skipping");
+    const user = userByEmail[email];
+    if (!user) {
+      skippedNoUser++;
       continue;
     }
 
-    // Step 2: Get the slug
-    const productSlug = products[0].slug;
-    console.log("Resolved slug:", productSlug);
-
-    // Step 3: Find the user by email
-    const users = await base44.asServiceRole.entities.User.filter({
-      email: record.email
-    });
-
-    console.log("Users found for email:", record.email, "->", users.length);
-
-    if (users.length === 0) {
-      console.log("No user found for email:", record.email, "- skipping");
-      continue;
-    }
-
-    const user = users[0];
-    const currentProducts = Array.isArray(user.purchased_products)
-      ? user.purchased_products
-      : [];
-
-    // Avoid duplicates
-    if (!currentProducts.includes(productSlug)) {
-      await base44.asServiceRole.entities.User.update(user.id, {
-        purchased_products: [...currentProducts, productSlug]
-      });
-      console.log("Updated user", user.id, "with slug:", productSlug);
+    if (PREMIUM_PLAN_PRODUCT_IDS.includes(productId)) {
+      // É produto premium do app → dar plan=premium
+      await base44.asServiceRole.entities.User.update(user.id, { plan: "premium" });
+      console.log("plan=premium applied:", email);
     } else {
-      console.log("Slug already exists for user, skipping duplicate:", productSlug);
+      const slug = slugByProductId[productId];
+      if (!slug) {
+        console.log("No slug for product_id:", productId, "- skipping");
+        skippedNoProduct++;
+        continue;
+      }
+
+      const currentProducts = Array.isArray(user.purchased_products) ? user.purchased_products : [];
+      if (!currentProducts.includes(slug)) {
+        await base44.asServiceRole.entities.User.update(user.id, {
+          purchased_products: [...currentProducts, slug]
+        });
+        console.log("Slug applied:", email, "->", slug);
+      } else {
+        console.log("Slug already present:", email, "->", slug);
+      }
     }
 
-    // Mark as processed regardless (even if slug was duplicate)
-    await base44.asServiceRole.entities.PendingPremium.update(record.id, {
-      status: "processed"
-    });
-
+    await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "processed" });
     processedCount++;
   }
 
-  return Response.json({ found: pending.length, processed: processedCount });
+  return Response.json({
+    found: pending.length,
+    processed: processedCount,
+    skipped_no_user: skippedNoUser,
+    skipped_no_product: skippedNoProduct,
+    still_pending: pending.length - processedCount
+  });
 });
