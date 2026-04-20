@@ -2,65 +2,58 @@ import { createClientFromRequest } from "npm:@base44/sdk";
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
+  const db = base44.asServiceRole.entities;
 
-  // Buscar todos os PendingPremium com status "pending"
-  const pending = await base44.asServiceRole.entities.PendingPremium.filter({
-    status: "pending"
-  });
-
+  const pending = await db.PendingPremium.filter({ status: "pending" });
+  
   let processed = 0;
   let still_pending = 0;
+  const errors = [];
 
   for (const record of pending) {
     try {
-      // Buscar usuário pelo email
-      const users = await base44.asServiceRole.entities.User.filter({
-        email: record.email
-      });
+      const email = (record.email || "").toLowerCase().trim();
+      const productId = String(record.product_id);
 
-      if (users.length === 0) {
+      // Buscar usuário
+      const users = await db.User.filter({ email: record.email });
+      
+      if (!users || users.length === 0) {
         still_pending++;
         continue;
       }
 
       const user = users[0];
 
-      // Buscar produto pelo hotmart_product_id para pegar o slug correto
-      const products = await base44.asServiceRole.entities.GostoPuroProduct.filter({
-        hotmart_product_id: String(record.product_id)
-      });
+      // Buscar produto
+      const products = await db.GostoPuroProduct.filter({ hotmart_product_id: productId });
 
-      if (products.length === 0) {
-        // Produto não encontrado, marcar como processed para não reprocessar
-        await base44.asServiceRole.entities.PendingPremium.update(record.id, {
-          status: "processed"
-        });
-        processed++;
-        continue;
+      let slug = null;
+      if (products && products.length > 0) {
+        slug = products[0].slug;
       }
 
-      const product = products[0];
-      const slug = product.slug;
+      // Montar purchased_products
+      const current = Array.isArray(user.purchased_products) ? user.purchased_products : [];
+      const updated = slug && !current.includes(slug) ? [...current, slug] : current;
 
-      // Adicionar slug ao purchased_products sem duplicar
-      const currentProducts = Array.isArray(user.purchased_products) ? user.purchased_products : [];
-      if (!currentProducts.includes(slug)) {
-        currentProducts.push(slug);
-        await base44.asServiceRole.entities.User.update(user.id, {
-          purchased_products: currentProducts
-        });
-      }
+      // Fazer update
+      const updateResult = await db.User.update(user.id, { purchased_products: updated });
 
       // Marcar como processed
-      await base44.asServiceRole.entities.PendingPremium.update(record.id, {
-        status: "processed"
-      });
+      await db.PendingPremium.update(record.id, { status: "processed" });
 
       processed++;
     } catch (err) {
+      errors.push({ email: record.email, error: err.message });
       still_pending++;
     }
   }
 
-  return Response.json({ processed, still_pending, total: pending.length });
+  return Response.json({ 
+    processed, 
+    still_pending, 
+    total: pending.length,
+    errors: errors.slice(0, 5)
+  });
 });
