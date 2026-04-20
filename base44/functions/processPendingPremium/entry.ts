@@ -6,65 +6,72 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const db = base44.asServiceRole.entities;
 
-  // Buscar apenas 10 pendentes por vez para não estourar rate limit
   const allPending = await db.PendingPremium.filter({ status: "pending" });
-  const pending = allPending.slice(0, 10);
+  const pending = allPending.slice(0, 3);
   
   let processed = 0;
-  let still_pending = 0;
-  const errors = [];
+  const debug = [];
 
   for (const record of pending) {
+    const info = { email: record.email, product_id: record.product_id, step: "" };
+    
     try {
-      // Pausa de 300ms entre cada registro para evitar rate limit
       await sleep(300);
-
-      const productId = String(record.product_id);
 
       // Buscar usuário
       const users = await db.User.filter({ email: record.email });
       await sleep(200);
       
+      info.users_found = users ? users.length : 0;
+      
       if (!users || users.length === 0) {
-        still_pending++;
+        info.step = "user_not_found";
+        debug.push(info);
         continue;
       }
 
       const user = users[0];
+      info.user_id = user.id;
+      info.current_products = user.purchased_products;
 
       // Buscar produto
-      const products = await db.GostoPuroProduct.filter({ hotmart_product_id: productId });
+      await sleep(200);
+      const products = await db.GostoPuroProduct.filter({ hotmart_product_id: String(record.product_id) });
       await sleep(200);
 
-      let slug = null;
-      if (products && products.length > 0) {
-        slug = products[0].slug;
+      info.products_found = products ? products.length : 0;
+
+      if (!products || products.length === 0) {
+        info.step = "product_not_found";
+        debug.push(info);
+        // Marcar como processed para não reprocessar
+        await db.PendingPremium.update(record.id, { status: "processed" });
+        processed++;
+        continue;
       }
 
-      // Montar purchased_products
-      const current = Array.isArray(user.purchased_products) ? user.purchased_products : [];
-      const updated = slug && !current.includes(slug) ? [...current, slug] : current;
+      const slug = products[0].slug;
+      info.slug = slug;
 
-      // Update usuário
+      const current = Array.isArray(user.purchased_products) ? user.purchased_products : [];
+      const updated = !current.includes(slug) ? [...current, slug] : current;
+
       await db.User.update(user.id, { purchased_products: updated });
       await sleep(200);
 
-      // Marcar como processed
       await db.PendingPremium.update(record.id, { status: "processed" });
       await sleep(200);
 
+      info.step = "success";
       processed++;
+
     } catch (err) {
-      errors.push({ email: record.email, error: err.message });
-      still_pending++;
+      info.step = "error";
+      info.error = err.message;
     }
+
+    debug.push(info);
   }
 
-  return Response.json({ 
-    processed, 
-    still_pending, 
-    total: pending.length,
-    errors: errors.slice(0, 5),
-    note: "Processando 10 por vez. Rode novamente para processar mais."
-  });
+  return Response.json({ processed, total: pending.length, debug });
 });
