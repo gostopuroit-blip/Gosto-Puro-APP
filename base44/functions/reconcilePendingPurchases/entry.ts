@@ -4,75 +4,77 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   try {
-    const user = await base44.auth.me();
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-  } catch {
-    // Allow scheduled calls (no user context)
-  }
+    // Buscar todos e filtrar manualmente (evita rate limit de múltiplos .filter())
+    const allPending = await base44.asServiceRole.entities.PendingPremium.list('-created_date', 500);
+    const pending = allPending.filter(r => r.status === "pending");
 
-  try {
-    const pending = await base44.asServiceRole.entities.PendingPremium.filter({ status: "pending" });
-
-    if (!pending || pending.length === 0) {
+    if (pending.length === 0) {
       console.log('[reconcile] Nenhum PendingPremium pendente.');
       return Response.json({ status: "ok", processed: 0 });
     }
 
     console.log(`[reconcile] Processando ${pending.length} registros pendentes...`);
+
+    // Buscar usuários e produtos UMA VEZ SÓ fora do loop
+    const [users, products] = await Promise.all([
+      base44.asServiceRole.entities.User.list('-created_date', 5000),
+      base44.asServiceRole.entities.GostoPuroProduct.list('-created_date', 200),
+    ]);
+
+    // Indexar por email e hotmart_product_id para lookup O(1)
+    const usersByEmail = {};
+    for (const u of users) {
+      if (u.email) usersByEmail[u.email.toLowerCase().trim()] = u;
+    }
+    const productsByHotmartId = {};
+    for (const p of products) {
+      if (p.hotmart_product_id) productsByHotmartId[String(p.hotmart_product_id)] = p;
+    }
+
     let applied = 0;
 
     for (const record of pending) {
-      const email = (record.email || "").toLowerCase().trim();
-      const productId = String(record.product_id || "").trim();
+      try {
+        const email = (record.email || "").toLowerCase().trim();
+        const productId = String(record.product_id || "").trim();
 
-      if (!email || !productId) continue;
+        if (!email || !productId) continue;
 
-      // Buscar usuário
-      const users = await base44.asServiceRole.entities.User.filter({ email });
-      if (!users || users.length === 0) {
-        console.log(`[reconcile] Usuário ainda não registrado: ${email}`);
-        continue;
+        const dbUser = usersByEmail[email];
+        if (!dbUser) {
+          console.log(`[reconcile] Usuário ainda não registrado: ${email}`);
+          continue;
+        }
+
+        const product = productsByHotmartId[productId];
+        if (!product) {
+          // Produto não existe — marcar como applied para não reprocessar
+          console.log(`[reconcile] Produto não encontrado, marcando applied: ${productId} (${email})`);
+          await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
+          applied++;
+          continue;
+        }
+
+        const slug = product.slug;
+        const current = Array.isArray(dbUser.purchased_products) ? dbUser.purchased_products : [];
+        if (!current.includes(slug)) {
+          const updated = [...current, slug];
+          await base44.asServiceRole.entities.User.update(dbUser.id, { purchased_products: updated });
+          // Atualizar cache local para evitar duplicatas no mesmo loop
+          dbUser.purchased_products = updated;
+        }
+
+        await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
+        console.log(`[reconcile] Aplicado: ${email} → ${slug}`);
+        applied++;
+
+      } catch (err) {
+        console.log(`[reconcile] Erro no registro ${record.id}: ${err.message}`);
       }
-
-      // Buscar produto
-      const products = await base44.asServiceRole.entities.GostoPuroProduct.filter({ hotmart_product_id: productId });
-      if (!products || products.length === 0) {
-        console.log(`[reconcile] Produto não encontrado: ${productId} para ${email}`);
-        continue;
-      }
-
-      const dbUser = users[0];
-      const slug = products[0].slug;
-
-      // Adicionar slug sem duplicar
-      const current = dbUser.purchased_products || [];
-      if (!current.includes(slug)) {
-        await base44.asServiceRole.entities.User.update(dbUser.id, {
-          purchased_products: [...current, slug],
-        });
-      }
-
-      // Marcar como applied
-      await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
-
-      // Logar sucesso
-      await base44.asServiceRole.entities.WebhookLog.create({
-        source: "reconcile",
-        event_type: "RECONCILE_APPLIED",
-        status: "success",
-        user_email: email,
-        payload: JSON.stringify({ product_id: productId, slug }),
-        error_message: "",
-        timestamp: new Date().toISOString(),
-      });
-
-      console.log(`[reconcile] Aplicado: ${email} → ${slug}`);
-      applied++;
     }
 
     return Response.json({ status: "ok", processed: applied, total_pending: pending.length });
+
   } catch (error) {
     console.error('[reconcile] Erro:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
