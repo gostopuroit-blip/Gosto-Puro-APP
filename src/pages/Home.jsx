@@ -246,17 +246,17 @@ export default function Home() {
             });
 
             const unlockedProducts = gostoPuroProducts.filter(p => {
-              const isUnlocked = user?.role === "admin" || p.is_free || (user?.purchased_products || []).includes(p.slug);
+              const isUnlocked = isPremium || p.is_free || (user?.purchased_products || []).includes(p.slug);
               const hasOccasion = p.occasioni && p.occasioni.length > 0;
               const canNavigate = hasOccasion && p.image_url;
               return isUnlocked && canNavigate;
             });
 
             const lockedProducts = gostoPuroProducts.filter(p => {
-              const isUnlocked = user?.role === "admin" || p.is_free || (user?.purchased_products || []).includes(p.slug);
+              const isUnlocked = isPremium || p.is_free || (user?.purchased_products || []).includes(p.slug);
               const hasOccasion = p.occasioni && p.occasioni.length > 0;
               const canNavigate = hasOccasion && p.image_url;
-              return !isUnlocked && canNavigate && !isPremium;
+              return !isUnlocked && canNavigate;
             });
 
             const brokenProducts = gostoPuroProducts.filter(p => {
