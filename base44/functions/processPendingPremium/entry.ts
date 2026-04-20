@@ -3,10 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Buscar TODOS os PendingPremium sem filtro primeiro
+  // Buscar TODOS os PendingPremium e filtrar manualmente (filter pode não funcionar server-side)
   const allPending = await base44.asServiceRole.entities.PendingPremium.list('-created_date', 500);
-
-  // Filtrar manualmente os que têm status "pending"
   const pendingRecords = allPending.filter(r => r.status === "pending");
 
   console.log(`[processPendingPremium] Total: ${allPending.length}, Pendentes: ${pendingRecords.length}`);
@@ -26,10 +24,11 @@ Deno.serve(async (req) => {
 
   for (const record of pendingRecords) {
     try {
-      const email = record.email.toLowerCase().trim();
+      const email = (record.email || "").toLowerCase().trim();
       const productId = String(record.product_id);
 
       const user = users.find(u => u.email && u.email.toLowerCase().trim() === email);
+
       if (!user) {
         console.log(`[processPendingPremium] Usuário não encontrado: ${email}`);
         still_pending++;
@@ -37,14 +36,17 @@ Deno.serve(async (req) => {
       }
 
       const product = products.find(p => String(p.hotmart_product_id) === productId);
+
       if (!product) {
-        console.log(`[processPendingPremium] Produto não encontrado: ${productId} (${email})`);
-        still_pending++;
+        // Produto não existe no sistema — marcar como applied para não reprocessar
+        console.log(`[processPendingPremium] Produto não encontrado, marcando applied: ${productId} (${email})`);
+        await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
+        processed++;
         continue;
       }
 
-      // Adicionar slug ao purchased_products
-      const currentProducts = user.purchased_products || [];
+      // Adicionar slug apenas se não existir
+      const currentProducts = Array.isArray(user.purchased_products) ? user.purchased_products : [];
       if (!currentProducts.includes(product.slug)) {
         currentProducts.push(product.slug);
         await base44.asServiceRole.entities.User.update(user.id, { purchased_products: currentProducts });
