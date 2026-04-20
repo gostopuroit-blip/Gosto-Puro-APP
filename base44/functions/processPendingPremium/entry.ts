@@ -3,15 +3,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // Usa asServiceRole para contornar a RLS (read: false na entidade PendingPremium)
-  const all = await base44.asServiceRole.entities.PendingPremium.list('-created_date', 200);
-  const pending = all.filter(r => r.status === "pending");
-
-  console.log(`[processPendingPremium] Total registros: ${all.length}, Pendentes: ${pending.length}`);
-
-  for (const r of pending) {
-    console.log(`[processPendingPremium] Pendente: email=${r.email}, product_id=${r.product_id}, status=${r.status}`);
+  // Usa filter com asServiceRole — o .list() é bloqueado pela RLS "read: false"
+  // mesmo com asServiceRole, enquanto .filter() com query vazia funciona
+  let pending = [];
+  try {
+    pending = await base44.asServiceRole.entities.PendingPremium.filter(
+      { status: "pending" },
+      "-created_date",
+      200
+    );
+  } catch (e) {
+    console.log(`[processPendingPremium] Erro ao buscar pendentes: ${e.message}`);
+    return Response.json({ processed: 0, still_pending: 0, total: 0, error: e.message });
   }
+
+  console.log(`[processPendingPremium] Pendentes encontrados: ${pending.length}`);
 
   if (pending.length === 0) {
     return Response.json({ processed: 0, still_pending: 0, total: 0 });
@@ -27,14 +33,16 @@ Deno.serve(async (req) => {
     const email = (record.email || "").toLowerCase().trim();
     const productId = String(record.product_id || "").trim();
 
+    if (!email) continue;
+
     const user = allUsers.find(u => (u.email || "").toLowerCase().trim() === email);
 
     if (!user) {
-      console.log(`[processPendingPremium] Usuário não encontrado ainda: ${email}`);
+      console.log(`[processPendingPremium] Usuário não registrado ainda: ${email}`);
       continue;
     }
 
-    console.log(`[processPendingPremium] Usuário encontrado: ${user.email} (id=${user.id})`);
+    console.log(`[processPendingPremium] Processando: ${email} → productId=${productId}`);
 
     const gpProduct = allGpProducts.find(p => String(p.hotmart_product_id || "").trim() === productId);
 
@@ -47,13 +55,13 @@ Deno.serve(async (req) => {
         });
         console.log(`[processPendingPremium] Produto GP aplicado: ${email} → ${slug}`);
       } else {
-        console.log(`[processPendingPremium] Produto GP já presente: ${email} → ${slug}`);
+        console.log(`[processPendingPremium] Produto já presente: ${email} → ${slug}`);
       }
     } else if (productId === APP_PRODUCT_ID) {
       await base44.asServiceRole.entities.User.update(user.id, { plan: "premium" });
       console.log(`[processPendingPremium] Plan premium aplicado: ${email}`);
     } else {
-      console.log(`[processPendingPremium] Produto não encontrado (${productId}) para: ${email}`);
+      console.log(`[processPendingPremium] Produto desconhecido (${productId}) — ignorando: ${email}`);
     }
 
     await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
