@@ -11,6 +11,16 @@ Deno.serve(async (req) => {
 
   console.log(`[processPendingPremium] Total: ${allPending.length}, Pendentes: ${pendingRecords.length}`);
 
+  if (pendingRecords.length === 0) {
+    return Response.json({ processed: 0, still_pending: 0, total: 0 });
+  }
+
+  // Buscar usuários e produtos UMA VEZ SÓ fora do loop
+  const [users, products] = await Promise.all([
+    base44.asServiceRole.entities.User.list('-created_date', 5000),
+    base44.asServiceRole.entities.GostoPuroProduct.list('-created_date', 200),
+  ]);
+
   let processed = 0;
   let still_pending = 0;
 
@@ -19,20 +29,14 @@ Deno.serve(async (req) => {
       const email = record.email.toLowerCase().trim();
       const productId = String(record.product_id);
 
-      // Buscar usuário
-      const users = await base44.asServiceRole.entities.User.list('-created_date', 5000);
       const user = users.find(u => u.email && u.email.toLowerCase().trim() === email);
-
       if (!user) {
         console.log(`[processPendingPremium] Usuário não encontrado: ${email}`);
         still_pending++;
         continue;
       }
 
-      // Buscar produto
-      const products = await base44.asServiceRole.entities.GostoPuroProduct.list('-created_date', 200);
       const product = products.find(p => String(p.hotmart_product_id) === productId);
-
       if (!product) {
         console.log(`[processPendingPremium] Produto não encontrado: ${productId} (${email})`);
         still_pending++;
@@ -44,6 +48,8 @@ Deno.serve(async (req) => {
       if (!currentProducts.includes(product.slug)) {
         currentProducts.push(product.slug);
         await base44.asServiceRole.entities.User.update(user.id, { purchased_products: currentProducts });
+        // Atualizar cache local para evitar duplicatas em registros seguintes do mesmo usuário
+        user.purchased_products = currentProducts;
         console.log(`[processPendingPremium] Aplicado: ${email} → ${product.slug}`);
       } else {
         console.log(`[processPendingPremium] Já tinha: ${email} → ${product.slug}`);

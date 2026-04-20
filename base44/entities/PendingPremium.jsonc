@@ -34,8 +34,16 @@
   "name": "PendingPremium",
   "rls": {
     "create": true,
-    "read": false,
-    "update": false,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "delete": false
   }
 }
