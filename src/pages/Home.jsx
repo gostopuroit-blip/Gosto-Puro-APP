@@ -180,7 +180,6 @@ export default function Home() {
                 {getGreeting()}{userName ? `, ${userName}` : ""}
               </p>
               <div className="flex items-center gap-2 mt-0.5">
-                <h1 className="text-gray-900 dark:text-gray-100 text-sm font-bold tracking-tight leading-tight">Cosa prepariamo oggi?</h1>
                 {userRole === "admin" ? (
                   <span className="text-[10px] font-bold bg-purple-500 text-white px-1.5 py-0.5 rounded-lg">⭐ Admin</span>
                 ) : userPlan === "premium" ? (
@@ -191,9 +190,44 @@ export default function Home() {
               </div>
             </div>
         </div>
-        <p className="text-[13px] text-gray-400 dark:text-gray-500 mt-3 leading-relaxed">
-          Ricette organizzate per decidere senza perdere tempo
-        </p>
+
+        {/* Prodotti acquistati - accesso vitalizio */}
+        {(() => {
+          const purchased = user?.purchased_products || [];
+          const PRODUCT_OCCASION_MAP = {
+            ricette_sane_35: "35 Ricette Sane",
+            ricette_veloci_pratiche: "Ricette Veloci e Pratiche",
+            cene_friggitrice: "Cene con Friggitrice ad Aria",
+            ricette_congelare: "Ricette Facili da Congelare",
+            diabetici: "365 Ricette per Diabetici",
+            fitness_pratiche: "275 Ricette Fitness",
+            ricette_detox: "Ricette Detox",
+            low_carb: "Ricette Low Carb",
+            senza_zucchero: "Ricette Senza Zucchero",
+          };
+          if (purchased.length === 0) return null;
+          const productNames = purchased.map(slug => {
+            const gpProduct = gostoPuroProducts.find(p => p.slug === slug);
+            return gpProduct?.nome || PRODUCT_OCCASION_MAP[slug] || slug;
+          });
+          return (
+            <div className="mt-3 bg-[#F0F7F4] dark:bg-[#1A2B20] rounded-2xl px-4 py-3 border border-[#C8E6D8] dark:border-[#2D4A38]">
+              <p className="text-[13px] text-[#2D6A4F] dark:text-[#40916C] font-semibold mb-1">
+                ✅ Hai accesso sbloccato a:
+              </p>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {productNames.map((name, i) => (
+                  <span key={i} className="text-[11px] font-bold bg-[#2D6A4F] text-white px-2.5 py-1 rounded-full">
+                    {name}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                🔓 Il tuo accesso a questi prodotti è <strong>a vita</strong> e include tutti gli aggiornamenti futuri.
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Dietary Banner */}
