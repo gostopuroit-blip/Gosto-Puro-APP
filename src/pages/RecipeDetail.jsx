@@ -158,6 +158,7 @@ export default function RecipeDetail() {
     ricette_detox: ["Detox"],
     low_carb: ["Low carb"],
     senza_zucchero: ["Senza zucchero"],
+    "504_ricette_collezione": ["Collezione Gosto Puro"],
   };
   const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena", "Leggera"];
 
