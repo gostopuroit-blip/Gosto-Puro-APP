@@ -179,15 +179,11 @@ export default function Home() {
               <p className="text-[#2D6A4F] dark:text-[#40916C] text-lg font-semibold leading-tight">
                 {getGreeting()}{userName ? `, ${userName}` : ""}
               </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {userRole === "admin" ? (
+              {userRole === "admin" && (
+                <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-[10px] font-bold bg-purple-500 text-white px-1.5 py-0.5 rounded-lg">⭐ Admin</span>
-                ) : userPlan === "premium" ? (
-                  <span className="text-[10px] font-bold bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded-lg">👑 Premium</span>
-                ) : (
-                  <span className="text-[10px] font-bold bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-lg">Base</span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
         </div>
 

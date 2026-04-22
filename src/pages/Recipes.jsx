@@ -27,6 +27,7 @@ export default function Recipes() {
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
   const [freeIds, setFreeIds] = useState([]);
+  const [soloPerMe, setSoloPerMe] = useState(false);
   const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
@@ -135,8 +136,16 @@ export default function Recipes() {
       result = result.filter((r) => r.prep_time <= 15);
     }
 
+    // Solo per me: mostra solo ricette che hanno almeno una delle tag dietetiche del profilo
+    const userDietaryTags = user?.dietary_tags_profile || [];
+    if (soloPerMe && userDietaryTags.length > 0) {
+      result = result.filter((r) =>
+        userDietaryTags.some(tag => (r.dietary_tags || []).includes(tag))
+      );
+    }
+
     return result;
-  }, [recipes, search, activeFilters, activeTags]);
+  }, [recipes, search, activeFilters, activeTags, soloPerMe, user]);
 
   const clearTag = (type) => {
     setActiveTags((prev) => ({ ...prev, [type]: null }));
@@ -253,7 +262,7 @@ export default function Recipes() {
         }
 
        {/* Filters */}
-       <div className="flex gap-2 overflow-x-auto hide-scrollbar px-5 pb-4">
+       <div className="flex gap-2 overflow-x-auto hide-scrollbar px-5 pb-2">
          {filters.map((f) =>
           <button
             key={f.key}
@@ -263,11 +272,23 @@ export default function Recipes() {
             "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20" :
             "bg-white dark:bg-[#2D3F35] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246] hover:border-gray-200 dark:hover:border-[#4D6456]"}`
             }>
-
              {f.label}
            </button>
           )}
+          {(user?.dietary_tags_profile || []).length > 0 && (
+            <button
+              onClick={() => { setSoloPerMe(v => !v); goToPage(1); }}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                soloPerMe
+                  ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
+                  : "bg-white dark:bg-[#2D3F35] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
+              }`}
+            >
+              🎯 Solo per me
+            </button>
+          )}
        </div>
+       <div className="pb-2" />
 
        {/* Recipe List */}
        <div className="px-5 space-y-4">

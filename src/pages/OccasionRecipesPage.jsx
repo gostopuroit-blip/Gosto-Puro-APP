@@ -222,7 +222,7 @@ export default function OccasionRecipesPage() {
         r.description?.toLowerCase().includes(query.toLowerCase());
       const matchesCategory = activeCategory === "Tutte" || r.category === activeCategory;
       const matchesDietary = !soloPerMe || userDietaryTags.length === 0 ||
-        userDietaryTags.every(tag => (r.dietary_tags || []).includes(tag));
+        userDietaryTags.some(tag => (r.dietary_tags || []).includes(tag));
       return matchesQuery && matchesCategory && matchesDietary;
     });
   }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags]);
