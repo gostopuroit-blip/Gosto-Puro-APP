@@ -72,6 +72,13 @@ const GP_PRODUCT_OCCASIONS = new Set([
   "275 Ricette Fitness Pratiche ed Economiche",
 ]);
 
+// Todas as ocasiões que compõem a "Collezione Gosto Puro"
+const COLLEZIONE_GOSTO_PURO_OCCASIONS = [
+  "Colazione", "Pranzo", "Cena", "Leggera",
+  "Instagram", "In famiglia", "Per due", "Con amici",
+  "Estate", "Autunno", "Inverno", "Primavera",
+];
+
 const DIETARY_TAG_COLORS = {
   "Senza glutine": "bg-green-100 text-green-800",
   "Diabetico": "bg-orange-100 text-orange-800",
@@ -133,25 +140,37 @@ export default function OccasionRecipesPage() {
         "-created_date",
         FETCH_LIMIT
       );
-      // Use occasion aliases if available, otherwise use the occasion directly
-      const searchTerms = occasionAliases[occasion] || [occasion];
-      const exclusions = occasionExclusions[occasion] || [];
-      const isGpProductOccasion = GP_PRODUCT_OCCASIONS.has(occasion);
-      const filtered = batch.filter((r) => {
-        const rOccasions = r.occasions || [];
-        const rLifestyle = r.lifestyle || [];
-        const matchesTerm = searchTerms.some(term => {
-          // GP product occasions: match ONLY in occasions field (never in dietary_tags/lifestyle)
-          // Prevents recipes with a similar dietary_tag from appearing in wrong collections
-          if (isGpProductOccasion) {
-            return rOccasions.includes(term);
-          }
-          // Other occasions (seasonal, social): match in occasions or lifestyle
-          return rOccasions.includes(term) || rLifestyle.includes(term);
+
+      let filtered;
+
+      // "Collezione Gosto Puro" é uma meta-coleção: agrega receitas de várias ocasiões
+      if (occasion === "Collezione Gosto Puro") {
+        filtered = batch.filter((r) => {
+          const rOccasions = r.occasions || [];
+          const rLifestyle = r.lifestyle || [];
+          return COLLEZIONE_GOSTO_PURO_OCCASIONS.some(term =>
+            rOccasions.includes(term) || rLifestyle.includes(term)
+          );
         });
-        const isExcluded = exclusions.some(excl => rOccasions.includes(excl));
-        return matchesTerm && !isExcluded;
-      });
+      } else {
+        // Use occasion aliases if available, otherwise use the occasion directly
+        const searchTerms = occasionAliases[occasion] || [occasion];
+        const exclusions = occasionExclusions[occasion] || [];
+        const isGpProductOccasion = GP_PRODUCT_OCCASIONS.has(occasion);
+        filtered = batch.filter((r) => {
+          const rOccasions = r.occasions || [];
+          const rLifestyle = r.lifestyle || [];
+          const matchesTerm = searchTerms.some(term => {
+            if (isGpProductOccasion) {
+              return rOccasions.includes(term);
+            }
+            return rOccasions.includes(term) || rLifestyle.includes(term);
+          });
+          const isExcluded = exclusions.some(excl => rOccasions.includes(excl));
+          return matchesTerm && !isExcluded;
+        });
+      }
+
       recipesCache[occasion] = filtered;
     }
 

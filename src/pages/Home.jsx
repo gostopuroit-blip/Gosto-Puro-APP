@@ -406,9 +406,14 @@ export default function Home() {
         const isPremium = accessibleOccasions.includes("ALL");
 
         const collectionOccasions = [
+          { label: "Colazione", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/187a4172e_Colazione.png" },
+          { label: "Pranzo", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/f3bc57429_Pranzo.png" },
+          { label: "Cena", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d7674cdee_Cena.png" },
+          { label: "Leggera", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/8ea268711_Insalata.png" },
           { label: "Instagram", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png" },
           { label: "In famiglia", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/78bec7c3b_Infamiglia.png" },
           { label: "Per due", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/90f0dad01_Perdue.png" },
+          { label: "Con amici", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/2e95bf4e4_Conamici.png" },
           { label: "Estate", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/029f21cd5_Estate.png" },
           { label: "Autunno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png" },
           { label: "Inverno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d0924a4a2_Inverno.png" },
@@ -419,6 +424,29 @@ export default function Home() {
           <div className="px-5 mt-8">
             <SectionHeader title="Collezione Gosto Puro" />
             <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+              {/* Card especial: Ver todas as receitas da coleção */}
+              {isPremium ? (
+                <Link
+                  to={`/OccasionRecipes?occasion=${encodeURIComponent("Collezione Gosto Puro")}`}
+                  onClick={() => trackEvent("occasion_click", { occasion_label: "Collezione Gosto Puro" })}
+                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                  <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-gradient-to-br from-[#2D6A4F] to-[#40916C] shadow-md flex items-center justify-center">
+                    <span className="text-4xl">🍽️</span>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-[#2D6A4F] dark:text-[#40916C]">Tutte le ricette</span>
+                </Link>
+              ) : (
+                <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                  <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14, opacity: 0.6 }} className="overflow-hidden bg-gradient-to-br from-[#2D6A4F] to-[#40916C] shadow-md flex items-center justify-center relative">
+                    <span className="text-4xl">🍽️</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <Lock className="w-5 h-5 text-white drop-shadow" />
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-500 dark:text-gray-500">Tutte le ricette</span>
+                </a>
+              )}
               {collectionOccasions.map(occ => (
                 isPremium ? (
                   <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.label)}`}
