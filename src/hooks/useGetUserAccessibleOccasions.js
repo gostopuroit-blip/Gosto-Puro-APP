@@ -1,14 +1,14 @@
-// Mapping produto slug → ocasião desbloqueada
+// Mapping produto slug → ocasiões desbloqueadas (incluindo aliases)
 const PRODUCT_OCCASION_MAP = {
-  ricette_sane_35: "Ricette Sane",
-  ricette_veloci_pratiche: "Veloci",
-  cene_friggitrice: "Friggitrice ad Aria",
-  ricette_congelare: "Facili da Congelare",
-  diabetici: "365 Ricette Deliziose per Diabetici",
-  fitness_pratiche: "275 Ricette Fitness Pratiche ed Economiche",
-  ricette_detox: "Detox",
-  low_carb: "Low carb",
-  senza_zucchero: "Senza zucchero",
+  ricette_sane_35: ["Ricette Sane"],
+  ricette_veloci_pratiche: ["Veloci"],
+  cene_friggitrice: ["Friggitrice ad Aria"],
+  ricette_congelare: ["Facili da Congelare"],
+  diabetici: ["365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico"],
+  fitness_pratiche: ["275 Ricette Fitness Pratiche ed Economiche", "Fit"],
+  ricette_detox: ["Detox"],
+  low_carb: ["Low carb"],
+  senza_zucchero: ["Senza zucchero"],
 };
 
 // Ocasiões sempre acessíveis com qualquer compra
@@ -30,14 +30,14 @@ export function getUserAccessibleOccasions(user) {
     return [];
   }
 
-  // COM COMPRAS: dia do giorno + ocasiões dos produtos
+  // COM COMPRAS: ocasiões do giorno + ocasiões dos produtos (com aliases)
   const accessible = [...ALWAYS_ACCESSIBLE_WITH_PURCHASE];
-  
+
   user.purchased_products.forEach((slug) => {
-    const occasion = PRODUCT_OCCASION_MAP[slug];
-    if (occasion && !accessible.includes(occasion)) {
-      accessible.push(occasion);
-    }
+    const occasions = PRODUCT_OCCASION_MAP[slug] || [];
+    occasions.forEach(occ => {
+      if (!accessible.includes(occ)) accessible.push(occ);
+    });
   });
 
   return accessible;

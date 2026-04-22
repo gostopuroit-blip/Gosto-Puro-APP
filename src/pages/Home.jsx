@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles, Lock, Crown } from "lucide-react";
+import { Loader2, Sparkles, Lock } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
@@ -359,8 +359,6 @@ export default function Home() {
       {(() => {
         const accessibleOccasions = getUserAccessibleOccasions(user);
         const isPremium = accessibleOccasions.includes("ALL");
-        
-        if (!isPremium) return null;
 
         const collectionOccasions = [
           { label: "Instagram", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png" },
@@ -377,14 +375,27 @@ export default function Home() {
             <SectionHeader title="Collezione Gosto Puro" />
             <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
               {collectionOccasions.map(occ => (
-                <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.label)}`}
-                  onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
-                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                  <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
-                    <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
-                </Link>
+                isPremium ? (
+                  <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.label)}`}
+                    onClick={() => trackEvent("occasion_click", { occasion_label: occ.label })}
+                    className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                    <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+                      <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
+                  </Link>
+                ) : (
+                  <a key={occ.label} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+                    className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                    <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14, opacity: 0.6 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                      <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <Lock className="w-5 h-5 text-white drop-shadow" />
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-500 dark:text-gray-500">{occ.label}</span>
+                  </a>
+                )
               ))}
             </div>
           </div>

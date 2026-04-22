@@ -148,15 +148,15 @@ export default function RecipeDetail() {
 
   // Verifica se o usuário tem acesso via produto comprado (ocasião desbloqueada)
   const PRODUCT_OCCASION_MAP = {
-    ricette_sane_35: "Ricette Sane",
-    ricette_veloci_pratiche: "Veloci",
-    cene_friggitrice: "Friggitrice ad Aria",
-    ricette_congelare: "Facili da Congelare",
-    diabetici: "365 Ricette Deliziose per Diabetici",
-    fitness_pratiche: "275 Ricette Fitness Pratiche ed Economiche",
-    ricette_detox: "Detox",
-    low_carb: "Low carb",
-    senza_zucchero: "Senza zucchero",
+    ricette_sane_35: ["Ricette Sane"],
+    ricette_veloci_pratiche: ["Veloci"],
+    cene_friggitrice: ["Friggitrice ad Aria"],
+    ricette_congelare: ["Facili da Congelare"],
+    diabetici: ["365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico"],
+    fitness_pratiche: ["275 Ricette Fitness Pratiche ed Economiche", "Fit"],
+    ricette_detox: ["Detox"],
+    low_carb: ["Low carb"],
+    senza_zucchero: ["Senza zucchero"],
   };
   const ALWAYS_ACCESSIBLE = ["Colazione", "Pranzo", "Cena", "Leggera"];
 
@@ -166,8 +166,8 @@ export default function RecipeDetail() {
     if (purchased.length === 0) return new Set();
     const occs = new Set(ALWAYS_ACCESSIBLE);
     purchased.forEach(slug => {
-      const occ = PRODUCT_OCCASION_MAP[slug];
-      if (occ) occs.add(occ);
+      const occsForSlug = PRODUCT_OCCASION_MAP[slug] || [];
+      occsForSlug.forEach(occ => occs.add(occ));
     });
     return occs;
   })();
@@ -175,7 +175,8 @@ export default function RecipeDetail() {
   const hasProductAccess = userAccessibleOccasions === null || (
     recipe && userAccessibleOccasions.size > 0 && (
       (recipe.occasions || []).some(occ => userAccessibleOccasions.has(occ)) ||
-      (recipe.lifestyle || []).some(occ => userAccessibleOccasions.has(occ))
+      (recipe.lifestyle || []).some(occ => userAccessibleOccasions.has(occ)) ||
+      (recipe.dietary_tags || []).some(occ => userAccessibleOccasions.has(occ))
     )
   );
 
