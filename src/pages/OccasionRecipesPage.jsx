@@ -3,7 +3,36 @@ import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Search, Heart, Star, Loader2, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
+
+
+// Mapping produto slug → ocasiões desbloqueadas (todos os labels/aliases)
+const PRODUCT_OCCASION_MAP = {
+  ricette_sane_35: ["Ricette Sane"],
+  ricette_veloci_pratiche: ["Veloci"],
+  cene_friggitrice: ["Friggitrice ad Aria"],
+  ricette_congelare: ["Facili da Congelare"],
+  diabetici: ["365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico"],
+  fitness_pratiche: ["275 Ricette Fitness Pratiche ed Economiche", "Fit"],
+  ricette_detox: ["Detox"],
+  low_carb: ["Low carb"],
+  senza_zucchero: ["Senza zucchero"],
+};
+
+// Ocasiões sempre acessíveis (sem compra necessária)
+const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena", "Leggera"];
+
+// Verifica se a COLEÇÃO/ocasião está acessível para o usuário
+function canAccessOccasion(user, occasion, aliases) {
+  if (!user) return false;
+  if (user.role === "admin" || user.plan === "premium" || user.role === "premium") return true;
+  if (FREE_OCCASIONS.includes(occasion)) return true;
+  const terms = aliases || [occasion];
+  const purchased = user.purchased_products || [];
+  return purchased.some(slug => {
+    const occs = PRODUCT_OCCASION_MAP[slug] || [];
+    return occs.some(occ => terms.includes(occ));
+  });
+}
 
 const OCCASION_ICONS = {
   "Fit": "🏋️", "Detox": "🌿", "Low carb": "🥗", "Low Carb": "🥗",
@@ -111,10 +140,8 @@ export default function OccasionRecipesPage() {
     const userData = await base44.auth.me().catch(() => null);
     setUser(userData);
     
-    const accessible = getUserAccessibleOccasions(userData);
-    // Check access using aliases too (e.g. "Diabete" alias for "365 Ricette Deliziose per Diabetici")
     const occasionTerms = occasionAliases[occasion] || [occasion];
-    const canAccess = accessible.includes("ALL") || occasionTerms.some(term => accessible.includes(term));
+    const canAccess = canAccessOccasion(userData, occasion, occasionTerms);
     setIsAccessible(canAccess);
     
     // Use cache to avoid re-fetching on back navigation
@@ -186,12 +213,9 @@ export default function OccasionRecipesPage() {
 
   const dailyIds = useMemo(() => new Set(dailyRecipes.map((r) => r.id)), [dailyRecipes]);
 
-  // Helper: all terms (including aliases) for a given occasion label
-  const getOccasionTerms = (occ) => occasionAliases[occ] || [occ];
-
   // All filtering is instant (in-memory) — no re-fetch on page/filter changes
   const filteredRecipes = useMemo(() => {
-    const filtered = allOccasionRecipes.filter((r) => {
+    return allOccasionRecipes.filter((r) => {
       if (showDaily && dailyIds.has(r.id)) return false;
       const matchesQuery = !query.trim() ||
         r.title?.toLowerCase().includes(query.toLowerCase()) ||
@@ -201,27 +225,7 @@ export default function OccasionRecipesPage() {
         userDietaryTags.every(tag => (r.dietary_tags || []).includes(tag));
       return matchesQuery && matchesCategory && matchesDietary;
     });
-    
-    // Sort: desbloqueadas primeiro, depois bloqueadas
-    const accessible = getUserAccessibleOccasions(user);
-    const isPremium = accessible.includes("ALL");
-    
-    // Expand accessible occasions to include all aliases
-    const accessibleWithAliases = isPremium ? accessible : accessible.flatMap(getOccasionTerms);
-
-    const recipeIsAccessible = (r) =>
-      accessibleWithAliases.some(occ =>
-        (r.occasions || []).includes(occ) ||
-        (r.lifestyle || []).includes(occ) ||
-        (DIETARY_TAG_OCCASIONS.has(occ) && (r.dietary_tags || []).includes(occ))
-      );
-
-    return filtered.sort((a, b) => {
-      const aBlocked = !isPremium && !recipeIsAccessible(a);
-      const bBlocked = !isPremium && !recipeIsAccessible(b);
-      return aBlocked - bBlocked;
-    });
-  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, user]);
+  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -392,28 +396,17 @@ export default function OccasionRecipesPage() {
                 )}
 
                 <div className="space-y-3" style={!isAccessible ? { filter: "blur(6px)", pointerEvents: "none" } : {}}>
-                   {pagedRecipes.map((recipe) => {
-                     const accessible = getUserAccessibleOccasions(user);
-                     const isPremium = accessible.includes("ALL");
-                     const accessibleWithAliases = isPremium ? accessible : accessible.flatMap(getOccasionTerms);
-                     const isBlocked = isAccessible && !isPremium && !accessibleWithAliases.some(occ =>
-                       (recipe.occasions || []).includes(occ) ||
-                       (recipe.lifestyle || []).includes(occ) ||
-                       (DIETARY_TAG_OCCASIONS.has(occ) && (recipe.dietary_tags || []).includes(occ))
-                     );
-
-                     return (
-                       <RecipeCard
-                         key={recipe.id}
-                         recipe={recipe}
-                         occasion={occasion}
-                         isSaved={!isAccessible ? false : !!userRecipes[recipe.id]}
-                         user={user}
-                         isBlocked={isBlocked}
-                         onBlockedClick={() => setBlockedRecipeId(recipe.id)}
-                       />
-                     );
-                   })}
+                   {pagedRecipes.map((recipe) => (
+                     <RecipeCard
+                       key={recipe.id}
+                       recipe={recipe}
+                       occasion={occasion}
+                       isSaved={isAccessible ? !!userRecipes[recipe.id] : false}
+                       user={user}
+                       isBlocked={false}
+                       onBlockedClick={() => {}}
+                     />
+                   ))}
                  </div>
 
                 {totalPages > 1 && (
