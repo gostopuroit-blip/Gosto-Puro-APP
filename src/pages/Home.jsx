@@ -193,8 +193,10 @@ export default function Home() {
 
         {/* Prodotti acquistati - accesso vitalizio */}
         {(() => {
+          const isPremium = user?.plan === "premium" || user?.role === "admin";
           const purchased = user?.purchased_products || [];
-          const PRODUCT_OCCASION_MAP = {
+
+          const PRODUCT_NAMES = {
             ricette_sane_35: "35 Ricette Sane",
             ricette_veloci_pratiche: "Ricette Veloci e Pratiche",
             cene_friggitrice: "Cene con Friggitrice ad Aria",
@@ -205,14 +207,27 @@ export default function Home() {
             low_carb: "Ricette Low Carb",
             senza_zucchero: "Ricette Senza Zucchero",
           };
+
+          if (isPremium) {
+            return (
+              <div className="mt-3 bg-amber-50 dark:bg-amber-950/20 rounded-2xl px-4 py-3 border border-amber-200 dark:border-amber-900/40">
+                <p className="text-[13px] text-amber-700 dark:text-amber-400 font-semibold">
+                  👑 Pacchetto Completo — accesso a vita a tutte le ricette e aggiornamenti
+                </p>
+              </div>
+            );
+          }
+
           if (purchased.length === 0) return null;
+
           const productNames = purchased.map(slug => {
             const gpProduct = gostoPuroProducts.find(p => p.slug === slug);
-            return gpProduct?.nome || PRODUCT_OCCASION_MAP[slug] || slug;
+            return gpProduct?.nome || PRODUCT_NAMES[slug] || slug;
           });
+
           return (
             <div className="mt-3 bg-[#F0F7F4] dark:bg-[#1A2B20] rounded-2xl px-4 py-3 border border-[#C8E6D8] dark:border-[#2D4A38]">
-              <p className="text-[13px] text-[#2D6A4F] dark:text-[#40916C] font-semibold mb-1">
+              <p className="text-[13px] text-[#2D6A4F] dark:text-[#40916C] font-semibold mb-1.5">
                 ✅ Hai accesso sbloccato a:
               </p>
               <div className="flex flex-wrap gap-1.5 mb-2">
@@ -223,7 +238,7 @@ export default function Home() {
                 ))}
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                🔓 Il tuo accesso a questi prodotti è <strong>a vita</strong> e include tutti gli aggiornamenti futuri.
+                🔓 Il tuo accesso è <strong>a vita</strong> — non è un abbonamento. Inclusi tutti gli aggiornamenti futuri.
               </p>
             </div>
           );

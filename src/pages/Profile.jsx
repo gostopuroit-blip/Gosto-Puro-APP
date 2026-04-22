@@ -450,36 +450,108 @@ export default function Profile() {
         </Button>
       </div>
 
-      {/* Abbonamento */}
-      <div className="px-5 mt-4">
-        <div className="bg-gradient-to-r from-amber-50 dark:from-amber-950/20 to-yellow-50 dark:to-yellow-950/20 rounded-2xl p-4 border border-amber-100 dark:border-amber-900/40 flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Crown className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-gray-800 dark:text-white">
-              {user?.plan === "premium" || user?.role === "admin" ? "Piano Premium attivo ✨" : "Piano Base"}
-            </p>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-              {user?.plan === "premium" || user?.role === "admin"
-                ? "Hai accesso completo a tutte le funzionalità"
-                : "Sblocca Planner, Occasioni Speciali e molto altro"}
-            </p>
+      {/* Abbonamento / Accesso */}
+      {(() => {
+        const isPremium = user?.plan === "premium" || user?.role === "admin";
+        const purchased = user?.purchased_products || [];
 
+        const PRODUCT_NAMES = {
+          ricette_sane_35: "35 Ricette Sane",
+          ricette_veloci_pratiche: "Ricette Veloci e Pratiche",
+          cene_friggitrice: "Cene con Friggitrice ad Aria",
+          ricette_congelare: "Ricette Facili da Congelare",
+          diabetici: "365 Ricette per Diabetici",
+          fitness_pratiche: "275 Ricette Fitness",
+          ricette_detox: "Ricette Detox",
+          low_carb: "Ricette Low Carb",
+          senza_zucchero: "Ricette Senza Zucchero",
+        };
+
+        if (isPremium) {
+          return (
+            <div className="px-5 mt-4">
+              <div className="bg-gradient-to-r from-amber-50 dark:from-amber-950/20 to-yellow-50 dark:to-yellow-950/20 rounded-2xl p-4 border border-amber-100 dark:border-amber-900/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Crown className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-800 dark:text-white">👑 Pacchetto Completo attivo</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Accesso completo a tutte le ricette e funzionalità</p>
+                  </div>
+                </div>
+                <div className="mt-3 bg-amber-100/60 dark:bg-amber-900/20 rounded-xl px-3 py-2">
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold">
+                    🔓 Accesso <strong>a vita</strong> — non è un abbonamento. Inclusi tutti gli aggiornamenti futuri.
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        if (purchased.length > 0) {
+          const productNames = purchased.map(slug => PRODUCT_NAMES[slug] || slug);
+          return (
+            <div className="px-5 mt-4">
+              <div className="bg-[#F0F7F4] dark:bg-[#1A2B20] rounded-2xl p-4 border border-[#C8E6D8] dark:border-[#2D4A38]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-[#2D6A4F] dark:text-[#40916C]">✅ I tuoi prodotti acquistati:</p>
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {productNames.map((name, i) => (
+                        <span key={i} className="text-[11px] font-bold bg-[#2D6A4F] text-white px-2.5 py-1 rounded-full">{name}</span>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+                      🔓 <strong>Accesso a vita</strong> — non è un abbonamento. Inclusi tutti gli aggiornamenti futuri.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="https://gostopuro.it/upgrade/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent("premium_click", { source: "profile_purchased" })}
+                  className="mt-3 w-full flex items-center justify-center gap-2 bg-amber-500 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl"
+                >
+                  <Crown className="w-4 h-4" />
+                  Sblocca il Pacchetto Completo
+                </a>
+                <p className="text-[10px] text-center text-gray-400 mt-1.5">Accesso vitalizio · Nessun abbonamento · Tutti gli aggiornamenti</p>
+              </div>
+            </div>
+          );
+        }
+
+        // Nessun acquisto
+        return (
+          <div className="px-5 mt-4">
+            <div className="bg-gradient-to-r from-amber-50 dark:from-amber-950/20 to-yellow-50 dark:to-yellow-950/20 rounded-2xl p-4 border border-amber-100 dark:border-amber-900/40">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Crown className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-800 dark:text-white">Pacchetto Completo</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Sblocca tutte le ricette e collezioni</p>
+                </div>
+              </div>
+              <a
+                href="https://gostopuro.it/upgrade/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("premium_click", { source: "profile" })}
+                className="w-full flex items-center justify-center gap-2 bg-amber-500 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl"
+              >
+                <Crown className="w-4 h-4" />
+                Scopri il Pacchetto Completo
+              </a>
+              <p className="text-[10px] text-center text-gray-400 mt-1.5">Accesso vitalizio · Nessun abbonamento · Tutti gli aggiornamenti</p>
+            </div>
           </div>
-          {(!user?.plan || user?.plan === "free") && user?.role !== "admin" && (
-            <a
-              href="https://gostopuro.it/upgrade/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent("premium_click", { source: "profile" })}
-              className="bg-amber-500 dark:bg-amber-600 text-white text-[13px] font-bold px-3 py-1.5 rounded-xl flex-shrink-0"
-            >
-              Upgrade
-            </a>
-          )}
-        </div>
-      </div>
+        );
+      })()}
 
 
       {/* Admin Button */}
