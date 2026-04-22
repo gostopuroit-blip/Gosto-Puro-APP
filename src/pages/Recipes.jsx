@@ -60,28 +60,23 @@ export default function Recipes() {
 
 
   // Define constants before useMemo
-  const OCCASIONS_LIST = [
-    "Colazione", "Pranzo", "Cena", "Leggera", "Dolci",
-    "In famiglia", "Per due", "Con amici", "Feste",
-    "Estate", "Autunno", "Inverno", "Primavera",
-    "Veloci", "Instagram", "Natale", "Capodanno", "Dal mondo",
-    "275 Ricette Fitness Pratiche ed Economiche",
-    "Senza zucchero", "Detox",
-    "365 Ricette Deliziose per Diabetici",
-    "Proteiche", "Low carb",
-    "Friggitrice ad Aria",
-    "Facili da Congelare",
-    "Ricette Sane"
-  ];
   const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const SPECIAL_OCCASIONS = OCCASIONS_LIST.filter(occ => !FREE_CATEGORIES.includes(occ));
-  const LIFESTYLE_TAGS = [
-    "275 Ricette Fitness Pratiche ed Economiche",
-    "Senza zucchero", "Detox",
-    "365 Ricette Deliziose per Diabetici",
-    "Proteiche", "Low carb"
-  ];
   const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
+
+  // Occasioni GP prodotto: buscar SOLO in occasions (non in dietary_tags/lifestyle)
+  // Altrimenti ricette salate con dietary_tag "Senza zucchero" appaiono nella collezione dolci
+  const GP_PRODUCT_OCCASIONS = new Set([
+    "Senza zucchero", "Low carb", "Detox", "Fit",
+    "Ricette Sane", "Veloci", "Friggitrice ad Aria", "Facili da Congelare",
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "365 Ricette Deliziose per Diabetici",
+  ]);
+
+  // Aliases: occasione prodotto → labels antichi usati nelle ricette
+  const OCCASION_ALIASES = {
+    "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
+    "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"],
+  };
 
   const filteredRecipes = useMemo(() => {
     let result = [...recipes];
@@ -100,26 +95,34 @@ export default function Recipes() {
       );
     }
 
-    // Tags — filter by category for Colazione/Pranzo/Cena, or by occasions/lifestyle for others
+    // Tags — filter by category for Colazione/Pranzo/Cena, or by occasions only for GP products
     if (activeTags.occasion) {
       if (FREE_CATEGORIES.includes(activeTags.occasion)) {
-        // Filter by category
         result = result.filter((r) => r.category === activeTags.occasion);
+      } else if (GP_PRODUCT_OCCASIONS.has(activeTags.occasion)) {
+        // GP product occasions: match ONLY in occasions (not dietary_tags/lifestyle to avoid false positives)
+        const terms = OCCASION_ALIASES[activeTags.occasion] || [activeTags.occasion];
+        result = result.filter((r) => terms.some(term => (r.occasions || []).includes(term)));
       } else {
-        // Filter by occasions or lifestyle
+        // Other occasions: match in occasions or lifestyle
         result = result.filter(
           (r) =>
-          r.occasions && r.occasions.includes(activeTags.occasion) ||
-          r.lifestyle && r.lifestyle.includes(activeTags.occasion)
+          (r.occasions || []).includes(activeTags.occasion) ||
+          (r.lifestyle || []).includes(activeTags.occasion)
         );
       }
     }
     if (activeTags.lifestyle) {
-      result = result.filter(
-        (r) =>
-        r.lifestyle && r.lifestyle.includes(activeTags.lifestyle) ||
-        r.occasions && r.occasions.includes(activeTags.lifestyle)
-      );
+      if (GP_PRODUCT_OCCASIONS.has(activeTags.lifestyle)) {
+        const terms = OCCASION_ALIASES[activeTags.lifestyle] || [activeTags.lifestyle];
+        result = result.filter((r) => terms.some(term => (r.occasions || []).includes(term)));
+      } else {
+        result = result.filter(
+          (r) =>
+          (r.lifestyle || []).includes(activeTags.lifestyle) ||
+          (r.occasions || []).includes(activeTags.lifestyle)
+        );
+      }
     }
 
     // Apply sort filters (only one at a time — last active wins)

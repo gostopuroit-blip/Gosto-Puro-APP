@@ -57,37 +57,19 @@ const occasionAliases = {
   "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"],
 };
 
-// Ocasiões que também devem ser buscadas em dietary_tags das receitas
-const DIETARY_TAG_OCCASIONS = new Set([
-  "Low carb",
-  "Senza zucchero",
-  "Detox",
-  "Proteiche",
-  "Fit",
-  "Diabetico",
-  "Senza glutine",
-  "Senza lattosio",
-  "Vegano",
-  "Vegetariano",
-  "Alto contenuto proteico",
-  "Senza uova",
-  "Senza frutti di mare",
-  "365 Ricette Deliziose per Diabetici",
-  "275 Ricette Fitness Pratiche ed Economiche",
-]);
-
 // Receitas que pertencem a estas occasions devem ser EXCLUÍDAS de outras coleções (evita overlap)
 const occasionExclusions = {
   "275 Ricette Fitness Pratiche ed Economiche": ["Friggitrice ad Aria"],
 };
 
-// Ocasiões que são produtos GP: buscar SOMENTE em occasions (não em dietary_tags nem lifestyle)
-// Evita que receitas salgadas com dietary_tag "Senza zucchero" apareçam na coleção dolci_fitness
+// Ocasiões GP produto: buscar SOMENTE em occasions (nunca em dietary_tags nem lifestyle)
+// Impede que receitas com dietary_tag similar apareçam em coleções erradas
 const GP_PRODUCT_OCCASIONS = new Set([
-  "Senza zucchero",
-  "Low carb",
-  "Detox",
-  "Fit",
+  "Senza zucchero", "Low carb", "Detox", "Fit",
+  "Ricette Sane", "Veloci", "Friggitrice ad Aria", "Facili da Congelare",
+  "Proteiche",
+  "365 Ricette Deliziose per Diabetici",
+  "275 Ricette Fitness Pratiche ed Economiche",
 ]);
 
 const DIETARY_TAG_COLORS = {
@@ -154,27 +136,17 @@ export default function OccasionRecipesPage() {
       // Use occasion aliases if available, otherwise use the occasion directly
       const searchTerms = occasionAliases[occasion] || [occasion];
       const exclusions = occasionExclusions[occasion] || [];
-      // For "275 Ricette Fitness": match "Fit" only in occasions (not lifestyle, to avoid false positives)
-      const isFitnessOccasion = occasion === "275 Ricette Fitness Pratiche ed Economiche";
-      const isDietaryOccasion = DIETARY_TAG_OCCASIONS.has(occasion);
       const isGpProductOccasion = GP_PRODUCT_OCCASIONS.has(occasion);
       const filtered = batch.filter((r) => {
         const rOccasions = r.occasions || [];
         const rLifestyle = r.lifestyle || [];
-        const rDietaryTags = r.dietary_tags || [];
         const matchesTerm = searchTerms.some(term => {
-          if (isFitnessOccasion && term === "Fit") {
-            return rOccasions.includes(term); // only occasions, not lifestyle
-          }
           // GP product occasions: match ONLY in occasions field (never in dietary_tags/lifestyle)
-          // This prevents savory recipes with dietary_tag "Senza zucchero" from appearing
+          // Prevents recipes with a similar dietary_tag from appearing in wrong collections
           if (isGpProductOccasion) {
             return rOccasions.includes(term);
           }
-          // For dietary-based occasions, also check dietary_tags
-          if (isDietaryOccasion) {
-            return rOccasions.includes(term) || rLifestyle.includes(term) || rDietaryTags.includes(term);
-          }
+          // Other occasions (seasonal, social): match in occasions or lifestyle
           return rOccasions.includes(term) || rLifestyle.includes(term);
         });
         const isExcluded = exclusions.some(excl => rOccasions.includes(excl));
