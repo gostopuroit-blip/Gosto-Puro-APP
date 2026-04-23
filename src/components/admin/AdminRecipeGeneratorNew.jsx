@@ -8,14 +8,15 @@ const OCCASIONS_LIST = [
   "Colazione", "Pranzo", "Cena", "Leggera", "Dolci",
   "In famiglia", "Per due", "Con amici", "Feste",
   "Estate", "Autunno", "Inverno", "Primavera",
-  "Veloci", "Instagram", "Natale", "Capodanno", "Dal mondo",
+  "Veloci", "Instagram", "Natale e Capodanno", "Dal mondo",
   "275 Ricette Fitness Pratiche ed Economiche",
   "Senza zucchero", "Detox",
   "365 Ricette Deliziose per Diabetici",
   "Proteiche", "Low carb",
   "Friggitrice ad Aria",
   "Facili da Congelare",
-  "Ricette Sane"
+  "Ricette Sane",
+  "Collezione Gosto Puro",
 ];
 
 const CATEGORIES = ["Colazione", "Pranzo", "Cena", "Dolce", "Snack", "Bevanda"];
