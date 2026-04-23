@@ -145,12 +145,11 @@ export default function OccasionRecipesPage() {
 
       let filtered;
 
-      // "Collezione Gosto Puro" é uma meta-coleção: agrega receitas de várias ocasiões
-      // Busca SOMENTE em occasions (nunca em lifestyle) para evitar overlap com outros produtos GP
+      // "Collezione Gosto Puro": busca SOMENTE receitas com a tag direta "Collezione Gosto Puro"
       if (occasion === "Collezione Gosto Puro") {
         filtered = batch.filter((r) => {
           const rOccasions = r.occasions || [];
-          return COLLEZIONE_GOSTO_PURO_OCCASIONS.some(term => rOccasions.includes(term));
+          return rOccasions.includes("Collezione Gosto Puro");
         });
       } else {
         // Use occasion aliases if available, otherwise use the occasion directly
