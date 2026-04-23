@@ -50,7 +50,7 @@ const DAILY_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 const CATEGORY_PILLS = ["Tutte", "Colazione", "Pranzo", "Cena", "Snack", "Dolce", "Bevanda"];
 const PAGE_SIZE = 6;
 // Max recipes to fetch in a single query — covers all known occasions
-const FETCH_LIMIT = 1000;
+const FETCH_LIMIT = 2000;
 
 // Occasione aliases para buscar receitas com labels antigos/novos
 const occasionAliases = {
