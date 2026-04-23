@@ -400,6 +400,55 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Collezione Gosto Puro — sub-occasions */}
+      {(() => {
+        const accessibleOccasions = getUserAccessibleOccasions(user);
+        const isPremium = accessibleOccasions.includes("ALL");
+        const hasCollezione = isPremium || (user?.purchased_products || []).includes("504_ricette_collezione");
+
+        const collectionOccasions = [
+          { label: "Instagram", occasion: "Instagram", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png" },
+          { label: "In famiglia", occasion: "In famiglia", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/78bec7c3b_Infamiglia.png" },
+          { label: "Per due", occasion: "Per due", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/90f0dad01_Perdue.png" },
+          { label: "Con amici", occasion: "Con amici", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/2e95bf4e4_Conamici.png" },
+          { label: "Estate", occasion: "Estate", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/029f21cd5_Estate.png" },
+          { label: "Autunno", occasion: "Autunno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/6d0a7ca9d_Autunno.png" },
+          { label: "Inverno", occasion: "Inverno", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/d0924a4a2_Inverno.png" },
+          { label: "Primavera", occasion: "Primavera", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/42185c523_Primavera.png" },
+        ];
+
+        return (
+          <div className="px-5 mt-8">
+            <SectionHeader title="Collezione Gosto-Puro" />
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+              {collectionOccasions.map(occ => (
+                hasCollezione ? (
+                  <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.occasion)}`}
+                    onClick={() => trackEvent("occasion_click", { occasion_label: occ.occasion })}
+                    className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                    <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+                      <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
+                  </Link>
+                ) : (
+                  <a key={occ.label} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
+                    className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                    <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14, opacity: 0.6 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
+                      <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <Lock className="w-5 h-5 text-white drop-shadow" />
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-500 dark:text-gray-500">{occ.label}</span>
+                  </a>
+                )
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Top Prepared — carousel with large cards */}
       <div className="mt-8">
         <div className="px-5">
