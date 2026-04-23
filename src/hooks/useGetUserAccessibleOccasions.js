@@ -9,6 +9,7 @@ const PRODUCT_OCCASION_MAP = {
   ricette_detox: ["Detox"],
   low_carb: ["Low carb"],
   senza_zucchero: ["Senza zucchero"],
+  504_ricette_collezione: ["Collezione Gosto Puro", "Veloci"],
 };
 
 // Ocasiões sempre acessíveis com qualquer compra
