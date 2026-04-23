@@ -69,7 +69,7 @@ export default function Recipes() {
     "Senza zucchero", "Low carb", "Detox", "Fit",
     "Ricette Sane", "Veloci", "Friggitrice ad Aria", "Facili da Congelare",
     "275 Ricette Fitness Pratiche ed Economiche",
-    "365 Ricette Deliziose per Diabetici",
+    "365 Ricette Deliziose per Diabetici", "Collezione Gosto Puro",
   ]);
 
   // Aliases: occasione prodotto → labels antichi usati nelle ricette
