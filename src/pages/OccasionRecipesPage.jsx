@@ -78,6 +78,7 @@ const COLLEZIONE_GOSTO_PURO_OCCASIONS = [
   "Colazione", "Pranzo", "Cena", "Leggera",
   "Instagram", "In famiglia", "Per due", "Con amici",
   "Estate", "Autunno", "Inverno", "Primavera",
+  "Natale e Capodanno",
 ];
 
 const DIETARY_TAG_COLORS = {
@@ -145,13 +146,11 @@ export default function OccasionRecipesPage() {
       let filtered;
 
       // "Collezione Gosto Puro" é uma meta-coleção: agrega receitas de várias ocasiões
+      // Busca SOMENTE em occasions (nunca em lifestyle) para evitar overlap com outros produtos GP
       if (occasion === "Collezione Gosto Puro") {
         filtered = batch.filter((r) => {
           const rOccasions = r.occasions || [];
-          const rLifestyle = r.lifestyle || [];
-          return COLLEZIONE_GOSTO_PURO_OCCASIONS.some(term =>
-            rOccasions.includes(term) || rLifestyle.includes(term)
-          );
+          return COLLEZIONE_GOSTO_PURO_OCCASIONS.some(term => rOccasions.includes(term));
         });
       } else {
         // Use occasion aliases if available, otherwise use the occasion directly
