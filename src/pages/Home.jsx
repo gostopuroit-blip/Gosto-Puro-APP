@@ -73,7 +73,8 @@ export default function Home() {
     "Proteiche", "Low carb",
     "Friggitrice ad Aria",
     "Facili da Congelare",
-    "Ricette Sane"
+    "Ricette Sane",
+    "Collezione Gosto Puro"
   ];
 
   const loadData = async () => {
