@@ -131,6 +131,7 @@ const FIXED_OCCASIONS = {
     { id: "22", label: "365 Ricette Deliziose per Diabetici", tipo: "stile_vita", icon: "🩺" },
     { id: "23", label: "Proteiche", tipo: "stile_vita", icon: "🥚" },
     { id: "24", label: "Low carb", tipo: "stile_vita", icon: "🥗" },
+    { id: "25", label: "Collezione Gosto Puro", tipo: "stile_vita", icon: "🍽️" },
   ],
 };
 

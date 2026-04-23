@@ -18,7 +18,7 @@ export default function AdminUserProducts() {
   const load = async () => {
     const [usersRes, productsRes] = await Promise.all([
       base44.functions.invoke("adminGetUsersV2", {}),
-      base44.entities.GostoPuroProduct.filter({ is_active: true }, "sort_order"),
+      base44.entities.GostoPuroProduct.filter({}, "sort_order"),
     ]);
     setUsers(usersRes.data?.users || []);
     setProducts(productsRes);
