@@ -147,10 +147,20 @@ export default function OccasionRecipesPage() {
 
       // "Collezione Gosto Puro": include tutte le ricette delle sub-occasioni
       // MA esclude le ricette che appartengono ad altri prodotti GP specifici
-    if (occasion === "Collezione Gosto Puro") {
+if (occasion === "Collezione Gosto Puro") {
+  const GP_PRODUCT_ONLY_OCCASIONS = new Set([
+    "Veloci", "Friggitrice ad Aria", "Facili da Congelare", "Ricette Sane",
+    "Senza zucchero", "Low carb", "Detox", "Fit",
+    "365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico",
+    "275 Ricette Fitness Pratiche ed Economiche",
+    "Proteiche",
+  ]);
   filtered = batch.filter((r) => {
     const rOccasions = r.occasions || [];
-    return rOccasions.includes("Collezione Gosto Puro");
+    const hasCollezioneOcc = COLLEZIONE_GOSTO_PURO_OCCASIONS.some(term => rOccasions.includes(term));
+    if (!hasCollezioneOcc) return false;
+    const hasOnlyOtherGP = rOccasions.every(occ => GP_PRODUCT_ONLY_OCCASIONS.has(occ));
+    return !hasOnlyOtherGP;
   });
 } else {
         // Use occasion aliases if available, otherwise use the occasion directly
