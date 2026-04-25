@@ -209,7 +209,8 @@ function ProductDropdown({ onSelect, current }) {
     "ricette_congelare",
     "senza_zucchero",
     "ricette_detox",
-    "low_carb"
+    "low_carb",
+    "504_ricette_collezione"
   ];
   
   const available = products.filter(p => !current.includes(p));
