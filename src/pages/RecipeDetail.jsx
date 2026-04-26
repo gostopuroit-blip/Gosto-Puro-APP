@@ -162,14 +162,26 @@ export default function RecipeDetail() {
   };
   const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena", "Leggera"];
 
+  // Sub-ocasiões que pertencem à Collezione Gosto Puro
+  const COLLEZIONE_GOSTO_PURO_OCCASIONS = [
+    "Colazione", "Pranzo", "Cena", "Leggera",
+    "Instagram", "In famiglia", "Per due", "Con amici",
+    "Estate", "Autunno", "Inverno", "Primavera",
+    "Natale e Capodanno",
+  ];
+
   const hasProductAccess = (() => {
     if (isBasicOrAbove) return true;
     if (!recipe) return false;
-    // Verifica ocasiões gratuitas
     const recipeOccs = recipe.occasions || [];
-    if (recipeOccs.some(occ => FREE_OCCASIONS.includes(occ))) return true;
-    // Verifica produtos comprados
     const purchased = user?.purchased_products || [];
+    // Verifica ocasiões gratuitas
+    if (recipeOccs.some(occ => FREE_OCCASIONS.includes(occ))) return true;
+    // Verifica se tem Collezione e a receita pertence a alguma sub-ocasião dela
+    if (purchased.includes("504_ricette_collezione")) {
+      if (recipeOccs.some(occ => COLLEZIONE_GOSTO_PURO_OCCASIONS.includes(occ))) return true;
+    }
+    // Verifica outros produtos comprados
     return purchased.some(slug => {
       const unlockedOccs = PRODUCT_OCCASION_MAP[slug] || [];
       return unlockedOccs.some(occ => recipeOccs.includes(occ));
