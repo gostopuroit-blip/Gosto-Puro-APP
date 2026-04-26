@@ -327,9 +327,11 @@ export default function Home() {
                 </Link>
               )),
               ...lockedProducts.map(product => (
-                <Link 
+                <a 
                   key={product.id} 
-                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
+                  href="https://gostopuro.it/upgrade/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
                   style={{ width: "200px", height: "250px", opacity: 0.6 }}
                 >
@@ -342,7 +344,7 @@ export default function Home() {
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                     <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
                   </div>
-                </Link>
+                </a>
               )),
               ...unlockedTags.map(tag => (
                 <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
@@ -361,8 +363,7 @@ export default function Home() {
                 </Link>
               )),
               ...lockedTags.map(tag => (
-                <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
-                  onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
+                <a key={tag.label} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
                   className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px", opacity: 0.6 }}>
                   {tag.img ? (
                     <img src={tag.img} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
@@ -377,7 +378,7 @@ export default function Home() {
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                     <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
                   </div>
-                </Link>
+                </a>
               )),
               ...brokenProducts.map(product => (
                 <div key={product.id} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden cursor-not-allowed" style={{ width: "200px", height: "250px" }}>
