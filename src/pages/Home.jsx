@@ -455,38 +455,15 @@ export default function Home() {
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {topRecipes.map((recipe) => {
-            const accessible = getUserAccessibleOccasions(user);
-            const isPremiumUser = accessible.includes("ALL");
-            const accessibleExpanded = isPremiumUser ? accessible : expandOccasions(accessible);
-            const isBlocked = !isPremiumUser && !accessibleExpanded.some(occ => (recipe.occasions || []).includes(occ) || (recipe.lifestyle || []).includes(occ));
-
-            if (isBlocked) {
-              return (
-                <button key={recipe.id} onClick={() => window.open("https://gostopuro.it/upgrade/", "_blank")} className="flex-shrink-0 group relative rounded-2xl overflow-hidden cursor-pointer opacity-60" style={{ width: "200px", height: "250px" }}>
-                  <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} />
-                  <div className="absolute inset-0 bg-black/30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Lock className="w-7 h-7 text-white drop-shadow-lg" />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
-                    <p className="text-white/80 text-xs">🔒 Accesso limitato</p>
-                  </div>
-                </button>
-              );
-            }
-
-            return (
-              <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                  <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
-                  <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
-                </div>
-              </Link>
-            );
-          })}
+          {topRecipes.map((recipe) => (
+            <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+              <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                <p className="text-white font-semibold text-sm line-clamp-2 mb-1">{recipe.title}</p>
+                <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
