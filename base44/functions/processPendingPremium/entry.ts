@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "processed" });
+    await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "processed", processed_by: "processPendingPremium" });
     processedCount++;
   }
 
@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
     processed: processedCount,
     skipped_no_user: skippedNoUser,
     skipped_no_product: skippedNoProduct,
-    still_pending: pending.length - processedCount
+    still_pending: pending.length - processedCount,
+    source: "processPendingPremium"
   });
 });

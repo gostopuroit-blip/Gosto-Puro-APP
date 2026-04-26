@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         if (!product) {
           // Produto não existe — marcar como applied para não reprocessar
           console.log(`[reconcile] Produto não encontrado, marcando applied: ${productId} (${email})`);
-          await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
+          await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied", processed_by: "reconcilePendingPurchases" });
           applied++;
           continue;
         }
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
           dbUser.purchased_products = updated;
         }
 
-        await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied" });
+        await base44.asServiceRole.entities.PendingPremium.update(record.id, { status: "applied", processed_by: "reconcilePendingPurchases" });
         console.log(`[reconcile] Aplicado: ${email} → ${slug}`);
         applied++;
 
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return Response.json({ status: "ok", processed: applied, total_pending: pending.length });
+    return Response.json({ status: "ok", processed: applied, total_pending: pending.length, source: "reconcilePendingPurchases" });
 
   } catch (error) {
     console.error('[reconcile] Erro:', error.message);
