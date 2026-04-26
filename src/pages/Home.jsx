@@ -455,7 +455,29 @@ export default function Home() {
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {topRecipes.map((recipe) => (
+          {(() => {
+            const accessibleOccasions = getUserAccessibleOccasions(user);
+            const isPremium = accessibleOccasions.includes("ALL");
+            const dietaryTags = user?.dietary_tags_profile || [];
+
+            const filtered = topRecipes.filter((recipe) => {
+              // Verifica acessibilidade
+              const recipeOccs = recipe.occasions || [];
+              const hasAccess = isPremium ||
+                recipeOccs.length === 0 ||
+                recipeOccs.some(occ => accessibleOccasions.includes(occ));
+              if (!hasAccess) return false;
+
+              // Filtro por tags dietéticas (apenas se o usuário tiver definido)
+              if (dietaryTags.length > 0) {
+                const recipeTags = recipe.dietary_tags || [];
+                return dietaryTags.some(tag => recipeTags.includes(tag));
+              }
+
+              return true;
+            });
+
+            return filtered.map((recipe) => (
             <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
               <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
@@ -463,7 +485,8 @@ export default function Home() {
                 <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
               </div>
             </Link>
-          ))}
+            ));
+          })()}
         </div>
       </div>
 
