@@ -3,52 +3,78 @@ import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search } from "lucide-react";
+import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
-const OCCASIONS = [
-  "Colazione", "Pranzo", "Cena", "Fit", "Detox", "Low carb",
-  "Senza zucchero", "Proteiche", "365 Ricette Deliziose per Diabetici",
-  "275 Ricette Fitness", "Instagram"
+const ALL_OCCASIONS = [
+  "Colazione", "Pranzo", "Cena", "Leggera",
+  "Fit", "Detox", "Low carb", "Senza zucchero",
+  "Proteiche", "365 Ricette Deliziose per Diabetici",
+  "275 Ricette Fitness Pratiche ed Economiche",
+  "Veloci", "Friggitrice ad Aria", "Facili da Congelare", "Ricette Sane",
+  "Instagram", "In famiglia", "Per due", "Con amici",
+  "Estate", "Autunno", "Inverno", "Primavera"
 ];
 
 const PAGE_SIZE = 10;
 
-export default function ChangeRecipeModal({ open, onOpenChange, mealType, onSelect }) {
-  const [selectedOccasion, setSelectedOccasion] = useState(OCCASIONS[0]);
+export default function ChangeRecipeModal({ open, onOpenChange, mealType, onSelect, user }) {
+  const [selectedOccasion, setSelectedOccasion] = useState("Colazione");
   const [search, setSearch] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    if (!open) return;
-    setPage(1);
-    fetchRecipes(selectedOccasion, "");
-    setSearch("");
-  }, [open, selectedOccasion]);
+  const accessibleOccasions = getUserAccessibleOccasions(user);
+  const isAllAccess = accessibleOccasions.includes("ALL");
 
-  // Set default occasion based on mealType
+  // Only show occasions the user has access to
+  const availableOccasions = isAllAccess
+    ? ALL_OCCASIONS
+    : ALL_OCCASIONS.filter(occ => accessibleOccasions.includes(occ));
+
+  // Set default occasion based on mealType when modal opens
   useEffect(() => {
     if (!open) return;
     const defaults = { colazione: "Colazione", pranzo: "Pranzo", cena: "Cena", snack: "Fit" };
-    setSelectedOccasion(defaults[mealType] || "Colazione");
+    const defaultOcc = defaults[mealType] || "Colazione";
+    // Use default only if it's accessible
+    const firstAccessible = availableOccasions.includes(defaultOcc)
+      ? defaultOcc
+      : availableOccasions[0] || "Colazione";
+    setSelectedOccasion(firstAccessible);
+    setSearch("");
+    setPage(1);
   }, [open, mealType]);
 
-  const fetchRecipes = async (occasion, query) => {
+  useEffect(() => {
+    if (!open) return;
+    fetchRecipes();
+  }, [open]);
+
+  const fetchRecipes = async () => {
     setLoading(true);
     const results = await base44.entities.Recipe.filter(
       { status: "pubblicata" },
       "-created_date",
-      200
+      500
     );
-    setRecipes(results);
     setLoading(false);
+
+    // Filter by accessible occasions
+    const accessible = isAllAccess
+      ? results
+      : results.filter(r => {
+          const recipeOccs = r.occasions || [];
+          if (recipeOccs.length === 0) return true;
+          return recipeOccs.some(occ => accessibleOccasions.includes(occ));
+        });
+
+    setRecipes(accessible);
   };
 
   const filtered = recipes.filter(r => {
     const matchesOccasion =
       (r.occasions || []).some(o => o.toLowerCase().includes(selectedOccasion.toLowerCase())) ||
-      (r.lifestyle || []).some(o => o.toLowerCase().includes(selectedOccasion.toLowerCase())) ||
-      (r.dietary_tags || []).some(o => o.toLowerCase().includes(selectedOccasion.toLowerCase())) ||
       (r.category || "").toLowerCase().includes(selectedOccasion.toLowerCase());
 
     const matchesSearch = !search ||
@@ -60,11 +86,6 @@ export default function ChangeRecipeModal({ open, onOpenChange, mealType, onSele
   const paginated = filtered.slice(0, page * PAGE_SIZE);
   const hasMore = paginated.length < filtered.length;
 
-  const handleOccasionChange = (occ) => {
-    setSelectedOccasion(occ);
-    setPage(1);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-lg h-[85vh] flex flex-col p-0 gap-0">
@@ -72,13 +93,13 @@ export default function ChangeRecipeModal({ open, onOpenChange, mealType, onSele
           <DialogTitle>Scegli una ricetta</DialogTitle>
         </DialogHeader>
 
-        {/* Occasion pills */}
+        {/* Occasion pills — only accessible ones */}
         <div className="px-4 py-3 border-b border-gray-100 dark:border-[#2A2A2A] flex-shrink-0">
           <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
-            {OCCASIONS.map(occ => (
+            {availableOccasions.map(occ => (
               <button
                 key={occ}
-                onClick={() => handleOccasionChange(occ)}
+                onClick={() => { setSelectedOccasion(occ); setPage(1); }}
                 className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                   selectedOccasion === occ
                     ? "bg-[#2D6A4F] text-white"

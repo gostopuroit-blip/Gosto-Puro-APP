@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ChangeRecipeModal from "@/components/planner/ChangeRecipeModal";
 import PlannerModal from "@/components/PlannerModal";
+import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
 const MEAL_TIMES = {
   colazione: "07:00",
@@ -128,6 +129,8 @@ export default function Planner() {
     setIsCreating(true);
     try {
       // Fetch published recipes
+      const accessibleOccasions = getUserAccessibleOccasions(user);
+      const isAllAccess = accessibleOccasions.includes("ALL");
       let allRecipes = [];
       let skip = 0;
       while (true) {
@@ -144,8 +147,19 @@ export default function Planner() {
 
       // Helper: pick a random recipe matching category, prefer dietary tags
       const pickRecipe = (category, exclude = [], usedIds = new Set()) => {
-        const pool = (withinTime.length > 10 ? withinTime : fallback)
+        let pool = (withinTime.length > 10 ? withinTime : fallback)
           .filter(r => r.category === category && !usedIds.has(r.id));
+
+        // Filter by accessible occasions
+        if (!isAllAccess) {
+          pool = pool.filter(r => {
+            const recipeOccs = r.occasions || [];
+            // If recipe has no occasions, it's accessible to all
+            if (recipeOccs.length === 0) return true;
+            // Check if any of the recipe's occasions are accessible
+            return recipeOccs.some(occ => accessibleOccasions.includes(occ));
+          });
+        }
 
         if (pool.length === 0) return null;
 
@@ -574,6 +588,7 @@ export default function Planner() {
         onOpenChange={(v) => !v && setChangeRecipeSlot(null)}
         mealType={changeRecipeSlot?.mealType}
         onSelect={swapRecipe}
+        user={user}
       />
     </div>
   );
