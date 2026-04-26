@@ -386,13 +386,15 @@ if (occasion === "Collezione Gosto Puro") {
                     <span className="text-4xl mb-2 block">🔒</span>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">Sblocca {occasion}</h3>
                     <p className="text-sm text-gray-500 mb-4">Acquista questa collezione per accedere a tutte le ricette</p>
-                    <Link
-                      to={createPageUrl("ProdottiGostoPuro")}
+                    <a
+                      href="https://gostopuro.it/upgrade/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-block px-5 py-2.5 rounded-xl font-bold text-sm text-white"
                       style={{ background: "#2D6A4F" }}
                     >
                       Scopri come sbloccare →
-                    </Link>
+                    </a>
                   </div>
                 )}
 
