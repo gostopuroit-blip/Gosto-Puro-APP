@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ChangeRecipeModal from "@/components/planner/ChangeRecipeModal";
 import PlannerModal from "@/components/PlannerModal";
+import KcalCounter from "@/components/planner/KcalCounter";
 import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
 const MEAL_TIMES = {
@@ -427,6 +428,14 @@ export default function Planner() {
           )}
         </div>
       </div>
+
+      {/* Kcal Counter */}
+      <KcalCounter
+        plan={plan}
+        recipes={recipes}
+        selectedDay={selectedDay}
+        dailyKcal={plan.daily_kcal}
+      />
 
       {/* Macros */}
       {(macros.proteina > 0 || macros.carboidrati > 0 || macros.grassi > 0 || macros.fibre > 0) && (
