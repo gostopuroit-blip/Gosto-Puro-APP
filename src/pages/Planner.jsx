@@ -113,13 +113,20 @@ export default function Planner() {
         if (day.cena_id) recipeIds.add(day.cena_id);
       });
 
-      // Fetch all recipes in a single batch query
+      // Fetch all recipes needed by the plan (paginated to cover large catalogs)
       const fetchedRecipes = {};
       if (recipeIds.size > 0) {
-        const allRecipes = await base44.entities.Recipe.list("-created_date", 500);
-        allRecipes.forEach(r => {
-          if (recipeIds.has(r.id)) fetchedRecipes[r.id] = r;
-        });
+        let skip = 0;
+        while (true) {
+          const batch = await base44.entities.Recipe.list("-created_date", 500, skip);
+          batch.forEach(r => {
+            if (recipeIds.has(r.id)) fetchedRecipes[r.id] = r;
+          });
+          // Stop early if we already found all needed recipes
+          if (Object.keys(fetchedRecipes).length >= recipeIds.size) break;
+          if (batch.length < 500) break;
+          skip += 500;
+        }
       }
       setRecipes(fetchedRecipes);
     }
