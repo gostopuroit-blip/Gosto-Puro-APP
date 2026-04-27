@@ -9,6 +9,7 @@ const PRODUCT_OCCASION_MAP = {
   ricette_detox: ["Detox"],
   low_carb: ["Low carb"],
   senza_zucchero: ["Senza zucchero"],
+  "504_ricette_collezione": ["Collezione Gosto Puro", "Colazione", "Pranzo", "Cena", "Leggera", "Instagram", "In famiglia", "Per due", "Con amici", "Estate", "Autunno", "Inverno", "Primavera", "Natale e Capodanno"],
 };
 
 // Ocasiões sempre acessíveis com qualquer compra
