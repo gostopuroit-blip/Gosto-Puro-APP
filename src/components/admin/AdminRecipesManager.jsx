@@ -222,55 +222,79 @@ export default function AdminRecipesManager() {
   const [regenHint, setRegenHint] = useState("");
 
   const handleRegenerateIngredientsAndSteps = async () => {
-    if (!form.title.trim()) return toast.error("La ricetta deve avere un titolo");
-    setRegenerating(true);
-    try {
-      // Include existing ingredients as context so the AI enriches rather than inventing
-      const existingIngs = (form.ingredients || []).filter(i => i.name?.trim()).map(i => `${i.name} ${i.quantity || ""}`.trim()).join(", ");
-      const context = [
-        `Titolo: ${form.title}`,
-        `Categoria: ${form.category}`,
-        `Descrizione: ${form.description || ""}`,
-        `Difficoltà: ${form.difficulty}`,
-        `Tempo: ${form.prep_time} min`,
-        `Porzioni: ${form.servings}`,
-        existingIngs ? `Ingredienti già presenti (da usare come base): ${existingIngs}` : "",
-        form.gen_prompt ? `Prompt originale: ${form.gen_prompt}` : "",
-        regenHint ? `Note aggiuntive: ${regenHint}` : "",
-      ].filter(Boolean).join("\n");
+    // Capture current form state immediately to avoid stale closure
+    setForm(currentForm => {
+      if (!currentForm.title.trim()) {
+        toast.error("La ricetta deve avere un titolo");
+        return currentForm;
+      }
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Sei un cuoco italiano esperto. Basandoti su questi dati, genera ingredienti COMPLETI e DETTAGLIATI e istruzioni di preparazione PROFESSIONALI per la ricetta.
+      // Trigger async work outside setter
+      (async (snapshot) => {
+        setRegenerating(true);
+        try {
+          const existingIngs = (snapshot.ingredients || [])
+            .filter(i => i.name?.trim())
+            .map(i => `${i.name}${i.quantity ? ` (${i.quantity})` : ""}`)
+            .join(", ");
 
+          const occasioniSelezionate = (snapshot.occasions || []).join(", ");
+
+          const context = [
+            `Nome del piatto: ${snapshot.title}`,
+            `Categoria pasto: ${snapshot.category}`,
+            occasioniSelezionate ? `Occasioni / contesto del piatto: ${occasioniSelezionate}` : "",
+            snapshot.description ? `Descrizione: ${snapshot.description}` : "",
+            `Difficoltà: ${snapshot.difficulty}`,
+            `Tempo di preparazione: ${snapshot.prep_time} min`,
+            `Porzioni: ${snapshot.servings}`,
+            existingIngs ? `Ingredienti già presenti (usali come base, arricchisci): ${existingIngs}` : "",
+            snapshot.gen_prompt ? `Prompt / note originali: ${snapshot.gen_prompt}` : "",
+            regenHint ? `Istruzioni extra: ${regenHint}` : "",
+          ].filter(Boolean).join("\n");
+
+          const result = await base44.integrations.Core.InvokeLLM({
+            prompt: `Sei un cuoco italiano esperto. Basandoti ESCLUSIVAMENTE sul nome del piatto e sul suo contesto (occasione, categoria), genera una lista di ingredienti COMPLETA e DETTAGLIATA e un procedimento di preparazione PROFESSIONALE.
+
+DATI DELLA RICETTA:
 ${context}
 
 REGOLE OBBLIGATORIE:
-- Ingredienti: usa quelli già presenti come base e arricchisci/correggi. Ogni ingrediente deve avere nome specifico (es: "farina 00", non "farina"), quantità precisa e categoria corretta.
-- Istruzioni: MINIMO 5 passi dettagliati con tempi, temperature e tecniche culinarie professionali. Ogni passo deve essere chiaro e autonomo.
-- Categorie ingredienti valide SOLO: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
-- Non inventare ingredienti non coerenti con la ricetta.
+1. Ingredienti coerenti con il nome del piatto "${snapshot.title}" e con le occasioni: ${occasioniSelezionate || snapshot.category}.
+2. Ogni ingrediente deve avere: nome specifico (es: "farina 00", non solo "farina"), quantità precisa (es: "200g", "3 uova") e categoria corretta.
+3. Istruzioni: MINIMO 6 passi dettagliati con tempi precisi, temperature e tecniche culinarie. Ogni passo autonomo e chiaro.
+4. Categorie ingredienti valide SOLO: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
 
-Restituisci SOLO JSON:
+Restituisci SOLO JSON valido:
 {
   "ingredients": [{"name": "string", "quantity": "string", "category": "string"}],
   "instructions": ["passo dettagliato 1", "passo dettagliato 2", ...]
 }`,
-        model: "claude_sonnet_4_6",
-        response_json_schema: {
-          type: "object",
-          properties: {
-            ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
-            instructions: { type: "array", items: { type: "string" } },
-          },
-        },
-      });
-      if (result.ingredients?.length) setForm(f => ({ ...f, ingredients: result.ingredients }));
-      if (result.instructions?.length) setForm(f => ({ ...f, instructions: result.instructions }));
-      toast.success("Ingredienti e preparazione rigenerati!");
-    } catch (e) {
-      toast.error("Errore nella rigenerazione. Riprova.");
-    }
-    setRegenerating(false);
+            model: "claude_sonnet_4_6",
+            response_json_schema: {
+              type: "object",
+              properties: {
+                ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
+                instructions: { type: "array", items: { type: "string" } },
+              },
+            },
+          });
+
+          setForm(f => ({
+            ...f,
+            ...(result.ingredients?.length ? { ingredients: result.ingredients } : {}),
+            ...(result.instructions?.length ? { instructions: result.instructions } : {}),
+          }));
+          toast.success("Ingredienti e preparazione rigenerati!");
+        } catch (e) {
+          console.error("Regen error:", e);
+          toast.error("Errore nella rigenerazione. Riprova.");
+        }
+        setRegenerating(false);
+      })(currentForm);
+
+      return currentForm; // no change from setter itself
+    });
   };
 
   const parseReceitaPrompt = (text) => {
