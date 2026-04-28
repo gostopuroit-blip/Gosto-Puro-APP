@@ -79,11 +79,21 @@ export default function AdminRecipesManager() {
   useEffect(() => { load(); }, []);
 
   const load = async () => {
-    const [recipesData, occasionsData] = await Promise.all([
-      base44.entities.Recipe.list("-created_date", 1000),
+    const [occasionsData] = await Promise.all([
       base44.entities.RecipeOccasion.filter({ show_in_home: true }, "sort_order")
     ]);
-    setRecipes(recipesData);
+
+    // Fetch all recipes with pagination
+    let allRecipes = [];
+    let skip = 0;
+    while (true) {
+      const batch = await base44.entities.Recipe.list("-created_date", 500, skip);
+      allRecipes = allRecipes.concat(batch);
+      if (batch.length < 500) break;
+      skip += 500;
+    }
+
+    setRecipes(allRecipes);
     setOccasions(occasionsData);
     setLoading(false);
   };
