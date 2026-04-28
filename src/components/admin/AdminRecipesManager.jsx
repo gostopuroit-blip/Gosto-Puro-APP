@@ -234,45 +234,41 @@ export default function AdminRecipesManager() {
   const [regenHint, setRegenHint] = useState("");
 
   const handleRegenerateIngredientsAndSteps = async () => {
-    // Capture current form state immediately to avoid stale closure
-    setForm(currentForm => {
-      if (!currentForm.title.trim()) {
-        toast.error("La ricetta deve avere un titolo");
-        return currentForm;
-      }
+    if (!form.title.trim()) {
+      toast.error("La ricetta deve avere un titolo");
+      return;
+    }
 
-      // Trigger async work outside setter
-      (async (snapshot) => {
-        setRegenerating(true);
-        try {
-          const existingIngs = (snapshot.ingredients || [])
-            .filter(i => i.name?.trim())
-            .map(i => `${i.name}${i.quantity ? ` (${i.quantity})` : ""}`)
-            .join(", ");
+    setRegenerating(true);
+    try {
+      const existingIngs = (form.ingredients || [])
+        .filter(i => i.name?.trim())
+        .map(i => `${i.name}${i.quantity ? ` (${i.quantity})` : ""}`)
+        .join(", ");
 
-          const occasioniSelezionate = (snapshot.occasions || []).join(", ");
+      const occasioniSelezionate = (form.occasions || []).join(", ");
 
-          const context = [
-            `Nome del piatto: ${snapshot.title}`,
-            `Categoria pasto: ${snapshot.category}`,
-            occasioniSelezionate ? `Occasioni / contesto del piatto: ${occasioniSelezionate}` : "",
-            snapshot.description ? `Descrizione: ${snapshot.description}` : "",
-            `Difficoltà: ${snapshot.difficulty}`,
-            `Tempo di preparazione: ${snapshot.prep_time} min`,
-            `Porzioni: ${snapshot.servings}`,
-            existingIngs ? `Ingredienti già presenti (usali come base, arricchisci): ${existingIngs}` : "",
-            snapshot.gen_prompt ? `Prompt / note originali: ${snapshot.gen_prompt}` : "",
-            regenHint ? `Istruzioni extra: ${regenHint}` : "",
-          ].filter(Boolean).join("\n");
+      const context = [
+        `Nome del piatto: ${form.title}`,
+        `Categoria pasto: ${form.category}`,
+        occasioniSelezionate ? `Occasioni / contesto del piatto: ${occasioniSelezionate}` : "",
+        form.description ? `Descrizione: ${form.description}` : "",
+        `Difficoltà: ${form.difficulty}`,
+        `Tempo di preparazione: ${form.prep_time} min`,
+        `Porzioni: ${form.servings}`,
+        existingIngs ? `Ingredienti già presenti (usali come base, arricchisci): ${existingIngs}` : "",
+        form.gen_prompt ? `Prompt / note originali: ${form.gen_prompt}` : "",
+        regenHint ? `Istruzioni extra: ${regenHint}` : "",
+      ].filter(Boolean).join("\n");
 
-          const result = await base44.integrations.Core.InvokeLLM({
-            prompt: `Sei un cuoco italiano esperto. Basandoti ESCLUSIVAMENTE sul nome del piatto e sul suo contesto (occasione, categoria), genera una lista di ingredienti COMPLETA e DETTAGLIATA e un procedimento di preparazione PROFESSIONALE.
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Sei un cuoco italiano esperto. Basandoti ESCLUSIVAMENTE sul nome del piatto e sul suo contesto (occasione, categoria), genera una lista di ingredienti COMPLETA e DETTAGLIATA e un procedimento di preparazione PROFESSIONALE.
 
 DATI DELLA RICETTA:
 ${context}
 
 REGOLE OBBLIGATORIE:
-1. Ingredienti coerenti con il nome del piatto "${snapshot.title}" e con le occasioni: ${occasioniSelezionate || snapshot.category}.
+1. Ingredienti coerenti con il nome del piatto "${form.title}" e con le occasioni: ${occasioniSelezionate || form.category}.
 2. Ogni ingrediente deve avere: nome specifico (es: "farina 00", non solo "farina"), quantità precisa (es: "200g", "3 uova") e categoria corretta.
 3. Istruzioni: MINIMO 6 passi dettagliati con tempi precisi, temperature e tecniche culinarie. Ogni passo autonomo e chiaro.
 4. Categorie ingredienti valide SOLO: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
@@ -282,31 +278,27 @@ Restituisci SOLO JSON valido:
   "ingredients": [{"name": "string", "quantity": "string", "category": "string"}],
   "instructions": ["passo dettagliato 1", "passo dettagliato 2", ...]
 }`,
-            model: "claude_sonnet_4_6",
-            response_json_schema: {
-              type: "object",
-              properties: {
-                ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
-                instructions: { type: "array", items: { type: "string" } },
-              },
-            },
-          });
+        model: "claude_sonnet_4_6",
+        response_json_schema: {
+          type: "object",
+          properties: {
+            ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
+            instructions: { type: "array", items: { type: "string" } },
+          },
+        },
+      });
 
-          setForm(f => ({
-            ...f,
-            ...(result.ingredients?.length ? { ingredients: result.ingredients } : {}),
-            ...(result.instructions?.length ? { instructions: result.instructions } : {}),
-          }));
-          toast.success("Ingredienti e preparazione rigenerati!");
-        } catch (e) {
-          console.error("Regen error:", e);
-          toast.error("Errore nella rigenerazione. Riprova.");
-        }
-        setRegenerating(false);
-      })(currentForm);
-
-      return currentForm; // no change from setter itself
-    });
+      setForm(f => ({
+        ...f,
+        ...(result.ingredients?.length ? { ingredients: result.ingredients } : {}),
+        ...(result.instructions?.length ? { instructions: result.instructions } : {}),
+      }));
+      toast.success("Ingredienti e preparazione rigenerati!");
+    } catch (e) {
+      console.error("Regen error:", e);
+      toast.error("Errore nella rigenerazione. Riprova.");
+    }
+    setRegenerating(false);
   };
 
   const parseReceitaPrompt = (text) => {
