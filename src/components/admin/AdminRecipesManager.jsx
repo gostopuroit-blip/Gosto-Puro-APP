@@ -98,7 +98,7 @@ export default function AdminRecipesManager() {
       visibility: r.is_premium === true ? "premium" : r.is_premium === false ? "all" : "premium",
     });
     setEditId(r.id);
-    setPasteText(""); setShowPaste(false);
+    setPasteText(""); setShowPaste(true);
     setShowForm(true);
   };
 
@@ -340,10 +340,19 @@ export default function AdminRecipesManager() {
 
     setInterpreting(true);
     const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Analizza il seguente testo di una ricetta e restituisci SOLO un oggetto JSON valido, senza markdown, senza backtick, senza testo extra. Il JSON deve avere esattamente questi campi:
+      prompt: `Sei un esperto cuoco italiano e nutrizionista. Analizza il seguente testo di una ricetta e restituisci SOLO un oggetto JSON valido, senza markdown, senza backtick, senza testo extra.
+
+REGOLE IMPORTANTI:
+1. Gli ingredienti devono essere COMPLETI e DETTAGLIATI. Se il testo è vago (es: "farina"), specifica il tipo (es: "farina 00"). Non omettere nessun ingrediente menzionato.
+2. Le istruzioni devono essere DETTAGLIATE e CHIARE - minimo 4-6 passi ben spiegati. Se il testo è sintetico, ESPANDI i passi con tecniche culinarie appropriate.
+3. Per la "category" degli ingredienti usa SOLO: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
+4. Il campo 'calorie' è il numero dopo 'KCAL:' o 'KCAL '. NON lasciare null.
+5. Se un campo non è presente nel testo, deduci un valore ragionevole dal contesto della ricetta.
+
+Il JSON deve avere esattamente questi campi:
 {
   "title": "string",
-  "description": "string (testo della DESCRIZIONE BREVE)",
+  "description": "string (frase breve e invitante, max 25 parole)",
   "category": "string (Colazione|Pranzo|Cena|Dolce|Snack|Bevanda)",
   "difficulty": "string (Facile|Media|Difficile)",
   "prep_time": number,
@@ -356,12 +365,13 @@ export default function AdminRecipesManager() {
   "zuccheri": number,
   "sodio": number,
   "occasions": ["array di stringhe con le occasioni rilevate"],
-  "ingredients": [{"name": "string", "quantity": "string", "category": "Dispensa"}],
-  "instructions": ["array di stringhe, un passo per elemento"],
+  "ingredients": [{"name": "string (nome preciso e completo)", "quantity": "string (quantità specifica)", "category": "string (categoria corretta)"}],
+  "instructions": ["array di stringhe, UN passo per elemento, ogni passo ben dettagliato con tempi e tecniche"],
   "sostituzioni": [{"ingrediente_nome": "string", "opzioni": [{"nome": "string", "quantita": "string", "tags": ["string"], "impatto_calorie": number, "impatto_proteine": number, "impatto_carboidrati": number, "impatto_grassi": number}]}]
 }
-IMPORTANTE: Il campo 'calorie' deve essere estratto dalla riga 'KCAL: 320' o 'KCAL 320'. È un numero intero. NON lasciare null. Se trovi 'KCAL' seguito da un numero, quel numero VA nel campo 'calorie'.
+
 Testo della ricetta:\n${text}`,
+      model: "claude_sonnet_4_6",
       response_json_schema: {
         type: "object",
         properties: {
@@ -510,7 +520,9 @@ Testo della ricetta:\n${text}`,
             {/* Incolla Ricetta */}
             {showPaste && (
               <div className="bg-blue-50 rounded-2xl p-3 border border-blue-100 space-y-2">
-                <label className="text-[10px] text-blue-600 font-semibold uppercase">📋 Incolla la ricetta formattata</label>
+                <label className="text-[10px] text-blue-600 font-semibold uppercase">
+                  {editId ? "🔄 Incolla prompt per aggiornare la ricetta" : "📋 Incolla la ricetta formattata"}
+                </label>
                 <textarea
                   value={pasteText}
                   onChange={e => setPasteText(e.target.value)}
