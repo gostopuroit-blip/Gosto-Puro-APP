@@ -591,6 +591,13 @@ Testo della ricetta:\n${text}`,
         </p>
       )}
 
+      {/* Count info */}
+      <p className="text-[11px] text-gray-400">
+        {occasionFilter !== "Tutte"
+          ? `${filtered.length} de ${recipes.length} ricette · occasione: ${occasionFilter}`
+          : `${filtered.length} ricette totali`}
+      </p>
+
       {/* List */}
       <div className="space-y-2">
         {filtered.map((r) => (
