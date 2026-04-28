@@ -218,6 +218,41 @@ export default function AdminRecipesManager() {
   };
 
   const [interpreting, setInterpreting] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+
+  const handleRegenerateIngredientsAndSteps = async () => {
+    if (!form.title.trim()) return toast.error("La ricetta deve avere un titolo");
+    setRegenerating(true);
+    const context = `Titolo: ${form.title}\nCategoria: ${form.category}\nDescrizione: ${form.description}\nDifficoltà: ${form.difficulty}\nTempo: ${form.prep_time} min\nPorzioni: ${form.servings}\nPrompt originale: ${form.gen_prompt || ""}`;
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Sei un cuoco italiano esperto. Basandoti su questi dati di una ricetta, genera ingredienti COMPLETI e DETTAGLIATI e istruzioni di preparazione DETTAGLIATE e PROFESSIONALI.
+
+${context}
+
+Regole:
+- Gli ingredienti devono essere specifici (es: "farina 00" non "farina"), con quantità precise e categoria corretta.
+- Le istruzioni devono avere almeno 5-7 passi ben dettagliati, con tempi, temperature e tecniche culinarie.
+- Categorie ingredienti valide: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
+
+Restituisci SOLO JSON con:
+{
+  "ingredients": [{"name": "string", "quantity": "string", "category": "string"}],
+  "instructions": ["passo 1 dettagliato...", "passo 2 dettagliato..."]
+}`,
+      model: "claude_sonnet_4_6",
+      response_json_schema: {
+        type: "object",
+        properties: {
+          ingredients: { type: "array", items: { type: "object", properties: { name: { type: "string" }, quantity: { type: "string" }, category: { type: "string" } } } },
+          instructions: { type: "array", items: { type: "string" } },
+        },
+      },
+    });
+    if (result.ingredients?.length) setForm(f => ({ ...f, ingredients: result.ingredients }));
+    if (result.instructions?.length) setForm(f => ({ ...f, instructions: result.instructions }));
+    setRegenerating(false);
+    toast.success("Ingredienti e preparazione rigenerati!");
+  };
 
   const parseReceitaPrompt = (text) => {
     const result = {};
@@ -708,6 +743,17 @@ Testo della ricetta:\n${text}`,
                 ))}
               </div>
             </div>
+
+            {/* Regenerate ingredients + steps */}
+            <button
+              type="button"
+              onClick={handleRegenerateIngredientsAndSteps}
+              disabled={regenerating}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all hover:bg-purple-700 disabled:opacity-60"
+            >
+              {regenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              {regenerating ? "Rigenerando..." : "🔄 Rigera Ingredienti & Preparazione"}
+            </button>
 
             {/* Ingredients */}
             <div>
