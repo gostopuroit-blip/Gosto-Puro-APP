@@ -64,6 +64,7 @@ export default function AdminRecipesManager() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("Tutti");
+  const [occasionFilter, setOccasionFilter] = useState("Tutte");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -202,7 +203,8 @@ export default function AdminRecipesManager() {
   const filtered = recipes.filter((r) => {
     const matchSearch = !search || r.title.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === "Tutti" || r.category === catFilter;
-    return matchSearch && matchCat;
+    const matchOccasion = occasionFilter === "Tutte" || (r.occasions || []).includes(occasionFilter);
+    return matchSearch && matchCat && matchOccasion;
   });
 
   const setIng = (i, field, val) => {
@@ -563,6 +565,21 @@ Testo della ricetta:\n${text}`,
           </button>
         ))}
       </div>
+
+      {/* Occasion filter */}
+      <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+        {["Tutte", ...FIXED_OCCASIONS].map((o) => (
+          <button key={o} onClick={() => setOccasionFilter(o)}
+            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${occasionFilter === o ? "bg-[#E07A3A] text-white" : "bg-white border border-gray-100 text-gray-500"}`}>
+            {o}
+          </button>
+        ))}
+      </div>
+      {occasionFilter !== "Tutte" && (
+        <p className="text-[11px] text-gray-400">
+          {filtered.length} ricett{filtered.length === 1 ? "a" : "e"} con occasione <strong>{occasionFilter}</strong>
+        </p>
+      )}
 
       {/* List */}
       <div className="space-y-2">
