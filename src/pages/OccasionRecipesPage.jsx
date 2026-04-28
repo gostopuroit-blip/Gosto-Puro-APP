@@ -104,13 +104,15 @@ export default function OccasionRecipesPage() {
   const params = new URLSearchParams(window.location.search);
   const occasion = params.get("occasion") || "";
 
+  const pageKey = `occ_page_${occasion}`;
+
   const [allOccasionRecipes, setAllOccasionRecipes] = useState([]);
   const [dailyRecipes, setDailyRecipes] = useState([]);
   const [userRecipes, setUserRecipes] = useState({});
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tutte");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => parseInt(sessionStorage.getItem(pageKey) || "1", 10));
   const [soloPerMe, setSoloPerMe] = useState(false);
   const [userDietaryTags, setUserDietaryTags] = useState([]);
   const [user, setUser] = useState(null);
@@ -235,6 +237,7 @@ if (occasion === "Collezione Gosto Puro") {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
+    sessionStorage.setItem(pageKey, newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

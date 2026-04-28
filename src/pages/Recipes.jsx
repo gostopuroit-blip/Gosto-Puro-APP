@@ -34,8 +34,11 @@ export default function Recipes() {
     const params = new URLSearchParams(location.search);
     const occ = params.get("occasion");
     const life = params.get("lifestyle");
-    const page = parseInt(params.get("page") || "1", 10);
     const q = params.get("search") || "";
+    // Restore page from sessionStorage if URL doesn't have it (e.g. back navigation without page param)
+    const urlPage = params.get("page");
+    const savedPage = parseInt(sessionStorage.getItem("recipes_page") || "1", 10);
+    const page = urlPage ? parseInt(urlPage, 10) : savedPage;
     setActiveTags({ occasion: occ || null, lifestyle: life || null });
     setCurrentPage(page);
     setSearch(q);
@@ -155,6 +158,7 @@ export default function Recipes() {
   };
 
   const goToPage = (page) => {
+    sessionStorage.setItem("recipes_page", page);
     const params = new URLSearchParams(location.search);
     params.set("page", page);
     if (search.trim()) {
