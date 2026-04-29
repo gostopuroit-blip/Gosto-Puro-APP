@@ -387,7 +387,7 @@ export default function Home() {
                     <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center" />
                   )}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Em breve</p>
+                    <p className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Prossimamente</p>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                     <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
