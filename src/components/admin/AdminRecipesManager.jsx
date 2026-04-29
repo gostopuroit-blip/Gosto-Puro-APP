@@ -48,6 +48,28 @@ const FIXED_OCCASIONS = [
   "Facili da Congelare"
 ];
 
+// Mesma lógica da OccasionRecipesPage
+const GP_PRODUCT_OCCASIONS = new Set([
+  "Senza zucchero", "Low carb", "Detox", "Fit",
+  "Ricette Sane", "Veloci", "Friggitrice ad Aria", "Facili da Congelare",
+  "Proteiche",
+  "365 Ricette Deliziose per Diabetici",
+  "275 Ricette Fitness Pratiche ed Economiche",
+]);
+const OCCASION_ALIASES = {
+  "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
+  "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"],
+};
+function matchesOccasionFilter(recipe, occ) {
+  const rOccasions = recipe.occasions || [];
+  const rLifestyle = recipe.lifestyle || [];
+  const searchTerms = OCCASION_ALIASES[occ] || [occ];
+  const isGp = GP_PRODUCT_OCCASIONS.has(occ);
+  return searchTerms.some(term =>
+    isGp ? rOccasions.includes(term) : rOccasions.includes(term) || rLifestyle.includes(term)
+  );
+}
+
 const emptyForm = {
   title: "", description: "", image_url: "", category: "Pranzo",
   prep_time: 30, servings: 4, difficulty: "Facile", calories: null,
@@ -213,7 +235,7 @@ export default function AdminRecipesManager() {
   const filtered = recipes.filter((r) => {
     const matchSearch = !search || r.title.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === "Tutti" || r.category === catFilter;
-    const matchOccasion = occasionFilter === "Tutte" || (r.occasions || []).includes(occasionFilter);
+    const matchOccasion = occasionFilter === "Tutte" || matchesOccasionFilter(r, occasionFilter);
     return matchSearch && matchCat && matchOccasion;
   });
 
