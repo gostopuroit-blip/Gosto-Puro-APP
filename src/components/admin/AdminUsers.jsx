@@ -210,7 +210,8 @@ function ProductDropdown({ onSelect, current }) {
     "senza_zucchero",
     "ricette_detox",
     "low_carb",
-    "504_ricette_collezione"
+    "504_ricette_collezione",
+    "cucina_senza_tempo"
   ];
   
   const available = products.filter(p => !current.includes(p));
