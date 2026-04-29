@@ -262,12 +262,40 @@ export default function AdminRecipesManager() {
       ].filter(Boolean).join("\n");
 
       // Build occasion-specific instructions
+      const occ = (form.occasions || []).map(o => o.toLowerCase());
       const occasionRules = [];
-      if ((form.occasions || []).some(o => o.toLowerCase().includes("congel"))) {
-        occasionRules.push("CONGELARE: includi nelle istruzioni il metodo di congelamento (come conservare, in quali contenitori), la durata massima in freezer (es: fino a 3 mesi) e le istruzioni dettagliate per scongelare (in frigo overnight, a temperatura ambiente, o in padella/forno).");
+
+      if (occ.some(o => o.includes("congel"))) {
+        occasionRules.push("FACILI DA CONGELARE: la ricetta deve essere adatta al congelamento. Includi nelle istruzioni: (1) come porzionare e conservare per il congelamento (sacchetti sottovuoto, contenitori ermetici), (2) durata massima in freezer (es: fino a 3 mesi), (3) istruzioni dettagliate per scongelare (in frigo overnight oppure direttamente in padella/forno indicando temperatura e tempo). Gli ingredienti devono essere scelti tenendo conto della buona resa dopo il congelamento.");
       }
-      if ((form.occasions || []).some(o => o.toLowerCase().includes("friggitrice") || o.toLowerCase().includes("aria"))) {
-        occasionRules.push("FRIGGITRICE AD ARIA: includi nelle istruzioni la temperatura precisa in gradi Celsius (es: 180°C), il tempo di cottura in friggitrice ad aria (es: 15 minuti), se girare a metà cottura, e se preriscaldare la friggitrice.");
+      if (occ.some(o => o.includes("friggitrice") || o.includes("aria"))) {
+        occasionRules.push("FRIGGITRICE AD ARIA: la ricetta deve essere pensata specificamente per la friggitrice ad aria. Includi: temperatura precisa in °C (es: 180°C), tempo di cottura (es: 12 minuti), se preriscaldare la friggitrice (sì/no e per quanto), se girare o scuotere il cestello a metà cottura. Gli ingredienti devono essere adatti alla cottura in friggitrice.");
+      }
+      if (occ.some(o => o.includes("diabet") || o.includes("365 ricette") || o.includes("diabetici"))) {
+        occasionRules.push("RICETTA PER DIABETICI: la ricetta deve avere basso indice glicemico. Usa ingredienti con pochi zuccheri semplici, preferisci farine integrali o alternative a basso IG, evita zucchero raffinato (usa stevia, eritritolo o dolcificanti naturali se necessario). Le istruzioni devono essere coerenti con una dieta per diabetici.");
+      }
+      if (occ.some(o => o.includes("275") || o.includes("fitness") || o.includes("economich"))) {
+        occasionRules.push("RICETTA FITNESS ED ECONOMICA: la ricetta deve essere ad alto contenuto proteico, bilanciata nei macronutrienti e realizzata con ingredienti economici e facilmente reperibili. Privilegia proteine magre, verdure di stagione e cereali integrali. Indica il costo approssimativo per porzione se possibile.");
+      }
+      if (occ.some(o => o.includes("veloci"))) {
+        occasionRules.push("RICETTA VELOCE: la ricetta deve essere preparabile in meno di 20 minuti. Usa tecniche di cottura rapide (saltare in padella, microonde, bollitura rapida). Le istruzioni devono essere essenziali e ottimizzate per il tempo. Evita marinature lunghe o cotture lente.");
+      }
+      if (occ.some(o => o.includes("leggera"))) {
+        occasionRules.push("RICETTA LEGGERA: la ricetta deve essere ipocalorica (preferibilmente sotto le 400 kcal a porzione). Usa cotture light (vapore, griglia, forno), riduci i grassi aggiunti e privilegia verdure, legumi e proteine magre.");
+      }
+      if (occ.some(o => o.includes("detox"))) {
+        occasionRules.push("RICETTA DETOX: la ricetta deve avere proprietà depurative. Usa ingredienti come zenzero, curcuma, limone, verdure a foglia verde, finocchio, cetriolo. Evita latticini, glutine, zuccheri raffinati e carne rossa. Le istruzioni devono valorizzare le proprietà detox degli ingredienti.");
+      }
+      if (occ.some(o => o.includes("low carb"))) {
+        occasionRules.push("RICETTA LOW CARB: la ricetta deve avere meno di 20g di carboidrati a porzione. Evita pasta, pane, riso, patate e zuccheri. Usa alternative low carb (pasta di konjac, cavolfiore al posto del riso, zucchine al posto della pasta). Ingredienti principali: proteine, verdure non amidacee, grassi sani.");
+      }
+      if (occ.some(o => o.includes("dolci") || o.includes("senza zucchero"))) {
+        if (occ.some(o => o.includes("senza zucchero"))) {
+          occasionRules.push("DOLCE SENZA ZUCCHERO: il dolce non deve contenere zucchero raffinato. Usa dolcificanti naturali come stevia, eritritolo, datteri, banana matura o sciroppo d'agave in piccole quantità. Indica esplicitamente nelle istruzioni che è senza zucchero aggiunto e il sostituto usato.");
+        }
+      }
+      if (occ.some(o => o.includes("ricette sane"))) {
+        occasionRules.push("RICETTA SANA: la ricetta deve essere nutrizionalmente equilibrata, con ingredienti freschi e naturali, preferibilmente biologici. Evita additivi, conservanti e ingredienti ultra-processati. Privilegia cereali integrali, verdure, legumi e proteine di qualità.");
       }
 
       const occasionRulesText = occasionRules.length > 0
