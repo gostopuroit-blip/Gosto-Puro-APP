@@ -262,23 +262,17 @@ export default function AdminRecipesManager() {
       ].filter(Boolean).join("\n");
 
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Sei un cuoco italiano esperto. Basandoti ESCLUSIVAMENTE sul nome del piatto e sul suo contesto (occasione, categoria), genera una lista di ingredienti COMPLETA e DETTAGLIATA e un procedimento di preparazione PROFESSIONALE.
+        prompt: `Sei un cuoco italiano esperto. Genera ingredienti e procedimento per questa ricetta:
 
-DATI DELLA RICETTA:
 ${context}
 
-REGOLE OBBLIGATORIE:
-1. Ingredienti coerenti con il nome del piatto "${form.title}" e con le occasioni: ${occasioniSelezionate || form.category}.
-2. Ogni ingrediente deve avere: nome specifico (es: "farina 00", non solo "farina"), quantità precisa (es: "200g", "3 uova") e categoria corretta.
-3. Istruzioni: MINIMO 6 passi dettagliati con tempi precisi, temperature e tecniche culinarie. Ogni passo autonomo e chiaro.
-4. Categorie ingredienti valide SOLO: Ortofrutta, Carne e pesce, Latticini, Dispensa, Surgelati, Altro.
-
-Restituisci SOLO JSON valido:
+Restituisci SOLO JSON con questa struttura:
 {
-  "ingredients": [{"name": "string", "quantity": "string", "category": "string"}],
-  "instructions": ["passo dettagliato 1", "passo dettagliato 2", ...]
-}`,
-        model: "claude_sonnet_4_6",
+  "ingredients": [{"name": "nome preciso", "quantity": "quantità", "category": "Ortofrutta|Carne e pesce|Latticini|Dispensa|Surgelati|Altro"}],
+  "instructions": ["passo 1 dettagliato", "passo 2 dettagliato", "passo 3", "passo 4", "passo 5", "passo 6"]
+}
+
+Regole: ingredienti coerenti con "${form.title}", minimo 6 passi dettagliati con tempi e temperature.`,
         response_json_schema: {
           type: "object",
           properties: {
