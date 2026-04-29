@@ -17,6 +17,7 @@ const PRODUCT_OCCASION_MAP = {
   low_carb: ["Low carb"],
   senza_zucchero: ["Senza zucchero"],
   "504_ricette_collezione": ["Collezione Gosto Puro"],
+  "cucina_senza_tempo": ["Cucina Senza Tempo"],
 };
 
 // Ocasiões sempre acessíveis (sem compra necessária)
@@ -71,6 +72,7 @@ const GP_PRODUCT_OCCASIONS = new Set([
   "Proteiche",
   "365 Ricette Deliziose per Diabetici",
   "275 Ricette Fitness Pratiche ed Economiche",
+  "Cucina Senza Tempo",
 ]);
 
 // Todas as ocasiões que compõem a "Collezione Gosto Puro"

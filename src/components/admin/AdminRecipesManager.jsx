@@ -45,7 +45,8 @@ const FIXED_OCCASIONS = [
   "Ricette Sane",
   "Veloci",
   "Friggitrice ad Aria",
-  "Facili da Congelare"
+  "Facili da Congelare",
+  "Cucina Senza Tempo"
 ];
 
 // Mesma lógica da OccasionRecipesPage
@@ -55,6 +56,7 @@ const GP_PRODUCT_OCCASIONS = new Set([
   "Proteiche",
   "365 Ricette Deliziose per Diabetici",
   "275 Ricette Fitness Pratiche ed Economiche",
+  "Cucina Senza Tempo",
 ]);
 const OCCASION_ALIASES = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
