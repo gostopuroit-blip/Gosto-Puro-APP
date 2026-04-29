@@ -261,10 +261,23 @@ export default function AdminRecipesManager() {
         regenHint ? `Istruzioni extra: ${regenHint}` : "",
       ].filter(Boolean).join("\n");
 
+      // Build occasion-specific instructions
+      const occasionRules = [];
+      if ((form.occasions || []).some(o => o.toLowerCase().includes("congel"))) {
+        occasionRules.push("CONGELARE: includi nelle istruzioni il metodo di congelamento (come conservare, in quali contenitori), la durata massima in freezer (es: fino a 3 mesi) e le istruzioni dettagliate per scongelare (in frigo overnight, a temperatura ambiente, o in padella/forno).");
+      }
+      if ((form.occasions || []).some(o => o.toLowerCase().includes("friggitrice") || o.toLowerCase().includes("aria"))) {
+        occasionRules.push("FRIGGITRICE AD ARIA: includi nelle istruzioni la temperatura precisa in gradi Celsius (es: 180°C), il tempo di cottura in friggitrice ad aria (es: 15 minuti), se girare a metà cottura, e se preriscaldare la friggitrice.");
+      }
+
+      const occasionRulesText = occasionRules.length > 0
+        ? `\n\nREGOLE SPECIALI BASATE SULLE OCCASIONI:\n${occasionRules.join("\n")}`
+        : "";
+
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Sei un cuoco italiano esperto. Genera ingredienti e procedimento per questa ricetta:
 
-${context}
+${context}${occasionRulesText}
 
 Restituisci SOLO JSON con questa struttura:
 {
