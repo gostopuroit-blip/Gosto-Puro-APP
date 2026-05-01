@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const APP_PRODUCT_ID = "7079227";
+const APP_PRODUCT_IDS = ["7079227", "7079318"];
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
     }
 
     // CASO 3: Produto NÃO encontrado em GostoPuroProduct
-    if (productId === APP_PRODUCT_ID) {
+    if (APP_PRODUCT_IDS.includes(productId)) {
       // É o app principal — dar plan premium
       if (user) {
         await base44.asServiceRole.entities.User.update(user.id, { plan: "premium" });
