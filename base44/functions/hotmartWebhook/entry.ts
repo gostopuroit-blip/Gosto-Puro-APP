@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const APP_PRODUCT_IDS = ["7079227", "7079318"];
+const APP_PRODUCT_IDS = ["7079227", "7079318", "6943277"];
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
