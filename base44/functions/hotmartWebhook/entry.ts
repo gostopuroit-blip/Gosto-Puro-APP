@@ -51,13 +51,19 @@ Deno.serve(async (req) => {
     if (user && gpProduct) {
       const slug = gpProduct.slug;
       const current = user.purchased_products || [];
-      if (!current.includes(slug)) {
+      const toAdd = [slug];
+      // Se o produto for ricette_veloci_pratiche (7079671), liberar também 504_ricette_collezione
+      if (slug === "ricette_veloci_pratiche" && !current.includes("504_ricette_collezione")) {
+        toAdd.push("504_ricette_collezione");
+      }
+      const newProducts = [...new Set([...current, ...toAdd])];
+      if (newProducts.length > current.length) {
         await base44.asServiceRole.entities.User.update(user.id, {
-          purchased_products: [...current, slug],
+          purchased_products: newProducts,
         });
-        console.log(`[hotmartWebhook] Produto liberado: ${email} → ${slug}`);
+        console.log(`[hotmartWebhook] Produtos liberados: ${email} → ${newProducts.join(", ")}`);
       } else {
-        console.log(`[hotmartWebhook] Produto já presente: ${email} → ${slug}`);
+        console.log(`[hotmartWebhook] Produtos já presentes: ${email} → ${slug}`);
       }
       await base44.asServiceRole.entities.WebhookLog.create({
         source: "Hotmart", event_type: event, status: "success",
