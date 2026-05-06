@@ -387,6 +387,9 @@ export default function RecipeDetail() {
     } else {
       await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
     }
+    const newCount = (recipe.numero_salvate || 0) + (newVal ? 1 : -1);
+    await base44.entities.Recipe.update(recipeId, { numero_salvate: Math.max(0, newCount) });
+    setRecipe((prev) => ({ ...prev, numero_salvate: Math.max(0, newCount) }));
     setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), is_favorite: newVal }));
     toast.success(newVal ? "Aggiunta ai preferiti ❤️" : "Rimossa dai preferiti");
   };
