@@ -376,6 +376,21 @@ export default function RecipeDetail() {
     setSaving(false);
   };
 
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      toast.error("Accedi per aggiungere ai preferiti");
+      return;
+    }
+    const newVal = !userRecipe?.is_favorite;
+    if (userRecipe) {
+      await base44.entities.UserRecipe.update(userRecipe.id, { is_favorite: newVal });
+    } else {
+      await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
+    }
+    setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), is_favorite: newVal }));
+    toast.success(newVal ? "Aggiunta ai preferiti ❤️" : "Rimossa dai preferiti");
+  };
+
   const handleRate = async (rating) => {
     const oldRating = userRecipe?.user_rating || 0;
     const newTotal = (recipe.total_rating || 0) - oldRating + rating;
@@ -476,10 +491,13 @@ export default function RecipeDetail() {
                 <Plus className="w-3 h-3 text-gray-600" />
               </button>
             </div>
-            <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
-              <Heart className="w-4 h-4 text-rose-400" />
+            <button
+              onClick={handleToggleFavorite}
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 transition-colors ${userRecipe?.is_favorite ? "bg-rose-50" : "bg-gray-50"}`}
+            >
+              <Heart className={`w-4 h-4 transition-colors ${userRecipe?.is_favorite ? "text-rose-500 fill-rose-500" : "text-rose-400"}`} />
               <span className="text-xs font-semibold">{recipe.numero_salvate || 0}</span>
-            </div>
+            </button>
             <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
               <ChefHat className="w-4 h-4 text-[#2D6A4F]" />
               <span className="text-xs font-semibold">{recipe.numero_preparate || 0}</span>
