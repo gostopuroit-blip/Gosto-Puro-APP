@@ -12,3 +12,13 @@ export const base44 = createClient({
   requiresAuth: false,
   appBaseUrl
 });
+
+// TEMPORÁRIO: injeta plan=premium para todos os usuários logados
+const _originalMe = base44.auth.me.bind(base44.auth);
+base44.auth.me = async (...args) => {
+  const user = await _originalMe(...args);
+  if (user && user.role !== 'admin') {
+    user.plan = 'premium';
+  }
+  return user;
+};
