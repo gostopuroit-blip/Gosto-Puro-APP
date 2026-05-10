@@ -143,52 +143,9 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
-  const isBasicOrAbove = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
-  const isPremium = isBasicOrAbove;
-
-  // Verifica se o usuário tem acesso via produto comprado (ocasião desbloqueada)
-  // Regra: se recipe.occasions contém alguma ocasião que o usuário desbloqueou → acesso liberado
-  const PRODUCT_OCCASION_MAP = {
-    ricette_sane_35: ["Ricette Sane"],
-    ricette_veloci_pratiche: ["Veloci"],
-    cene_friggitrice: ["Friggitrice ad Aria"],
-    ricette_congelare: ["Facili da Congelare"],
-    diabetici: ["365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico"],
-    fitness_pratiche: ["275 Ricette Fitness Pratiche ed Economiche", "Fit"],
-    ricette_detox: ["Detox"],
-    low_carb: ["Low carb"],
-    senza_zucchero: ["Senza zucchero"],
-    "504_ricette_collezione": ["Collezione Gosto Puro"],
-  };
-  const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena", "Leggera"];
-
-  // Sub-ocasiões que pertencem à Collezione Gosto Puro
-  const COLLEZIONE_GOSTO_PURO_OCCASIONS = [
-    "Colazione", "Pranzo", "Cena", "Leggera",
-    "Instagram", "In famiglia", "Per due", "Con amici",
-    "Estate", "Autunno", "Inverno", "Primavera",
-    "Natale e Capodanno",
-  ];
-
-  const hasProductAccess = (() => {
-    if (isBasicOrAbove) return true;
-    if (!recipe) return false;
-    const recipeOccs = recipe.occasions || [];
-    const purchased = user?.purchased_products || [];
-    // Verifica ocasiões gratuitas
-    if (recipeOccs.some(occ => FREE_OCCASIONS.includes(occ))) return true;
-    // Verifica se tem Collezione e a receita pertence a alguma sub-ocasião dela
-    if (purchased.includes("504_ricette_collezione")) {
-      if (recipeOccs.some(occ => COLLEZIONE_GOSTO_PURO_OCCASIONS.includes(occ))) return true;
-    }
-    // Verifica outros produtos comprados
-    return purchased.some(slug => {
-      const unlockedOccs = PRODUCT_OCCASION_MAP[slug] || [];
-      return unlockedOccs.some(occ => recipeOccs.includes(occ));
-    });
-  })();
-
-  const isContentLocked = !hasProductAccess && freeRecipeIds !== null && !freeRecipeIds.has(recipeId);
+  // OPEN ACCESS: todos têm acesso total
+  const isPremium = true;
+  const isContentLocked = false;
 
   const handlePrint = async () => {
     const { jsPDF } = await import("jspdf");
@@ -343,11 +300,7 @@ export default function RecipeDetail() {
       toast.error("Accedi per salvare le ricette");
       return;
     }
-    if (!isPremium && !userRecipe?.is_saved && savedCount >= FREE_SAVE_LIMIT) {
-      toast.error(`Piano Free: puoi salvare solo ${FREE_SAVE_LIMIT} ricette. Passa a Premium per salvarne di più! ✨`);
-      trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
-      return;
-    }
+
     if (!userRecipe?.is_saved) {
       trackEvent("recipe_saved", { recipe_id: recipeId, recipe_title: recipe?.title });
     }
@@ -355,14 +308,7 @@ export default function RecipeDetail() {
   };
 
   const handlePrepare = async () => {
-    // Block free users if they already reached the limit and this recipe isn't already prepared
-    if (!isPremium && !userRecipe?.is_prepared) {
-      if (preparedCount >= FREE_SAVE_LIMIT) {
-        toast.error(`Piano Free: puoi segnare solo ${FREE_SAVE_LIMIT} ricette come preparate. Passa a Premium per continuare! ✨`);
-        trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
-        return;
-      }
-    }
+
     setSaving(true);
     if (userRecipe) {
       await base44.entities.UserRecipe.update(userRecipe.id, { is_prepared: true, status: "fatta" });
@@ -608,18 +554,7 @@ export default function RecipeDetail() {
               <p className="text-xs font-bold text-gray-400 tracking-widest uppercase">Lista Ingredienti</p>
               <span className="text-xs text-gray-400">per {servings} {servings === 1 ? "persona" : "persone"}</span>
             </div>
-            {isContentLocked ? (
-              <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-                className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-                <div className="p-6 flex flex-col items-center gap-3 text-center">
-                  <span className="text-3xl">🔒</span>
-                  <p className="font-bold text-gray-800 text-sm">Ingredienti disponibili con Premium</p>
-                  <p className="text-xs text-gray-400">Sblocca questa e tutte le ricette Premium</p>
-                  <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
-                </div>
-              </a>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
                 {(recipe.ingredients || []).map((ing, i) => {
                   const sostApplied = (userRecipe?.sostituzioni_applicate || []).find(
                     (s) =>
@@ -638,7 +573,6 @@ export default function RecipeDetail() {
                   );
                 })}
               </div>
-            )}
           </div>
         )}
 
@@ -646,18 +580,7 @@ export default function RecipeDetail() {
         {activeTab === "preparazione" && (
           <div className="mt-4">
             <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-3">Passo per Passo</p>
-            {isContentLocked ? (
-              <a href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-                className="block bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-                <div className="p-6 flex flex-col items-center gap-3 text-center">
-                  <span className="text-3xl">🔒</span>
-                  <p className="font-bold text-gray-800 text-sm">Istruzioni disponibili con Premium</p>
-                  <p className="text-xs text-gray-400">Passa a Premium per accedere a questa ricetta completa</p>
-                  <span className="bg-[#2D6A4F] text-white text-sm font-bold px-5 py-2.5 rounded-xl">Passa a Premium →</span>
-                </div>
-              </a>
-            ) : (
-              <div className="space-y-3">
+            <div className="space-y-3">
                 {(recipe.instructions || []).map((step, i) => (
                   <div key={i} className="flex gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
                     <div className="w-7 h-7 rounded-full bg-[#2D6A4F] flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -667,7 +590,6 @@ export default function RecipeDetail() {
                   </div>
                 ))}
               </div>
-            )}
           </div>
         )}
 
@@ -759,17 +681,9 @@ export default function RecipeDetail() {
           {userRecipe?.is_saved ? "Salvata ✓" : "Salvare"}
         </Button>
         <Button
-          onClick={() => {
-            if (!isPremium) {
-              toast.error("Piano Free: stampa disponibile solo per Premium ✨");
-              trackEvent("premium_view", { recipe_id: recipeId, recipe_title: recipe?.title });
-              return;
-            }
-            handlePrint();
-          }}
-          disabled={!isPremium}
+          onClick={handlePrint}
           variant="outline"
-          className="w-full py-6 rounded-2xl border-2 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-6 rounded-2xl border-2 font-bold text-sm"
         >
           <Printer className="w-5 h-5 mr-2" />
           Stampa ricetta

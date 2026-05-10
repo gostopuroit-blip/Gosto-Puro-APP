@@ -22,25 +22,6 @@ const ALWAYS_ACCESSIBLE_WITH_PURCHASE = [
 ];
 
 export function getUserAccessibleOccasions(user) {
-  // PREMIUM: acessa tudo
-  if (user?.role === "admin" || user?.plan === "premium" || user?.role === "premium") {
-    return ["ALL"];
-  }
-
-  // FREE: sem acesso a Prodotti
-  if (!user?.purchased_products || user.purchased_products.length === 0) {
-    return [];
-  }
-
-  // COM COMPRAS: ocasiões do giorno + ocasiões dos produtos (com aliases)
-  const accessible = [...ALWAYS_ACCESSIBLE_WITH_PURCHASE];
-
-  user.purchased_products.forEach((slug) => {
-    const occasions = PRODUCT_OCCASION_MAP[slug] || [];
-    occasions.forEach(occ => {
-      if (!accessible.includes(occ)) accessible.push(occ);
-    });
-  });
-
-  return accessible;
+  // OPEN ACCESS: todos os usuários têm acesso total
+  return ["ALL"];
 }

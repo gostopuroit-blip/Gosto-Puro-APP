@@ -3,12 +3,12 @@ import { base44 } from "@/api/base44Client";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles, Lock } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
-import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
+
 
 // Aliases: produto slug occasion → receitas podem ter o label antigo
 const OCCASION_ALIASES = {
@@ -187,58 +187,7 @@ export default function Home() {
             </div>
         </div>
 
-        {/* Prodotti acquistati - accesso vitalizio */}
-        {(() => {
-          const isPremium = user?.plan === "premium" || user?.role === "admin";
-          const purchased = user?.purchased_products || [];
 
-          const PRODUCT_NAMES = {
-            ricette_sane_35: "35 Ricette Sane",
-            ricette_veloci_pratiche: "Ricette Veloci e Pratiche",
-            cene_friggitrice: "Cene con Friggitrice ad Aria",
-            ricette_congelare: "Ricette Facili da Congelare",
-            diabetici: "365 Ricette per Diabetici",
-            fitness_pratiche: "275 Ricette Fitness",
-            ricette_detox: "Ricette Detox",
-            low_carb: "Ricette Low Carb",
-            senza_zucchero: "Ricette Senza Zucchero",
-          };
-
-          if (isPremium) {
-            return (
-              <div className="mt-3 bg-amber-50 dark:bg-amber-950/20 rounded-2xl px-4 py-3 border border-amber-200 dark:border-amber-900/40">
-                <p className="text-[13px] text-amber-700 dark:text-amber-400 font-semibold">
-                  👑 Pacchetto Completo — accesso a vita a tutte le ricette e aggiornamenti
-                </p>
-              </div>
-            );
-          }
-
-          if (purchased.length === 0) return null;
-
-          const productNames = purchased.map(slug => {
-            const gpProduct = gostoPuroProducts.find(p => p.slug === slug);
-            return gpProduct?.nome || PRODUCT_NAMES[slug] || slug;
-          });
-
-          return (
-            <div className="mt-3 bg-[#F0F7F4] dark:bg-[#1A2B20] rounded-2xl px-4 py-3 border border-[#C8E6D8] dark:border-[#2D4A38]">
-              <p className="text-[13px] text-[#2D6A4F] dark:text-[#40916C] font-semibold mb-1.5">
-                ✅ Hai accesso sbloccato a:
-              </p>
-              <div className="flex flex-wrap gap-1.5 mb-2">
-                {productNames.map((name, i) => (
-                  <span key={i} className="text-[11px] font-bold bg-[#2D6A4F] text-white px-2.5 py-1 rounded-full">
-                    {name}
-                  </span>
-                ))}
-              </div>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-                🔓 Il tuo accesso è <strong>a vita</strong> — non è un abbonamento. Inclusi tutti gli aggiornamenti futuri.
-              </p>
-            </div>
-          );
-        })()}
       </div>
 
       {/* Dietary Banner */}
@@ -276,136 +225,58 @@ export default function Home() {
           <SectionHeader title="Prodotti Gosto Puro" />
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
-          {(() => {
-            const accessibleOccasions = getUserAccessibleOccasions(user);
-            const isPremium = accessibleOccasions.includes("ALL");
-
-            const unlockedTags = lifestyleTags.filter(tag => {
-              const isProductAlready = gostoPuroProducts.some(p => p.occasioni && p.occasioni.includes(tag.label));
-              return !isProductAlready && (isPremium || accessibleOccasions.includes(tag.label));
-            });
-
-            const lockedTags = lifestyleTags.filter(tag => {
-              const isProductAlready = gostoPuroProducts.some(p => p.occasioni && p.occasioni.includes(tag.label));
-              return !isProductAlready && !isPremium && !accessibleOccasions.includes(tag.label);
-            });
-
-            const unlockedProducts = gostoPuroProducts.filter(p => {
-              const isUnlocked = isPremium || p.is_free || (user?.purchased_products || []).includes(p.slug);
-              const hasOccasion = p.occasioni && p.occasioni.length > 0;
-              const canNavigate = hasOccasion && p.image_url;
-              return isUnlocked && canNavigate;
-            });
-
-            const lockedProducts = gostoPuroProducts.filter(p => {
-              const isUnlocked = isPremium || p.is_free || (user?.purchased_products || []).includes(p.slug);
-              const hasOccasion = p.occasioni && p.occasioni.length > 0;
-              const canNavigate = hasOccasion && p.image_url;
-              return !isUnlocked && canNavigate;
-            });
-
-            const brokenProducts = gostoPuroProducts.filter(p => {
-              const hasOccasion = p.occasioni && p.occasioni.length > 0;
-              const canNavigate = hasOccasion && p.image_url;
-              return !canNavigate;
-            });
-
-            return [
-              ...unlockedProducts.map(product => (
-                <Link 
-                  key={product.id} 
-                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
-                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
-                  style={{ width: "200px", height: "250px" }}
-                >
-                  {product.image_url && (
-                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
-                  </div>
-                </Link>
-              )),
-              ...lockedProducts.map(product => (
-                <Link 
-                  key={product.id} 
-                  to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
-                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" 
-                  style={{ width: "200px", height: "250px", opacity: 0.6 }}
-                >
-                  {product.image_url && (
-                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                  )}
-                  <div className="absolute top-2 right-2 w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center shadow">
-                    <Lock className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
-                  </div>
-                </Link>
-              )),
-              ...unlockedTags.map(tag => (
-                <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
-                  onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
-                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
-                  {tag.img ? (
-                    <img src={tag.img} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                  ) : (
-                    <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
-                      <span className="text-5xl">{tag.icon}</span>
-                    </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
-                  </div>
-                </Link>
-              )),
-              ...lockedTags.map(tag => (
-                <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
-                  onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
-                  className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px", opacity: 0.6 }}>
-                  {tag.img ? (
-                    <img src={tag.img} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
-                  ) : (
-                    <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
-                      <span className="text-5xl">{tag.icon}</span>
-                    </div>
-                  )}
-                  <div className="absolute top-2 right-2 w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center shadow">
-                    <Lock className="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
-                  </div>
-                </Link>
-              )),
-              ...brokenProducts.map(product => (
-                <div key={product.id} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden cursor-not-allowed" style={{ width: "200px", height: "250px" }}>
-                  {product.image_url ? (
-                    <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0, opacity: 0.4 }} className="grayscale" />
-                  ) : (
-                    <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center" />
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Prossimamente</p>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-                    <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
-                  </div>
+          {[
+            ...gostoPuroProducts.filter(p => p.occasioni && p.occasioni.length > 0 && p.image_url).map(product => (
+              <Link
+                key={product.id}
+                to={`/OccasionRecipes?occasion=${encodeURIComponent(product.occasioni[0])}`}
+                className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden"
+                style={{ width: "200px", height: "250px" }}
+              >
+                <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
                 </div>
-              ))
-            ];
-          })()}
+              </Link>
+            )),
+            ...gostoPuroProducts.filter(p => !(p.occasioni && p.occasioni.length > 0 && p.image_url)).map(product => (
+              <div key={product.id} className="flex-shrink-0 relative rounded-2xl overflow-hidden cursor-not-allowed" style={{ width: "200px", height: "250px" }}>
+                {product.image_url ? (
+                  <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0, opacity: 0.4 }} className="grayscale" />
+                ) : (
+                  <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-gray-400 to-gray-500" />
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-white text-xs font-bold bg-black/60 px-3 py-1.5 rounded-lg">Prossimamente</p>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
+                </div>
+              </div>
+            )),
+            ...lifestyleTags.filter(tag => !gostoPuroProducts.some(p => p.occasioni && p.occasioni.includes(tag.label))).map(tag => (
+              <Link key={tag.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(tag.label)}`}
+                onClick={() => trackEvent("occasion_click", { occasion_label: tag.label })}
+                className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
+                {tag.img ? (
+                  <img src={tag.img} alt={tag.label} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+                ) : (
+                  <div style={{ width: "200px", height: "250px" }} className="bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center">
+                    <span className="text-5xl">{tag.icon}</span>
+                  </div>
+                )}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
+                  <p className="text-white font-semibold text-sm line-clamp-2">{tag.label}</p>
+                </div>
+              </Link>
+            ))
+          ]}
 
         </div>
       </div>
 
       {/* Collezione Gosto Puro — sub-occasions */}
       {(() => {
-        const accessibleOccasions = getUserAccessibleOccasions(user);
-        const isPremium = accessibleOccasions.includes("ALL");
-        const hasCollezione = isPremium || (user?.purchased_products || []).includes("504_ricette_collezione");
-
         const collectionOccasions = [
           { label: "Instagram", occasion: "Instagram", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/7913ab823_Instagram.png" },
           { label: "In famiglia", occasion: "In famiglia", img: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699707f25ff5e371dc9a1c99/78bec7c3b_Infamiglia.png" },
@@ -422,27 +293,14 @@ export default function Home() {
             <SectionHeader title="Collezione Gosto-Puro" />
             <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
               {collectionOccasions.map(occ => (
-                hasCollezione ? (
-                  <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.occasion)}`}
-                    onClick={() => trackEvent("occasion_click", { occasion_label: occ.occasion })}
-                    className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                    <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
-                      <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
-                    </div>
-                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
-                  </Link>
-                ) : (
-                  <a key={occ.label} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer"
-                    className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                    <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14, opacity: 0.6 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38] relative">
-                      <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                        <Lock className="w-5 h-5 text-white drop-shadow" />
-                      </div>
-                    </div>
-                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-500 dark:text-gray-500">{occ.label}</span>
-                  </a>
-                )
+                <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.occasion)}`}
+                  onClick={() => trackEvent("occasion_click", { occasion_label: occ.occasion })}
+                  className="flex-shrink-0 flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                  <div style={{ width: 100, height: 100, minWidth: 100, maxWidth: 100, borderRadius: 14 }} className="overflow-hidden bg-white dark:bg-[#1A2B20] shadow-md border border-gray-100 dark:border-[#2D4A38]">
+                    <img src={occ.img} alt={occ.label} className="w-full h-full object-cover" />
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", maxWidth: 100, whiteSpace: "normal", wordBreak: "break-word", lineHeight: 1.3 }} className="text-gray-700 dark:text-gray-300">{occ.label}</span>
+                </Link>
               ))}
             </div>
           </div>
@@ -456,24 +314,12 @@ export default function Home() {
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {(() => {
-            const accessibleOccasions = getUserAccessibleOccasions(user);
-            const isPremium = accessibleOccasions.includes("ALL");
             const dietaryTags = user?.dietary_tags_profile || [];
-
             const filtered = topRecipes.filter((recipe) => {
-              // Verifica acessibilidade
-              const recipeOccs = recipe.occasions || [];
-              const hasAccess = isPremium ||
-                recipeOccs.length === 0 ||
-                recipeOccs.some(occ => accessibleOccasions.includes(occ));
-              if (!hasAccess) return false;
-
-              // Filtro por tags dietéticas (apenas se o usuário tiver definido)
               if (dietaryTags.length > 0) {
                 const recipeTags = recipe.dietary_tags || [];
                 return dietaryTags.some(tag => recipeTags.includes(tag));
               }
-
               return true;
             });
 
