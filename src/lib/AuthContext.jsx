@@ -92,10 +92,6 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
-      // TEMPORÁRIO: libera premium para todos os usuários logados
-      if (currentUser && currentUser.role !== 'admin') {
-        currentUser.plan = 'premium';
-      }
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
