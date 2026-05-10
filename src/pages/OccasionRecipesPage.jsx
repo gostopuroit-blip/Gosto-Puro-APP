@@ -136,8 +136,7 @@ export default function OccasionRecipesPage() {
     setUser(userData);
     
     const occasionTerms = occasionAliases[occasion] || [occasion];
-    const canAccess = canAccessOccasion(userData, occasion, occasionTerms);
-    setIsAccessible(canAccess);
+    setIsAccessible(true);
     
     // Use cache to avoid re-fetching on back navigation
     if (!recipesCache[occasion]) {
