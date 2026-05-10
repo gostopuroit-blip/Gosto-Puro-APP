@@ -1,40 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Search, Heart, Star, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Search, Heart, Star, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 
-// Mapping produto slug → ocasiões desbloqueadas (todos os labels/aliases)
-const PRODUCT_OCCASION_MAP = {
-  ricette_sane_35: ["Ricette Sane"],
-  ricette_veloci_pratiche: ["Veloci"],
-  cene_friggitrice: ["Friggitrice ad Aria"],
-  ricette_congelare: ["Facili da Congelare"],
-  diabetici: ["365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico"],
-  fitness_pratiche: ["275 Ricette Fitness Pratiche ed Economiche", "Fit"],
-  ricette_detox: ["Detox"],
-  low_carb: ["Low carb"],
-  senza_zucchero: ["Senza zucchero"],
-  "504_ricette_collezione": ["Collezione Gosto Puro"],
-  "cucina_senza_tempo": ["Cucina Senza Tempo"],
-};
 
-// Ocasiões sempre acessíveis (sem compra necessária)
-const FREE_OCCASIONS = ["Colazione", "Pranzo", "Cena", "Leggera"];
-
-// Verifica se a COLEÇÃO/ocasião está acessível para o usuário
-function canAccessOccasion(user, occasion, aliases) {
-  if (!user) return false;
-  if (user.role === "admin" || user.plan === "premium" || user.role === "premium") return true;
-  if (FREE_OCCASIONS.includes(occasion)) return true;
-  const terms = aliases || [occasion];
-  const purchased = user.purchased_products || [];
-  return purchased.some(slug => {
-    const occs = PRODUCT_OCCASION_MAP[slug] || [];
-    return occs.some(occ => terms.includes(occ));
-  });
-}
 
 const OCCASION_ICONS = {
   "Fit": "🏋️", "Detox": "🌿", "Low carb": "🥗", "Low Carb": "🥗",
@@ -118,8 +89,7 @@ export default function OccasionRecipesPage() {
   const [soloPerMe, setSoloPerMe] = useState(false);
   const [userDietaryTags, setUserDietaryTags] = useState([]);
   const [user, setUser] = useState(null);
-  const [isAccessible, setIsAccessible] = useState(true);
-  const [blockedRecipeId, setBlockedRecipeId] = useState(null);
+
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
 
@@ -136,7 +106,7 @@ export default function OccasionRecipesPage() {
     setUser(userData);
     
     const occasionTerms = occasionAliases[occasion] || [occasion];
-    setIsAccessible(true);
+
     
     // Use cache to avoid re-fetching on back navigation
     if (!recipesCache[occasion]) {
@@ -332,22 +302,6 @@ if (occasion === "Collezione Gosto Puro") {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
           </div>
-        ) : blockedRecipeId ? (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-[#1A1A1A] rounded-2xl p-6 max-w-sm">
-              <Lock className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-2">Ricetta Bloccata</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">Acquista un prodotto Gosto Puro per accedere a questa ricetta.</p>
-              <div className="flex gap-2">
-                <button onClick={() => setBlockedRecipeId(null)} className="flex-1 px-4 py-2 border border-gray-200 dark:border-[#2A2A2A] text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm">
-                  Chiudi
-                </button>
-                <Link to={createPageUrl("Home")} className="flex-1 px-4 py-2 bg-[#2D6A4F] text-white rounded-xl font-semibold text-sm text-center">
-                  Scopri i Prodotti
-                </Link>
-              </div>
-            </div>
-          </div>
         ) : (
           <>
             {/* Ricette del Giorno — only for Colazione, Pranzo, Cena */}
@@ -384,31 +338,13 @@ if (occasion === "Collezione Gosto Puro") {
                   Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
                 </p>
 
-                {/* Locked occasion: sticky overlay + all recipes blurred with pagination */}
-                {!isAccessible && (
-                  <div className="sticky top-0 z-20 mb-4 rounded-2xl p-5 text-center shadow-lg" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)" }}>
-                    <span className="text-4xl mb-2 block">🔒</span>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">Sblocca {occasion}</h3>
-                    <p className="text-sm text-gray-500 mb-4">Acquista questa collezione per accedere a tutte le ricette</p>
-                    <a
-                      href="https://gostopuro.it/upgrade/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-5 py-2.5 rounded-xl font-bold text-sm text-white"
-                      style={{ background: "#2D6A4F" }}
-                    >
-                      Scopri come sbloccare →
-                    </a>
-                  </div>
-                )}
-
-                <div className="space-y-3" style={!isAccessible ? { filter: "blur(6px)", pointerEvents: "none" } : {}}>
+                <div className="space-y-3">
                    {pagedRecipes.map((recipe) => (
                      <RecipeCard
                        key={recipe.id}
                        recipe={recipe}
                        occasion={occasion}
-                       isSaved={isAccessible ? !!userRecipes[recipe.id] : false}
+                       isSaved={!!userRecipes[recipe.id]}
                        user={user}
                        isBlocked={false}
                        onBlockedClick={() => {}}
@@ -486,68 +422,7 @@ function DailyRecipeCard({ recipe, isSaved }) {
 function RecipeCard({ recipe, occasion, isSaved, user, isBlocked, onBlockedClick }) {
   const kcal = recipe.calorie ?? recipe.calories;
   
-  if (isBlocked) {
-    return (
-      <button
-        onClick={onBlockedClick}
-        className="flex gap-3 bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-2xl overflow-hidden active:scale-[0.98] transition-transform shadow-sm opacity-60 cursor-pointer w-full text-left"
-      >
-        <div className="w-24 flex-shrink-0 relative self-stretch">
-          <img
-            src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200"}
-            alt={recipe.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <Lock className="w-6 h-6 text-white" />
-          </div>
-        </div>
 
-      <div className="flex-1 py-3 pr-3 min-w-0">
-        <div className="flex gap-1.5 flex-wrap mb-1.5">
-          <span className="text-[10px] font-bold bg-[#2D6A4F]/30 text-[#52b788] px-2 py-0.5 rounded-full">
-            {occasion}
-          </span>
-          {recipe.category && recipe.category !== occasion && (
-            <span className="text-[10px] font-bold bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded-full">
-              {recipe.category}
-            </span>
-          )}
-        </div>
-
-        <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug mb-1.5"
-          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {recipe.title}
-        </p>
-
-        <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 mb-1.5">
-          {recipe.prep_time && <span>⏱ {recipe.prep_time} min</span>}
-          {kcal && <span>🔥 {kcal} kcal</span>}
-          {recipe.difficulty && <span>{recipe.difficulty}</span>}
-          {recipe.media_rating && (
-            <span className="flex items-center gap-0.5">
-              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-              {recipe.media_rating}
-            </span>
-          )}
-        </div>
-
-        {(recipe.dietary_tags || []).length > 0 && (
-          <div className="flex gap-1 flex-wrap">
-            {recipe.dietary_tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${DIETARY_TAG_COLORS[tag] || "bg-gray-100 text-gray-700"}`}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-      </button>
-      );
-      }
 
       return (
       <Link
