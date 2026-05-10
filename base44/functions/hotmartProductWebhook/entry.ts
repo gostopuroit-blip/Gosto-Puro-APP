@@ -107,13 +107,23 @@ Deno.serve(async (req) => {
     return Response.json({ success: true, email, plan: "premium" });
   }
 
-  // CASO 3: Produto desconhecido → registrar no WebhookLog e ignorar
+  // CASO 3: Produto desconhecido → dar plan=premium ao usuário
+  const unknownUsers = await base44.asServiceRole.entities.User.list();
+  const unknownUser = unknownUsers.find(u => (u.email || "").toLowerCase().trim() === email);
+  if (unknownUser) {
+    await base44.asServiceRole.entities.User.update(unknownUser.id, { plan: "premium" });
+  } else {
+    await base44.asServiceRole.entities.PendingPremium.create({
+      email, product_id: productId, event_type: eventType,
+      raw_payload: payloadStr, status: "pending",
+    });
+  }
   await base44.asServiceRole.entities.WebhookLog.create({
-    source: "Hotmart", event_type: eventType, status: "error",
+    source: "Hotmart", event_type: eventType, status: "success",
     user_email: email, payload: payloadStr,
-    error_message: `Unknown product_id: ${productId} — ignored`,
+    error_message: unknownUser ? "Unknown product — premium granted" : "Unknown product — saved to PendingPremium",
     transaction_id: transactionId || undefined,
     timestamp: new Date().toISOString(),
   });
-  return Response.json({ success: false, ignored: true, productId });
+  return Response.json({ success: true, action: unknownUser ? "premium_granted" : "pending", productId });
 });
