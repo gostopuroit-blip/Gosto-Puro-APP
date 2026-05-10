@@ -16,14 +16,13 @@ import AdminUTMGenerator from "@/components/admin/AdminUTMGenerator";
 import AdminEbookUTMs from "@/components/admin/AdminEbookUTMs";
 import AdminEbookFollowup from "@/components/admin/AdminEbookFollowup";
 import AdminPremiumIntelligence from "@/components/admin/AdminPremiumIntelligence";
-import AdminBaseFreeRecipes from "@/components/admin/AdminBaseFreeRecipes";
 import AdminRecipeIngredientAudit from "@/components/admin/AdminRecipeIngredientAudit";
 import AdminUserProducts from "@/components/admin/AdminUserProducts";
 import AdminGostoPuroProducts from "@/components/admin/AdminGostoPuroProducts";
 import AdminDietaryTagsBulk from "@/components/admin/AdminDietaryTagsBulk";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Gift, Filter, Package, Tag } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
@@ -36,7 +35,6 @@ const tabs = [
   { key: "audit_ingredients", label: "Audit Ingredienti", icon: Filter },
   { key: "dietary_tags_bulk", label: "Tag Dietetici", icon: Tag },
   { key: "genera",       label: "Genera con IA",    icon: Sparkles },
-  { key: "base_free",    label: "Ricette Base",   icon: Gift },
   { key: "emails",       label: "Template Email",  icon: Mail },
   { key: "notifiche",    label: "Notifiche",    icon: Bell },
   { key: "permessi",     label: "Permessi",      icon: Lock },
@@ -167,7 +165,6 @@ function AdminContent() {
           {activeTab === "audit_ingredients" && <AdminRecipeIngredientAudit />}
           {activeTab === "dietary_tags_bulk" && <AdminDietaryTagsBulk />}
           {activeTab === "genera"       && <AdminRecipeGenerator />}
-          {activeTab === "base_free"    && <AdminBaseFreeRecipes />}
           {activeTab === "emails"       && <AdminEmailTemplates />}
           {activeTab === "notifiche"    && <AdminNotifications />}
           {activeTab === "permessi"     && <AdminPermissions />}
