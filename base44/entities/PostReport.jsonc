@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "properties": {
+    "reporter_email": {
+      "type": "string",
+      "description": "User who reported"
+    },
+    "reported_post_id": {
+      "type": "string",
+      "description": "ID of the reported post"
+    },
+    "reported_user_email": {
+      "type": "string",
+      "description": "Email of the post author"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "spam",
+        "inappropriate",
+        "hate_speech",
+        "violence",
+        "nudity",
+        "misinformation",
+        "other"
+      ],
+      "description": "Report reason"
+    },
+    "details": {
+      "type": "string",
+      "description": "Additional details from reporter"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "pending",
+      "description": "Moderation status"
+    },
+    "moderator_note": {
+      "type": "string",
+      "description": "Admin note on resolution"
+    }
+  },
+  "required": [
+    "reporter_email",
+    "reported_post_id",
+    "reason"
+  ],
+  "name": "PostReport",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

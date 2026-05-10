@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "blocker_email": {
+      "type": "string",
+      "description": "User who blocked"
+    },
+    "blocked_email": {
+      "type": "string",
+      "description": "User who was blocked"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional reason for blocking"
+    }
+  },
+  "required": [
+    "blocker_email",
+    "blocked_email"
+  ],
+  "name": "UserBlock",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": false,
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

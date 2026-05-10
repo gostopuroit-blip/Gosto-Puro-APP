@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "Date of the daily recipes (YYYY-MM-DD)"
+    },
+    "recipe_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of the 3 daily recipes"
+    },
+    "recipe_titles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Titles of the 3 daily recipes"
+    },
+    "occasions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Occasions (Colazione, Pranzo, Cena)"
+    }
+  },
+  "required": [
+    "date",
+    "recipe_ids"
+  ],
+  "name": "DailyNotification",
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

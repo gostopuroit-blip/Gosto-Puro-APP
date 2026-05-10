@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Folder name"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji icon"
+    },
+    "is_system": {
+      "type": "boolean",
+      "description": "Is a system folder"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "name": "Folder",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}",
+      "data.is_system": false
+    },
+    "read": {
+      "$or": [
+        {
+          "data.is_system": true
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "created_by": "{{user.email}}",
+      "data.is_system": false
+    },
+    "delete": {
+      "created_by": "{{user.email}}",
+      "data.is_system": false
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Group name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Group description"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Cover image URL"
+    },
+    "avatar_image": {
+      "type": "string",
+      "description": "Avatar image URL"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Group creator/owner email"
+    },
+    "admins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Admin emails"
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Member emails"
+    },
+    "members_count": {
+      "type": "number",
+      "default": 0
+    },
+    "privacy": {
+      "type": "string",
+      "enum": [
+        "public",
+        "private",
+        "secret"
+      ],
+      "default": "public"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "food",
+        "recipe",
+        "health",
+        "lifestyle",
+        "fitness",
+        "general"
+      ]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Group rules"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "name",
+    "owner_email"
+  ],
+  "name": "Group",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": true,
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

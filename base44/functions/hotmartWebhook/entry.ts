@@ -13,8 +13,18 @@ Deno.serve(async (req) => {
     const purchaseStatus = body?.data?.purchase?.status || "";
     const event = body?.event || "";
     const payloadStr = JSON.stringify(body);
+    const transactionId = String(body?.data?.purchase?.transaction || body?.transaction || body?.id || "").trim();
 
-    console.log(`[hotmartWebhook] Recebido — event=${event}, status=${purchaseStatus}, email=${email}, productId=${productId}`);
+    console.log(`[hotmartWebhook] Recebido — event=${event}, status=${purchaseStatus}, email=${email}, productId=${productId}, transaction=${transactionId}`);
+
+    // IDEMPOTÊNCIA: checar se já processamos este transaction_id com sucesso
+    if (transactionId) {
+      const existingLogs = await base44.asServiceRole.entities.WebhookLog.filter({ transaction_id: transactionId, status: "success" });
+      if (existingLogs.length > 0) {
+        console.log(`[hotmartWebhook] Duplicado ignorado — transaction_id=${transactionId}`);
+        return Response.json({ success: true, message: "Already processed", duplicate: true });
+      }
+    }
 
     // Aceitar apenas eventos e statuses válidos
     const validEvents = ["PURCHASE_APPROVED", "PURCHASE_COMPLETE"];
@@ -30,6 +40,7 @@ Deno.serve(async (req) => {
         source: "Hotmart", event_type: event, status: "error",
         user_email: email || "unknown", payload: payloadStr,
         error_message: "Missing email or product_id",
+        transaction_id: transactionId || undefined,
         timestamp: new Date().toISOString(),
       });
       return Response.json({ status: "ok" });
@@ -69,6 +80,7 @@ Deno.serve(async (req) => {
         source: "Hotmart", event_type: event, status: "success",
         user_email: email, payload: payloadStr,
         error_message: `Produto liberado: ${slug}`,
+        transaction_id: transactionId || undefined,
         timestamp: new Date().toISOString(),
       });
       return Response.json({ success: true, action: "unlocked", slug });
@@ -95,6 +107,7 @@ Deno.serve(async (req) => {
         source: "Hotmart", event_type: event, status: "success",
         user_email: email, payload: payloadStr,
         error_message: `User not found - saved as pending (slug: ${gpProduct.slug})`,
+        transaction_id: transactionId || undefined,
         timestamp: new Date().toISOString(),
       });
       return Response.json({ success: true, action: "pending" });
@@ -126,6 +139,7 @@ Deno.serve(async (req) => {
         source: "Hotmart", event_type: event, status: "success",
         user_email: email, payload: payloadStr,
         error_message: user ? "App principal — plan=premium aplicado" : "App principal — saved as pending",
+        transaction_id: transactionId || undefined,
         timestamp: new Date().toISOString(),
       });
       return Response.json({ success: true, action: "premium" });
@@ -148,6 +162,7 @@ Deno.serve(async (req) => {
       source: "Hotmart", event_type: event, status: "success",
       user_email: email, payload: payloadStr,
       error_message: `Ebook registrado para followup 48h: ${productId}`,
+      transaction_id: transactionId || undefined,
       timestamp: new Date().toISOString(),
     });
     console.log(`[hotmartWebhook] Ebook followup agendado: ${email} → ${productId}`);

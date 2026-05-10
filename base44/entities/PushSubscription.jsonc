@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "endpoint": {
+      "type": "string",
+      "description": "Push subscription endpoint URL"
+    },
+    "p256dh": {
+      "type": "string",
+      "description": "Push subscription p256dh key"
+    },
+    "auth": {
+      "type": "string",
+      "description": "Push subscription auth key"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email"
+    }
+  },
+  "required": [
+    "endpoint",
+    "p256dh",
+    "auth"
+  ],
+  "name": "PushSubscription",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

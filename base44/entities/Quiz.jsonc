@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Creator email"
+    },
+    "post_id": {
+      "type": "string",
+      "description": "Associated CommunityPost ID"
+    },
+    "question": {
+      "type": "string",
+      "description": "Quiz question"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "is_correct": {
+            "type": "boolean"
+          },
+          "votes_count": {
+            "type": "number",
+            "default": 0
+          },
+          "voters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Quiz options with correct answer"
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Explanation shown after answering"
+    },
+    "total_answers": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of answers"
+    },
+    "correct_answers": {
+      "type": "number",
+      "default": 0,
+      "description": "Total correct answers"
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "Expiration datetime ISO"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "question",
+    "options",
+    "post_id"
+  ],
+  "name": "Quiz",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": true,
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

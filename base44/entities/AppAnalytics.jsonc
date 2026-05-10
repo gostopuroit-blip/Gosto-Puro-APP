@@ -1,0 +1,109 @@
+{
+  "type": "object",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "session_start",
+        "session_end",
+        "recipe_view",
+        "recipe_saved",
+        "recipe_scroll",
+        "occasion_click",
+        "pwa_install_click",
+        "planner_created",
+        "premium_view",
+        "premium_click",
+        "premium_purchase",
+        "login",
+        "utm_visit",
+        "recipe_search",
+        "recipe_view_start",
+        "recipe_view_end",
+        "screen_load",
+        "ui_click",
+        "push_sent",
+        "push_opened",
+        "push_recipe_open"
+      ],
+      "description": "Type of analytics event"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email"
+    },
+    "user_plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "premium"
+      ],
+      "description": "User plan at time of event"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Unique session ID"
+    },
+    "session_duration_seconds": {
+      "type": "number",
+      "description": "Session duration in seconds (for session_end events)"
+    },
+    "recipe_id": {
+      "type": "string",
+      "description": "Recipe ID"
+    },
+    "recipe_title": {
+      "type": "string",
+      "description": "Recipe title"
+    },
+    "scroll_percentage": {
+      "type": "number",
+      "description": "Scroll depth percentage (25, 50, 75, 100)"
+    },
+    "occasion_label": {
+      "type": "string",
+      "description": "Occasion label / search query / element name / utm source / screen name"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source page / utm_medium / utm_campaign / element type"
+    },
+    "date": {
+      "type": "string",
+      "description": "Date YYYY-MM-DD"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Duration in seconds (for recipe_view_start/end)"
+    },
+    "load_time_ms": {
+      "type": "number",
+      "description": "Load time in milliseconds (for screen_load events)"
+    },
+    "results_count": {
+      "type": "number",
+      "description": "Number of results (for recipe_search events)"
+    },
+    "notification_id": {
+      "type": "string",
+      "description": "Notification ID (for push events)"
+    }
+  },
+  "required": [
+    "event_type",
+    "date"
+  ],
+  "name": "AppAnalytics",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": false,
+    "delete": false
+  }
+}

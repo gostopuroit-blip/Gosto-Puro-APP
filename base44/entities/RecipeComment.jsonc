@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "recipe_id": {
+      "type": "string",
+      "description": "Reference to Recipe ID"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Author email"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Author display name"
+    },
+    "user_photo": {
+      "type": "string",
+      "description": "Author photo URL"
+    },
+    "content": {
+      "type": "string",
+      "description": "Comment text"
+    },
+    "is_expert": {
+      "type": "boolean",
+      "description": "Author is verified expert"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "hidden"
+      ],
+      "default": "active",
+      "description": "Moderation status"
+    }
+  },
+  "required": [
+    "recipe_id",
+    "content"
+  ],
+  "name": "RecipeComment",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "data.status": "active"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

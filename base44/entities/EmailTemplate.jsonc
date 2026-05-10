@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do template (ex: Daily Recipe Email)"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject do email"
+    },
+    "body": {
+      "type": "string",
+      "description": "Corpo do email em HTML (use {{RECIPE_LIST}} para inserir as receitas)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Template ativo"
+    }
+  },
+  "required": [
+    "name",
+    "subject",
+    "body"
+  ],
+  "name": "EmailTemplate",
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Hashtag name without # symbol"
+    },
+    "posts_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of posts using this hashtag"
+    },
+    "is_trending": {
+      "type": "boolean",
+      "default": false,
+      "description": "Currently trending"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "food",
+        "recipe",
+        "lifestyle",
+        "health",
+        "fitness",
+        "general"
+      ],
+      "description": "Hashtag category"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "name": "Hashtag",
+  "rls": {
+    "create": true,
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

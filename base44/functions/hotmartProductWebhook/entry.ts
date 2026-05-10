@@ -22,12 +22,23 @@ Deno.serve(async (req) => {
 
   const eventType = body?.event || body?.data?.purchase?.status || "PURCHASE_COMPLETE";
   const payloadStr = JSON.stringify(body);
+  const transactionId = String(body?.data?.purchase?.transaction || body?.transaction || body?.id || "").trim();
+
+  // IDEMPOTÊNCIA: checar se já processamos este transaction_id com sucesso
+  if (transactionId) {
+    const existingLogs = await base44.asServiceRole.entities.WebhookLog.filter({ transaction_id: transactionId, status: "success" });
+    if (existingLogs.length > 0) {
+      console.log(`[hotmartProductWebhook] Duplicado ignorado — transaction_id=${transactionId}`);
+      return Response.json({ success: true, message: "Already processed", duplicate: true });
+    }
+  }
 
   if (!email || !productId) {
     await base44.asServiceRole.entities.WebhookLog.create({
       source: "Hotmart", event_type: eventType, status: "error",
       user_email: email || "unknown", payload: payloadStr,
       error_message: "Missing email or product_id",
+      transaction_id: transactionId || undefined,
       timestamp: new Date().toISOString(),
     });
     return Response.json({ error: "Missing email or product_id" }, { status: 400 });
@@ -54,6 +65,7 @@ Deno.serve(async (req) => {
         source: "Hotmart", event_type: eventType, status: "success",
         user_email: email, payload: payloadStr,
         error_message: `Slug applied: ${slug}`,
+        transaction_id: transactionId || undefined,
         timestamp: new Date().toISOString(),
       });
       return Response.json({ success: true, email, slug });
@@ -66,6 +78,7 @@ Deno.serve(async (req) => {
         source: "Hotmart", event_type: eventType, status: "success",
         user_email: email, payload: payloadStr,
         error_message: `User not registered yet — saved to PendingPremium (slug: ${slug})`,
+        transaction_id: transactionId || undefined,
         timestamp: new Date().toISOString(),
       });
       return Response.json({ success: true, pending: true, email, slug });
@@ -88,6 +101,7 @@ Deno.serve(async (req) => {
       source: "Hotmart", event_type: eventType, status: "success",
       user_email: email, payload: payloadStr,
       error_message: user ? "Premium plan applied directly" : "Saved to PendingPremium (premium plan)",
+      transaction_id: transactionId || undefined,
       timestamp: new Date().toISOString(),
     });
     return Response.json({ success: true, email, plan: "premium" });
@@ -98,6 +112,7 @@ Deno.serve(async (req) => {
     source: "Hotmart", event_type: eventType, status: "error",
     user_email: email, payload: payloadStr,
     error_message: `Unknown product_id: ${productId} — ignored`,
+    transaction_id: transactionId || undefined,
     timestamp: new Date().toISOString(),
   });
   return Response.json({ success: false, ignored: true, productId });

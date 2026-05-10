@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "properties": {
+    "sharer_email": {
+      "type": "string",
+      "description": "User who shared"
+    },
+    "original_post_id": {
+      "type": "string",
+      "description": "ID of the original post"
+    },
+    "share_type": {
+      "type": "string",
+      "enum": [
+        "repost",
+        "story_share",
+        "external",
+        "dm_share"
+      ],
+      "description": "Type of share"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Optional caption added by sharer"
+    },
+    "shared_to": {
+      "type": "string",
+      "description": "Email of receiver (for DM shares)"
+    }
+  },
+  "required": [
+    "sharer_email",
+    "original_post_id",
+    "share_type"
+  ],
+  "name": "PostShare",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": true,
+    "update": false,
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

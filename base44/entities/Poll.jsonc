@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Creator email"
+    },
+    "question": {
+      "type": "string",
+      "description": "Poll question"
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "votes_count": {
+            "type": "number"
+          },
+          "voters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Poll options with votes"
+    },
+    "total_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total votes cast"
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "Poll expiration datetime ISO"
+    },
+    "post_id": {
+      "type": "string",
+      "description": "Associated post ID if any"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "question",
+    "options"
+  ],
+  "name": "Poll",
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": true,
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

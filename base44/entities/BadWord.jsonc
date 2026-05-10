@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "properties": {
+    "word": {
+      "type": "string",
+      "description": "Parola vietata"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "warning",
+        "block"
+      ],
+      "default": "block",
+      "description": "warning = avviso, block = blocca completamente"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "offensive",
+        "hate_speech",
+        "sexual",
+        "violence",
+        "other"
+      ],
+      "description": "Categoria della parola"
+    }
+  },
+  "required": [
+    "word",
+    "severity"
+  ],
+  "name": "BadWord",
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

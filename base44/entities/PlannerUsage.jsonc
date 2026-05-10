@@ -1,0 +1,36 @@
+{
+  "name": "PlannerUsage",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "plans_created": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de planos criados pelo usu\u00e1rio Basic"
+    },
+    "limit_reached": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se atingiu o limite de 3 planos"
+    }
+  },
+  "required": [
+    "user_email",
+    "plans_created"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": true,
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
