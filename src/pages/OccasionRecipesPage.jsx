@@ -359,7 +359,7 @@ if (occasion === "Collezione Gosto Puro") {
                       disabled={safePage === 1}
                       className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      ← Anterior
+                      ← Precedente
                     </button>
                     <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
                       {safePage} / {totalPages}
@@ -369,7 +369,7 @@ if (occasion === "Collezione Gosto Puro") {
                       disabled={safePage === totalPages}
                       className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      Próxima →
+                      Successiva →
                     </button>
                   </div>
                 )}
