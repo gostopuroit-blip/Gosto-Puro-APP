@@ -325,22 +325,24 @@ export default function RecipeDetail() {
       return;
     }
     const newVal = !userRecipe?.is_favorite;
-    if (userRecipe) {
+    if (userRecipe?.id) {
       await base44.entities.UserRecipe.update(userRecipe.id, { is_favorite: newVal });
+      setUserRecipe((prev) => ({ ...prev, is_favorite: newVal }));
     } else {
-      await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
+      const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
+      setUserRecipe(created);
     }
-    setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), is_favorite: newVal }));
     toast.success(newVal ? "Aggiunta ai preferiti ❤️" : "Rimossa dai preferiti");
   };
 
   const handleRate = async (rating) => {
-    if (userRecipe) {
+    if (userRecipe?.id) {
       await base44.entities.UserRecipe.update(userRecipe.id, { user_rating: rating });
+      setUserRecipe((prev) => ({ ...prev, user_rating: rating }));
     } else {
-      await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
+      const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
+      setUserRecipe(created);
     }
-    setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), user_rating: rating }));
     toast.success("Grazie per la valutazione! ⭐");
   };
 
