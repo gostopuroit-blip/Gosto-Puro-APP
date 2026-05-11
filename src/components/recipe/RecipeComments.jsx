@@ -37,19 +37,24 @@ export default function RecipeComments({ recipeId, currentUser }) {
     if (!newComment.trim()) return;
     if (!currentUser) return toast.error("Devi essere loggato per commentare");
     setSubmitting(true);
-    const created = await base44.entities.RecipeComment.create({
-      recipe_id: recipeId,
-      user_email: currentUser.email,
-      user_name: currentUser.display_name || currentUser.full_name || currentUser.email.split("@")[0],
-      user_photo: currentUser.photo_url || null,
-      content: newComment.trim(),
-      is_expert: currentUser.role === "expert" || currentUser.role === "admin",
-      status: "active",
-    });
-    setComments([created, ...comments]);
-    setNewComment("");
-    setSubmitting(false);
-    toast.success("Commento aggiunto!");
+    try {
+      const created = await base44.entities.RecipeComment.create({
+        recipe_id: recipeId,
+        user_email: currentUser.email,
+        user_name: currentUser.display_name || currentUser.full_name || currentUser.email.split("@")[0],
+        user_photo: currentUser.photo_url || null,
+        content: newComment.trim(),
+        is_expert: currentUser.role === "expert" || currentUser.role === "admin",
+        status: "active",
+      });
+      setComments([created, ...comments]);
+      setNewComment("");
+      toast.success("Commento aggiunto!");
+    } catch (e) {
+      toast.error("Erro ao comentar: " + e.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

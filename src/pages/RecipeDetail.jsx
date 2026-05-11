@@ -308,42 +308,59 @@ export default function RecipeDetail() {
   };
 
   const handlePrepare = async () => {
-    setSaving(true);
-    if (userRecipe) {
-      await base44.entities.UserRecipe.update(userRecipe.id, { is_prepared: true, status: "fatta" });
-    } else {
-      await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_prepared: true, status: "fatta" });
+    try {
+      setSaving(true);
+      if (userRecipe?.id) {
+        await base44.entities.UserRecipe.update(userRecipe.id, { is_prepared: true, status: "fatta" });
+      } else {
+        await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_prepared: true, status: "fatta" });
+      }
+      await loadRecipe();
+      toast.success("Complimenti! Ricetta preparata! 👨‍🍳");
+    } catch (e) {
+      toast.error("Erro: " + e.message);
+    } finally {
+      setSaving(false);
     }
-    await loadRecipe();
-    toast.success("Complimenti! Ricetta preparata! 👨‍🍳");
-    setSaving(false);
   };
 
   const handleToggleFavorite = async () => {
-    if (!user) {
-      toast.error("Accedi per aggiungere ai preferiti");
-      return;
+    try {
+      if (!user) {
+        toast.error("Accedi per aggiungere ai preferiti");
+        return;
+      }
+      const newVal = !userRecipe?.is_favorite;
+      if (userRecipe?.id) {
+        await base44.entities.UserRecipe.update(userRecipe.id, { is_favorite: newVal });
+        setUserRecipe((prev) => ({ ...prev, is_favorite: newVal }));
+      } else {
+        const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
+        setUserRecipe(created);
+      }
+      toast.success(newVal ? "Aggiunta ai preferiti ❤️" : "Rimossa dai preferiti");
+    } catch (e) {
+      toast.error("Erro: " + e.message);
     }
-    const newVal = !userRecipe?.is_favorite;
-    if (userRecipe?.id) {
-      await base44.entities.UserRecipe.update(userRecipe.id, { is_favorite: newVal });
-      setUserRecipe((prev) => ({ ...prev, is_favorite: newVal }));
-    } else {
-      const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
-      setUserRecipe(created);
-    }
-    toast.success(newVal ? "Aggiunta ai preferiti ❤️" : "Rimossa dai preferiti");
   };
 
   const handleRate = async (rating) => {
-    if (userRecipe?.id) {
-      await base44.entities.UserRecipe.update(userRecipe.id, { user_rating: rating });
-      setUserRecipe((prev) => ({ ...prev, user_rating: rating }));
-    } else {
-      const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
-      setUserRecipe(created);
+    try {
+      if (!user) {
+        toast.error("Accedi per valutare la ricetta");
+        return;
+      }
+      if (userRecipe?.id) {
+        await base44.entities.UserRecipe.update(userRecipe.id, { user_rating: rating });
+        setUserRecipe((prev) => ({ ...prev, user_rating: rating }));
+      } else {
+        const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
+        setUserRecipe(created);
+      }
+      toast.success("Grazie per la valutazione! ⭐");
+    } catch (e) {
+      toast.error("Erro: " + e.message);
     }
-    toast.success("Grazie per la valutazione! ⭐");
   };
 
   if (loading) {

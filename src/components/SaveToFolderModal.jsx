@@ -50,6 +50,7 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
 
   const handleSave = async () => {
     setSaving(true);
+    try {
     const user = await base44.auth.me().catch(() => null);
     if (!user?.email) {
       toast.error("Accedi per salvare le ricette");
@@ -81,6 +82,10 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
     toast.success("Ricetta salvata! 💚");
     onSaved && onSaved();
     onClose();
+    } catch (e) {
+      toast.error("Erro ao salvar: " + e.message);
+      setSaving(false);
+    }
   };
 
   const allFolders = [
