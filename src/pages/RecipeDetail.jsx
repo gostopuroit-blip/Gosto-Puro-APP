@@ -308,15 +308,12 @@ export default function RecipeDetail() {
   };
 
   const handlePrepare = async () => {
-
     setSaving(true);
     if (userRecipe) {
       await base44.entities.UserRecipe.update(userRecipe.id, { is_prepared: true, status: "fatta" });
     } else {
       await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_prepared: true, status: "fatta" });
     }
-    const newCount = (recipe.numero_preparate || 0) + 1;
-    await base44.entities.Recipe.update(recipeId, { numero_preparate: newCount });
     await loadRecipe();
     toast.success("Complimenti! Ricetta preparata! 👨‍🍳");
     setSaving(false);
@@ -333,29 +330,17 @@ export default function RecipeDetail() {
     } else {
       await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_favorite: newVal });
     }
-    const newCount = (recipe.numero_salvate || 0) + (newVal ? 1 : -1);
-    await base44.entities.Recipe.update(recipeId, { numero_salvate: Math.max(0, newCount) });
-    setRecipe((prev) => ({ ...prev, numero_salvate: Math.max(0, newCount) }));
     setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), is_favorite: newVal }));
     toast.success(newVal ? "Aggiunta ai preferiti ❤️" : "Rimossa dai preferiti");
   };
 
   const handleRate = async (rating) => {
-    const oldRating = userRecipe?.user_rating || 0;
-    const newTotal = (recipe.total_rating || 0) - oldRating + rating;
-    const newCount = (recipe.rating_count || 0) + (oldRating ? 0 : 1);
-    const newAvg = newTotal / newCount;
     if (userRecipe) {
       await base44.entities.UserRecipe.update(userRecipe.id, { user_rating: rating });
     } else {
       await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
     }
-    await base44.entities.Recipe.update(recipeId, {
-      total_rating: newTotal,
-      rating_count: newCount,
-      media_rating: Math.round(newAvg * 10) / 10,
-    });
-    await loadRecipe();
+    setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), user_rating: rating }));
     toast.success("Grazie per la valutazione! ⭐");
   };
 

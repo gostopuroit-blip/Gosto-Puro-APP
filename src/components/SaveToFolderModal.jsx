@@ -89,13 +89,6 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
         folder_ids: customIds,
       });
     }
-    // bump save count
-    const recipes = await base44.entities.Recipe.filter({ id: recipeId });
-    if (recipes.length > 0) {
-      await base44.entities.Recipe.update(recipeId, {
-        numero_salvate: (recipes[0].numero_salvate || 0) + 1,
-      });
-    }
     setSaving(false);
     toast.success("Ricetta salvata! 💚");
     onSaved && onSaved();
