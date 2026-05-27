@@ -93,8 +93,8 @@ export default function Planner() {
     setUser(currentUser);
 
     const plans = await base44.entities.MealPlan.filter(
-      { is_active: true, created_by: currentUser?.email },
-      "-created_date",
+      { is_active: true, created_by: currentUser?.id },
+      "-created_at",
       1
     );
 
@@ -136,18 +136,19 @@ export default function Planner() {
   const handleCreatePlan = async ({ days, focus, maxTime, servings, dietaryTags }) => {
     setIsCreating(true);
     try {
-      // Fetch published recipes
+      // Fetch published recipes (batch via list + filter JS-side)
       const accessibleOccasions = getUserAccessibleOccasions(user);
       const isAllAccess = accessibleOccasions.includes("ALL");
-      let allRecipes = [];
+      let allRecipesBatch = [];
       let skip = 0;
+      const batchSize = 1000;
       while (true) {
-        const batch = await base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 200, skip);
-        allRecipes = allRecipes.concat(batch);
-        if (batch.length < 200) break;
-        skip += 200;
-        await new Promise(r => setTimeout(r, 300));
+        const batch = await base44.entities.Recipe.list("-created_at", batchSize, skip);
+        allRecipesBatch = allRecipesBatch.concat(batch);
+        if (batch.length < batchSize) break;
+        skip += batchSize;
       }
+      const allRecipes = allRecipesBatch.filter(r => r.status === "pubblicata");
 
       // Filter by max time
       const withinTime = allRecipes.filter(r => !r.prep_time || r.prep_time <= maxTime);
@@ -226,7 +227,7 @@ export default function Planner() {
       });
 
       // Deactivate previous plans
-      const existingPlans = await base44.entities.MealPlan.filter({ is_active: true, created_by: user?.email });
+      const existingPlans = await base44.entities.MealPlan.filter({ is_active: true, created_by: user?.id });
       await Promise.all(existingPlans.map(p => base44.entities.MealPlan.update(p.id, { is_active: false })));
 
       // Create new plan
@@ -240,6 +241,7 @@ export default function Planner() {
         plan_data,
         is_active: true,
         days_completed: [],
+        created_by: user?.id,
       });
 
       setShowPlannerModal(false);

@@ -49,11 +49,23 @@ export default function Recipes() {
   }, []);
 
   const loadRecipes = async () => {
-    const [data, freeRecipes, currentUser] = await Promise.all([
-      base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 5000),
+    const [freeRecipes, currentUser] = await Promise.all([
       base44.entities.FreeRecipe.list("-created_date", 500),
       base44.auth.me().catch(() => null),
     ]);
+
+    // Busca todas as receitas em lotes de 1000 (limite do Supabase por request)
+    let allRecipes = [];
+    let skip = 0;
+    const batchSize = 1000;
+    while (true) {
+      const batch = await base44.entities.Recipe.list("-created_at", batchSize, skip);
+      allRecipes = allRecipes.concat(batch);
+      if (batch.length < batchSize) break;
+      skip += batchSize;
+    }
+    const data = allRecipes.filter(r => r.status === "pubblicata");
+
     setRecipes(data);
     setFreeIds(freeRecipes.map((r) => r.recipe_id));
     setUser(currentUser);

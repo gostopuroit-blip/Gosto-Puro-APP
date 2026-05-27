@@ -1,24 +1,182 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
+import { supabase } from '@/lib/supabase';
 
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
+// Base44 usava "created_date" / "updated_date" — Supabase usa "created_at" / "updated_at"
+const FIELD_MAP = {
+  created_date: 'created_at',
+  updated_date: 'updated_at',
+};
 
-//Create a client with authentication required
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  serverUrl: '',
-  requiresAuth: false,
-  appBaseUrl
-});
+function mapField(field) {
+  return FIELD_MAP[field] || field;
+}
 
-// Libera acesso premium para todos os usuários logados
-const _originalMe = base44.auth.me.bind(base44.auth);
-base44.auth.me = async (...args) => {
+function parseSortParam(sort) {
+  if (!sort || typeof sort !== 'string') return { column: 'created_at', ascending: false };
+  const desc = sort.startsWith('-');
+  const column = mapField(sort.replace(/^-/, ''));
+  return { column, ascending: !desc };
+}
+
+function createEntity(tableName) {
+  return {
+    async filter(filters = {}, sort = '-created_at', limit = 100) {
+      let query = supabase.from(tableName).select('*');
+
+      for (const [key, value] of Object.entries(filters)) {
+        if (value === null || value === undefined) {
+          query = query.is(key, null);
+        } else if (Array.isArray(value)) {
+          query = query.contains(key, value);
+        } else {
+          query = query.eq(key, value);
+        }
+      }
+
+      const { column, ascending } = parseSortParam(sort);
+      query = query.order(column, { ascending });
+
+      if (limit) query = query.limit(limit);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+
+    async list(sort = '-created_at', limit = 1000, skip = 0) {
+      let query = supabase.from(tableName).select('*');
+      const { column, ascending } = parseSortParam(sort);
+      query = query.order(column, { ascending });
+      if (limit) {
+        if (skip > 0) {
+          query = query.range(skip, skip + limit - 1);
+        } else {
+          query = query.limit(limit);
+        }
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+
+    async get(id) {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async create(data) {
+      const { data: result, error } = await supabase
+        .from(tableName)
+        .insert(data)
+        .select()
+        .single();
+      if (error) throw error;
+      return result;
+    },
+
+    async update(id, data) {
+      const { data: result, error } = await supabase
+        .from(tableName)
+        .update({ ...data, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return result;
+    },
+
+    async delete(id) {
+      const { error } = await supabase.from(tableName).delete().eq('id', id);
+      if (error) throw error;
+    },
+  };
+}
+
+const auth = {
+  async me() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw Object.assign(new Error('Not authenticated'), { status: 401 });
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    return {
+      ...profile,
+      id: user.id,
+      email: user.email,
+    };
+  },
+
+  async logout(redirectUrl) {
+    await supabase.auth.signOut();
+    window.location.href = redirectUrl || '/Login';
+  },
+
+  redirectToLogin(redirectUrl) {
+    const params = redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : '';
+    window.location.href = `/Login${params}`;
+  },
+};
+
+// Monkey-patch herdado: libera premium para todos os usuários logados (exceto admin)
+const _originalMe = auth.me.bind(auth);
+auth.me = async (...args) => {
   const user = await _originalMe(...args);
   if (user && user.role !== 'admin') {
     user.plan = 'premium';
   }
   return user;
+};
+
+export const base44 = {
+  auth,
+  // appLogs é um no-op — era usado pelo NavigationTracker do Base44
+  appLogs: {
+    logUserInApp: async () => {},
+  },
+  entities: {
+    AppAnalytics: createEntity('app_analytics'),
+    AppConfig: createEntity('app_config'),
+    BadWord: createEntity('bad_words'),
+    CommunityComment: createEntity('community_comments'),
+    CommunityPost: createEntity('community_posts'),
+    DailyNotification: createEntity('daily_notifications'),
+    DirectMessage: createEntity('direct_messages'),
+    EbookPurchaseTrigger: createEntity('ebook_purchase_triggers'),
+    EmailTemplate: createEntity('email_templates'),
+    Folder: createEntity('folders'),
+    FreeRecipe: createEntity('free_recipes'),
+    GostoPuroProduct: createEntity('gosto_puro_products'),
+    Group: createEntity('groups'),
+    Hashtag: createEntity('hashtags'),
+    MealPlan: createEntity('meal_plans'),
+    Notification: createEntity('notifications'),
+    PendingPremium: createEntity('pending_premium'),
+    PendingPurchase: createEntity('pending_purchases'),
+    PlannerUsage: createEntity('planner_usage'),
+    Poll: createEntity('polls'),
+    PostReaction: createEntity('post_reactions'),
+    PostReport: createEntity('post_reports'),
+    PostShare: createEntity('post_shares'),
+    PushSubscription: createEntity('push_subscriptions'),
+    Quiz: createEntity('quizzes'),
+    Recipe: createEntity('recipes'),
+    RecipeComment: createEntity('recipe_comments'),
+    RecipeOccasion: createEntity('recipe_occasions'),
+    SavedPost: createEntity('saved_posts'),
+    ShoppingItem: createEntity('shopping_items'),
+    Story: createEntity('stories'),
+    User: createEntity('profiles'),
+    UserBlock: createEntity('user_blocks'),
+    UserFollow: createEntity('user_follows'),
+    UserRecipe: createEntity('user_recipes'),
+    WebhookLog: createEntity('webhook_logs'),
+  },
 };

@@ -110,11 +110,16 @@ export default function OccasionRecipesPage() {
     
     // Use cache to avoid re-fetching on back navigation
     if (!recipesCache[occasion]) {
-      const batch = await base44.entities.Recipe.filter(
-        { status: "pubblicata" },
-        "-created_date",
-        FETCH_LIMIT
-      );
+      let allFetched = [];
+      let skip = 0;
+      const batchSize = 1000;
+      while (true) {
+        const chunk = await base44.entities.Recipe.list("-created_at", batchSize, skip);
+        allFetched = allFetched.concat(chunk);
+        if (chunk.length < batchSize) break;
+        skip += batchSize;
+      }
+      const batch = allFetched.filter(r => r.status === "pubblicata");
 
       let filtered;
 
