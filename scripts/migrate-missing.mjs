@@ -5,8 +5,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 
-const SUPABASE_URL = 'https://szgxfgjspdpwdrdrmbxx.supabase.co';
-const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6Z3hmZ2pzcGRwd2RyZHJtYnh4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODg2MjE2MywiZXhwIjoyMDk0NDM4MTYzfQ.d90BswCDv06n7dygxVIXuBpiRegZO55ZEh2pJCOL4zU';
+const SUPABASE_URL = 'https://twkftwjsvhlczwlhdwzu.supabase.co';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a2Z0d2pzdmhsY3p3bGhkd3p1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg5NDc0MiwiZXhwIjoyMDk1NDcwNzQyfQ.wtz-X9sLEwQRjMdPYM7CWdr0Tf0jygnlVE2rEKNlFbU';
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 const CATEGORY_MAP = {
