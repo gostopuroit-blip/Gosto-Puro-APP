@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 import { trackEvent } from "@/components/useAnalytics";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -48,122 +49,96 @@ export default function Recipes() {
     loadRecipes();
   }, []);
 
+  const [totalCount, setTotalCount] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Carrega freeIds e user uma vez
   const loadRecipes = async () => {
     const [freeRecipes, currentUser] = await Promise.all([
       base44.entities.FreeRecipe.list("-created_date", 500),
       base44.auth.me().catch(() => null),
     ]);
-
-    // Busca todas as receitas em lotes de 1000 (limite do Supabase por request)
-    let allRecipes = [];
-    let skip = 0;
-    const batchSize = 1000;
-    while (true) {
-      const batch = await base44.entities.Recipe.list("-created_at", batchSize, skip);
-      allRecipes = allRecipes.concat(batch);
-      if (batch.length < batchSize) break;
-      skip += batchSize;
-    }
-    const data = allRecipes.filter(r => r.status === "pubblicata");
-
-    setRecipes(data);
     setFreeIds(freeRecipes.map((r) => r.recipe_id));
     setUser(currentUser);
-    setLoading(false);
   };
 
-
-
-  // Define constants before useMemo
-  const FREE_CATEGORIES = ["Colazione", "Pranzo", "Cena"];
-  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
-
-  // Occasioni GP prodotto: buscar SOLO in occasions (non in dietary_tags/lifestyle)
-  // Altrimenti ricette salate con dietary_tag "Senza zucchero" appaiono nella collezione dolci
-  const GP_PRODUCT_OCCASIONS = new Set([
+  // Constants used by both query e UI
+  const FREE_CATEGORIES_LIST = ["Colazione", "Pranzo", "Cena"];
+  const GP_PROD_OCC = new Set([
     "Senza zucchero", "Low carb", "Detox", "Fit",
     "Ricette Sane", "Veloci", "Friggitrice ad Aria", "Facili da Congelare",
     "275 Ricette Fitness Pratiche ed Economiche",
     "365 Ricette Deliziose per Diabetici",
   ]);
-
-  // Aliases: occasione prodotto → labels antichi usati nelle ricette
-  const OCCASION_ALIASES = {
+  const OCC_ALIASES = {
     "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
     "275 Ricette Fitness Pratiche ed Economiche": ["Fit", "275 Ricette Fitness Pratiche ed Economiche"],
   };
 
-  const filteredRecipes = useMemo(() => {
-    let result = [...recipes];
+  // Fetch paginado e filtrado no servidor — re-roda quando qualquer filtro muda
+  useEffect(() => {
+    const fetchPage = async () => {
+      setLoading(true);
+      const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status,created_at";
+      let q = supabase.from("recipes").select(RECIPE_COLS, { count: "exact" }).eq("status", "pubblicata");
 
-    // Search
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (r) =>
-        r.title.toLowerCase().includes(q) ||
-        (r.description || "").toLowerCase().includes(q) ||
-        (r.category || "").toLowerCase().includes(q) ||
-        (r.occasions || []).some((o) => o.toLowerCase().includes(q)) ||
-        (r.lifestyle || []).some((l) => l.toLowerCase().includes(q)) ||
-        (r.ingredients || []).some((i) => (i.name || "").toLowerCase().includes(q))
-      );
-    }
-
-    // Tags — filter by category for Colazione/Pranzo/Cena, or by occasions only for GP products
-    if (activeTags.occasion) {
-      if (FREE_CATEGORIES.includes(activeTags.occasion)) {
-        result = result.filter((r) => r.category === activeTags.occasion);
-      } else if (GP_PRODUCT_OCCASIONS.has(activeTags.occasion)) {
-        // GP product occasions: match ONLY in occasions (not dietary_tags/lifestyle to avoid false positives)
-        const terms = OCCASION_ALIASES[activeTags.occasion] || [activeTags.occasion];
-        result = result.filter((r) => terms.some(term => (r.occasions || []).includes(term)));
-      } else {
-        // Other occasions: match in occasions or lifestyle
-        result = result.filter(
-          (r) =>
-          (r.occasions || []).includes(activeTags.occasion) ||
-          (r.lifestyle || []).includes(activeTags.occasion)
-        );
+      if (debouncedSearch) {
+        const s = debouncedSearch.replace(/[%,()]/g, "");
+        q = q.or(`title.ilike.%${s}%,description.ilike.%${s}%,category.ilike.%${s}%`);
       }
-    }
-    if (activeTags.lifestyle) {
-      if (GP_PRODUCT_OCCASIONS.has(activeTags.lifestyle)) {
-        const terms = OCCASION_ALIASES[activeTags.lifestyle] || [activeTags.lifestyle];
-        result = result.filter((r) => terms.some(term => (r.occasions || []).includes(term)));
-      } else {
-        result = result.filter(
-          (r) =>
-          (r.lifestyle || []).includes(activeTags.lifestyle) ||
-          (r.occasions || []).includes(activeTags.lifestyle)
-        );
+
+      const applyOccasionLike = (tag) => {
+        if (!tag) return;
+        if (FREE_CATEGORIES_LIST.includes(tag)) {
+          q = q.eq("category", tag);
+        } else if (GP_PROD_OCC.has(tag)) {
+          const terms = OCC_ALIASES[tag] || [tag];
+          q = q.overlaps("occasions", terms);
+        } else {
+          const term = tag.replace(/"/g, '\\"');
+          q = q.or(`occasions.cs.{"${term}"},lifestyle.cs.{"${term}"}`);
+        }
+      };
+      applyOccasionLike(activeTags.occasion);
+      applyOccasionLike(activeTags.lifestyle);
+
+      if (activeFilters.has("veloci")) q = q.lte("prep_time", 15);
+
+      const userDietaryTags = user?.dietary_tags_profile || [];
+      if (soloPerMe && userDietaryTags.length > 0) {
+        q = q.overlaps("dietary_tags", userDietaryTags);
       }
-    }
 
-    // Apply sort filters (only one at a time — last active wins)
-    const hasSort = activeFilters.has("salvate") || activeFilters.has("preparate") || activeFilters.has("valutate");
-    if (activeFilters.has("valutate")) {
-      result.sort((a, b) => (b.media_rating || 0) - (a.media_rating || 0));
-    } else if (activeFilters.has("preparate")) {
-      result.sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0));
-    } else if (activeFilters.has("salvate")) {
-      result.sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0));
-    }
+      if (activeFilters.has("valutate")) q = q.order("media_rating", { ascending: false, nullsFirst: false });
+      else if (activeFilters.has("preparate")) q = q.order("numero_preparate", { ascending: false, nullsFirst: false });
+      else if (activeFilters.has("salvate")) q = q.order("numero_salvate", { ascending: false, nullsFirst: false });
+      else q = q.order("created_at", { ascending: false });
 
-    if (activeFilters.has("veloci")) {
-      result = result.filter((r) => r.prep_time <= 15);
-    }
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      q = q.range(from, from + ITEMS_PER_PAGE - 1);
 
-    // Solo per me: mostra solo ricette che hanno almeno una delle tag dietetiche del profilo
-    const userDietaryTags = user?.dietary_tags_profile || [];
-    if (soloPerMe && userDietaryTags.length > 0) {
-      result = result.filter((r) =>
-        userDietaryTags.some(tag => (r.dietary_tags || []).includes(tag))
-      );
-    }
+      const { data, count, error } = await q;
+      if (!error) {
+        setRecipes(data || []);
+        setTotalCount(count || 0);
+      }
+      setLoading(false);
+    };
+    fetchPage();
+  }, [debouncedSearch, activeFilters, activeTags, soloPerMe, currentPage, user]);
 
-    return result;
-  }, [recipes, search, activeFilters, activeTags, soloPerMe, user]);
+
+
+  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
+
+  // Filtros/ordenação/paginação são server-side (ver useEffect acima).
+  // filteredRecipes/orderedRecipes/paginatedRecipes apenas espelham `recipes` para o JSX abaixo.
+  const filteredRecipes = recipes;
 
   const clearTag = (type) => {
     setActiveTags((prev) => ({ ...prev, [type]: null }));
@@ -196,22 +171,17 @@ export default function Recipes() {
 
 
 
-  // If user has any purchase or is premium: natural order. Otherwise: free first, locked after.
+  // Reorder free → locked apenas na página atual (não-premium sem compras)
   const hasPurchases = isPremium || (user?.purchased_products && user.purchased_products.length > 0);
   const orderedRecipes = useMemo(() => {
-    if (hasPurchases) return filteredRecipes;
-    const free = filteredRecipes.filter((r) => freeIds.includes(r.id));
-    const locked = filteredRecipes.filter((r) => !freeIds.includes(r.id));
+    if (hasPurchases) return recipes;
+    const free = recipes.filter((r) => freeIds.includes(r.id));
+    const locked = recipes.filter((r) => !freeIds.includes(r.id));
     return [...free, ...locked];
-  }, [filteredRecipes, hasPurchases, freeIds]);
+  }, [recipes, hasPurchases, freeIds]);
 
-  const paginatedRecipes = useMemo(() => {
-    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIdx = startIdx + ITEMS_PER_PAGE;
-    return orderedRecipes.slice(startIdx, endIdx);
-  }, [orderedRecipes, currentPage]);
-
-  const totalPages = Math.ceil(orderedRecipes.length / ITEMS_PER_PAGE);
+  const paginatedRecipes = orderedRecipes;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
   if (loading) {
     return (

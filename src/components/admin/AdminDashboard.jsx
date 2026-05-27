@@ -14,15 +14,18 @@ export default function AdminDashboard({ onNavigate }) {
   }, []);
 
   const load = async () => {
-    // Fetch all recipes with pagination
-    let allRecipes = [];
-    let skip = 0;
-    while (true) {
-      const batch = await base44.entities.Recipe.list("-created_date", 200, skip);
-      allRecipes = allRecipes.concat(batch);
-      if (batch.length < 200) break;
-      skip += 200;
-    }
+    const { supabase } = await import("@/lib/supabase");
+
+    // 3 queries pequenas em vez de baixar todas as 3000 receitas
+    const RECIPE_COLS = "id,title,image_url,numero_salvate,numero_preparate";
+    const [countRes, savedRes, preparedRes] = await Promise.all([
+      supabase.from("recipes").select("id", { count: "exact", head: true }),
+      supabase.from("recipes").select(RECIPE_COLS).order("numero_salvate", { ascending: false, nullsFirst: false }).limit(5),
+      supabase.from("recipes").select(RECIPE_COLS).order("numero_preparate", { ascending: false, nullsFirst: false }).limit(5),
+    ]);
+    const totalRecipesCount = countRes.count || 0;
+    const topSaved = savedRes.data || [];
+    const topPrepared = preparedRes.data || [];
 
     let usersResult = [];
     try {
@@ -52,14 +55,11 @@ export default function AdminDashboard({ onNavigate }) {
     const now = Date.now();
     const h24 = webhooks.filter((w) => new Date(w.timestamp || w.created_date).getTime() > now - 86400000);
 
-    const topSaved = [...allRecipes].sort((a, b) => (b.numero_salvate || 0) - (a.numero_salvate || 0)).slice(0, 5);
-    const topPrepared = [...allRecipes].sort((a, b) => (b.numero_preparate || 0) - (a.numero_preparate || 0)).slice(0, 5);
-
     setStats({
       totalUsers: users.length,
       premiumUsers: users.filter((u) => u.plan === "premium").length,
       freeUsers: users.filter((u) => !u.plan || u.plan === "free").length,
-      totalRecipes: allRecipes.length,
+      totalRecipes: totalRecipesCount,
       topSaved,
       topPrepared,
       webhookErrors24h: h24.length,

@@ -12,9 +12,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { writeFileSync, unlinkSync, existsSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import sharp from 'sharp';
 
 const SUPABASE_URL = 'https://twkftwjsvhlczwlhdwzu.supabase.co';
 const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a2Z0d2pzdmhsY3p3bGhkd3p1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg5NDc0MiwiZXhwIjoyMDk1NDcwNzQyfQ.wtz-X9sLEwQRjMdPYM7CWdr0Tf0jygnlVE2rEKNlFbU';
@@ -28,12 +26,12 @@ const skipExisting = process.argv.includes('--skip-existing');
 const limitArg = process.argv.find(a => a.startsWith('--limit='));
 const LIMIT = limitArg ? parseInt(limitArg.split('=')[1]) : null;
 
-// Adiciona transformação WebP na URL do Cloudinary
-function toWebpUrl(url) {
-  if (!url) return null;
-  if (!url.includes('cloudinary.com')) return url; // já não é cloudinary
-  // Injeta f_webp,q_auto,w_800 na URL
-  return url.replace('/upload/', '/upload/f_webp,q_auto,w_800/');
+// Converte buffer pra WebP (qualidade 80, max 1200px de largura)
+async function convertToWebp(buffer) {
+  return sharp(buffer)
+    .resize({ width: 1200, withoutEnlargement: true })
+    .webp({ quality: 80 })
+    .toBuffer();
 }
 
 async function fetchWithRetry(url, retries = 3) {
@@ -78,10 +76,30 @@ async function main() {
     query = query.not('image_url', 'like', `${SUPABASE_STORAGE_BASE}%`);
   }
 
-  if (LIMIT) query = query.limit(LIMIT);
-
-  const { data: recipes, error } = await query;
-  if (error) throw error;
+  // Pagina manualmente — PostgREST tem max-rows configurado
+  let recipes = [];
+  if (LIMIT) {
+    query = query.limit(LIMIT);
+    const { data, error } = await query;
+    if (error) throw error;
+    recipes = data || [];
+  } else {
+    const PAGE = 1000;
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, base44_id, title, image_url')
+        .not('image_url', 'is', null)
+        .neq('image_url', '')
+        .not('image_url', 'like', `${SUPABASE_STORAGE_BASE}%`)
+        .order('id')
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      recipes = recipes.concat(data);
+      if (data.length < PAGE) break;
+    }
+  }
 
   console.log(`Total de receitas para processar: ${recipes.length}`);
   if (isDryRun) {
@@ -103,10 +121,12 @@ async function main() {
     }
 
     try {
-      // Baixa a imagem em WebP do Cloudinary
-      const webpUrl = toWebpUrl(recipe.image_url);
-      const res = await fetchWithRetry(webpUrl);
-      const buffer = Buffer.from(await res.arrayBuffer());
+      // Baixa a imagem original
+      const res = await fetchWithRetry(recipe.image_url);
+      const originalBuffer = Buffer.from(await res.arrayBuffer());
+
+      // Converte pra WebP de verdade com sharp
+      const buffer = await convertToWebp(originalBuffer);
 
       // Sobe para o Supabase Storage
       const { error: uploadError } = await supabase.storage

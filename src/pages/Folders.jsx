@@ -52,19 +52,28 @@ export default function Folders() {
     const user = await base44.auth.me().catch(() => null);
     setCurrentUser(user);
 
-    const [ur, r, f] = await Promise.all([
+    const [ur, f] = await Promise.all([
       user
         ? fetchAllPages((limit, skip) =>
             base44.entities.UserRecipe.filter({ created_by: user.email }, "-created_date", limit, skip)
           )
         : Promise.resolve([]),
-      fetchAllPages((limit, skip) =>
-        base44.entities.Recipe.list("-numero_preparate", limit, skip)
-      ),
       user
         ? base44.entities.Folder.filter({ is_system: false, created_by: user.email })
         : Promise.resolve([]),
     ]);
+
+    // Busca SÓ as receitas referenciadas em user_recipes (não todas as 3000)
+    const recipeIds = [...new Set(ur.map(x => x.recipe_id).filter(Boolean))];
+    let r = [];
+    if (recipeIds.length > 0) {
+      const { supabase } = await import("@/lib/supabase");
+      const { data } = await supabase
+        .from("recipes")
+        .select("id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate")
+        .in("id", recipeIds);
+      r = data || [];
+    }
 
     setUserRecipes(ur);
     setRecipes(r);

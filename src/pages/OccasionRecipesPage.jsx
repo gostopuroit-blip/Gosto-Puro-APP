@@ -110,52 +110,57 @@ export default function OccasionRecipesPage() {
     
     // Use cache to avoid re-fetching on back navigation
     if (!recipesCache[occasion]) {
-      let allFetched = [];
-      let skip = 0;
-      const batchSize = 1000;
-      while (true) {
-        const chunk = await base44.entities.Recipe.list("-created_at", batchSize, skip);
-        allFetched = allFetched.concat(chunk);
-        if (chunk.length < batchSize) break;
-        skip += batchSize;
-      }
-      const batch = allFetched.filter(r => r.status === "pubblicata");
+      const { supabase } = await import("@/lib/supabase");
+      const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status";
 
-      let filtered;
+      let filtered = [];
 
-      // "Collezione Gosto Puro": include tutte le ricette delle sub-occasioni
-      // MA esclude le ricette che appartengono ad altri prodotti GP specifici
-if (occasion === "Collezione Gosto Puro") {
-  const GP_PRODUCT_ONLY_OCCASIONS = new Set([
-    "Veloci", "Friggitrice ad Aria", "Facili da Congelare", "Ricette Sane",
-    "Senza zucchero", "Low carb", "Detox", "Fit",
-    "365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico",
-    "275 Ricette Fitness Pratiche ed Economiche",
-    "Proteiche",
-  ]);
-  filtered = batch.filter((r) => {
-    const rOccasions = r.occasions || [];
-    const hasCollezioneOcc = COLLEZIONE_GOSTO_PURO_OCCASIONS.some(term => rOccasions.includes(term));
-    if (!hasCollezioneOcc) return false;
-    const hasOnlyOtherGP = rOccasions.every(occ => GP_PRODUCT_ONLY_OCCASIONS.has(occ));
-    return !hasOnlyOtherGP;
-  });
-} else {
-        // Use occasion aliases if available, otherwise use the occasion directly
+      if (occasion === "Collezione Gosto Puro") {
+        const GP_PRODUCT_ONLY_OCCASIONS = new Set([
+          "Veloci", "Friggitrice ad Aria", "Facili da Congelare", "Ricette Sane",
+          "Senza zucchero", "Low carb", "Detox", "Fit",
+          "365 Ricette Deliziose per Diabetici", "Diabete", "Diabetico",
+          "275 Ricette Fitness Pratiche ed Economiche",
+          "Proteiche",
+        ]);
+        // Server: pega só receitas com qualquer das ocasiões da coleção
+        const { data } = await supabase
+          .from("recipes")
+          .select(RECIPE_COLS)
+          .eq("status", "pubblicata")
+          .overlaps("occasions", COLLEZIONE_GOSTO_PURO_OCCASIONS)
+          .order("created_at", { ascending: false })
+          .limit(2000);
+        filtered = (data || []).filter((r) => {
+          const rOccasions = r.occasions || [];
+          const hasOnlyOtherGP = rOccasions.every(occ => GP_PRODUCT_ONLY_OCCASIONS.has(occ));
+          return !hasOnlyOtherGP;
+        });
+      } else {
         const searchTerms = occasionAliases[occasion] || [occasion];
         const exclusions = occasionExclusions[occasion] || [];
         const isGpProductOccasion = GP_PRODUCT_OCCASIONS.has(occasion);
-        filtered = batch.filter((r) => {
+
+        // Server: pega receitas que dão match em occasions OU lifestyle
+        let query = supabase
+          .from("recipes")
+          .select(RECIPE_COLS)
+          .eq("status", "pubblicata")
+          .order("created_at", { ascending: false })
+          .limit(2000);
+
+        if (isGpProductOccasion) {
+          query = query.overlaps("occasions", searchTerms);
+        } else {
+          // occasions && terms  OR  lifestyle && terms
+          const termsLit = searchTerms.map(t => `"${t.replace(/"/g, '\\"')}"`).join(",");
+          query = query.or(`occasions.ov.{${termsLit}},lifestyle.ov.{${termsLit}}`);
+        }
+
+        const { data } = await query;
+        filtered = (data || []).filter((r) => {
           const rOccasions = r.occasions || [];
-          const rLifestyle = r.lifestyle || [];
-          const matchesTerm = searchTerms.some(term => {
-            if (isGpProductOccasion) {
-              return rOccasions.includes(term);
-            }
-            return rOccasions.includes(term) || rLifestyle.includes(term);
-          });
-          const isExcluded = exclusions.some(excl => rOccasions.includes(excl));
-          return matchesTerm && !isExcluded;
+          return !exclusions.some(excl => rOccasions.includes(excl));
         });
       }
 

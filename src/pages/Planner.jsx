@@ -136,19 +136,38 @@ export default function Planner() {
   const handleCreatePlan = async ({ days, focus, maxTime, servings, dietaryTags }) => {
     setIsCreating(true);
     try {
-      // Fetch published recipes (batch via list + filter JS-side)
+      // Separa restrições (hard filter) de preferências (soft filter)
+      const RESTRICTIONS = ["Senza glutine", "Senza lattosio", "Senza uova", "Senza frutti di mare", "Diabetico", "Senza zucchero"];
+      const userRestrictions = (dietaryTags || []).filter(t => RESTRICTIONS.includes(t));
+      const userPreferences = (dietaryTags || []).filter(t => !RESTRICTIONS.includes(t));
+
       const accessibleOccasions = getUserAccessibleOccasions(user);
       const isAllAccess = accessibleOccasions.includes("ALL");
-      let allRecipesBatch = [];
-      let skip = 0;
-      const batchSize = 1000;
-      while (true) {
-        const batch = await base44.entities.Recipe.list("-created_at", batchSize, skip);
-        allRecipesBatch = allRecipesBatch.concat(batch);
-        if (batch.length < batchSize) break;
-        skip += batchSize;
+
+      // Carrega só colunas necessárias, já filtrando status no servidor + paginando
+      const { supabase } = await import("@/lib/supabase");
+      const RECIPE_COLS = "id,title,category,prep_time,dietary_tags,occasions";
+      const PAGE = 1000;
+      let allRecipes = [];
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await supabase
+          .from("recipes")
+          .select(RECIPE_COLS)
+          .eq("status", "pubblicata")
+          .order("id")
+          .range(from, from + PAGE - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        allRecipes = allRecipes.concat(data);
+        if (data.length < PAGE) break;
       }
-      const allRecipes = allRecipesBatch.filter(r => r.status === "pubblicata");
+
+      // HARD filter: receita deve conter TODAS as restrições do usuário
+      if (userRestrictions.length > 0) {
+        allRecipes = allRecipes.filter(r =>
+          userRestrictions.every(restriction => (r.dietary_tags || []).includes(restriction))
+        );
+      }
 
       // Filter by max time
       const withinTime = allRecipes.filter(r => !r.prep_time || r.prep_time <= maxTime);
@@ -172,10 +191,10 @@ export default function Planner() {
 
         if (pool.length === 0) return null;
 
-        // Prefer recipes matching dietary tags
-        if (dietaryTags && dietaryTags.length > 0) {
+        // Prefere receitas com TAGS de preferência do usuário (restrições já foram aplicadas como hard filter)
+        if (userPreferences.length > 0) {
           const preferred = pool.filter(r =>
-            (r.dietary_tags || []).some(tag => dietaryTags.includes(tag))
+            (r.dietary_tags || []).some(tag => userPreferences.includes(tag))
           );
           if (preferred.length > 0) {
             return preferred[Math.floor(Math.random() * preferred.length)];
