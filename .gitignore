@@ -2,9 +2,6 @@
 .env
 .env.*
 
-# Scripts de migração (contêm chaves e dados pessoais)
-scripts/
-supabase/
 
 # Logs
 logs
