@@ -114,7 +114,7 @@ export default function Folders() {
 
   const addRecipeToFolder = async (recipe, folderId) => {
     const existing = userRecipes.find((u) => u.recipe_id === recipe.id);
-    const isFree = currentUser?.plan !== "premium" && currentUser?.role !== "admin";
+    const isFree = !currentUser?.is_premium;
 
     // Check if trying to add to custom folder as free user
     const isCustomFolder = !["per_fare", "fatte", "preferite", "valutate"].includes(folderId);
@@ -185,7 +185,7 @@ export default function Folders() {
 
   const createFolder = async () => {
     if (!newFolderName.trim()) return;
-    const isFree = currentUser?.plan !== "premium" && currentUser?.role !== "admin";
+    const isFree = !currentUser?.is_premium;
     if (isFree) {
       toast.error("Solo gli utenti premium possono creare cartelle personalizzate");
       return;
@@ -213,7 +213,7 @@ export default function Folders() {
    };
 
 
-  const isPremium = currentUser?.plan === "premium" || currentUser?.role === "admin";
+  const isPremium = currentUser?.is_premium;
 
   const filteredSearch = recipes.filter((r) =>
     r.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -235,7 +235,7 @@ export default function Folders() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Le mie cartelle</h1>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Organizza le tue ricette</p>
           </div>
-          {(currentUser?.plan === "premium" || currentUser?.role === "admin") && (
+          {(currentUser?.is_premium) && (
             <Button
               onClick={() => setShowNewFolder(true)}
               size="sm"
@@ -305,7 +305,7 @@ export default function Folders() {
              </button>
              {isExpanded && (
                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
-                 {(currentUser?.plan === "premium" || currentUser?.role === "admin") && (
+                 {(currentUser?.is_premium) && (
                    <Button
                      onClick={() => setShowAddRecipe(true)}
                      size="sm"
@@ -380,7 +380,7 @@ export default function Folders() {
 
               {isExpanded && (
                 <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
-                  {(currentUser?.plan === "premium" || currentUser?.role === "admin") && (
+                  {(currentUser?.is_premium) && (
                     <Button
                       onClick={() => setShowAddRecipe(true)}
                       size="sm"

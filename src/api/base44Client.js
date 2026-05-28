@@ -107,10 +107,23 @@ const auth = {
       .eq('id', user.id)
       .single();
 
+    // Campo derivado: true se o usuário tem acesso a features premium
+    // (plan premium, role admin/premium/basic, expert, OU tem qualquer compra GP)
+    const hasPurchase = Array.isArray(profile?.purchased_products) && profile.purchased_products.length > 0;
+    const isPremium =
+      profile?.role === 'admin' ||
+      profile?.role === 'premium' ||
+      profile?.role === 'basic' ||
+      profile?.plan === 'premium' ||
+      profile?.plan === 'basic' ||
+      profile?.is_expert === true ||
+      hasPurchase;
+
     return {
       ...profile,
       id: user.id,
       email: user.email,
+      is_premium: isPremium,
     };
   },
 
