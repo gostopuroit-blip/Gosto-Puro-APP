@@ -135,12 +135,36 @@ auth.me = async (...args) => {
   return user;
 };
 
+const NOT_AVAILABLE = (feature) => () => {
+  throw new Error(`${feature} requer chave de IA (OpenAI/Anthropic) — funcionalidade não configurada no momento.`);
+};
+
+const integrations = {
+  Core: {
+    // Upload real pro Supabase Storage. Retorna { file_url } (formato esperado pelo código legado)
+    async UploadFile({ file, bucket = 'uploads' }) {
+      if (!file) throw new Error('UploadFile: arquivo ausente');
+      const { data: { user } } = await supabase.auth.getUser();
+      const folder = user?.id || 'anon';
+      const ext = (file.name?.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        contentType: file.type || undefined,
+        upsert: false,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      return { file_url: data.publicUrl };
+    },
+    // Stubs: dão erro claro em vez de TypeError até configurar edge function
+    InvokeLLM: NOT_AVAILABLE('InvokeLLM'),
+    GenerateImage: NOT_AVAILABLE('GenerateImage'),
+  },
+};
+
 export const base44 = {
   auth,
-  // appLogs é um no-op — era usado pelo NavigationTracker do Base44
-  appLogs: {
-    logUserInApp: async () => {},
-  },
+  integrations,
   entities: {
     AppAnalytics: createEntity('app_analytics'),
     AppConfig: createEntity('app_config'),

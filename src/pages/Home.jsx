@@ -83,7 +83,7 @@ export default function Home() {
        
        const [notifs, recipes, products] = await Promise.all([
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
-    base44.entities.Recipe.filter({ status: "pubblicata" }, "-created_date", 10),
+    base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 20),
     base44.entities.GostoPuroProduct.filter({ is_active: true }, "created_date"),
     ]);
 
@@ -315,13 +315,15 @@ export default function Home() {
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {(() => {
             const dietaryTags = user?.dietary_tags_profile || [];
-            const filtered = topRecipes.filter((recipe) => {
-              if (dietaryTags.length > 0) {
-                const recipeTags = recipe.dietary_tags || [];
-                return dietaryTags.some(tag => recipeTags.includes(tag));
-              }
-              return true;
-            });
+            // Prefere receitas que casam com tags do perfil; se nenhuma casar, mostra todas
+            let filtered = topRecipes;
+            if (dietaryTags.length > 0) {
+              const matching = topRecipes.filter((recipe) =>
+                dietaryTags.some(tag => (recipe.dietary_tags || []).includes(tag))
+              );
+              filtered = matching.length > 0 ? matching : topRecipes;
+            }
+            filtered = filtered.slice(0, 10);
 
             return filtered.map((recipe) => (
             <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
