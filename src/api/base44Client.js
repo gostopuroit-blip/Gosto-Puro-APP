@@ -125,16 +125,6 @@ const auth = {
   },
 };
 
-// Monkey-patch herdado: libera premium para todos os usuários logados (exceto admin)
-const _originalMe = auth.me.bind(auth);
-auth.me = async (...args) => {
-  const user = await _originalMe(...args);
-  if (user && user.role !== 'admin') {
-    user.plan = 'premium';
-  }
-  return user;
-};
-
 const NOT_AVAILABLE = (feature) => () => {
   throw new Error(`${feature} requer chave de IA (OpenAI/Anthropic) — funcionalidade não configurada no momento.`);
 };
