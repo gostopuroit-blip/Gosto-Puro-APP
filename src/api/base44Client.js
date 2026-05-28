@@ -107,23 +107,44 @@ const auth = {
       .eq('id', user.id)
       .single();
 
-    // Campo derivado: true se o usuário tem acesso a features premium
-    // (plan premium, role admin/premium/basic, expert, OU tem qualquer compra GP)
-    const hasPurchase = Array.isArray(profile?.purchased_products) && profile.purchased_products.length > 0;
-    const isPremium =
+    const purchasedSlugs = Array.isArray(profile?.purchased_products) ? profile.purchased_products : [];
+    const hasPurchase = purchasedSlugs.length > 0;
+
+    // Acesso premium "estrito": vê TODAS as receitas (premium completo, admin, expert)
+    const isFullPremium =
       profile?.role === 'admin' ||
       profile?.role === 'premium' ||
       profile?.role === 'basic' ||
       profile?.plan === 'premium' ||
       profile?.plan === 'basic' ||
-      profile?.is_expert === true ||
-      hasPurchase;
+      profile?.is_expert === true;
+
+    // has_access = libera Planner/Cartelle (qualquer compra OU premium completo)
+    const hasAccess = isFullPremium || hasPurchase;
+
+    // unlocked_occasions = ocasiões que esse usuário pode ver
+    // Premium completo → ['*'] (tudo). Senão → união das occasioni dos produtos comprados.
+    let unlockedOccasions = [];
+    if (isFullPremium) {
+      unlockedOccasions = ['*'];
+    } else if (hasPurchase) {
+      const { data: prods } = await supabase
+        .from('gosto_puro_products')
+        .select('slug,occasioni')
+        .in('slug', purchasedSlugs);
+      const set = new Set();
+      (prods || []).forEach(p => (p.occasioni || []).forEach(o => set.add(o)));
+      unlockedOccasions = [...set];
+    }
 
     return {
       ...profile,
       id: user.id,
       email: user.email,
-      is_premium: isPremium,
+      is_premium: hasAccess,        // mantém compatibilidade com Folders/etc
+      is_full_premium: isFullPremium,
+      has_access: hasAccess,
+      unlocked_occasions: unlockedOccasions,
     };
   },
 

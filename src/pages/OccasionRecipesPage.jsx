@@ -356,8 +356,14 @@ export default function OccasionRecipesPage() {
                        occasion={occasion}
                        isSaved={!!userRecipes[recipe.id]}
                        user={user}
-                       isBlocked={false}
-                       onBlockedClick={() => {}}
+                       isBlocked={(() => {
+                         const isFullPremium = user?.is_full_premium === true;
+                         const unlocked = user?.unlocked_occasions || [];
+                         if (isFullPremium || unlocked.includes("*")) return false;
+                         // Receita acessível se uma das suas ocasiões está nas desbloqueadas
+                         return !(recipe.occasions || []).some(o => unlocked.includes(o));
+                       })()}
+                       onBlockedClick={() => window.open("https://gostopuro.it/upgrade/", "_blank")}
                      />
                    ))}
                  </div>

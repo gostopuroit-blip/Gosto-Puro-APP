@@ -134,7 +134,14 @@ export default function Recipes() {
 
 
 
-  const isPremium = user?.role === "admin" || user?.role === "premium" || user?.role === "basic" || user?.plan === "premium" || user?.plan === "basic" || user?.is_expert === true;
+  const isPremium = user?.is_full_premium === true;
+  const unlockedOccasions = user?.unlocked_occasions || [];
+  const hasAllAccess = unlockedOccasions.includes("*");
+  const recipeMatchesPurchase = (r) => {
+    if (hasAllAccess) return true;
+    if (unlockedOccasions.length === 0) return false;
+    return (r.occasions || []).some((o) => unlockedOccasions.includes(o));
+  };
 
   // Filtros/ordenação/paginação são server-side (ver useEffect acima).
   // filteredRecipes/orderedRecipes/paginatedRecipes apenas espelham `recipes` para o JSX abaixo.
@@ -289,7 +296,7 @@ export default function Recipes() {
           <>
              {paginatedRecipes.map((recipe) => {
                const isFitOccasion = activeTags.occasion === "Fit" || activeTags.lifestyle === "Fit";
-               const isLocked = !isPremium && !freeIds.includes(recipe.id) && !isFitOccasion;
+               const isLocked = !isPremium && !freeIds.includes(recipe.id) && !isFitOccasion && !recipeMatchesPurchase(recipe);
                if (isLocked) {
                  return (
                    <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("premium_click", { source: "recipe_list", recipe_id: recipe.id, recipe_title: recipe.title })} className="block relative rounded-3xl overflow-hidden">
