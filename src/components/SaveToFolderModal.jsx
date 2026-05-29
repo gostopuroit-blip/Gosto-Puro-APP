@@ -27,7 +27,7 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
     setLoadingFolders(true);
     const user = await base44.auth.me().catch(() => null);
     const f = user
-      ? await base44.entities.Folder.filter({ is_system: false, created_by: user.email })
+      ? await base44.entities.Folder.filter({ is_system: false, user_id: user.id })
       : [];
     setCustomFolders(f);
     setLoadingFolders(false);
@@ -57,7 +57,7 @@ export default function SaveToFolderModal({ open, onClose, recipeId, onSaved }) 
       setSaving(false);
       return;
     }
-    const existing = await base44.entities.UserRecipe.filter({ recipe_id: recipeId, created_by: user.email });
+    const existing = await base44.entities.UserRecipe.filter({ recipe_id: recipeId, user_id: user.id });
 
     const isFavorite = selectedFolders.includes("preferite");
     const customIds = selectedFolders.filter((id) => id !== "per_fare" && id !== "preferite");

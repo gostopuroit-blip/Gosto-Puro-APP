@@ -183,7 +183,7 @@ export default function OccasionRecipesPage() {
 
     // Load user favorites + dietary tags in parallel (non-blocking)
     if (userData) {
-      const saved = await base44.entities.UserRecipe.filter({ is_saved: true, created_by: userData.email }).catch(() => []);
+      const saved = await base44.entities.UserRecipe.filter({ is_saved: true, user_id: userData.id }).catch(() => []);
       const map = {};
       saved.forEach((ur) => { map[ur.recipe_id] = ur; });
       setUserRecipes(map);

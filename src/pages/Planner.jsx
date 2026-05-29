@@ -93,7 +93,7 @@ export default function Planner() {
     setUser(currentUser);
 
     const plans = await base44.entities.MealPlan.filter(
-      { is_active: true, created_by: currentUser?.id },
+      { is_active: true, user_id: currentUser?.id },
       "-created_at",
       1
     );
@@ -246,7 +246,7 @@ export default function Planner() {
       });
 
       // Deactivate previous plans
-      const existingPlans = await base44.entities.MealPlan.filter({ is_active: true, created_by: user?.id });
+      const existingPlans = await base44.entities.MealPlan.filter({ is_active: true, user_id: user?.id });
       await Promise.all(existingPlans.map(p => base44.entities.MealPlan.update(p.id, { is_active: false })));
 
       // Create new plan
@@ -260,6 +260,7 @@ export default function Planner() {
         plan_data,
         is_active: true,
         days_completed: [],
+        user_id: user?.id,
         created_by: user?.id,
       });
 

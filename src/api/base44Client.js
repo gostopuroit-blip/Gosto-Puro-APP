@@ -69,9 +69,15 @@ function createEntity(tableName) {
     },
 
     async create(data) {
+      // Injeta user_id automaticamente se não foi passado (necessário para RLS)
+      let payload = { ...data };
+      if (!payload.user_id) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) payload.user_id = user.id;
+      }
       const { data: result, error } = await supabase
         .from(tableName)
-        .insert(data)
+        .insert(payload)
         .select()
         .single();
       if (error) throw error;

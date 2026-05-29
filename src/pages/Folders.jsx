@@ -55,11 +55,11 @@ export default function Folders() {
     const [ur, f] = await Promise.all([
       user
         ? fetchAllPages((limit, skip) =>
-            base44.entities.UserRecipe.filter({ created_by: user.email }, "-created_date", limit, skip)
+            base44.entities.UserRecipe.filter({ user_id: user.id }, "-created_at", limit, skip)
           )
         : Promise.resolve([]),
       user
-        ? base44.entities.Folder.filter({ is_system: false, created_by: user.email })
+        ? base44.entities.Folder.filter({ is_system: false, user_id: user.id })
         : Promise.resolve([]),
     ]);
 

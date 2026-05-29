@@ -119,13 +119,13 @@ export default function RecipeDetail() {
     const [recipes, userRecipes, allSaved, allPrepared, recentRecipes] = await Promise.all([
       base44.entities.Recipe.filter({ id: recipeId }),
       currentUser
-        ? base44.entities.UserRecipe.filter({ recipe_id: recipeId, created_by: currentUser.email })
+        ? base44.entities.UserRecipe.filter({ recipe_id: recipeId, user_id: currentUser.id })
         : Promise.resolve([]),
       currentUser
-        ? base44.entities.UserRecipe.filter({ is_saved: true, created_by: currentUser.email })
+        ? base44.entities.UserRecipe.filter({ is_saved: true, user_id: currentUser.id })
         : Promise.resolve([]),
       currentUser
-        ? base44.entities.UserRecipe.filter({ is_prepared: true, created_by: currentUser.email })
+        ? base44.entities.UserRecipe.filter({ is_prepared: true, user_id: currentUser.id })
         : Promise.resolve([]),
       base44.entities.FreeRecipe.list("-created_date", 500),
     ]);
