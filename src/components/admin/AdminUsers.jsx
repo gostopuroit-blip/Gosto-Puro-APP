@@ -200,26 +200,24 @@ export default function AdminUsers() {
 }
 
 function ProductDropdown({ onSelect, current }) {
-  const products = [
-    "diabetici",
-    "fitness_pratiche",
-    "ricette_sane_35",
-    "ricette_veloci_pratiche",
-    "cene_friggitrice",
-    "ricette_congelare",
-    "senza_zucchero",
-    "ricette_detox",
-    "low_carb",
-    "504_ricette_collezione",
-    "cucina_senza_tempo"
-  ];
-  
-  const available = products.filter(p => !current.includes(p));
-  
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    // Busca TODOS os produtos do catálogo (sempre reflete o que está no banco)
+    base44.entities.GostoPuroProduct.list("sort_order", 100)
+      .then((rows) => setProducts((rows || []).map((p) => ({ slug: p.slug, nome: p.nome || p.slug }))))
+      .catch(() => setProducts([]));
+  }, []);
+
+  const available = products.filter((p) => !current.includes(p.slug));
+
+  if (products.length === 0) {
+    return <span className="text-[11px] text-gray-400">Caricamento…</span>;
+  }
   if (available.length === 0) {
     return <span className="text-[11px] text-gray-400">Tutti i prodotti aggiunti</span>;
   }
-  
+
   return (
     <select
       onChange={(e) => {
@@ -232,7 +230,7 @@ function ProductDropdown({ onSelect, current }) {
     >
       <option value="">+ Aggiungi prodotto</option>
       {available.map((p) => (
-        <option key={p} value={p}>{p}</option>
+        <option key={p.slug} value={p.slug}>{p.nome}</option>
       ))}
     </select>
   );

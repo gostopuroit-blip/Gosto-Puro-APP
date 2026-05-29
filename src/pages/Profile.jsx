@@ -465,6 +465,10 @@ export default function Profile() {
           ricette_detox: "Ricette Detox",
           low_carb: "Ricette Low Carb",
           senza_zucchero: "Ricette Senza Zucchero",
+          "504_ricette_collezione": "Collezione Gosto Puro",
+          cucina_senza_tempo: "110 e Lode in Cucina",
+          dolci_senza_colpa: "99 Dolci Senza Colpa",
+          piatti_settimanali_air_fryer: "Piatti Settimanali in Air Fryer",
         };
 
         if (isPremium) {
