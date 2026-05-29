@@ -42,7 +42,8 @@ export default function Login() {
     if (error) {
       setMessage({ type: 'error', text: error.message });
     } else {
-      setMessage({ type: 'success', text: 'Account creato! Controlla la tua email per confermare la registrazione.' });
+      // Redireciona direto — confirmação de email desabilitada
+      redirectAfterLogin();
     }
     setLoading(false);
   };
@@ -67,7 +68,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F0FDF4] px-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-green-700">Gosto Puro</h1>
           <p className="text-gray-500 text-sm mt-1">
             {mode === 'login' && 'Accedi al tuo account'}
@@ -75,6 +76,24 @@ export default function Login() {
             {mode === 'reset' && 'Recupera la password'}
           </p>
         </div>
+
+        {/* Banner utenti esistenti — visibile solo su login e register */}
+        {(mode === 'login' || mode === 'register') && (
+          <div className="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
+            <p className="font-bold text-amber-700 mb-1">👋 Già con noi su Gosto Puro?</p>
+            {mode === 'login' ? (
+              <p>
+                Se avevi un account sul vecchio sito, <strong>crea un nuovo account</strong> con la stessa email —
+                il tuo piano Premium verrà ripristinato automaticamente! 🎉
+              </p>
+            ) : (
+              <p>
+                Usa la <strong>stessa email</strong> del tuo vecchio account Gosto Puro
+                e il tuo accesso Premium sarà attivato subito in automatico! 🎉
+              </p>
+            )}
+          </div>
+        )}
 
         {message && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${
