@@ -48,8 +48,7 @@ export const AuthProvider = ({ children }) => {
         ...profile,
         id: authUser.id,
         email: authUser.email,
-        // garante premium para todos os não-admin (herda comportamento original)
-        plan: profile?.role === 'admin' ? (profile?.plan || 'free') : 'premium',
+        plan: profile?.plan || 'free',
         role: profile?.role || 'user',
       };
 
@@ -57,7 +56,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setAuthError(null);
     } catch {
-      setUser({ id: authUser.id, email: authUser.email, plan: 'premium', role: 'user' });
+      setUser({ id: authUser.id, email: authUser.email, plan: 'free', role: 'user' });
       setIsAuthenticated(true);
       setAuthError(null);
     } finally {

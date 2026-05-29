@@ -19,10 +19,11 @@ function parseSortParam(sort) {
 
 function createEntity(tableName) {
   return {
-    async filter(filters = {}, sort = '-created_at', limit = 100) {
+    async filter(filters = {}, sort = '-created_at', limit = 100, skip = 0) {
       let query = supabase.from(tableName).select('*');
 
-      for (const [key, value] of Object.entries(filters)) {
+      for (const [rawKey, value] of Object.entries(filters)) {
+        const key = mapField(rawKey);
         if (value === null || value === undefined) {
           query = query.is(key, null);
         } else if (Array.isArray(value)) {
@@ -47,7 +48,13 @@ function createEntity(tableName) {
       const { column, ascending } = parseSortParam(sort);
       query = query.order(column, { ascending });
 
-      if (limit) query = query.limit(limit);
+      if (limit) {
+        if (skip > 0) {
+          query = query.range(skip, skip + limit - 1);
+        } else {
+          query = query.limit(limit);
+        }
+      }
 
       const { data, error } = await query;
       if (error) throw error;
@@ -180,6 +187,20 @@ const auth = {
       has_access: hasAccess,
       unlocked_occasions: unlockedOccasions,
     };
+  },
+
+  // Atualiza o profile do usuário logado
+  async updateMe(data) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw Object.assign(new Error('Not authenticated'), { status: 401 });
+    const { data: result, error } = await supabase
+      .from('profiles')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', user.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return result;
   },
 
   async logout(redirectUrl) {

@@ -81,6 +81,7 @@ export default function ShoppingList() {
       for (const recipe of recipes) {
         if (!recipe) continue;
         for (const ing of recipe.ingredients || []) {
+          if (!ing || !ing.name) continue;
           const key = ing.name.toLowerCase().trim();
           if (!allIngredients[key]) {
             allIngredients[key] = {
