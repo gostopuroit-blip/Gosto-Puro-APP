@@ -6,7 +6,6 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import WhatToCook from './pages/WhatToCook';
-import Search from './pages/Search';
 import OccasionRecipesPage from './pages/OccasionRecipesPage';
 import ShoppingList from './pages/ShoppingList';
 import Login from './pages/Login';
@@ -60,7 +59,6 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/WhatToCook" element={<LayoutWrapper currentPageName="WhatToCook"><WhatToCook /></LayoutWrapper>} />
-      <Route path="/Search" element={<LayoutWrapper currentPageName="Search"><Search /></LayoutWrapper>} />
       <Route path="/OccasionRecipes" element={<LayoutWrapper currentPageName="OccasionRecipes"><OccasionRecipesPage /></LayoutWrapper>} />
       <Route path="/ShoppingList" element={<LayoutWrapper currentPageName="ShoppingList"><ShoppingList /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
