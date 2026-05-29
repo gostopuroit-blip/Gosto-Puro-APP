@@ -94,11 +94,20 @@ function createEntity(tableName) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.id) payload.user_id = user.id;
       }
-      const { data: result, error } = await supabase
+      let { data: result, error } = await supabase
         .from(tableName)
         .insert(payload)
         .select()
         .single();
+      // Tabelas sem coluna user_id (ex: notifications) — tenta de novo sem ela
+      if (error && /user_id/.test(error.message || '') && payload.user_id) {
+        const { user_id, ...rest } = payload;
+        ({ data: result, error } = await supabase
+          .from(tableName)
+          .insert(rest)
+          .select()
+          .single());
+      }
       if (error) throw error;
       return result;
     },
@@ -241,9 +250,162 @@ const integrations = {
   },
 };
 
+// ------------------------------------------------------------------
+// functions.invoke — substitui as Edge Functions do base44.
+// Funções DB-backed rodam direto no Supabase; as que dependem de
+// email/push/IA fazem no-op gracioso (retornam {success:false,message}).
+// Sempre retorna { data } para casar com o formato que os callers esperam.
+// ------------------------------------------------------------------
+async function getAllProfiles() {
+  const PAGE = 1000;
+  let all = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    all = all.concat(data);
+    if (data.length < PAGE) break;
+  }
+  return all;
+}
+
+async function insertNotification(row) {
+  // Resolve recipient_id pelo email (permite que o destinatário leia por id também)
+  if (!row.recipient_id && row.recipient_email) {
+    const { data: rprof } = await supabase
+      .from('profiles').select('id').ilike('email', row.recipient_email).limit(1).maybeSingle();
+    if (rprof?.id) row.recipient_id = rprof.id;
+  }
+  // NÃO usar .select() — a policy de SELECT bloqueia ler notificação de outro usuário
+  const { error } = await supabase.from('notifications').insert(row);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+const FUNCTION_HANDLERS = {
+  async adminGetUsersV2() {
+    return await getAllProfiles();
+  },
+
+  async adminUpdateUser({ userId, data } = {}) {
+    if (!userId || !data) return { success: false, error: 'Missing userId or data' };
+    const { data: updated, error } = await supabase
+      .from('profiles').update(data).eq('id', userId).select().single();
+    if (error) return { success: false, error: error.message };
+    return { success: true, user: updated };
+  },
+
+  async createLikeNotification({ post_id, post_author_email, liker_email, liker_name, liker_photo } = {}) {
+    if (!post_id || !post_author_email || !liker_email) return { success: false };
+    if (liker_email === post_author_email) return { success: true, skipped: true };
+    return await insertNotification({
+      recipient_email: post_author_email, sender_email: liker_email,
+      sender_name: liker_name || liker_email.split('@')[0], sender_photo: liker_photo || null,
+      type: 'like', message: `${liker_name || liker_email.split('@')[0]} ha messo mi piace al tuo post`,
+      reference_id: post_id, reference_type: 'post', is_read: false,
+    });
+  },
+
+  async createFollowNotification({ followed_email, follower_email, follower_name, follower_photo } = {}) {
+    if (!followed_email || !follower_email) return { success: false };
+    if (follower_email === followed_email) return { success: true, skipped: true };
+    return await insertNotification({
+      recipient_email: followed_email, sender_email: follower_email,
+      sender_name: follower_name || follower_email.split('@')[0], sender_photo: follower_photo || null,
+      type: 'follow', message: `${follower_name || follower_email.split('@')[0]} ha iniziato a seguirti`,
+      reference_id: follower_email, reference_type: 'profile', is_read: false,
+    });
+  },
+
+  async createMentionNotification({ recipient_email, sender_name, post_id, type } = {}) {
+    if (!recipient_email || !sender_name || !post_id || !type) return { success: false };
+    const { data: { user } } = await supabase.auth.getUser();
+    return await insertNotification({
+      recipient_email, sender_email: user?.email, sender_name, type,
+      message: type === 'post_mention'
+        ? `${sender_name} ti ha menzionato in un post`
+        : `${sender_name} ti ha menzionato in un commento`,
+      reference_id: post_id, reference_type: 'post', is_read: false,
+    });
+  },
+
+  async savePushSubscription({ endpoint, p256dh, auth: authKey } = {}) {
+    if (!endpoint) return { success: false, error: 'Missing endpoint' };
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from('push_subscriptions').upsert({
+      user_id: user?.id, user_email: user?.email, endpoint, p256dh, auth: authKey,
+    }, { onConflict: 'endpoint' });
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  },
+
+  // Push web requer chaves VAPID no servidor — não configurado
+  async getVapidPublicKey() {
+    return { publicKey: null };
+  },
+
+  // Aplica compras pendentes a perfis já existentes (admin)
+  async processPendingPremium() {
+    const { data: pendings } = await supabase
+      .from('pending_premium').select('*').eq('status', 'pending');
+    let applied = 0;
+    for (const p of pendings || []) {
+      const { data: prof } = await supabase
+        .from('profiles').select('id,purchased_products').ilike('email', p.email).limit(1).maybeSingle();
+      if (!prof) continue;
+      const { data: gp } = await supabase
+        .from('gosto_puro_products').select('slug').eq('hotmart_product_id', p.product_id).maybeSingle();
+      if (gp?.slug) {
+        const cur = prof.purchased_products || [];
+        if (!cur.includes(gp.slug)) {
+          await supabase.from('profiles').update({ purchased_products: [...cur, gp.slug] }).eq('id', prof.id);
+        }
+      } else {
+        await supabase.from('profiles').update({ plan: 'premium' }).eq('id', prof.id);
+      }
+      await supabase.from('pending_premium').update({ status: 'applied' }).eq('id', p.id);
+      applied++;
+    }
+    return { success: true, applied };
+  },
+};
+
+// Funções que dependem de email/push/IA — no-op gracioso até configurar infra
+const NOOP_FUNCTIONS = {
+  sendCustomNotification: 'Notifiche push richiedono configurazione VAPID',
+  sendDailyRecipeEmailsForce: 'Invio email richiede configurazione SMTP',
+  ebookFollowupSender: 'Invio email richiede configurazione SMTP',
+  ebookFollowupTest: 'Invio email richiede configurazione SMTP',
+  generateBulkRecipes: 'Generazione IA non configurata',
+  cleanupFreeUserRecipes: 'Funzione non disponibile',
+  updateBaseFreeUnlockedIds: 'Funzione non disponibile',
+};
+
+const functions = {
+  async invoke(name, payload) {
+    try {
+      if (FUNCTION_HANDLERS[name]) {
+        const result = await FUNCTION_HANDLERS[name](payload);
+        return { data: result };
+      }
+      if (NOOP_FUNCTIONS[name]) {
+        return { data: { success: false, message: NOOP_FUNCTIONS[name] } };
+      }
+      return { data: { success: false, error: `Função desconhecida: ${name}` } };
+    } catch (e) {
+      return { data: { success: false, error: e.message } };
+    }
+  },
+};
+
 export const base44 = {
   auth,
   integrations,
+  functions,
   entities: {
     AppAnalytics: createEntity('app_analytics'),
     AppConfig: createEntity('app_config'),
