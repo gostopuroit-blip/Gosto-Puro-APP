@@ -140,7 +140,7 @@ export default function AdminRecipeEngagement() {
   const hourCounts = Array(24).fill(0);
   sessionStarts.forEach(e => {
     if (e.created_date) {
-      const h = new Date(e.created_date).getHours();
+      const h = new Date(e.created_at || e.created_date).getHours();
       hourCounts[h]++;
     }
   });

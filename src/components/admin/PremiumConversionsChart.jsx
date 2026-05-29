@@ -44,7 +44,8 @@ export default function PremiumConversionsChart() {
       return weeks.map((weekStart) => {
         const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
         const count = premiumUsers.filter((u) => {
-          const d = new Date(u.updated_date || u.created_date);
+          const d = new Date(u.updated_at || u.created_at || u.updated_date || u.created_date);
+          if (isNaN(d.getTime())) return false;
           return isWithinInterval(d, { start: weekStart, end: weekEnd }) && d >= startDate;
         }).length;
         return {
@@ -58,7 +59,8 @@ export default function PremiumConversionsChart() {
       return days.map((day) => {
         const dayStr = format(day, "yyyy-MM-dd");
         const count = premiumUsers.filter((u) => {
-          const d = new Date(u.updated_date || u.created_date);
+          const d = new Date(u.updated_at || u.created_at || u.updated_date || u.created_date);
+          if (isNaN(d.getTime())) return false;
           return format(d, "yyyy-MM-dd") === dayStr;
         }).length;
         return {
@@ -72,7 +74,8 @@ export default function PremiumConversionsChart() {
   const totalConversions = useMemo(() => {
     const startDate = subDays(new Date(), selectedDays);
     return premiumUsers.filter((u) => {
-      const d = new Date(u.updated_date || u.created_date);
+      const d = new Date(u.updated_at || u.created_at || u.updated_date || u.created_date);
+      if (isNaN(d.getTime())) return false;
       return d >= startDate;
     }).length;
   }, [premiumUsers, selectedDays]);

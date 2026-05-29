@@ -120,7 +120,7 @@ export default function AdminAnalyticsReport() {
     const dayCounts = {};
     sessionStarts.forEach(e => {
       if (e.created_date) {
-        const day = new Date(e.created_date).getDay();
+        const day = new Date(e.created_at || e.created_date).getDay();
         dayCounts[day] = (dayCounts[day] || 0) + 1;
       }
     });

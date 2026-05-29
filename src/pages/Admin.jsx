@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AdminGuard from "@/components/AdminGuard";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminRecipesManager from "@/components/admin/AdminRecipesManager";
@@ -144,6 +145,7 @@ function AdminContent() {
 
         {/* Page content */}
         <main className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
+          <ErrorBoundary key={activeTab} label={activeLabel}>
           {activeTab === "dashboard"    && <AdminDashboard onNavigate={setActiveTab} />}
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}
@@ -174,6 +176,7 @@ function AdminContent() {
           {activeTab === "user_products"  && <AdminUserProducts />}
           {activeTab === "gp_products"    && <AdminGostoPuroProducts />}
           {activeTab === "impostazioni" && <AdminSettings />}
+          </ErrorBoundary>
         </main>
       </div>
     </div>
