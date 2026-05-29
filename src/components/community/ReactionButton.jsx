@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const REACTIONS = [

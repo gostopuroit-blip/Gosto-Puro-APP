@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, Trash2, Flag, MessageCircle, BadgeCheck, X } from "lucide-react";
+import { Heart, Trash2, Flag, MessageCircle, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 import UserAvatar from "../UserAvatar";
 

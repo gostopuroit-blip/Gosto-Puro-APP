@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, X, ChevronLeft, ChevronRight, Loader2, Heart, Lock } from "lucide-react";
+import { Plus, X, Loader2, Heart } from "lucide-react";
 import { toast } from "sonner";
 import UserAvatar from "../UserAvatar";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";

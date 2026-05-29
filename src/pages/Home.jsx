@@ -4,7 +4,6 @@ import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Loader2, Sparkles } from "lucide-react";
-import InstallPWABanner from "@/components/InstallPWABanner";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";

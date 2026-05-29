@@ -1,4 +1,3 @@
-import { Crown, Zap, ShieldCheck } from "lucide-react";
 
 const plans = [
   {

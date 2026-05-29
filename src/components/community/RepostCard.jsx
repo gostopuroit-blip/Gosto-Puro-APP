@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { Repeat2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Link } from "react-router-dom";
 import CommunityPostCard from "./CommunityPostCard";
 
 export default function RepostCard({ 

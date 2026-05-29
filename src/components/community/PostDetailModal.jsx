@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Heart, MessageCircle, BadgeCheck, Send, Trash2, X, Lock } from "lucide-react";
+import { Heart, MessageCircle, BadgeCheck, Send, X, Lock } from "lucide-react";
 import ImageCarousel from "./ImageCarousel";
 import { toast } from "sonner";
 import { formatTimeAgo } from "@/lib/communityUtils";

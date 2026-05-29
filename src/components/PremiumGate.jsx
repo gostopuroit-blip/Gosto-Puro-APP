@@ -1,5 +1,3 @@
-import { Crown } from "lucide-react";
-import { trackEvent } from "@/components/useAnalytics";
 
 export default function PremiumGate({ children }) {
   // OPEN ACCESS: sem bloqueio premium

@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { BadgeCheck, ArrowLeft, Loader2, Lock, Grid3X3, Edit3, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import UserAvatar from "@/components/UserAvatar";
-import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
+import { getPhotoUrl } from "@/lib/userDisplayUtils";
 import CommunityPostCard from "@/components/community/CommunityPostCard";
 import PostDetailModal from "@/components/community/PostDetailModal";
 import EditProfileModal from "@/components/EditProfileModal";

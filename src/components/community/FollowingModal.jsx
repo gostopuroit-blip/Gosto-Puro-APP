@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { X, Loader2, UserPlus, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { getDisplayName, getPhotoUrl } from "@/lib/userDisplayUtils";
 
 export default function FollowingModal({ expertEmail, onClose, currentUser }) {
   const [following, setFollowing] = useState([]);

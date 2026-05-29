@@ -5,9 +5,8 @@ import { trackEvent } from "@/components/useAnalytics";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import DailyRecipesSection from "@/components/DailyRecipesSection";
-import { Search, SlidersHorizontal, Loader2, X, Lock, Crown } from "lucide-react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { Search, Loader2, X, Lock, Crown } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const filters = [
 { key: "all", label: "Tutte" },

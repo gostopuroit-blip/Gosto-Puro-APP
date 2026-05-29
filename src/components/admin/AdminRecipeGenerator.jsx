@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Image, Save, Loader2, ChevronDown, Plus, X, BookmarkCheck } from "lucide-react";
+import { Sparkles, Save, Loader2, BookmarkCheck } from "lucide-react";
 import { toast } from "sonner";
 
 const difficulties = ["Facile", "Media", "Difficile"];

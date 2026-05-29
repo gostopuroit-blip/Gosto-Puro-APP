@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Loader2, Check, RotateCcw, Pencil, Plus, X } from "lucide-react";
+import { Sparkles, Loader2, Check, RotateCcw, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import RecipeEditor from "./RecipeEditor";
 

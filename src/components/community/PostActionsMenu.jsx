@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  MoreHorizontal, Flag, UserX, Share2, Copy, Facebook,
+  MoreHorizontal, Flag, UserX, Facebook,
   Instagram, Music2, Link, Pencil, Trash2, Repeat2, Bookmark
 } from "lucide-react";
 import { toast } from "sonner";

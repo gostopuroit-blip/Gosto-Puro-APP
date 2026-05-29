@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Check, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import { toast } from "sonner";
 
 const TAG_COLORS = {

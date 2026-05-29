@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { X, ImagePlus, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera, Video } from "lucide-react";
+import { X, Loader2, Image, Lightbulb, UtensilsCrossed, Lock, BarChart2, Plus, Minus, ChevronLeft, ChevronRight, Search, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { extractMentionEmails } from "@/lib/mentionUtils";
@@ -9,7 +9,6 @@ import LinkPreviewCard from "./LinkPreviewCard";
 import { extractUrlFromText, fetchLinkPreview } from "@/lib/linkPreviewUtils";
 import PremiumUpgradeModal from "./PremiumUpgradeModal";
 import { checkBadWords, logBadWordViolation } from "@/lib/badWordsFilter";
-import { HelpCircle } from "lucide-react";
 
 const POST_TYPES = [
   { value: "image_post", label: "Foto", icon: Image, color: "text-blue-500" },

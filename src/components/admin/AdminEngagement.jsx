@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, RefreshCw, Users, BookOpen, Smartphone, Clock, TrendingUp } from "lucide-react";
+import { Loader2, RefreshCw, Users, BookOpen, Clock, TrendingUp } from "lucide-react";
 import { fmtSeconds } from "./engagementUtils";
 import AdminEngagementUsers from "./AdminEngagementUsers";
 import AdminPremiumFunnel from "./AdminPremiumFunnel";

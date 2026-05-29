@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Download, Bell } from "lucide-react";
+import { X, Download } from "lucide-react";
 import { trackEvent } from "@/components/useAnalytics";
 
 export default function InstallPWABanner() {

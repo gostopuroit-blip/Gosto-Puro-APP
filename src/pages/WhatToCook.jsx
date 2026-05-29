@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import RecipeCard from "@/components/RecipeCard";
-import { toast } from "sonner";
 
 const TIME_OPTIONS = [
   { label: "15 min", value: 15 },
