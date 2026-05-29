@@ -199,11 +199,10 @@ export default function Planner() {
         return pool[Math.floor(Math.random() * pool.length)];
       };
 
-      // BUG 1: start from tomorrow, not always Monday
-      const DAY_NAMES = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const startDayOfWeek = tomorrow.getDay(); // 0=Dom, 1=Lun, ...
+      // Começa de hoje (não amanhã), com data real
+      const DAY_NAMES_SHORT = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+      const MONTHS_SHORT = ["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+      const startDate = new Date();
 
       const usedPerCategory = { Colazione: new Set(), Pranzo: new Set(), Snack: new Set(), Cena: new Set() };
 
@@ -217,9 +216,14 @@ export default function Planner() {
         const cena = pickRecipe("Cena", [], usedPerCategory["Cena"]);
         if (cena) usedPerCategory["Cena"].add(cena.id);
 
+        const dayDate = new Date(startDate);
+        dayDate.setDate(startDate.getDate() + i);
+        const dayName = `${DAY_NAMES_SHORT[dayDate.getDay()]} ${dayDate.getDate()} ${MONTHS_SHORT[dayDate.getMonth()]}`;
+
         return {
           day: i + 1,
-          day_name: DAY_NAMES[(startDayOfWeek + i) % 7],
+          day_name: dayName,
+          date: dayDate.toISOString().slice(0, 10),
           colazione_id: colazione?.id || null,
           colazione_title: colazione?.title || null,
           colazione_servings: servings,

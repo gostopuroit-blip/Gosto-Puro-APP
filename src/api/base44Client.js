@@ -111,6 +111,22 @@ function createEntity(tableName) {
       const { error } = await supabase.from(tableName).delete().eq('id', id);
       if (error) throw error;
     },
+
+    async bulkCreate(items) {
+      if (!items || items.length === 0) return [];
+      // Injeta user_id em todos os itens
+      const { data: { user } } = await supabase.auth.getUser();
+      const payload = items.map(item => ({
+        ...item,
+        user_id: item.user_id || user?.id,
+      }));
+      const { data: result, error } = await supabase
+        .from(tableName)
+        .insert(payload)
+        .select();
+      if (error) throw error;
+      return result;
+    },
   };
 }
 
