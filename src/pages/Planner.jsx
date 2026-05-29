@@ -113,20 +113,15 @@ export default function Planner() {
         if (day.cena_id) recipeIds.add(day.cena_id);
       });
 
-      // Fetch all recipes needed by the plan (paginated to cover large catalogs)
+      // Busca só as receitas necessárias (máx 28 IDs para 7 dias x 4 refeições)
       const fetchedRecipes = {};
       if (recipeIds.size > 0) {
-        let skip = 0;
-        while (true) {
-          const batch = await base44.entities.Recipe.list("-created_date", 500, skip);
-          batch.forEach(r => {
-            if (recipeIds.has(r.id)) fetchedRecipes[r.id] = r;
-          });
-          // Stop early if we already found all needed recipes
-          if (Object.keys(fetchedRecipes).length >= recipeIds.size) break;
-          if (batch.length < 500) break;
-          skip += 500;
-        }
+        const { supabase } = await import("@/lib/supabase");
+        const { data } = await supabase
+          .from("recipes")
+          .select("*")
+          .in("id", [...recipeIds]);
+        (data || []).forEach(r => { fetchedRecipes[r.id] = r; });
       }
       setRecipes(fetchedRecipes);
     }

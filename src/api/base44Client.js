@@ -27,6 +27,18 @@ function createEntity(tableName) {
           query = query.is(key, null);
         } else if (Array.isArray(value)) {
           query = query.contains(key, value);
+        } else if (typeof value === 'object' && value.$in) {
+          query = query.in(key, value.$in);
+        } else if (typeof value === 'object' && value.$ne) {
+          query = query.neq(key, value.$ne);
+        } else if (typeof value === 'object' && value.$gt) {
+          query = query.gt(key, value.$gt);
+        } else if (typeof value === 'object' && value.$gte) {
+          query = query.gte(key, value.$gte);
+        } else if (typeof value === 'object' && value.$lt) {
+          query = query.lt(key, value.$lt);
+        } else if (typeof value === 'object' && value.$lte) {
+          query = query.lte(key, value.$lte);
         } else {
           query = query.eq(key, value);
         }
