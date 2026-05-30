@@ -294,8 +294,8 @@ export default function Recipes() {
            </div> :
           <>
              {paginatedRecipes.map((recipe) => {
-               const isFitOccasion = activeTags.occasion === "Fit" || activeTags.lifestyle === "Fit";
-               const isLocked = !isPremium && !freeIds.includes(recipe.id) && !isFitOccasion && !recipeMatchesPurchase(recipe);
+               // Bloqueado para todos exceto: Premium full OU comprou a ocasião específica
+               const isLocked = !isPremium && !recipeMatchesPurchase(recipe);
                if (isLocked) {
                  return (
                    <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("premium_click", { source: "recipe_list", recipe_id: recipe.id, recipe_title: recipe.title })} className="block relative rounded-3xl overflow-hidden">

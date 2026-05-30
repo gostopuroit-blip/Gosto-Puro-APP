@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus, Printer, CalendarDays } from "lucide-react";
+import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus, Printer, CalendarDays, Lock, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
@@ -143,9 +143,13 @@ export default function RecipeDetail() {
     setLoading(false);
   };
 
-  // OPEN ACCESS: todos têm acesso total
-  const isPremium = true;
-  const isContentLocked = false;
+  // ACESSO: Premium full OU comprou a ocasião específica
+  const isPremium = user?.is_full_premium === true;
+  const hasAllAccess = (user?.unlocked_occasions || []).includes("*");
+  const matchesPurchase = recipe
+    ? (recipe.occasions || []).some((o) => (user?.unlocked_occasions || []).includes(o))
+    : false;
+  const isContentLocked = !!user && !isPremium && !hasAllAccess && !matchesPurchase;
 
   const handlePrint = async () => {
     const { jsPDF } = await import("jspdf");
@@ -378,6 +382,49 @@ export default function RecipeDetail() {
         <Link to={createPageUrl("Home")} className="text-[#2D6A4F] font-semibold text-sm">
           Torna alla home
         </Link>
+      </div>
+    );
+  }
+
+  if (isContentLocked) {
+    return (
+      <div className="pb-32">
+        <div className="relative">
+          <img
+            src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800"}
+            alt={recipe.title}
+            className="w-full aspect-[4/3] object-cover blur-md opacity-60"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
+          </button>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-xl">
+              <Lock className="w-7 h-7 text-amber-500" />
+            </div>
+            <h1 className="text-white text-2xl font-bold drop-shadow-lg">{recipe.title}</h1>
+            <p className="text-white/90 text-sm drop-shadow">Ricetta Premium</p>
+          </div>
+        </div>
+        <div className="px-5 mt-6 text-center space-y-4">
+          <h2 className="text-xl font-bold text-gray-800">Sblocca questa ricetta</h2>
+          <p className="text-sm text-gray-500">
+            Diventa Premium o acquista il pacchetto per accedere a questa e a centinaia di altre ricette.
+          </p>
+          <a
+            href="https://gostopuro.it/upgrade/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("premium_click", { source: "recipe_detail", recipe_id: recipeId, recipe_title: recipe.title })}
+            className="inline-flex items-center gap-2 bg-amber-500 text-white font-bold px-6 py-3 rounded-2xl shadow-lg active:scale-95 transition-all"
+          >
+            <Crown className="w-5 h-5" /> Sblocca Premium
+          </a>
+        </div>
       </div>
     );
   }
