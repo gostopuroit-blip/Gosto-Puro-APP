@@ -1,37 +1,57 @@
 /**
- * Gera os ícones PWA a partir do logo SVG.
+ * Gera os ícones PWA a partir do logo (PNG/WEBP/SVG).
  * - icon-192.png, icon-512.png (Android)
  * - icon-512-maskable.png (Android adaptive)
  * - apple-touch-icon.png 180x180 (iOS)
- * - favicon.ico (browser tab)
+ * - favicon-32.png (browser tab)
+ *
+ * Procura source em ordem:
+ *   public/logo-source.png
+ *   public/logo gosto puro.webp
+ *   public/logo.webp
+ *   public/logo.png
+ *   public/logo.svg (fallback)
  */
 import sharp from 'sharp';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 
-const svg = readFileSync('public/logo.svg');
+const candidates = [
+  'public/logo-source.png',
+  'public/logo gosto puro.webp',
+  'public/logo.webp',
+  'public/logo.png',
+  'public/logo.svg',
+];
+const sourceFile = candidates.find(p => existsSync(p));
+if (!sourceFile) {
+  console.error('❌ Nenhum logo encontrado em public/');
+  process.exit(1);
+}
+const source = readFileSync(sourceFile);
+console.log(`📥 Source: ${sourceFile}`);
+
+// Cor de fundo (verde escuro do logo) usada no maskable safe-zone padding
+const BG = { r: 17, g: 49, b: 38, alpha: 1 };
 
 async function main() {
-  // Android — full bleed
-  await sharp(svg).resize(192, 192).png().toFile('public/icon-192.png');
-  await sharp(svg).resize(512, 512).png().toFile('public/icon-512.png');
+  // Android — full bleed (logo ocupa toda a área)
+  await sharp(source).resize(192, 192).png().toFile('public/icon-192.png');
+  await sharp(source).resize(512, 512).png().toFile('public/icon-512.png');
 
-  // Maskable — adiciona safe zone (padding 12.5% pra Android adaptive icon)
-  const maskable = await sharp(svg)
-    .resize(384, 384) // 75% do 512 = safe zone
-    .png()
-    .toBuffer();
+  // Maskable — adiciona safe zone (Android adaptive icon precisa de 12.5% padding)
+  const innerPng = await sharp(source).resize(384, 384, { fit: 'contain', background: BG }).png().toBuffer();
   await sharp({
-    create: { width: 512, height: 512, channels: 4, background: '#2D6A4F' }
+    create: { width: 512, height: 512, channels: 4, background: BG }
   })
-    .composite([{ input: maskable, gravity: 'center' }])
+    .composite([{ input: innerPng, gravity: 'center' }])
     .png()
     .toFile('public/icon-512-maskable.png');
 
   // iOS — apple-touch-icon
-  await sharp(svg).resize(180, 180).png().toFile('public/apple-touch-icon.png');
+  await sharp(source).resize(180, 180).png().toFile('public/apple-touch-icon.png');
 
   // Favicon
-  await sharp(svg).resize(32, 32).png().toFile('public/favicon-32.png');
+  await sharp(source).resize(32, 32).png().toFile('public/favicon-32.png');
 
   console.log('✅ Ícones PWA gerados em public/');
 }
