@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const [mode, setMode] = useState('login'); // 'login' | 'register' | 'reset' | 'update-password'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'error'|'success', text }
@@ -82,8 +84,19 @@ export default function Login() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage(null);
+
+    // Validações que evitam recuperações de senha desnecessárias
+    if (password.length < 6) {
+      setMessage({ type: 'error', text: 'La password deve avere almeno 6 caratteri.' });
+      return;
+    }
+    if (password !== confirmPassword) {
+      setMessage({ type: 'error', text: '⚠️ Le password non coincidono. Controlla di averle scritte uguali in entrambi i campi.' });
+      return;
+    }
+
+    setLoading(true);
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -221,30 +234,56 @@ export default function Login() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {mode === 'update-password' ? 'Nuova password' : 'Password'}
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {mode === 'register' && (
+                <p className="text-xs text-gray-400 mt-1">Almeno 6 caratteri</p>
+              )}
             </div>
           )}
 
-          {mode === 'update-password' && (
+          {(mode === 'update-password' || mode === 'register') && (
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">Conferma password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="••••••••"
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                  confirmPassword && password !== confirmPassword
+                    ? 'border-red-300 bg-red-50'
+                    : confirmPassword && password === confirmPassword
+                    ? 'border-green-300 bg-green-50'
+                    : 'border-gray-300'
+                }`}
+                placeholder="Ripeti la password"
                 required
                 minLength={6}
               />
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-xs text-red-500 mt-1">⚠️ Le password non coincidono</p>
+              )}
+              {confirmPassword && password === confirmPassword && (
+                <p className="text-xs text-green-600 mt-1">✓ Le password coincidono</p>
+              )}
             </div>
           )}
 
@@ -291,7 +330,7 @@ export default function Login() {
         <div className="mt-6 text-center text-sm space-y-2">
           {mode === 'login' && (
             <>
-              <button onClick={() => { setMode('register'); setMessage(null); }} className="text-green-600 hover:underline block w-full">
+              <button onClick={() => { setMode('register'); setMessage(null); setConfirmPassword(''); }} className="text-green-600 hover:underline block w-full">
                 Non hai un account? Registrati
               </button>
               <button onClick={() => { setMode('reset'); setMessage(null); }} className="text-gray-400 hover:underline block w-full">
@@ -300,7 +339,7 @@ export default function Login() {
             </>
           )}
           {(mode === 'register' || mode === 'reset') && (
-            <button onClick={() => { setMode('login'); setMessage(null); }} className="text-green-600 hover:underline">
+            <button onClick={() => { setMode('login'); setMessage(null); setConfirmPassword(''); }} className="text-green-600 hover:underline">
               Hai già un account? Accedi
             </button>
           )}
