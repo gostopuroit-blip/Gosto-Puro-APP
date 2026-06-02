@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function Login() {
-  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'reset'
+  const [mode, setMode] = useState('login'); // 'login' | 'register' | 'reset' | 'update-password'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'error'|'success', text }
+
+  // Detecta retorno do link de recuperação de senha (hash #type=recovery vindo do Supabase)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes('type=recovery') || hash.includes('type=invite')) {
+      setMode('update-password');
+      // Limpa a hash da URL pra não ficar feio
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    // Listener pra capturar quando Supabase processa o token de recovery
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setMode('update-password');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const redirectAfterLogin = () => {
     const params = new URLSearchParams(window.location.search);
@@ -81,6 +99,28 @@ export default function Login() {
     setLoading(false);
   };
 
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setMessage(null);
+    if (password.length < 6) {
+      setMessage({ type: 'error', text: 'La password deve avere almeno 6 caratteri.' });
+      return;
+    }
+    if (password !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Le password non coincidono.' });
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      setMessage({ type: 'error', text: 'Errore: ' + error.message });
+      setLoading(false);
+      return;
+    }
+    setMessage({ type: 'success', text: 'Password aggiornata! Reindirizzamento...' });
+    setTimeout(() => { window.location.href = '/'; }, 1500);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F0FDF4] px-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
@@ -90,11 +130,12 @@ export default function Login() {
             {mode === 'login' && 'Accedi al tuo account'}
             {mode === 'register' && 'Crea il tuo account'}
             {mode === 'reset' && 'Recupera la password'}
+            {mode === 'update-password' && 'Imposta una nuova password'}
           </p>
         </div>
 
         {/* Banner utenti esistenti — visibile solo su login e register */}
-        {(mode === 'login' || mode === 'register') && (
+        {(mode === 'login' || mode === 'register') && mode !== 'update-password' && (
           <div className="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
             <p className="font-bold text-amber-700 mb-1">👋 Già con noi su Gosto Puro?</p>
             {mode === 'login' ? (
@@ -121,7 +162,14 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={mode === 'login' ? handleLogin : mode === 'register' ? handleRegister : handleReset}>
+        <form
+          onSubmit={
+            mode === 'login' ? handleLogin
+              : mode === 'register' ? handleRegister
+              : mode === 'reset' ? handleReset
+              : handleUpdatePassword
+          }
+        >
           {mode === 'register' && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -136,21 +184,25 @@ export default function Login() {
             </div>
           )}
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="tua@email.com"
-              required
-            />
-          </div>
+          {mode !== 'update-password' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="tua@email.com"
+                required
+              />
+            </div>
+          )}
 
           {mode !== 'reset' && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {mode === 'update-password' ? 'Nuova password' : 'Password'}
+              </label>
               <input
                 type="password"
                 value={password}
@@ -163,17 +215,38 @@ export default function Login() {
             </div>
           )}
 
+          {mode === 'update-password' && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Conferma password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="••••••••"
+                required
+                minLength={6}
+              />
+            </div>
+          )}
+
+          {mode !== 'update-password' && mode !== 'reset' && <div className="mb-2" />}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg text-sm transition disabled:opacity-50"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg text-sm transition disabled:opacity-50 mt-2"
           >
-            {loading ? 'Attendere...' : mode === 'login' ? 'Accedi' : mode === 'register' ? 'Crea account' : 'Invia email'}
+            {loading ? 'Attendere...'
+              : mode === 'login' ? 'Accedi'
+              : mode === 'register' ? 'Crea account'
+              : mode === 'reset' ? 'Invia email'
+              : 'Aggiorna password'}
           </button>
         </form>
 
-        {/* Login com Google (não aparece no modo reset) */}
-        {mode !== 'reset' && (
+        {/* Login com Google (não aparece nos modos reset/update-password) */}
+        {mode !== 'reset' && mode !== 'update-password' && (
           <>
             <div className="flex items-center gap-3 my-4">
               <div className="h-px bg-gray-200 flex-1" />
@@ -212,6 +285,11 @@ export default function Login() {
             <button onClick={() => { setMode('login'); setMessage(null); }} className="text-green-600 hover:underline">
               Hai già un account? Accedi
             </button>
+          )}
+          {mode === 'update-password' && (
+            <p className="text-gray-400 text-xs">
+              Sarai reindirizzato automaticamente dopo l'aggiornamento.
+            </p>
           )}
         </div>
       </div>
