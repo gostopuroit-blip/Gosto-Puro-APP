@@ -13,6 +13,24 @@ export default function Login() {
   // Detecta retorno do link de recuperação de senha (hash #type=recovery vindo do Supabase)
   useEffect(() => {
     const hash = window.location.hash;
+
+    // Trata erros vindos do Supabase no hash (link expirado, inválido, etc.)
+    if (hash.includes('error=')) {
+      const params = new URLSearchParams(hash.replace(/^#/, ''));
+      const errorCode = params.get('error_code');
+      const errorMsg = params.get('error_description')?.replace(/\+/g, ' ');
+      let userMsg = 'Si è verificato un errore. Riprova.';
+      if (errorCode === 'otp_expired') {
+        userMsg = '⏰ Il link è scaduto o è già stato utilizzato. Richiedi un nuovo recupero password qui sotto.';
+        setMode('reset');
+      } else if (errorMsg) {
+        userMsg = errorMsg;
+      }
+      setMessage({ type: 'error', text: userMsg });
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      return;
+    }
+
     if (hash.includes('type=recovery') || hash.includes('type=invite')) {
       setMode('update-password');
       // Limpa a hash da URL pra não ficar feio
