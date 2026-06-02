@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accedi al tuo account · Gosto Puro</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F0FDF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1F2937;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#F0FDF4;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="560" style="max-width:560px;background-color:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(17,49,38,0.08);">
+          <tr>
+            <td align="center" style="background-color:#113126;padding:36px 24px;">
+              <div style="font-family:'Playfair Display',Georgia,serif;font-size:32px;font-weight:700;color:#D4AF37;letter-spacing:0.5px;line-height:1;">Gosto Puro</div>
+              <div style="height:2px;width:80px;background-color:#D4AF37;margin:8px auto 0;"></div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 32px 24px;">
+              <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3;color:#113126;font-weight:700;">Accedi al tuo account ✨</h1>
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#374151;">
+                Clicca sul pulsante qui sotto per accedere al tuo account Gosto Puro senza bisogno di password.
+              </p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:32px auto;">
+                <tr>
+                  <td align="center" style="border-radius:12px;background-color:#2D6A4F;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:14px 36px;font-size:16px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:12px;">
+                      Accedi a Gosto Puro
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#6B7280;">
+                Oppure copia e incolla questo link nel browser:
+              </p>
+              <p style="margin:0 0 24px;font-size:13px;line-height:1.5;color:#2D6A4F;word-break:break-all;">
+                <a href="{{ .ConfirmationURL }}" style="color:#2D6A4F;text-decoration:none;">{{ .ConfirmationURL }}</a>
+              </p>
+              <div style="background-color:#FEE2E2;border-left:3px solid #DC2626;padding:14px 18px;border-radius:8px;margin:24px 0 0;">
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#991B1B;">
+                  ⏰ <strong>Link valido per 1 ora.</strong> Usalo subito o richiedine uno nuovo.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 32px 32px;border-top:1px solid #E5E7EB;">
+              <p style="margin:0 0 8px;font-size:12px;line-height:1.5;color:#9CA3AF;">
+                Se non sei stato tu a richiedere questo link, ignora pure questa email.
+              </p>
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#9CA3AF;">
+                <a href="https://gostopuro.com" style="color:#2D6A4F;text-decoration:none;">gostopuro.com</a>
+                · Ricette sane e fitness, ogni giorno
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
