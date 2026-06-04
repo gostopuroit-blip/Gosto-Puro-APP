@@ -189,18 +189,29 @@ export default function Login() {
         {/* Banner utenti esistenti — visibile solo su login e register */}
         {(mode === 'login' || mode === 'register') && mode !== 'update-password' && (
           <div className="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
-            <p className="font-bold text-amber-700 mb-1">👋 Già con noi su Gosto Puro?</p>
-            {mode === 'login' ? (
-              <p>
-                Se avevi un account sul vecchio sito, <strong>crea un nuovo account</strong> con la stessa email —
-                il tuo piano Premium verrà ripristinato automaticamente! 🎉
-              </p>
-            ) : (
-              <p>
-                Usa la <strong>stessa email</strong> del tuo vecchio account Gosto Puro
-                e il tuo accesso Premium sarà attivato subito in automatico! 🎉
-              </p>
-            )}
+            <p className="font-bold text-amber-700 mb-1.5">👋 Hai già acquistato in passato?</p>
+            <p className="mb-2">
+              Per accedere al tuo piano Premium, segui questi 2 passi:
+            </p>
+            <ol className="list-decimal list-inside space-y-1 mb-2">
+              <li>
+                Clicca su <strong>"Continua con Google"</strong> qui sotto
+                (è il modo più veloce e sicuro)
+              </li>
+              <li>
+                Scrivi un'email a{' '}
+                <a href="mailto:supporto@gostopuro.it?subject=Sblocco%20accesso%20Premium&body=Ciao%2C%20ho%20gi%C3%A0%20acquistato%20in%20passato.%20L'email%20con%20cui%20ho%20fatto%20il%20login%20%C3%A8%3A%20"
+                   className="font-bold underline text-amber-900">
+                  supporto@gostopuro.it
+                </a>
+                {' '}indicando con quale email hai fatto il login —
+                ti sblocchiamo l'accesso entro 24h ✨
+              </li>
+            </ol>
+            <p className="text-[11px] text-amber-700 mt-1.5 italic">
+              💡 Funziona anche con email/password se preferisci.
+              L'importante è dirci con quale email accedi.
+            </p>
           </div>
         )}
 
@@ -423,8 +434,14 @@ export default function Login() {
                 <span>Ho ancora bisogno di aiuto</span>
               </summary>
               <div className="px-3 pb-3 pt-1 text-xs text-gray-600 leading-relaxed">
-                Scrivici via WhatsApp o Instagram e ti aiutiamo entro 24 ore. Ricordati di indicare
-                <strong> l'email con cui hai comprato</strong> per accelerare la risoluzione. 🙏
+                Scrivici a{' '}
+                <a href="mailto:supporto@gostopuro.it?subject=Aiuto%20accesso%20account"
+                   className="text-[#2D6A4F] font-semibold underline">
+                  supporto@gostopuro.it
+                </a>
+                {' '}indicando <strong>l'email con cui hai fatto il login</strong>
+                (e quella con cui hai comprato su Hotmart, se diversa).
+                Ti aiutiamo entro 24 ore 🙏
               </div>
             </details>
           </div>
