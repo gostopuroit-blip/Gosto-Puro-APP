@@ -118,6 +118,27 @@ export default function Login() {
     setLoading(true);
     setMessage(null);
 
+    // Antes de pedir reset, verifica se a conta existe — evita o caso comum
+    // de quem nunca criou conta (depois de comprar na Hotmart) tentar reset
+    // e ficar perdido sem entender por que não chega email.
+    try {
+      const { data: exists, error: rpcErr } = await supabase.rpc(
+        'user_exists_by_email',
+        { p_email: email }
+      );
+      if (!rpcErr && exists === false) {
+        setMessage({
+          type: 'error',
+          text: '⚠️ Questa email non ha ancora un account su Gosto Puro. Forse hai comprato su Hotmart ma non hai ancora creato il tuo account qui? Clicca su "Registrati" qui sotto per crearne uno con questa email — i tuoi acquisti si sbloccheranno automaticamente! 🎉',
+          showRegister: true,
+        });
+        setLoading(false);
+        return;
+      }
+    } catch (_) {
+      // Se a RPC falhar, segue normal (não bloqueia o fluxo)
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/Login`,
     });
@@ -125,7 +146,7 @@ export default function Login() {
     if (error) {
       setMessage({ type: 'error', text: error.message });
     } else {
-      setMessage({ type: 'success', text: 'Email di recupero inviato. Controlla la tua casella di posta.' });
+      setMessage({ type: 'success', text: '✅ Email di recupero inviato! Controlla la tua casella di posta (e anche lo SPAM). Il link è valido per 1 ora.' });
     }
     setLoading(false);
   };
@@ -189,7 +210,16 @@ export default function Login() {
               ? 'bg-red-50 text-red-700 border border-red-200'
               : 'bg-green-50 text-green-700 border border-green-200'
           }`}>
-            {message.text}
+            <p className="leading-relaxed">{message.text}</p>
+            {message.showRegister && (
+              <button
+                type="button"
+                onClick={() => { setMode('register'); setMessage(null); setConfirmPassword(''); }}
+                className="mt-2 inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-4 py-2 rounded-lg"
+              >
+                Sì, voglio registrarmi →
+              </button>
+            )}
           </div>
         )}
 
@@ -349,6 +379,56 @@ export default function Login() {
             </p>
           )}
         </div>
+
+        {/* FAQ inline — resolve dúvidas comuns sem precisar abrir suporte */}
+        {mode !== 'update-password' && (
+          <div className="mt-6 pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-400 text-center mb-2">Hai bisogno di aiuto?</p>
+            <details className="text-sm">
+              <summary className="cursor-pointer py-2 px-3 rounded-lg hover:bg-gray-50 text-gray-700 font-medium text-xs flex items-center gap-1">
+                <span>❓</span>
+                <span>Ho comprato su Hotmart, come accedo?</span>
+              </summary>
+              <div className="px-3 pb-3 pt-1 text-xs text-gray-600 leading-relaxed">
+                L'acquisto su Hotmart NON crea automaticamente il tuo account qui.
+                Devi <strong>registrarti</strong> sull'app usando la <strong>stessa email</strong> con cui hai comprato.
+                Una volta registrato, tutti i tuoi acquisti si sbloccheranno automaticamente. ✨
+              </div>
+            </details>
+            <details className="text-sm">
+              <summary className="cursor-pointer py-2 px-3 rounded-lg hover:bg-gray-50 text-gray-700 font-medium text-xs flex items-center gap-1">
+                <span>📧</span>
+                <span>Non ricevo l'email di recupero password</span>
+              </summary>
+              <div className="px-3 pb-3 pt-1 text-xs text-gray-600 leading-relaxed">
+                <strong>1.</strong> Controlla la cartella <strong>SPAM</strong> o "Posta indesiderata".<br/>
+                <strong>2.</strong> Verifica di aver scritto l'email <strong>correttamente</strong> (errori di digitazione succedono).<br/>
+                <strong>3.</strong> Se hai usato "Continua con Google", non hai una password da recuperare — accedi direttamente con Google.<br/>
+                <strong>4.</strong> Se hai comprato su Hotmart ma non hai mai creato l'account qui, devi prima <strong>registrarti</strong>.
+              </div>
+            </details>
+            <details className="text-sm">
+              <summary className="cursor-pointer py-2 px-3 rounded-lg hover:bg-gray-50 text-gray-700 font-medium text-xs flex items-center gap-1">
+                <span>🔐</span>
+                <span>La password di Hotmart non funziona qui</span>
+              </summary>
+              <div className="px-3 pb-3 pt-1 text-xs text-gray-600 leading-relaxed">
+                Hotmart e Gosto Puro sono <strong>due servizi separati</strong>. La password che usi su Hotmart NON è la stessa qui.
+                Quando ti registri sull'app, scegli una password nuova — può essere uguale o diversa da quella di Hotmart.
+              </div>
+            </details>
+            <details className="text-sm">
+              <summary className="cursor-pointer py-2 px-3 rounded-lg hover:bg-gray-50 text-gray-700 font-medium text-xs flex items-center gap-1">
+                <span>💬</span>
+                <span>Ho ancora bisogno di aiuto</span>
+              </summary>
+              <div className="px-3 pb-3 pt-1 text-xs text-gray-600 leading-relaxed">
+                Scrivici via WhatsApp o Instagram e ti aiutiamo entro 24 ore. Ricordati di indicare
+                <strong> l'email con cui hai comprato</strong> per accelerare la risoluzione. 🙏
+              </div>
+            </details>
+          </div>
+        )}
       </div>
     </div>
   );
