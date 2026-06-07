@@ -20,6 +20,9 @@ const OCCASION_ICONS = {
 
 const DAILY_OCCASIONS = ["Colazione", "Pranzo", "Cena"];
 const CATEGORY_PILLS = ["Tutte", "Colazione", "Pranzo", "Cena", "Snack", "Dolce", "Bevanda"];
+// Filtro especial "Fitness" — só aparece nelle occasioni che contengono ricette fit
+// (es: Collezione Gosto Puro). Filtra per tag Fit/Fitness invece che per category.
+const FITNESS_PILL = "💪 Fitness";
 const PAGE_SIZE = 6;
 // Max recipes to fetch in a single query — covers all known occasions
 const FETCH_LIMIT = 3000;
@@ -204,12 +207,27 @@ export default function OccasionRecipesPage() {
       const matchesQuery = !query.trim() ||
         r.title?.toLowerCase().includes(query.toLowerCase()) ||
         r.description?.toLowerCase().includes(query.toLowerCase());
-      const matchesCategory = activeCategory === "Tutte" || r.category === activeCategory;
+      const isFit = (r.occasions || []).some(o => o === "Fit" || o === "Fitness")
+        || (r.lifestyle || []).some(l => l === "Fit" || l === "Fitness");
+      const matchesCategory =
+        activeCategory === "Tutte" ? true
+          : activeCategory === FITNESS_PILL ? isFit
+          : r.category === activeCategory;
       const matchesDietary = !soloPerMe || userDietaryTags.length === 0 ||
         userDietaryTags.some(tag => (r.dietary_tags || []).includes(tag));
       return matchesQuery && matchesCategory && matchesDietary;
     });
   }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags]);
+
+  // Detecta se a ocasião tem receitas fitness → mostra o pill "💪 Fitness"
+  const fitnessCount = useMemo(() =>
+    allOccasionRecipes.filter(r =>
+      (r.occasions || []).some(o => o === "Fit" || o === "Fitness") ||
+      (r.lifestyle || []).some(l => l === "Fit" || l === "Fitness")
+    ).length,
+    [allOccasionRecipes]
+  );
+  const pills = fitnessCount > 0 ? [...CATEGORY_PILLS, FITNESS_PILL] : CATEGORY_PILLS;
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -275,13 +293,15 @@ export default function OccasionRecipesPage() {
 
         {/* Category pills */}
         <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-1 px-1 pb-1">
-          {CATEGORY_PILLS.map((cat) => (
+          {pills.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}
               className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
                 activeCategory === cat
                   ? "bg-[#2D6A4F] text-white border-[#2D6A4F]"
+                  : cat === FITNESS_PILL
+                  ? "bg-teal-50 dark:bg-teal-500/10 border-teal-200 dark:border-teal-500/20 text-teal-700 dark:text-teal-400"
                   : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400"
               }`}
             >
