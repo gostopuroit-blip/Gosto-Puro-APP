@@ -236,7 +236,10 @@ export default function OccasionRecipesPage() {
     ).length,
     [allOccasionRecipes]
   );
-  const pills = fitnessCount > 0 ? [...CATEGORY_PILLS, FITNESS_PILL] : CATEGORY_PILLS;
+  // Fitness pill logo dopo "Tutte" (CATEGORY_PILLS[0]) per dargli risalto
+  const pills = fitnessCount > 0
+    ? [CATEGORY_PILLS[0], FITNESS_PILL, ...CATEGORY_PILLS.slice(1)]
+    : CATEGORY_PILLS;
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
