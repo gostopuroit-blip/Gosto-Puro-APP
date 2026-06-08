@@ -228,7 +228,7 @@ export default function Home() {
             ...gostoPuroProducts.filter(p => p.occasioni && p.occasioni.length > 0 && p.image_url).map(product => (
               <Link
                 key={product.id}
-                to={`/OccasionRecipes?occasion=${encodeURIComponent(product.nome)}`}
+                to={`/OccasionRecipes?occasion=${encodeURIComponent(product.nome)}&terms=${encodeURIComponent((product.occasioni || []).join('|'))}`}
                 className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden"
                 style={{ width: "200px", height: "250px" }}
               >

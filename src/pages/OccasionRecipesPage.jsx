@@ -79,6 +79,10 @@ export default function OccasionRecipesPage() {
   const navigate = useNavigate();
   const params = new URLSearchParams(window.location.search);
   const occasion = params.get("occasion") || "";
+  // Termos de busca passados pela URL (occasioni reali do prodotto, dal DB).
+  // Evita di dover hardcodare il mapping nome-prodotto → occasioni qui.
+  const termsParam = params.get("terms") || "";
+  const termsFromUrl = termsParam ? termsParam.split("|").filter(Boolean) : null;
 
   const pageKey = `occ_page_${occasion}`;
 
@@ -140,11 +144,17 @@ export default function OccasionRecipesPage() {
           return !hasOnlyOtherGP;
         });
       } else {
-        const searchTerms = occasionAliases[occasion] || [occasion];
+        // Prioridade: termos vindos da URL (occasioni reali del prodotto, dal DB).
+        // Senão, cai no mapping locale (occasionAliases) ou usa l'occasion stessa.
+        const searchTerms = (termsFromUrl && termsFromUrl.length > 0)
+          ? termsFromUrl
+          : (occasionAliases[occasion] || [occasion]);
         const exclusions = occasionExclusions[occasion] || [];
-        const isGpProductOccasion = GP_PRODUCT_OCCASIONS.has(occasion);
+        // Se vieram terms da URL (prodotto GP), busca SOLO in occasions (preciso).
+        // Senão, mantém comportamento legacy (occasions OU lifestyle).
+        const onlyOccasions = (termsFromUrl && termsFromUrl.length > 0)
+          || GP_PRODUCT_OCCASIONS.has(occasion);
 
-        // Server: pega receitas que dão match em occasions OU lifestyle
         let query = supabase
           .from("recipes")
           .select(RECIPE_COLS)
@@ -152,10 +162,9 @@ export default function OccasionRecipesPage() {
           .order("created_at", { ascending: false })
           .limit(2000);
 
-        if (isGpProductOccasion) {
+        if (onlyOccasions) {
           query = query.overlaps("occasions", searchTerms);
         } else {
-          // occasions && terms  OR  lifestyle && terms
           const termsLit = searchTerms.map(t => `"${t.replace(/"/g, '\\"')}"`).join(",");
           query = query.or(`occasions.ov.{${termsLit}},lifestyle.ov.{${termsLit}}`);
         }
