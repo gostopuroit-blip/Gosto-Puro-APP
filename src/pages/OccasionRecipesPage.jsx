@@ -72,8 +72,12 @@ const DIETARY_TAG_COLORS = {
   "Senza frutti di mare": "bg-purple-100 text-purple-800",
 };
 
-// Module-level cache so navigating back doesn't re-fetch
+// Module-level cache so navigating back doesn't re-fetch.
+// TTL curto (5 min) così le modifiche al catalogo (nuove ricette)
+// appaiono senza dover chiudere/riaprire tutte le schede.
 const recipesCache = {};
+const recipesCacheTime = {};
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export default function OccasionRecipesPage() {
   const navigate = useNavigate();
@@ -115,8 +119,11 @@ export default function OccasionRecipesPage() {
     const occasionTerms = occasionAliases[occasion] || [occasion];
 
     
-    // Use cache to avoid re-fetching on back navigation
-    if (!recipesCache[occasion]) {
+    // Use cache to avoid re-fetching on back navigation (con TTL)
+    const cacheValid = recipesCache[occasion]
+      && recipesCacheTime[occasion]
+      && (Date.now() - recipesCacheTime[occasion] < CACHE_TTL_MS);
+    if (!cacheValid) {
       const { supabase } = await import("@/lib/supabase");
       const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status";
 
@@ -177,6 +184,7 @@ export default function OccasionRecipesPage() {
       }
 
       recipesCache[occasion] = filtered;
+      recipesCacheTime[occasion] = Date.now();
     }
 
     const occasionRecipes = recipesCache[occasion];
