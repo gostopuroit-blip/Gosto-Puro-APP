@@ -80,11 +80,20 @@ export default function Home() {
        const user = await base44.auth.me().catch(() => null);
        await new Promise(r => setTimeout(r, 100));
        
-       const [notifs, recipes, products] = await Promise.all([
+       const { supabase } = await import("@/lib/supabase");
+       const [notifs, recipesRes, products] = await Promise.all([
     base44.entities.DailyNotification.filter({ date: today }, "-created_date", 1),
-    base44.entities.Recipe.filter({ status: "pubblicata" }, "-numero_preparate", 20),
+    // Ordina per più preparate, ma a parità (es. tutte 0) mostra le più recenti
+    supabase
+      .from("recipes")
+      .select("id,title,image_url,prep_time,calories,paese,category,occasions,lifestyle,numero_preparate,created_at")
+      .eq("status", "pubblicata")
+      .order("numero_preparate", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
+      .limit(20),
     base44.entities.GostoPuroProduct.filter({ is_active: true }, "sort_order"),
     ]);
+    const recipes = recipesRes.data || [];
 
     setTopRecipes(recipes);
     setGostoPuroProducts(products);
