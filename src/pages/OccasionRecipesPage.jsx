@@ -23,6 +23,20 @@ const CATEGORY_PILLS = ["Tutte", "Colazione", "Pranzo", "Cena", "Snack", "Dolce"
 // Filtro especial "Fitness" — só aparece nelle occasioni che contengono ricette fit
 // (es: Collezione Gosto Puro). Filtra per tag Fit/Fitness invece che per category.
 const FITNESS_PILL = "💪 Fitness";
+
+// Filtri tematici dedicati alla pagina "Gelati Artigianali" (invece di Colazione/Pranzo/…).
+// Filtrano per tag secondaria nelle occasions (es. "Gelati Classici"), non per category.
+const GELATI_THEME_PILLS = [
+  { label: "🍦 Classici", tag: "Gelati Classici" },
+  { label: "✨ Innovativi", tag: "Gelati Innovativi" },
+  { label: "🌿 Sani", tag: "Gelati Sani" },
+  { label: "🌱 Vegani", tag: "Gelati Vegani" },
+  { label: "🍫 Coperture", tag: "Gelati Coperture" },
+  { label: "💡 Consigli", tag: "Gelati Consigli" },
+];
+const GELATI_THEME_BY_LABEL = Object.fromEntries(GELATI_THEME_PILLS.map((t) => [t.label, t.tag]));
+const GELATI_EXTRA_TAGS = ["Gelati Coperture", "Gelati Consigli"];
+
 const PAGE_SIZE = 6;
 // Max recipes to fetch in a single query — covers all known occasions
 const FETCH_LIMIT = 3000;
@@ -103,6 +117,9 @@ export default function OccasionRecipesPage() {
 
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
+  const isGelati = occasion === "Gelati Artigianali"
+    || occasion.includes("Gelati Artigianali")
+    || (termsFromUrl && termsFromUrl.includes("Gelati Artigianali"));
 
   useEffect(() => {
     if (!occasion) return;
@@ -226,15 +243,27 @@ export default function OccasionRecipesPage() {
         r.description?.toLowerCase().includes(query.toLowerCase());
       const isFit = (r.occasions || []).some(o => o === "Fit" || o === "Fitness")
         || (r.lifestyle || []).some(l => l === "Fit" || l === "Fitness");
-      const matchesCategory =
-        activeCategory === "Tutte" ? true
-          : activeCategory === FITNESS_PILL ? isFit
-          : r.category === activeCategory;
+      const rOcc = r.occasions || [];
+      let matchesCategory;
+      if (isGelati) {
+        if (activeCategory === "Tutte") {
+          // "Tutte" mostra i gelati veri, non coperture/consigli (hanno i loro filtri)
+          matchesCategory = !GELATI_EXTRA_TAGS.some(t => rOcc.includes(t));
+        } else {
+          const tag = GELATI_THEME_BY_LABEL[activeCategory];
+          matchesCategory = tag ? rOcc.includes(tag) : true;
+        }
+      } else {
+        matchesCategory =
+          activeCategory === "Tutte" ? true
+            : activeCategory === FITNESS_PILL ? isFit
+            : r.category === activeCategory;
+      }
       const matchesDietary = !soloPerMe || userDietaryTags.length === 0 ||
         userDietaryTags.some(tag => (r.dietary_tags || []).includes(tag));
       return matchesQuery && matchesCategory && matchesDietary;
     });
-  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags]);
+  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, isGelati]);
 
   // Detecta se a ocasião tem receitas fitness → mostra o pill "💪 Fitness"
   const fitnessCount = useMemo(() =>
@@ -244,10 +273,13 @@ export default function OccasionRecipesPage() {
     ).length,
     [allOccasionRecipes]
   );
-  // Fitness pill logo dopo "Tutte" (CATEGORY_PILLS[0]) per dargli risalto
-  const pills = fitnessCount > 0
-    ? [CATEGORY_PILLS[0], FITNESS_PILL, ...CATEGORY_PILLS.slice(1)]
-    : CATEGORY_PILLS;
+  // Pagina Gelati: filtri tematici dedicati (Classici/Innovativi/Sani/Vegani/Coperture/Consigli).
+  // Altre occasioni: pills standard, con "Fitness" dopo "Tutte" se ci sono ricette fit.
+  const pills = isGelati
+    ? ["Tutte", ...GELATI_THEME_PILLS.map((t) => t.label)]
+    : fitnessCount > 0
+      ? [CATEGORY_PILLS[0], FITNESS_PILL, ...CATEGORY_PILLS.slice(1)]
+      : CATEGORY_PILLS;
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);

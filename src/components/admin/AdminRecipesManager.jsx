@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Snack", "Bevanda"];
+const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Gelato", "Snack", "Bevanda"];
 const difficulties = ["Facile", "Media", "Difficile"];
 const visibilities = ["all", "free", "premium"];
 const countries = [
@@ -46,7 +46,10 @@ const FIXED_OCCASIONS = [
   "Veloci",
   "Friggitrice ad Aria",
   "Facili da Congelare",
-  "Cucina Senza Tempo"
+  "Cucina Senza Tempo",
+  "Gelati Artigianali",
+  "Insalate in Barattolo",
+  "Ricette con Whey"
 ];
 
 // Mesma lógica da OccasionRecipesPage
@@ -57,6 +60,9 @@ const GP_PRODUCT_OCCASIONS = new Set([
   "365 Ricette Deliziose per Diabetici",
   "275 Ricette Fitness Pratiche ed Economiche",
   "Cucina Senza Tempo",
+  "Gelati Artigianali",
+  "Insalate in Barattolo",
+  "Ricette con Whey",
 ]);
 const OCCASION_ALIASES = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
