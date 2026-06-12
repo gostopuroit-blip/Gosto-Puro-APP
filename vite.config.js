@@ -11,7 +11,9 @@ export default defineConfig({
       srcDir: 'public',
       filename: 'sw-push.js',
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // We register the SW ourselves in src/pwa.js (with auto-reload on update).
+      // Disable the plugin's minimal auto-register to avoid a double registration.
+      injectRegister: null,
       includeAssets: ['favicon-32.png', 'apple-touch-icon.png', 'logo.svg'],
       manifest: {
         id: '/',
