@@ -10,6 +10,7 @@ import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryTagsSection from "@/components/profile/DietaryTagsSection";
+import { getInstallHint } from "@/installHelp";
 
 
 
@@ -352,7 +353,11 @@ export default function Profile() {
               <p className="text-xs text-gray-400 dark:text-gray-500">Aggiungi alla schermata Home</p>
             </div>
           </div>
-          {installPrompt ? (
+          {isInstalled ? (
+            <span className="flex items-center gap-1 text-[13px] font-bold text-[#2D6A4F]">
+              <Check className="w-4 h-4" /> Installata
+            </span>
+          ) : installPrompt ? (
             <button
               onClick={handleInstallPWA}
               className="bg-[#2D6A4F] text-white text-[13px] font-bold px-4 py-2 rounded-xl"
@@ -360,9 +365,7 @@ export default function Profile() {
               Installa
             </button>
           ) : (
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-[11px] text-gray-400 text-right max-w-[120px]">Tocca <strong>⎋</strong> poi "Aggiungi a Home"</p>
-            </div>
+            <p className="text-[11px] text-gray-400 text-right max-w-[160px] leading-snug">{getInstallHint()}</p>
           )}
         </div>
       </div>
