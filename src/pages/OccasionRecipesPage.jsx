@@ -273,13 +273,20 @@ export default function OccasionRecipesPage() {
     ).length,
     [allOccasionRecipes]
   );
+  // Mostra solo le categorie che esistono davvero in questa collezione,
+  // così non compaiono filtri vuoti (es. "Cena" dove non ci sono cene).
+  const categoryPills = useMemo(() => {
+    const present = new Set(allOccasionRecipes.map((r) => r.category).filter(Boolean));
+    return ["Tutte", ...CATEGORY_PILLS.slice(1).filter((c) => present.has(c))];
+  }, [allOccasionRecipes]);
+
   // Pagina Gelati: filtri tematici dedicati (Classici/Innovativi/Sani/Vegani/Coperture/Consigli).
-  // Altre occasioni: pills standard, con "Fitness" dopo "Tutte" se ci sono ricette fit.
+  // Altre occasioni: solo le categorie presenti, con "Fitness" dopo "Tutte" se ci sono ricette fit.
   const pills = isGelati
     ? ["Tutte", ...GELATI_THEME_PILLS.map((t) => t.label)]
     : fitnessCount > 0
-      ? [CATEGORY_PILLS[0], FITNESS_PILL, ...CATEGORY_PILLS.slice(1)]
-      : CATEGORY_PILLS;
+      ? [categoryPills[0], FITNESS_PILL, ...categoryPills.slice(1)]
+      : categoryPills;
 
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
