@@ -343,9 +343,17 @@ const FUNCTION_HANDLERS = {
     return { success: true };
   },
 
-  // Push web requer chaves VAPID no servidor — não configurado
+  // Chave pública VAPID (pode ficar no cliente — é pública). A privada vive
+  // só nos secrets da edge function send-push.
   async getVapidPublicKey() {
-    return { publicKey: null };
+    return { publicKey: "BMboBW-GP0ZxFk3ISf_UO2K0m9rqLwq2dFunz5YdHJDlLTtSW_p2xecsf0BOFDdzS7yzaGpC5D9tiOMyZRdIzc0" };
+  },
+
+  // Dispara push para os inscritos via edge function (apenas admin no servidor).
+  async sendCustomNotification(payload) {
+    const { data, error } = await supabase.functions.invoke("send-push", { body: payload || {} });
+    if (error) return { success: false, error: error.message };
+    return data;
   },
 
   // Aplica compras pendentes a perfis já existentes (admin)
@@ -376,7 +384,6 @@ const FUNCTION_HANDLERS = {
 
 // Funções que dependem de email/push/IA — no-op gracioso até configurar infra
 const NOOP_FUNCTIONS = {
-  sendCustomNotification: 'Notifiche push richiedono configurazione VAPID',
   sendDailyRecipeEmailsForce: 'Invio email richiede configurazione SMTP',
   ebookFollowupSender: 'Invio email richiede configurazione SMTP',
   ebookFollowupTest: 'Invio email richiede configurazione SMTP',
