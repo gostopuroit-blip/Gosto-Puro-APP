@@ -45,12 +45,15 @@ const PANE_THEME_PILLS = [
   { label: "☕ Colazione", tag: "Pane Colazione" },
   { label: "✨ Speciali", tag: "Pani Speciali" },
   { label: "🥣 Impasti", tag: "Impasti Varianti" },
+  { label: "🍕 Pizze", tag: "Pane Pizze" },
+  { label: "🍰 Pizze dolci", tag: "Pane Pizze Dolci" },
   { label: "🎂 Torte", tag: "Pane Torte" },
+  { label: "🍮 Dolci", tag: "Pane Dolci" },
   { label: "🥨 Snack", tag: "Pane Snack" },
   { label: "💡 Consigli", tag: "Pane Consigli" },
 ];
-// "Tutte" mostra solo i pani veri: bonus (torte/snack) e consigli hanno i loro filtri.
-const PANE_EXTRA_TAGS = ["Pane Torte", "Pane Snack", "Pane Consigli"];
+// "Tutte" mostra solo i pani veri: pizze, torte, dolci, snack e consigli hanno i loro filtri.
+const PANE_EXTRA_TAGS = ["Pane Pizze", "Pane Pizze Dolci", "Pane Torte", "Pane Dolci", "Pane Snack", "Pane Consigli"];
 
 // Occasioni con filtri tematici propri (invece di Colazione/Pranzo/…).
 const THEME_CONFIGS = [
