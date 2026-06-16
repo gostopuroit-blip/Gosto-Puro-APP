@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, Clock, Users, Star, Heart, ChefHat, Bookmark, Loader2, Check, Minus, Plus, Printer, CalendarDays, Lock, Crown } from "lucide-react";
@@ -60,6 +61,7 @@ function IngredientRow({ ing, index, total, ratio, activeSostituzione }) {
 
 export default function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
+  const [similar, setSimilar] = useState([]);
   const [userRecipe, setUserRecipe] = useState(null);
   const [user, setUser] = useState(null);
   const [savedCount, setSavedCount] = useState(0);
@@ -142,6 +144,25 @@ export default function RecipeDetail() {
     setPreparedCount(allPrepared.length);
     setLoading(false);
   };
+
+  // Ricette simili: stessa categoria, le piu preparate, esclusa quella corrente
+  useEffect(() => {
+    if (!recipe?.id) { setSimilar([]); return; }
+    let cancelled = false;
+    (async () => {
+      let q = supabase
+        .from("recipes")
+        .select("id,title,image_url,prep_time,calories,category,media_rating")
+        .eq("status", "pubblicata")
+        .neq("id", recipe.id)
+        .limit(10);
+      if (recipe.category) q = q.eq("category", recipe.category);
+      q = q.order("numero_preparate", { ascending: false, nullsFirst: false });
+      const { data } = await q;
+      if (!cancelled) setSimilar(data || []);
+    })();
+    return () => { cancelled = true; };
+  }, [recipe?.id, recipe?.category]);
 
   // ACESSO: Premium full OU comprou a ocasião específica
   const isPremium = user?.is_full_premium === true;
@@ -740,6 +761,37 @@ export default function RecipeDetail() {
           Stampa ricetta
         </Button>
       </div>
+
+      {similar.length > 0 && (
+        <div className="mt-8">
+          <h2 className="px-5 text-lg font-bold text-gray-900 dark:text-white mb-3">Ricette simili</h2>
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
+            {similar.map((r) => (
+              <Link
+                key={r.id}
+                to={createPageUrl(`RecipeDetail?id=${r.id}`)}
+                className="flex-shrink-0 w-40"
+              >
+                <div className="rounded-2xl overflow-hidden bg-white dark:bg-[#2D3F35] border border-gray-50 dark:border-[#3D5246] shadow-sm">
+                  <img
+                    src={r.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"}
+                    alt={r.title}
+                    loading="lazy"
+                    className="w-40 h-28 object-cover"
+                  />
+                  <div className="p-2.5">
+                    <p className="text-xs font-bold text-gray-800 dark:text-gray-100 leading-snug line-clamp-2">{r.title}</p>
+                    <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gray-400 dark:text-gray-500">
+                      <span>⏱ {r.prep_time} min</span>
+                      {r.calories ? <span>🔥 {Math.round(r.calories)} kcal</span> : null}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
 
 
