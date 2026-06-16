@@ -7,6 +7,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
+import Survey from "@/components/Survey";
 
 
 // Aliases: produto slug occasion → receitas podem ter o label antigo
@@ -226,6 +227,9 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      {/* Survey — feedback rápido */}
+      <Survey user={user} />
 
       {/* Prodotti Gosto Puro */}
       <div className="mt-8">

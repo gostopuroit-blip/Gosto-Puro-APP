@@ -9,6 +9,7 @@ import AdminPermissions from "@/components/admin/AdminPermissions";
 import AdminWebhooks from "@/components/admin/AdminWebhooks";
 import AdminSettings from "@/components/admin/AdminSettings";
 import AdminNotifications from "@/components/admin/AdminNotifications";
+import AdminSurvey from "@/components/admin/AdminSurvey";
 import AdminEngagement from "@/components/admin/AdminEngagement";
 import AdminRecipeEngagement from "@/components/admin/AdminRecipeEngagement";
 import AdminEmailTemplates from "@/components/admin/AdminEmailTemplates";
@@ -23,7 +24,7 @@ import AdminGostoPuroProducts from "@/components/admin/AdminGostoPuroProducts";
 import AdminDietaryTagsBulk from "@/components/admin/AdminDietaryTagsBulk";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart } from "lucide-react";
 
 const tabs = [
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
@@ -38,6 +39,7 @@ const tabs = [
   { key: "genera",       label: "Genera con IA",    icon: Sparkles },
   { key: "emails",       label: "Template Email",  icon: Mail },
   { key: "notifiche",    label: "Notifiche",    icon: Bell },
+  { key: "survey",       label: "Pesquisa",      icon: MessageSquareHeart },
   { key: "permessi",     label: "Permessi",      icon: Lock },
   { key: "webhooks",     label: "Webhook",        icon: Webhook },
   { key: "ebook",          label: "E-book Followup",  icon: BookOpen },
@@ -169,6 +171,7 @@ function AdminContent() {
           {activeTab === "genera"       && <AdminRecipeGenerator />}
           {activeTab === "emails"       && <AdminEmailTemplates />}
           {activeTab === "notifiche"    && <AdminNotifications />}
+          {activeTab === "survey"       && <AdminSurvey />}
           {activeTab === "permessi"     && <AdminPermissions />}
           {activeTab === "webhooks"     && <AdminWebhooks />}
           {activeTab === "ebook"          && <AdminEbookFollowup />}
