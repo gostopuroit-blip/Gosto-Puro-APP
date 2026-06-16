@@ -375,16 +375,21 @@ export default function RecipeDetail() {
         toast.error("Accedi per valutare la ricetta");
         return;
       }
-      if (userRecipe?.id) {
-        await base44.entities.UserRecipe.update(userRecipe.id, { user_rating: rating });
-        setUserRecipe((prev) => ({ ...prev, user_rating: rating }));
-      } else {
-        const created = await base44.entities.UserRecipe.create({ recipe_id: recipeId, user_rating: rating });
-        setUserRecipe(created);
+      // RPC: salva a nota do usuário E atualiza média/contagem da receita
+      // de forma incremental (preservando o baseline). Retorna a nova média.
+      const { data, error } = await supabase.rpc("rate_recipe", {
+        p_recipe_id: recipeId,
+        p_rating: rating,
+      });
+      if (error) throw error;
+      setUserRecipe((prev) => ({ ...(prev || { recipe_id: recipeId }), user_rating: rating }));
+      const agg = Array.isArray(data) ? data[0] : data;
+      if (agg) {
+        setRecipe((prev) => (prev ? { ...prev, media_rating: agg.media_rating, rating_count: agg.rating_count } : prev));
       }
       toast.success("Grazie per la valutazione! ⭐");
     } catch (e) {
-      toast.error("Erro: " + e.message);
+      toast.error("Errore: " + e.message);
     }
   };
 
@@ -717,8 +722,15 @@ export default function RecipeDetail() {
       </div>
 
       <div className="px-5 mt-6">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">Valuta questa ricetta</h2>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 flex items-center justify-center gap-2">
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Valuta questa ricetta</h2>
+          {recipe.rating_count > 0 && (
+            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
+              ⭐ {recipe.media_rating} · {recipe.rating_count} {recipe.rating_count === 1 ? "valutazione" : "valutazioni"}
+            </span>
+          )}
+        </div>
+        <div className="bg-white dark:bg-[#2D3F35] rounded-2xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-center gap-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
