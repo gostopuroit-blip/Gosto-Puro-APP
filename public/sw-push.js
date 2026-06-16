@@ -2,8 +2,17 @@
 // Combina: precache (workbox) + listeners de push notifications
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { CacheFirst, StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
+
+// App shell (HTML) sempre da rede primeiro: assim um deploy novo aparece já no
+// próximo carregamento, sem esperar a troca do service worker. Cai no cache só
+// se estiver offline (timeout de 4s). Registrado ANTES do precache para ter
+// prioridade sobre o index.html pré-cacheado nas navegações.
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  new NetworkFirst({ cacheName: 'html-shell', networkTimeoutSeconds: 4 })
+);
 
 // Precache de todos assets buildados (gerado pelo vite-plugin-pwa)
 precacheAndRoute(self.__WB_MANIFEST);
