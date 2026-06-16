@@ -86,9 +86,9 @@ export default function EnableNotificationsBanner() {
           <Bell className="w-4 h-4 text-amber-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900">Ricevi le ricette del giorno</p>
+          <p className="text-sm font-semibold text-gray-900">🔔 Ricevi la ricetta del giorno!</p>
           <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-            Attiva le notifiche per ricevere ogni giorno Colazione, Pranzo e Cena direttamente sul telefono.
+            Attiva le notifiche e ogni giorno ricevi idee per Colazione, Pranzo e Cena sul telefono. Niente spam, solo ispirazione. 😋
           </p>
           {status === "denied" ? (
             <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">

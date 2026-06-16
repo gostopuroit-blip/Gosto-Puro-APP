@@ -8,6 +8,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
 import Survey from "@/components/Survey";
+import EnableNotificationsBanner from "@/components/EnableNotificationsBanner";
 
 
 // Aliases: produto slug occasion → receitas podem ter o label antigo
@@ -201,6 +202,9 @@ export default function Home() {
 
       {/* Dietary Banner */}
       <DietaryBanner userName={userName} dietaryTags={user?.dietary_tags_profile} />
+
+      {/* Convite a ativar notificações (re-oferece no PWA) */}
+      <EnableNotificationsBanner />
 
       {/* Daily Message */}
         <div className="mx-5 mb-4 mt-2 flex items-center gap-2">
