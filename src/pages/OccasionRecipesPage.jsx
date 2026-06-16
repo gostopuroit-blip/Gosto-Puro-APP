@@ -34,8 +34,35 @@ const GELATI_THEME_PILLS = [
   { label: "🍫 Coperture", tag: "Gelati Coperture" },
   { label: "💡 Consigli", tag: "Gelati Consigli" },
 ];
-const GELATI_THEME_BY_LABEL = Object.fromEntries(GELATI_THEME_PILLS.map((t) => [t.label, t.tag]));
 const GELATI_EXTRA_TAGS = ["Gelati Coperture", "Gelati Consigli"];
+
+// Filtri tematici della pagina "Pane Senza Glutine".
+const PANE_THEME_PILLS = [
+  { label: "🍞 Tradizionale", tag: "Pane Tradizionale" },
+  { label: "🍞 In cassetta", tag: "Pane in Cassetta" },
+  { label: "🌾 Integrale", tag: "Pane Integrale" },
+  { label: "🥪 Panini morbidi", tag: "Panini Morbidi" },
+  { label: "☕ Colazione", tag: "Pane Colazione" },
+  { label: "✨ Speciali", tag: "Pani Speciali" },
+  { label: "🥣 Impasti", tag: "Impasti Varianti" },
+  { label: "🎂 Torte", tag: "Pane Torte" },
+  { label: "🥨 Snack", tag: "Pane Snack" },
+  { label: "💡 Consigli", tag: "Pane Consigli" },
+];
+// "Tutte" mostra solo i pani veri: bonus (torte/snack) e consigli hanno i loro filtri.
+const PANE_EXTRA_TAGS = ["Pane Torte", "Pane Snack", "Pane Consigli"];
+
+// Occasioni con filtri tematici propri (invece di Colazione/Pranzo/…).
+const THEME_CONFIGS = [
+  { occ: "Gelati Artigianali", pills: GELATI_THEME_PILLS, extra: GELATI_EXTRA_TAGS },
+  { occ: "Pane Senza Glutine", pills: PANE_THEME_PILLS, extra: PANE_EXTRA_TAGS },
+].map((c) => ({ ...c, byLabel: Object.fromEntries(c.pills.map((t) => [t.label, t.tag])) }));
+
+function activeTheme(occasion, terms) {
+  return THEME_CONFIGS.find((c) =>
+    occasion === c.occ || occasion.includes(c.occ) || (terms && terms.includes(c.occ))
+  ) || null;
+}
 
 const PAGE_SIZE = 6;
 // Max recipes to fetch in a single query — covers all known occasions
@@ -117,9 +144,7 @@ export default function OccasionRecipesPage() {
 
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
-  const isGelati = occasion === "Gelati Artigianali"
-    || occasion.includes("Gelati Artigianali")
-    || (termsFromUrl && termsFromUrl.includes("Gelati Artigianali"));
+  const theme = activeTheme(occasion, termsFromUrl);
 
   useEffect(() => {
     if (!occasion) return;
@@ -245,12 +270,12 @@ export default function OccasionRecipesPage() {
         || (r.lifestyle || []).some(l => l === "Fit" || l === "Fitness");
       const rOcc = r.occasions || [];
       let matchesCategory;
-      if (isGelati) {
+      if (theme) {
         if (activeCategory === "Tutte") {
-          // "Tutte" mostra i gelati veri, non coperture/consigli (hanno i loro filtri)
-          matchesCategory = !GELATI_EXTRA_TAGS.some(t => rOcc.includes(t));
+          // "Tutte" mostra i prodotti veri, non bonus/consigli (hanno i loro filtri)
+          matchesCategory = !theme.extra.some(t => rOcc.includes(t));
         } else {
-          const tag = GELATI_THEME_BY_LABEL[activeCategory];
+          const tag = theme.byLabel[activeCategory];
           matchesCategory = tag ? rOcc.includes(tag) : true;
         }
       } else {
@@ -263,7 +288,7 @@ export default function OccasionRecipesPage() {
         userDietaryTags.some(tag => (r.dietary_tags || []).includes(tag));
       return matchesQuery && matchesCategory && matchesDietary;
     });
-  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, isGelati]);
+  }, [allOccasionRecipes, query, activeCategory, dailyIds, showDaily, soloPerMe, userDietaryTags, theme?.occ]);
 
   // Detecta se a ocasião tem receitas fitness → mostra o pill "💪 Fitness"
   const fitnessCount = useMemo(() =>
@@ -282,8 +307,8 @@ export default function OccasionRecipesPage() {
 
   // Pagina Gelati: filtri tematici dedicati (Classici/Innovativi/Sani/Vegani/Coperture/Consigli).
   // Altre occasioni: solo le categorie presenti, con "Fitness" dopo "Tutte" se ci sono ricette fit.
-  const pills = isGelati
-    ? ["Tutte", ...GELATI_THEME_PILLS.map((t) => t.label)]
+  const pills = theme
+    ? ["Tutte", ...theme.pills.map((t) => t.label)]
     : fitnessCount > 0
       ? [categoryPills[0], FITNESS_PILL, ...categoryPills.slice(1)]
       : categoryPills;

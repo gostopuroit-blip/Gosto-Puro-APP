@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Gelato", "Snack", "Bevanda"];
+const categories = ["Colazione", "Pranzo", "Cena", "Dolce", "Gelato", "Snack", "Bevanda", "Pane"];
 const difficulties = ["Facile", "Media", "Difficile"];
 const visibilities = ["all", "free", "premium"];
 const countries = [
@@ -49,7 +49,8 @@ const FIXED_OCCASIONS = [
   "Cucina Senza Tempo",
   "Gelati Artigianali",
   "Insalate in Barattolo",
-  "Ricette con Whey"
+  "Ricette con Whey",
+  "Pane Senza Glutine"
 ];
 
 // Mesma lógica da OccasionRecipesPage
@@ -63,6 +64,7 @@ const GP_PRODUCT_OCCASIONS = new Set([
   "Gelati Artigianali",
   "Insalate in Barattolo",
   "Ricette con Whey",
+  "Pane Senza Glutine",
 ]);
 const OCCASION_ALIASES = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
