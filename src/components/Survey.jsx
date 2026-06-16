@@ -4,10 +4,9 @@ import { trackEvent } from "@/components/useAnalytics";
 import { MessageSquareHeart, X, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 
-// ⚠️ INATIVO: o card não aparece para os usuários enquanto for false.
-// Para visualizar mesmo inativo, abra a Home com ?survey=preview na URL.
-// Vire true quando a enquete estiver pronta para lançar.
-const SURVEY_ACTIVE = false;
+// Enquete ATIVA: o card aparece na Home para os usuários logados.
+// (?survey=preview ainda força a exibição ignorando o "já respondeu".)
+const SURVEY_ACTIVE = true;
 
 // Apenas coleções que NÃO existem no app — o objetivo é descobrir demanda nova.
 const OCCASION_OPTIONS = [
