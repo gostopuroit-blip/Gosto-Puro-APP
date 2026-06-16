@@ -184,7 +184,9 @@ export default function AdminRecipeEngagement() {
   const topClicks = Object.entries(clickCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
   // --- 12. Push Analytics ---
-  const pushOpenRate = pushSent.length > 0 ? Math.round((pushOpened.length / pushSent.length) * 100) : 0;
+  // push_sent guarda results_count = quantas notificações foram enviadas naquele disparo
+  const pushSentTotal = pushSent.reduce((a, e) => a + (e.results_count || 0), 0);
+  const pushOpenRate = pushSentTotal > 0 ? Math.round((pushOpened.length / pushSentTotal) * 100) : 0;
   const pushToRecipe = events.filter(e => e.event_type === "push_recipe_open").length;
 
   // --- 13. Retention by Source ---
@@ -417,7 +419,7 @@ export default function AdminRecipeEngagement() {
       {/* 12. Push Analytics */}
       <Section title="🔔 Analytics de Notificações" subtitle="Taxa de abertura das push notifications">
         <div className="grid grid-cols-2 gap-3 mb-2">
-          <Metric label="Push enviadas" value={pushSent.length} />
+          <Metric label="Push enviadas" value={pushSentTotal} />
           <Metric label="Push abertas" value={pushOpened.length} color="text-green-600 bg-green-50" />
           <Metric label="Taxa de abertura" value={`${pushOpenRate}%`} color="text-blue-600 bg-blue-50" />
           <Metric label="Push → Receita" value={pushToRecipe} color="text-purple-600 bg-purple-50" />

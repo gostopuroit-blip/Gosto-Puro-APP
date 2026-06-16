@@ -65,16 +65,18 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
+  // Marca a abertura como vinda de push, para o app logar push_opened.
+  const target = url + (url.includes('?') ? '&' : '?') + 'src=push';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       // Se já tem janela aberta, foca; senão abre nova
       for (const client of list) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
-          client.navigate(url);
+          client.navigate(target);
           return client.focus();
         }
       }
-      if (clients.openWindow) return clients.openWindow(url);
+      if (clients.openWindow) return clients.openWindow(target);
     })
   );
 });

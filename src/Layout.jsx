@@ -31,6 +31,19 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   useSessionTracking();
 
+  // Loga abertura via push (o service worker adiciona ?src=push ao abrir a notifica).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("src") !== "push") return;
+    trackEvent("push_opened", { source: "push" });
+    if (window.location.pathname.includes("RecipeDetail") || params.get("id")) {
+      trackEvent("push_recipe_open", { recipe_id: params.get("id") || null });
+    }
+    params.delete("src");
+    const qs = params.toString();
+    window.history.replaceState({}, "", window.location.pathname + (qs ? "?" + qs : "") + window.location.hash);
+  }, []);
+
   useEffect(() => {
     base44.auth.me().then((u) => {
       setUser(u);
