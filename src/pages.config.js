@@ -47,15 +47,19 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Admin from './pages/Admin';
-import Folders from './pages/Folders';
-import Home from './pages/Home';
-import Planner from './pages/Planner';
-import Profile from './pages/Profile';
-import RecipeDetail from './pages/RecipeDetail';
-import Recipes from './pages/Recipes';
-import ShoppingList from './pages/ShoppingList';
+import { lazy } from 'react';
 import __Layout from './Layout.jsx';
+
+// Lazy-loaded para code-splitting: cada pagina vira um chunk separado,
+// reduzindo o bundle inicial (o Admin, em especial, e enorme).
+const Admin = lazy(() => import('./pages/Admin'));
+const Folders = lazy(() => import('./pages/Folders'));
+const Home = lazy(() => import('./pages/Home'));
+const Planner = lazy(() => import('./pages/Planner'));
+const Profile = lazy(() => import('./pages/Profile'));
+const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
+const Recipes = lazy(() => import('./pages/Recipes'));
+const ShoppingList = lazy(() => import('./pages/ShoppingList'));
 
 
 export const PAGES = {
