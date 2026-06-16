@@ -35,6 +35,14 @@ const IMPROVEMENT_OPTIONS = [
   "Modalità offline",
 ];
 
+const COOKS_FOR_OPTIONS = [
+  "Solo per me",
+  "In coppia",
+  "Famiglia con bambini",
+  "Famiglia senza bambini",
+  "Amici / ospiti",
+];
+
 const FACES = [
   { v: 1, e: "😞", l: "Per niente" },
   { v: 2, e: "😕", l: "Poco" },
@@ -48,6 +56,7 @@ export default function Survey({ user: userProp }) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(() => localStorage.getItem("gp_survey_done") === "1");
   const [satisfaction, setSatisfaction] = useState(0);
+  const [cooksFor, setCooksFor] = useState("");
   const [occasions, setOccasions] = useState([]);
   const [improvements, setImprovements] = useState([]);
   const [comment, setComment] = useState("");
@@ -85,6 +94,7 @@ export default function Survey({ user: userProp }) {
       user_id: user.id,
       user_email: user.email,
       satisfaction,
+      cooks_for: cooksFor || null,
       occasions_wanted: occasions,
       improvements,
       comment: comment.trim() || null,
@@ -135,7 +145,7 @@ export default function Survey({ user: userProp }) {
           </div>
           <div className="flex-1">
             <p className="font-bold text-sm">Aiutaci a migliorare 💬</p>
-            <p className="text-xs text-white/80">4 domande veloci · meno di 1 minuto</p>
+            <p className="text-xs text-white/80">5 domande veloci · meno di 1 minuto</p>
           </div>
           <span className="text-xs font-bold bg-white/20 px-3 py-1.5 rounded-xl">Inizia</span>
         </button>
@@ -167,7 +177,7 @@ export default function Survey({ user: userProp }) {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Bastano 4 risposte. Grazie per il tuo tempo! ✨</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Solo 5 domande veloci. Grazie per il tuo tempo! ✨</p>
 
                 {/* Q1 satisfaction */}
                 <div className="mb-6">
@@ -190,9 +200,19 @@ export default function Survey({ user: userProp }) {
                   </div>
                 </div>
 
-                {/* Q2 occasions */}
+                {/* Q2 cooks_for */}
                 <div className="mb-6">
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">2. Quali nuove raccolte vorresti vedere?</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-3">2. Per chi cucini di solito?</p>
+                  <div className="flex flex-wrap gap-2">
+                    {COOKS_FOR_OPTIONS.map((o) => (
+                      <Chip key={o} label={o} active={cooksFor === o} onClick={() => setCooksFor(cooksFor === o ? "" : o)} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Q3 occasions */}
+                <div className="mb-6">
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">3. Quali nuove raccolte vorresti vedere?</p>
                   <p className="text-[11px] text-gray-400 mb-3">Scegli quante vuoi · non vedi la tua? scrivila nel commento 👇</p>
                   <div className="flex flex-wrap gap-2">
                     {OCCASION_OPTIONS.map((o) => (
@@ -203,7 +223,7 @@ export default function Survey({ user: userProp }) {
 
                 {/* Q3 improvements */}
                 <div className="mb-6">
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">3. Cosa miglioreresti?</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">4. Cosa miglioreresti?</p>
                   <p className="text-[11px] text-gray-400 mb-3">Scegli quante vuoi</p>
                   <div className="flex flex-wrap gap-2">
                     {IMPROVEMENT_OPTIONS.map((o) => (
@@ -214,7 +234,7 @@ export default function Survey({ user: userProp }) {
 
                 {/* Q4 comment */}
                 <div className="mb-6">
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">4. Vuoi dirci altro? (facoltativo)</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">5. Vuoi dirci altro? (facoltativo)</p>
                   <textarea
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}

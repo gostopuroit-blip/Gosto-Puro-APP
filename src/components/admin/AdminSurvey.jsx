@@ -34,6 +34,11 @@ export default function AdminSurvey() {
   const improvements = tally("improvements");
   const comments = rows.filter((r) => r.comment && r.comment.trim());
 
+  const cooksMap = {};
+  rows.forEach((r) => { if (r.cooks_for) cooksMap[r.cooks_for] = (cooksMap[r.cooks_for] || 0) + 1; });
+  const cooksFor = Object.entries(cooksMap).sort((a, b) => b[1] - a[1]);
+  const maxCook = cooksFor[0]?.[1] || 1;
+
   const maxOcc = occasions[0]?.[1] || 1;
   const maxImp = improvements[0]?.[1] || 1;
 
@@ -67,6 +72,25 @@ export default function AdminSurvey() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Para quem cozinham */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+            <p className="text-sm font-bold text-gray-800 mb-1">Para quem cozinham</p>
+            <p className="text-[11px] text-gray-400 mb-3">Perfil do público (cruze com as coleções pedidas)</p>
+            {cooksFor.length === 0 ? <p className="text-xs text-gray-400">Sem dados.</p> : (
+              <div className="space-y-1.5">
+                {cooksFor.map(([label, count]) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <p className="text-xs flex-1 text-gray-700 truncate">{label}</p>
+                    <div className="w-24 bg-gray-100 rounded-full h-2">
+                      <div className="bg-[#2D6A4F] h-2 rounded-full" style={{ width: `${(count / maxCook) * 100}%` }} />
+                    </div>
+                    <span className="text-xs font-bold text-gray-600 w-6 text-right">{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Ocasiões/produtos desejados */}
