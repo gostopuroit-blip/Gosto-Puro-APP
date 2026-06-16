@@ -9,18 +9,19 @@ import { toast } from "sonner";
 // Vire true quando a enquete estiver pronta para lançar.
 const SURVEY_ACTIVE = false;
 
+// Apenas coleções que NÃO existem no app — o objetivo é descobrir demanda nova.
 const OCCASION_OPTIONS = [
-  "Gelati artigianali",
-  "Insalate in barattolo",
-  "Ricette proteiche / con whey",
-  "Ricette vegane",
   "Ricette per bambini",
-  "Cucina internazionale",
-  "Dolci senza zucchero",
-  "Piatti economici",
-  "Meal prep settimanale",
+  "Aperitivo & finger food",
+  "Ricette delle feste (Natale, Pasqua…)",
+  "Pane, pizza & lievitati fatti in casa",
+  "Svuotafrigo (anti-spreco)",
+  "Ricette con 5 ingredienti",
+  "Bowl & piatti unici",
+  "Zuppe & vellutate",
   "Ricette senza glutine",
-  "Pranzo da ufficio",
+  "Smoothie & bevande sane",
+  "Slow cooker / pentola a pressione",
 ];
 
 const IMPROVEMENT_OPTIONS = [
@@ -191,8 +192,8 @@ export default function Survey({ user: userProp }) {
 
                 {/* Q2 occasions */}
                 <div className="mb-6">
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">2. Quali raccolte ti piacerebbe vedere?</p>
-                  <p className="text-[11px] text-gray-400 mb-3">Scegli quante vuoi</p>
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">2. Quali nuove raccolte vorresti vedere?</p>
+                  <p className="text-[11px] text-gray-400 mb-3">Scegli quante vuoi · non vedi la tua? scrivila nel commento 👇</p>
                   <div className="flex flex-wrap gap-2">
                     {OCCASION_OPTIONS.map((o) => (
                       <Chip key={o} label={o} active={occasions.includes(o)} onClick={() => toggle(occasions, setOccasions, o)} />
