@@ -4,6 +4,11 @@ import { trackEvent } from "@/components/useAnalytics";
 import { MessageSquareHeart, X, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 
+// ⚠️ INATIVO: o card não aparece para os usuários enquanto for false.
+// Para visualizar mesmo inativo, abra a Home com ?survey=preview na URL.
+// Vire true quando a enquete estiver pronta para lançar.
+const SURVEY_ACTIVE = false;
+
 const OCCASION_OPTIONS = [
   "Gelati artigianali",
   "Insalate in barattolo",
@@ -53,7 +58,12 @@ export default function Survey({ user: userProp }) {
     supabase.auth.getUser().then(({ data }) => setUser(data?.user || null)).catch(() => {});
   }, [userProp]);
 
-  if (done || !user) return null;
+  const preview = typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("survey") === "preview";
+
+  if (!user) return null;
+  if (!SURVEY_ACTIVE && !preview) return null; // inativo: escondido dos usuários
+  if (done && !preview) return null;
 
   const toggle = (arr, setArr, v) =>
     setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -61,6 +71,12 @@ export default function Survey({ user: userProp }) {
   const submit = async () => {
     if (!satisfaction) {
       toast.error("Dicci prima quanto ti piace l'app 🙂");
+      return;
+    }
+    // Modo preview: não grava nada, só mostra como fica.
+    if (preview) {
+      setThanks(true);
+      setTimeout(() => setOpen(false), 1900);
       return;
     }
     setSubmitting(true);
@@ -74,6 +90,14 @@ export default function Survey({ user: userProp }) {
     });
     setSubmitting(false);
     if (error) {
+      if (error.code === "23505") {
+        // 1 resposta por usuário — já respondeu
+        localStorage.setItem("gp_survey_done", "1");
+        toast.success("Hai già risposto, grazie! 🙏");
+        setOpen(false);
+        setDone(true);
+        return;
+      }
       toast.error("Ops, qualcosa è andato storto. Riprova.");
       return;
     }
