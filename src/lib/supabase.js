@@ -9,5 +9,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storageKey: 'gosto-puro-auth',
+    // Lock "pass-through": evita o deadlock do navigator.locks (getSession travando
+    // pra sempre em PWA/multi-aba → tela branca infinita). Só executa o callback.
+    lock: (_name, _acquireTimeout, fn) => fn(),
   },
 });

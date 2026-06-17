@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 
 const AuthContext = createContext();
@@ -10,17 +10,37 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings] = useState({});
+  const settledRef = useRef(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        loadProfile(session.user);
-      } else {
-        setIsLoadingAuth(false);
-        setIsAuthenticated(false);
-        setAuthError({ type: 'auth_required', message: 'Authentication required' });
-      }
-    });
+    // Fail-safe: NUNCA deixar a tela branca travada. Se getSession rejeitar/travar
+    // (deadlock conhecido do navigator.locks em PWA, ou sessão corrompida), ou se o
+    // carregamento demorar demais, manda pro login em vez de ficar no spinner pra sempre.
+    const goLogin = (message) => {
+      if (settledRef.current) return;
+      settledRef.current = true;
+      setUser(null);
+      setIsAuthenticated(false);
+      setAuthError({ type: 'auth_required', message });
+      setIsLoadingAuth(false);
+    };
+
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        if (settledRef.current) return;
+        if (session?.user) {
+          loadProfile(session.user);
+        } else {
+          goLogin('Authentication required');
+        }
+      })
+      .catch((err) => {
+        console.error('getSession failed', err);
+        goLogin('Authentication required');
+      });
+
+    // Watchdog: se em 8s nada resolveu, libera a tela (cai no login) em vez de travar.
+    const watchdog = setTimeout(() => goLogin('Authentication timeout'), 8000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -33,7 +53,7 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { clearTimeout(watchdog); subscription.unsubscribe(); };
   }, []);
 
   const loadProfile = async (authUser) => {
@@ -52,10 +72,12 @@ export const AuthProvider = ({ children }) => {
         role: profile?.role || 'user',
       };
 
+      settledRef.current = true;
       setUser(fullUser);
       setIsAuthenticated(true);
       setAuthError(null);
     } catch {
+      settledRef.current = true;
       setUser({ id: authUser.id, email: authUser.email, plan: 'free', role: 'user' });
       setIsAuthenticated(true);
       setAuthError(null);
