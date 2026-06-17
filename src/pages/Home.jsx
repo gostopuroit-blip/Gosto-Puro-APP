@@ -49,6 +49,7 @@ const occIcons = { "Colazione": "☕", "Pranzo": "🍝", "Cena": "🍷" };
 
 export default function Home() {
   const [topRecipes, setTopRecipes] = useState([]);
+  const [freeRecipes, setFreeRecipes] = useState([]);
   const [gostoPuroProducts, setGostoPuroProducts] = useState([]);
   const [specialOccasions, setSpecialOccasions] = useState([]);
   const [lifestyleTags, setLifestyleTags] = useState([]);
@@ -97,7 +98,22 @@ export default function Home() {
     ]);
     const recipes = recipesRes.data || [];
 
+    // Receitas da degustação gratuita — para mostrar no "Le più preparate" do free
+    const { data: freeRows } = await supabase.from("free_recipes").select("recipe_id");
+    const freeIds = (freeRows || []).map((r) => r.recipe_id);
+    let freeRecipesData = [];
+    if (freeIds.length > 0) {
+      const { data: frData } = await supabase
+        .from("recipes")
+        .select("id,title,image_url,prep_time,calories,dietary_tags,numero_preparate")
+        .in("id", freeIds)
+        .eq("status", "pubblicata")
+        .order("numero_preparate", { ascending: false, nullsFirst: false });
+      freeRecipesData = frData || [];
+    }
+
     setTopRecipes(recipes);
+    setFreeRecipes(freeRecipesData);
     setGostoPuroProducts(products);
     setUser(user);
     if (user?.display_name || user?.full_name) setUserName((user.display_name || user.full_name).split(" ")[0]);
@@ -330,6 +346,12 @@ export default function Home() {
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
           {(() => {
+            // Free sem acesso → mostra as receitas LIBERADAS (degustação), que abrem de verdade.
+            // Quem tem acesso → as mais preparate reais.
+            const hasAccess = user?.is_full_premium === true || user?.has_access === true || user?.is_premium === true;
+            if (!hasAccess) {
+              return freeRecipes.slice(0, 10);
+            }
             const dietaryTags = user?.dietary_tags_profile || [];
             // Prefere receitas que casam com tags do perfil; se nenhuma casar, mostra todas
             let filtered = topRecipes;
@@ -340,8 +362,8 @@ export default function Home() {
               filtered = matching.length > 0 ? matching : topRecipes;
             }
             filtered = filtered.slice(0, 10);
-
-            return filtered.map((recipe) => (
+            return filtered;
+          })().map((recipe) => (
             <Link key={recipe.id} to={createPageUrl(`RecipeDetail?id=${recipe.id}`)} className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden" style={{ width: "200px", height: "250px" }}>
               <img src={recipe.image_url || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400"} alt={recipe.title} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
@@ -349,11 +371,9 @@ export default function Home() {
                 <p className="text-white/80 text-xs">⏱️ {recipe.prep_time || "–"} min {recipe.calories ? `• ${recipe.calories} kcal` : ""}</p>
               </div>
             </Link>
-            ));
-          })()}
+            ))}
         </div>
       </div>
-
 
       </div>
     </PullToRefresh>);
