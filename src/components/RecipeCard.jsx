@@ -57,10 +57,12 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                   <span className="text-[10px]">{recipe.calories} kcal</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 text-white/80">
-                <Heart className="w-3 h-3" />
-                <span className="text-[10px]">{recipe.numero_salvate || 0}</span>
-              </div>
+              {recipe.numero_salvate > 0 && (
+                <div className="flex items-center gap-1 text-white/80">
+                  <Heart className="w-3 h-3" />
+                  <span className="text-[10px]">{recipe.numero_salvate}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -107,14 +109,18 @@ export default function RecipeCard({ recipe, variant = "default" }) {
                 <span className="text-[11px] font-medium">{recipe.calories} kcal</span>
               </div>
             )}
-            <div className="flex items-center gap-1.5 text-gray-400">
-              <Heart className="w-3.5 h-3.5 text-rose-400" />
-              <span className="text-[11px] font-medium">{recipe.numero_salvate || 0} salvate</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-gray-400">
-              <ChefHat className="w-3.5 h-3.5 text-[#2D6A4F]" />
-              <span className="text-[11px] font-medium">{recipe.numero_preparate || 0} preparate</span>
-            </div>
+            {recipe.numero_salvate > 0 && (
+              <div className="flex items-center gap-1.5 text-gray-400">
+                <Heart className="w-3.5 h-3.5 text-rose-400" />
+                <span className="text-[11px] font-medium">{recipe.numero_salvate} salvate</span>
+              </div>
+            )}
+            {recipe.numero_preparate > 0 && (
+              <div className="flex items-center gap-1.5 text-gray-400">
+                <ChefHat className="w-3.5 h-3.5 text-[#2D6A4F]" />
+                <span className="text-[11px] font-medium">{recipe.numero_preparate} preparate</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

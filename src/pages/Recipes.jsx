@@ -5,7 +5,7 @@ import { trackEvent } from "@/components/useAnalytics";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import DailyRecipesSection from "@/components/DailyRecipesSection";
-import { Search, Loader2, X, Lock, Crown, Star } from "lucide-react";
+import { Search, Loader2, X, Lock, Crown, Star, ChefHat } from "lucide-react";
 import { getSocialProof, formatCount } from "@/lib/socialProof";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -309,9 +309,13 @@ export default function Recipes() {
                         <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center">
                           <Lock className="w-5 h-5 text-amber-500" />
                         </div>
-                        <div className="flex items-center gap-1 bg-white/90 text-slate-900 text-[11px] font-bold px-2.5 py-1 rounded-full drop-shadow">
-                          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                          {sp.rating} · {formatCount(sp.count)}
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex items-center gap-1 bg-white/90 text-slate-900 text-[11px] font-bold px-2 py-1 rounded-full drop-shadow">
+                            <Star className="w-3 h-3 text-amber-400 fill-amber-400" /> {sp.rating}
+                          </span>
+                          <span className="flex items-center gap-1 bg-white/90 text-slate-900 text-[11px] font-bold px-2 py-1 rounded-full drop-shadow">
+                            <ChefHat className="w-3 h-3 text-[#2D6A4F]" /> {formatCount(sp.count)}
+                          </span>
                         </div>
                         <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl flex items-center gap-1">
                           <Crown className="w-3.5 h-3.5" /> Sblocca
