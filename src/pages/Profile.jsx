@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { PremiumBadge } from "@/components/PremiumGate";
+import { PremiumReassurance } from "@/components/PremiumCTA";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryTagsSection from "@/components/profile/DietaryTagsSection";
 import { getInstallHint } from "@/installHelp";
@@ -515,6 +516,15 @@ export default function Profile() {
                     </p>
                   </div>
                 </div>
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-gray-600 dark:text-gray-300">Hai sbloccato {purchased.length} di 18 raccolte</span>
+                    <span className="text-[11px] text-gray-400">{purchased.length}/18</span>
+                  </div>
+                  <div className="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500 rounded-full" style={{ width: `${Math.max(5, Math.round((purchased.length / 18) * 100))}%` }} />
+                  </div>
+                </div>
                 <a
                   href="https://gostopuro.it/upgrade/"
                   target="_blank"
@@ -525,7 +535,7 @@ export default function Profile() {
                   <Crown className="w-4 h-4" />
                   Sblocca il Pacchetto Completo
                 </a>
-                <p className="text-[10px] text-center text-gray-400 mt-1.5">Accesso vitalizio · Nessun abbonamento · Tutti gli aggiornamenti</p>
+                <div className="mt-2"><PremiumReassurance /></div>
               </div>
             </div>
           );
