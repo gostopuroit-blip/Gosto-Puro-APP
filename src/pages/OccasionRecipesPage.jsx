@@ -295,9 +295,10 @@ export default function OccasionRecipesPage() {
   const filteredRecipes = useMemo(() => {
     return allOccasionRecipes.filter((r) => {
       if (showDaily && dailyIds.has(r.id)) return false;
-      const matchesQuery = !query.trim() ||
-        r.title?.toLowerCase().includes(query.toLowerCase()) ||
-        r.description?.toLowerCase().includes(query.toLowerCase());
+      // Busca por PALAVRAS: cada parola deve apparire (titolo/descrizione/categoria), in qualsiasi ordine.
+      const qTokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const haystack = `${r.title || ""} ${r.description || ""} ${r.category || ""}`.toLowerCase();
+      const matchesQuery = qTokens.length === 0 || qTokens.every((tok) => haystack.includes(tok));
       const isFit = (r.occasions || []).some(o => o === "Fit" || o === "Fitness")
         || (r.lifestyle || []).some(l => l === "Fit" || l === "Fitness");
       const rOcc = r.occasions || [];

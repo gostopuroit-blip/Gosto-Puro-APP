@@ -88,8 +88,12 @@ export default function Recipes() {
       let q = supabase.from("recipes").select(RECIPE_COLS, { count: "exact" }).eq("status", "pubblicata");
 
       if (debouncedSearch) {
-        const s = debouncedSearch.replace(/[%,()]/g, "");
-        q = q.or(`title.ilike.%${s}%,description.ilike.%${s}%,category.ilike.%${s}%`);
+        // Busca por PALAVRAS: cada palavra deve aparecer (em título/descrição/categoria/país),
+        // não importa a ordem. Assim "pollo limone" acha "Scaloppine di Pollo al Limone".
+        const tokens = debouncedSearch.replace(/[%,()]/g, " ").split(/\s+/).filter(Boolean).slice(0, 6);
+        for (const t of tokens) {
+          q = q.or(`title.ilike.%${t}%,description.ilike.%${t}%,category.ilike.%${t}%,paese.ilike.%${t}%`);
+        }
       }
 
       const applyOccasionLike = (tag) => {
