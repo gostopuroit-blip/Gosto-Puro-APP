@@ -473,7 +473,32 @@ export default function Profile() {
           cucina_senza_tempo: "110 e Lode in Cucina",
           dolci_senza_colpa: "99 Dolci Senza Colpa",
           piatti_settimanali_air_fryer: "Piatti Settimanali in Air Fryer",
+          gelati_artigianali: "+70 Ricette di Gelati",
+          insalate_barattolo: "Insalate in Barattolo",
+          ricette_whey: "60 Ricette con Whey",
+          pane_senza_glutine: "Pane Senza Glutine",
+          menu_brucia_grassi: "Menu Brucia Grassi",
+          reset_anti_gonfiore: "Reset Anti-Gonfiore",
         };
+
+        // #7 — "Completa la estante": sugere coleções afins que o comprador ainda NÃO tem.
+        const AFFINITY = {
+          fitness_pratiche: ["ricette_whey", "gelati_artigianali", "low_carb"],
+          ricette_whey: ["fitness_pratiche", "gelati_artigianali", "low_carb"],
+          diabetici: ["senza_zucchero", "low_carb", "dolci_senza_colpa"],
+          senza_zucchero: ["dolci_senza_colpa", "diabetici", "gelati_artigianali"],
+          dolci_senza_colpa: ["senza_zucchero", "gelati_artigianali", "pane_senza_glutine"],
+          low_carb: ["fitness_pratiche", "diabetici", "ricette_detox"],
+          ricette_detox: ["low_carb", "senza_zucchero", "reset_anti_gonfiore"],
+          gelati_artigianali: ["dolci_senza_colpa", "ricette_whey", "senza_zucchero"],
+          reset_anti_gonfiore: ["ricette_detox", "menu_brucia_grassi", "low_carb"],
+          menu_brucia_grassi: ["fitness_pratiche", "reset_anti_gonfiore", "low_carb"],
+        };
+        const DEFAULT_SUGGEST = ["fitness_pratiche", "gelati_artigianali", "dolci_senza_colpa", "diabetici"];
+        const suggestRaw = [];
+        purchased.forEach((s) => (AFFINITY[s] || []).forEach((x) => suggestRaw.push(x)));
+        DEFAULT_SUGGEST.forEach((x) => suggestRaw.push(x));
+        const suggestions = [...new Set(suggestRaw)].filter((s) => !purchased.includes(s)).slice(0, 3);
 
         if (isPremium) {
           return (
@@ -525,6 +550,25 @@ export default function Profile() {
                     <div className="h-full bg-amber-500 rounded-full" style={{ width: `${Math.max(5, Math.round((purchased.length / 18) * 100))}%` }} />
                   </div>
                 </div>
+                {suggestions.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1.5">💡 Chi ha scelto le tue raccolte ama anche:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {suggestions.map((slug) => (
+                        <a
+                          key={slug}
+                          href="https://gostopuro.it/upgrade/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => trackEvent("premium_click", { source: "profile_crosssell", product: slug })}
+                          className="text-[11px] font-bold text-[#2D6A4F] dark:text-[#40916C] bg-white dark:bg-[#1A2B20] border border-[#C8E6D8] dark:border-[#2D4A38] px-2.5 py-1 rounded-full"
+                        >
+                          {PRODUCT_NAMES[slug] || slug} →
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <a
                   href="https://gostopuro.it/upgrade/"
                   target="_blank"
@@ -551,6 +595,11 @@ export default function Profile() {
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"><span className="text-[#2D6A4F] dark:text-[#40916C] font-bold">✓</span> 5.000+ ricette per ogni momento</div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"><span className="text-[#2D6A4F] dark:text-[#40916C] font-bold">✓</span> Il menu della settimana in 1 clic</div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"><span className="text-[#2D6A4F] dark:text-[#40916C] font-bold">✓</span> La lista della spesa automatica</div>
+              </div>
+              <div className="mt-3 bg-amber-100/60 dark:bg-amber-900/20 rounded-xl px-3 py-2 text-center">
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold">
+                  🎁 18 raccolte + planner + 3 bonus = oltre <span className="line-through opacity-70">€94</span> di valore · oggi <strong>€29,90</strong> una volta sola
+                </p>
               </div>
               <a
                 href="https://gostopuro.it/upgrade/"
