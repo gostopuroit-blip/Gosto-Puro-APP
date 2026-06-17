@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Search, Heart, Star, Loader2 } from "lucide-react";
+import { ArrowLeft, Search, Heart, Star, Loader2, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -122,6 +122,34 @@ const DIETARY_TAG_COLORS = {
 const recipesCache = {};
 const recipesCacheTime = {};
 const CACHE_TTL_MS = 5 * 60 * 1000;
+
+// Link premium genérico (fallback enquanto não houver link de vendas dedicado).
+const PREMIUM_LINK = "https://gostopuro.it/upgrade/";
+// Link de vendas DEDICADO por ocasião bloqueada. Quando tiver o link real de cada
+// produto, troque o PREMIUM_LINK pela URL específica daquela ocasião. Toda ocasião
+// que estiver neste mapa mostra a tela de cadeado; sem link específico cai no premium.
+const OCCASION_SALES_LINKS = {
+  "Gelati Artigianali": PREMIUM_LINK,
+  "Insalate in Barattolo": PREMIUM_LINK,
+  "Ricette con Whey": PREMIUM_LINK,
+  "Pane Senza Glutine": PREMIUM_LINK,
+  "99 Dolci Senza Colpa": PREMIUM_LINK,
+  "Senza zucchero": PREMIUM_LINK,
+  "Low carb": PREMIUM_LINK,
+  "Detox": PREMIUM_LINK,
+  "Ricette Sane": PREMIUM_LINK,
+  "Cucina Senza Tempo": PREMIUM_LINK,
+  "Facili da Congelare": PREMIUM_LINK,
+  "Friggitrice ad Aria": PREMIUM_LINK,
+  "Piatti Settimanali in Air Fryer": PREMIUM_LINK,
+  "Menu Brucia Grassi 21 Giorni": PREMIUM_LINK,
+  "Reset Anti-Gonfiore 7 Giorni": PREMIUM_LINK,
+  "365 Ricette Deliziose per Diabetici": PREMIUM_LINK,
+  "275 Ricette Fitness Pratiche ed Economiche": PREMIUM_LINK,
+  "Collezione Gosto Puro": PREMIUM_LINK,
+};
+const salesLinkForOccasion = (occ) => OCCASION_SALES_LINKS[occ] || PREMIUM_LINK;
+const isSellableOccasion = (occ) => Object.prototype.hasOwnProperty.call(OCCASION_SALES_LINKS, occ);
 
 export default function OccasionRecipesPage() {
   const navigate = useNavigate();
@@ -333,6 +361,17 @@ export default function OccasionRecipesPage() {
   const icon = OCCASION_ICONS[occasion] || "🍽️";
   const totalCount = allOccasionRecipes.length;
 
+  // Bloqueio no NÍVEL da ocasião: se é uma coleção vendável e o usuário não tem
+  // acesso (não é premium full e não comprou essa ocasião), mostra a tela de
+  // cadeado com botão para a página de vendas dedicada daquela ocasião.
+  const occUnlockedTerms = user?.unlocked_occasions || [];
+  const occTerms = occasionAliases[occasion] || [occasion];
+  const occHasAccess =
+    user?.is_full_premium === true ||
+    occUnlockedTerms.includes("*") ||
+    occTerms.some((t) => occUnlockedTerms.includes(t));
+  const occasionLocked = isSellableOccasion(occasion) && !occHasAccess;
+
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] pb-24">
       {/* Header */}
@@ -452,30 +491,51 @@ export default function OccasionRecipesPage() {
             ) : (
               <>
                 <p className="text-xs text-gray-400 mb-3">
-                  Mostrando {Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–{Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di {filteredRecipes.length} ricette
+                  {occasionLocked
+                    ? `Anteprima — ${filteredRecipes.length} ricette in questa raccolta`
+                    : `Mostrando ${Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–${Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di ${filteredRecipes.length} ricette`}
                 </p>
 
-                <div className="space-y-3">
-                   {pagedRecipes.map((recipe) => (
+                <div className="relative">
+                  <div className={occasionLocked ? "space-y-3 blur-[3px] select-none pointer-events-none opacity-60" : "space-y-3"}>
+                   {(occasionLocked ? pagedRecipes.slice(0, 6) : pagedRecipes).map((recipe) => (
                      <RecipeCard
                        key={recipe.id}
                        recipe={recipe}
                        occasion={occasion}
                        isSaved={!!userRecipes[recipe.id]}
                        user={user}
-                       isBlocked={(() => {
-                         const isFullPremium = user?.is_full_premium === true;
-                         const unlocked = user?.unlocked_occasions || [];
-                         if (isFullPremium || unlocked.includes("*")) return false;
-                         // Receita acessível se uma das suas ocasiões está nas desbloqueadas
-                         return !(recipe.occasions || []).some(o => unlocked.includes(o));
-                       })()}
-                       onBlockedClick={() => window.open("https://gostopuro.it/upgrade/", "_blank")}
+                       isBlocked={occasionLocked}
+                       onBlockedClick={() => window.open(salesLinkForOccasion(occasion), "_blank")}
                      />
                    ))}
-                 </div>
+                  </div>
 
-                {totalPages > 1 && (
+                  {occasionLocked && (
+                    <div className="absolute inset-0 flex justify-center pointer-events-none">
+                      <div className="sticky top-28 self-start pointer-events-auto bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-xl p-6 text-center max-w-xs mx-4 mt-10">
+                        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-amber-50 flex items-center justify-center">
+                          <Lock className="w-7 h-7 text-amber-500" />
+                        </div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Raccolta bloccata 🔒</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                          Sblocca <b>{occasion}</b> per accedere a tutte le <b>{filteredRecipes.length}</b> ricette di questa raccolta.
+                        </p>
+                        <a
+                          href={salesLinkForOccasion(occasion)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 w-full bg-[#2D6A4F] text-white font-bold py-3 rounded-2xl active:scale-95 transition-transform"
+                        >
+                          🔓 Sblocca questa raccolta
+                        </a>
+                        <p className="text-[11px] text-gray-400 mt-3">Accesso immediato dopo l'acquisto</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {!occasionLocked && totalPages > 1 && (
                   <div className="flex items-center justify-center gap-4 mt-6">
                     <button
                       onClick={() => handlePageChange(safePage - 1)}
