@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ChangeRecipeModal from "@/components/planner/ChangeRecipeModal";
 import PlannerModal from "@/components/PlannerModal";
+import { PremiumLock } from "@/components/PremiumGate";
 import KcalCounter from "@/components/planner/KcalCounter";
 import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
 
@@ -280,6 +281,12 @@ export default function Planner() {
         <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
       </div>
     );
+  }
+
+  // Free sem nenhuma compra → Planner bloqueado (cadeado).
+  const hasAccess = user?.is_premium === true || user?.has_access === true || user?.is_full_premium === true;
+  if (!hasAccess) {
+    return <PremiumLock feature="il Planner settimanale" />;
   }
 
   if (!plan) {

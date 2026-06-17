@@ -535,11 +535,11 @@ export default function OccasionRecipesPage() {
                   )}
                 </div>
 
-                {!occasionLocked && totalPages > 1 && (
+                {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-4 mt-6">
                     <button
-                      onClick={() => handlePageChange(safePage - 1)}
-                      disabled={safePage === 1}
+                      onClick={() => !occasionLocked && handlePageChange(safePage - 1)}
+                      disabled={occasionLocked || safePage === 1}
                       className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       ← Precedente
@@ -548,13 +548,18 @@ export default function OccasionRecipesPage() {
                       {safePage} / {totalPages}
                     </span>
                     <button
-                      onClick={() => handlePageChange(safePage + 1)}
-                      disabled={safePage === totalPages}
+                      onClick={() => !occasionLocked && handlePageChange(safePage + 1)}
+                      disabled={occasionLocked || safePage === totalPages}
                       className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Successiva →
                     </button>
                   </div>
+                )}
+                {occasionLocked && totalPages > 1 && (
+                  <p className="text-center text-xs text-gray-400 mt-2">
+                    🔒 {totalPages} pagine di ricette in questa raccolta — sblocca per vederle tutte
+                  </p>
                 )}
               </>
             )}

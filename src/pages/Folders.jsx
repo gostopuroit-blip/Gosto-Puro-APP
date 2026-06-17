@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import PremiumGate from "@/components/PremiumGate";
+import PremiumGate, { PremiumLock } from "@/components/PremiumGate";
 import { Loader2, Plus, FolderHeart, Search, Trash2, ChefHat, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -224,6 +224,12 @@ export default function Folders() {
         <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
       </div>
     );
+  }
+
+  // Free sem nenhuma compra → Cartelle bloqueada (cadeado).
+  const hasAccess = currentUser?.is_premium === true || currentUser?.has_access === true || currentUser?.is_full_premium === true;
+  if (!hasAccess) {
+    return <PremiumLock feature="le cartelle personalizzate" />;
   }
 
   return (
