@@ -88,11 +88,40 @@ export default function Recipes() {
       let q = supabase.from("recipes").select(RECIPE_COLS, { count: "exact" }).eq("status", "pubblicata");
 
       if (debouncedSearch) {
-        // Busca por PALAVRAS: cada palavra deve aparecer (em título/descrição/categoria/país),
-        // não importa a ordem. Assim "pollo limone" acha "Scaloppine di Pollo al Limone".
-        const tokens = debouncedSearch.replace(/[%,()]/g, " ").split(/\s+/).filter(Boolean).slice(0, 6);
-        for (const t of tokens) {
-          q = q.or(`title.ilike.%${t}%,description.ilike.%${t}%,category.ilike.%${t}%,paese.ilike.%${t}%`);
+        // Palavras-chave de dieta/condição → busca nas TAGS/OCASIÕES (senão "diabete"
+        // não acharia a coleção, que é tagueada e não tem a palavra no título).
+        const SEARCH_SYNONYMS = {
+          "diabete": { occ: ["Diabete", "Diabetico"], tag: ["Diabetico"] },
+          "diabetico": { occ: ["Diabete", "Diabetico"], tag: ["Diabetico"] },
+          "diabetici": { occ: ["Diabete", "Diabetico"], tag: ["Diabetico"] },
+          "vegano": { tag: ["Vegano"] },
+          "vegana": { tag: ["Vegano"] },
+          "vegani": { tag: ["Vegano"] },
+          "vegetariano": { tag: ["Vegetariano"] },
+          "detox": { occ: ["Detox"] },
+          "low carb": { occ: ["Low carb"], tag: ["Low carb"] },
+          "senza zucchero": { occ: ["Senza zucchero"], tag: ["Senza zucchero"] },
+          "senza glutine": { tag: ["Senza glutine"] },
+          "senza lattosio": { tag: ["Senza lattosio"] },
+          "fit": { occ: ["Fit"] },
+          "fitness": { occ: ["Fit"] },
+          "proteico": { tag: ["Alto contenuto proteico"] },
+          "proteiche": { tag: ["Alto contenuto proteico"] },
+        };
+        const sLower = debouncedSearch.trim().toLowerCase();
+        const syn = SEARCH_SYNONYMS[sLower];
+        if (syn) {
+          const conds = [];
+          (syn.occ || []).forEach((o) => conds.push(`occasions.cs.{"${o}"}`));
+          (syn.tag || []).forEach((t) => conds.push(`dietary_tags.cs.{"${t}"}`));
+          q = q.or(conds.join(","));
+        } else {
+          // Busca por PALAVRAS: cada palavra deve aparecer (título/descrição/categoria/país),
+          // em qualquer ordem. Assim "pollo limone" acha "Scaloppine di Pollo al Limone".
+          const tokens = debouncedSearch.replace(/[%,()]/g, " ").split(/\s+/).filter(Boolean).slice(0, 6);
+          for (const t of tokens) {
+            q = q.or(`title.ilike.%${t}%,description.ilike.%${t}%,category.ilike.%${t}%,paese.ilike.%${t}%`);
+          }
         }
       }
 
