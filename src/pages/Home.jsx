@@ -228,6 +228,37 @@ export default function Home() {
           <p className="text-sm text-gray-500 dark:text-gray-400">Ogni giorno nuove ricette ti aspettano!</p>
         </div>
 
+      {/* Progresso di sblocco — desiderio di completare la collezione (nascosto per Premium) */}
+      {user && user.is_full_premium !== true && (() => {
+        const total = gostoPuroProducts.length || 18;
+        const owned = Array.isArray(user.purchased_products) ? user.purchased_products.length : 0;
+        const pct = Math.max(4, Math.round((owned / total) * 100));
+        const title = owned === 0
+          ? "Hai assaggiato 40 ricette su oltre 1.700"
+          : `Hai sbloccato ${owned} raccolte su ${total}`;
+        const subtitle = owned === 0
+          ? "Le raccolte complete ti aspettano"
+          : `Ti mancano ancora ${total - owned} raccolte da scoprire`;
+        return (
+          <a
+            href="https://gostopuro.it/upgrade/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackEvent("premium_click", { source: "home_progress" })}
+            className="block mx-5 mb-4 rounded-2xl px-4 py-3.5 bg-gradient-to-br from-[#2D6A4F] to-[#40916C] shadow-sm active:scale-[0.99] transition-transform"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-white font-semibold text-sm">{title}</p>
+              <span className="text-white/80 text-xs font-semibold">{owned}/{total}</span>
+            </div>
+            <div className="h-1.5 bg-white/25 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full" style={{ width: `${pct}%` }} />
+            </div>
+            <p className="text-white/85 text-xs mt-2">{subtitle} →</p>
+          </a>
+        );
+      })()}
+
 
       {/* Daily Occasions — card style like image */}
       <div className="px-5 mt-2">

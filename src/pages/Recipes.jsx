@@ -5,7 +5,8 @@ import { trackEvent } from "@/components/useAnalytics";
 import RecipeCard from "@/components/RecipeCard";
 import PullToRefresh from "@/components/PullToRefresh";
 import DailyRecipesSection from "@/components/DailyRecipesSection";
-import { Search, Loader2, X, Lock, Crown } from "lucide-react";
+import { Search, Loader2, X, Lock, Crown, Star } from "lucide-react";
+import { getSocialProof, formatCount } from "@/lib/socialProof";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const filters = [
@@ -298,6 +299,7 @@ export default function Recipes() {
                // a ocasião, OU receitas da "degustação" gratuita (freeIds / free_recipes).
                const isLocked = !isPremium && !recipeMatchesPurchase(recipe) && !freeIds.includes(recipe.id);
                if (isLocked) {
+                 const sp = getSocialProof(recipe);
                  return (
                    <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("premium_click", { source: "recipe_list", recipe_id: recipe.id, recipe_title: recipe.title })} className="block relative rounded-3xl overflow-hidden">
                       <div className="pointer-events-none select-none blur-[2px] opacity-40">
@@ -307,9 +309,12 @@ export default function Recipes() {
                         <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center">
                           <Lock className="w-5 h-5 text-amber-500" />
                         </div>
-                        <p className="bg-zinc-50 text-slate-950 text-xs font-bold rounded drop-shadow">Ricetta Premium</p>
+                        <div className="flex items-center gap-1 bg-white/90 text-slate-900 text-[11px] font-bold px-2.5 py-1 rounded-full drop-shadow">
+                          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                          {sp.rating} · {formatCount(sp.count)}
+                        </div>
                         <span className="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-xl flex items-center gap-1">
-                          <Crown className="w-3.5 h-3.5" /> Sblocca Premium
+                          <Crown className="w-3.5 h-3.5" /> Sblocca
                         </span>
                       </div>
                     </a>);

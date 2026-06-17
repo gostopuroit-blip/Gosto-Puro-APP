@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
 import { trackEvent } from "@/components/useAnalytics";
+import { socialProofLine } from "@/lib/socialProof";
 import RecipeComments from "@/components/recipe/RecipeComments";
 import RecipeSostituzioni from "@/components/recipe/RecipeSostituzioni";
 
@@ -420,6 +421,7 @@ export default function RecipeDetail() {
   }
 
   if (isContentLocked) {
+    const sp = socialProofLine(recipe);
     return (
       <div className="pb-32">
         <div className="relative">
@@ -440,13 +442,17 @@ export default function RecipeDetail() {
               <Lock className="w-7 h-7 text-amber-500" />
             </div>
             <h1 className="text-white text-2xl font-bold drop-shadow-lg">{recipe.title}</h1>
-            <p className="text-white/90 text-sm drop-shadow">Ricetta Premium</p>
+            <div className="flex items-center gap-1.5 text-white/95 text-sm drop-shadow">
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+              <span className="font-bold">{sp.rating}</span>
+              <span className="text-white/80">· {sp.text}</span>
+            </div>
           </div>
         </div>
         <div className="px-5 mt-6 text-center space-y-4">
-          <h2 className="text-xl font-bold text-gray-800">Sblocca questa ricetta</h2>
+          <h2 className="text-xl font-bold text-gray-800">Manca solo un passo 🔓</h2>
           <p className="text-sm text-gray-500">
-            Diventa Premium o acquista il pacchetto per accedere a questa e a centinaia di altre ricette.
+            Questa ricetta è una delle preferite della community. Sbloccala e porta a casa anche le altre centinaia che ti aspettano.
           </p>
           <a
             href="https://gostopuro.it/upgrade/"
