@@ -484,13 +484,13 @@ export default function Profile() {
                     <Crown className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-800 dark:text-white">👑 Pacchetto Completo attivo</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Accesso completo a tutte le ricette e funzionalità</p>
+                    <p className="text-sm font-bold text-gray-800 dark:text-white">👑 Hai accesso completo</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Fai parte dei 53.000+ che hanno reso la cucina semplice, ogni giorno.</p>
                   </div>
                 </div>
                 <div className="mt-3 bg-amber-100/60 dark:bg-amber-900/20 rounded-xl px-3 py-2">
                   <p className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold">
-                    🔓 Accesso <strong>a vita</strong> — non è un abbonamento. Inclusi tutti gli aggiornamenti futuri.
+                    🔓 È tuo <strong>per sempre</strong> — nessun abbonamento, aggiornamenti inclusi. Goditi ogni ricetta.
                   </p>
                 </div>
               </div>
@@ -505,14 +505,14 @@ export default function Profile() {
               <div className="bg-[#F0F7F4] dark:bg-[#1A2B20] rounded-2xl p-4 border border-[#C8E6D8] dark:border-[#2D4A38]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-[#2D6A4F] dark:text-[#40916C]">✅ I tuoi prodotti acquistati:</p>
+                    <p className="text-sm font-bold text-[#2D6A4F] dark:text-[#40916C]">👏 Hai già fatto il primo passo</p>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {productNames.map((name, i) => (
                         <span key={i} className="text-[11px] font-bold bg-[#2D6A4F] text-white px-2.5 py-1 rounded-full">{name}</span>
                       ))}
                     </div>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-                      🔓 <strong>Accesso a vita</strong> — non è un abbonamento. Inclusi tutti gli aggiornamenti futuri.
+                    <p className="text-[12px] text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">
+                      Ti manca solo un passo per avere <strong>tutto</strong>: il planner, la lista della spesa automatica e le altre <strong>{18 - purchased.length}</strong> raccolte che ti aspettano.
                     </p>
                   </div>
                 </div>
@@ -533,7 +533,7 @@ export default function Profile() {
                   className="mt-3 w-full flex items-center justify-center gap-2 bg-amber-500 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl"
                 >
                   <Crown className="w-4 h-4" />
-                  Sblocca il Pacchetto Completo
+                  Completa il mio accesso
                 </a>
                 <div className="mt-2"><PremiumReassurance /></div>
               </div>
@@ -545,26 +545,24 @@ export default function Profile() {
         return (
           <div className="px-5 mt-4">
             <div className="bg-gradient-to-r from-amber-50 dark:from-amber-950/20 to-yellow-50 dark:to-yellow-950/20 rounded-2xl p-4 border border-amber-100 dark:border-amber-900/40">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Crown className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-800 dark:text-white">Pacchetto Completo</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Sblocca tutte le ricette e collezioni</p>
-                </div>
+              <p className="text-sm font-bold text-gray-800 dark:text-white">✨ Immagina di non chiederti mai più «cosa cucino oggi?»</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Con il Pacchetto Completo è già tutto pronto: scegli, cucina, goditi.</p>
+              <div className="mt-3 space-y-1.5">
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"><span className="text-[#2D6A4F] dark:text-[#40916C] font-bold">✓</span> 5.000+ ricette per ogni momento</div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"><span className="text-[#2D6A4F] dark:text-[#40916C] font-bold">✓</span> Il menu della settimana in 1 clic</div>
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300"><span className="text-[#2D6A4F] dark:text-[#40916C] font-bold">✓</span> La lista della spesa automatica</div>
               </div>
               <a
                 href="https://gostopuro.it/upgrade/"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackEvent("premium_click", { source: "profile" })}
-                className="w-full flex items-center justify-center gap-2 bg-amber-500 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl"
+                className="mt-3 w-full flex items-center justify-center gap-2 bg-amber-500 text-white text-[13px] font-bold px-4 py-2.5 rounded-xl"
               >
                 <Crown className="w-4 h-4" />
-                Scopri il Pacchetto Completo
+                Sì, voglio sbloccare tutto
               </a>
-              <p className="text-[10px] text-center text-gray-400 mt-1.5">Accesso vitalizio · Nessun abbonamento · Tutti gli aggiornamenti</p>
+              <div className="mt-2"><PremiumReassurance /></div>
             </div>
           </div>
         );
