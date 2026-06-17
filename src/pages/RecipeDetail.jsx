@@ -69,6 +69,7 @@ export default function RecipeDetail() {
   const [savedCount, setSavedCount] = useState(0);
   const [preparedCount, setPreparedCount] = useState(0);
   const [freeRecipeIds, setFreeRecipeIds] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -117,6 +118,18 @@ export default function RecipeDetail() {
     if (recipeId) loadRecipe();
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, [recipeId]);
+
+  useEffect(() => {
+    base44.entities.GostoPuroProduct.filter({ is_active: true }).then(setProducts).catch(() => {});
+  }, []);
+
+  // Coleção a que a receita bloqueada pertence (prefere a coleção específica, não a genérica)
+  const findCollection = (rec, prods) => {
+    const occ = rec?.occasions || [];
+    const matches = (prods || []).filter((p) => (p.occasioni || []).some((o) => occ.includes(o)));
+    if (!matches.length) return null;
+    return matches.find((p) => p.slug !== "504_ricette_collezione") || matches[0];
+  };
 
   const loadRecipe = async () => {
     const currentUser = await base44.auth.me().catch(() => null);
@@ -423,6 +436,7 @@ export default function RecipeDetail() {
 
   if (isContentLocked) {
     const sp = socialProofLine(recipe);
+    const collection = findCollection(recipe, products);
     return (
       <div className="pb-32">
         <div className="relative">
@@ -451,6 +465,19 @@ export default function RecipeDetail() {
           </div>
         </div>
         <div className="px-5 mt-6 text-center space-y-4">
+          {collection && (
+            <Link
+              to={createPageUrl(`OccasionRecipes?occasion=${encodeURIComponent(collection.nome)}&terms=${encodeURIComponent((collection.occasioni || []).join("|"))}`)}
+              className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/40 rounded-2xl px-4 py-3 text-left"
+            >
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0 text-lg">📦</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Fa parte della raccolta</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">{collection.nome}</p>
+              </div>
+              <span className="text-amber-500 text-lg flex-shrink-0">→</span>
+            </Link>
+          )}
           <h2 className="text-xl font-bold text-gray-800">Manca solo un passo 🔓</h2>
           <p className="text-sm text-gray-500">
             Questa ricetta è una delle preferite della community. Sbloccala e porta a casa anche le altre centinaia che ti aspettano.
