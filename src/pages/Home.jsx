@@ -234,11 +234,11 @@ export default function Home() {
         const owned = Array.isArray(user.purchased_products) ? user.purchased_products.length : 0;
         const pct = Math.max(4, Math.round((owned / total) * 100));
         const title = owned === 0
-          ? "Hai assaggiato 40 ricette su oltre 1.700"
+          ? "Hai assaggiato 40 ricette su 5.000+"
           : `Hai sbloccato ${owned} raccolte su ${total}`;
         const subtitle = owned === 0
-          ? "Le raccolte complete ti aspettano"
-          : `Ti mancano ancora ${total - owned} raccolte da scoprire`;
+          ? "Unisciti a 53.000+ membri e sblocca tutto"
+          : `Completa l'accesso · 53.000+ membri ★4.9`;
         return (
           <a
             href="https://gostopuro.it/upgrade/"

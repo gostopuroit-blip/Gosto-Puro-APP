@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import SaveToFolderModal from "@/components/SaveToFolderModal";
 import { trackEvent } from "@/components/useAnalytics";
 import { socialProofLine } from "@/lib/socialProof";
+import { PremiumReassurance } from "@/components/PremiumCTA";
 import RecipeComments from "@/components/recipe/RecipeComments";
 import RecipeSostituzioni from "@/components/recipe/RecipeSostituzioni";
 
@@ -463,6 +464,7 @@ export default function RecipeDetail() {
           >
             <Crown className="w-5 h-5" /> Sblocca Premium
           </a>
+          <PremiumReassurance />
         </div>
       </div>
     );

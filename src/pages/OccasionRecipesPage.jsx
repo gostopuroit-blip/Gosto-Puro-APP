@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Search, Heart, Star, Loader2, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { PremiumReassurance } from "@/components/PremiumCTA";
 
 
 
@@ -529,7 +530,9 @@ export default function OccasionRecipesPage() {
                         >
                           🔓 Sblocca questa raccolta
                         </a>
-                        <p className="text-[11px] text-gray-400 mt-3">Accesso immediato dopo l'acquisto</p>
+                        <div className="mt-3">
+                          <PremiumReassurance />
+                        </div>
                       </div>
                     </div>
                   )}

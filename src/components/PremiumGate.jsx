@@ -1,4 +1,5 @@
 import { Lock } from "lucide-react";
+import { PremiumReassurance } from "@/components/PremiumCTA";
 
 const PREMIUM_LINK = "https://gostopuro.it/upgrade/";
 
@@ -26,6 +27,9 @@ export function PremiumLock({ feature = "questa funzione", link = PREMIUM_LINK }
       >
         🔓 Sblocca l'accesso
       </a>
+      <div className="mt-4">
+        <PremiumReassurance />
+      </div>
     </div>
   );
 }
