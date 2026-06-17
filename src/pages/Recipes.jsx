@@ -83,7 +83,7 @@ export default function Recipes() {
   useEffect(() => {
     const fetchPage = async () => {
       setLoading(true);
-      const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status,created_at";
+      const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status,is_premium,created_at";
       let q = supabase.from("recipes").select(RECIPE_COLS, { count: "exact" }).eq("status", "pubblicata");
 
       if (debouncedSearch) {
@@ -294,8 +294,9 @@ export default function Recipes() {
            </div> :
           <>
              {paginatedRecipes.map((recipe) => {
-               // Bloqueado para todos exceto: Premium full OU comprou a ocasião específica
-               const isLocked = !isPremium && !recipeMatchesPurchase(recipe);
+               // FAIL-CLOSED: bloqueado por padrão. Libera só Premium full, quem comprou
+               // a ocasião, OU receitas da "degustação" gratuita (freeIds / free_recipes).
+               const isLocked = !isPremium && !recipeMatchesPurchase(recipe) && !freeIds.includes(recipe.id);
                if (isLocked) {
                  return (
                    <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("premium_click", { source: "recipe_list", recipe_id: recipe.id, recipe_title: recipe.title })} className="block relative rounded-3xl overflow-hidden">

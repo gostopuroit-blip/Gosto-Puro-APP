@@ -164,13 +164,20 @@ export default function RecipeDetail() {
     return () => { cancelled = true; };
   }, [recipe?.id, recipe?.category]);
 
-  // ACESSO: Premium full OU comprou a ocasião específica
+  // ACESSO (FAIL-CLOSED): por padrão TUDO é bloqueado. Só libera quem:
+  //  - é Premium full / admin / expert (is_full_premium), OU
+  //  - comprou a coleção daquela ocasião (unlocked_occasions), OU
+  //  - a receita faz parte da "degustação" gratuita (free_recipes).
+  // O código antigo usava `!!user && ...`, que abria todo o conteúdo quando o
+  // usuário não estava carregado (visitante/durante o load) — vazamento do paywall.
   const isPremium = user?.is_full_premium === true;
   const hasAllAccess = (user?.unlocked_occasions || []).includes("*");
   const matchesPurchase = recipe
     ? (recipe.occasions || []).some((o) => (user?.unlocked_occasions || []).includes(o))
     : false;
-  const isContentLocked = !!user && !isPremium && !hasAllAccess && !matchesPurchase;
+  const hasAccess = isPremium || hasAllAccess || matchesPurchase;
+  const isFreeTaster = !!recipe && freeRecipeIds instanceof Set && freeRecipeIds.has(recipe.id);
+  const isContentLocked = !!recipe && !hasAccess && !isFreeTaster;
 
   const handlePrint = async () => {
     const { jsPDF } = await import("jspdf");
