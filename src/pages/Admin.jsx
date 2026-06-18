@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AdminGuard from "@/components/AdminGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import AdminOverview from "@/components/admin/AdminOverview";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminRecipesManager from "@/components/admin/AdminRecipesManager";
@@ -24,9 +25,10 @@ import AdminGostoPuroProducts from "@/components/admin/AdminGostoPuroProducts";
 import AdminDietaryTagsBulk from "@/components/admin/AdminDietaryTagsBulk";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart, Eye } from "lucide-react";
 
 const tabs = [
+  { key: "overview",     label: "Visão Geral",    icon: Eye },
   { key: "dashboard",    label: "Dashboard",      icon: LayoutDashboard },
   { key: "engagement",   label: "Analytics",       icon: TrendingUp },
   { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
@@ -51,7 +53,7 @@ const tabs = [
 
 function AdminContent() {
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get("tab") || "dashboard";
+  const initialTab = urlParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const activeLabel = tabs.find(t => t.key === activeTab)?.label || "";
@@ -148,6 +150,7 @@ function AdminContent() {
         {/* Page content */}
         <main className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
           <ErrorBoundary key={activeTab} label={activeLabel}>
+          {activeTab === "overview"     && <AdminOverview />}
           {activeTab === "dashboard"    && <AdminDashboard onNavigate={setActiveTab} />}
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}

@@ -262,7 +262,7 @@ export default function Home() {
       {/* Daily Occasions — card style like image */}
       <div className="px-5 mt-2">
         <SectionHeader title="Occasioni del giorno" />
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 md:flex-wrap md:overflow-x-visible md:mx-0 md:px-0 md:justify-start">
           {dailyOccasions.map((occ) => (
             <Link
               key={occ.label}
@@ -286,7 +286,7 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Prodotti Gosto Puro" />
         </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 md:flex-wrap md:overflow-x-visible">
           {[
             ...gostoPuroProducts.filter(p => p.occasioni && p.occasioni.length > 0 && p.image_url).map(product => (
               <Link
@@ -353,7 +353,7 @@ export default function Home() {
         return (
           <div className="px-5 mt-8">
             <SectionHeader title="Collezione Gosto-Puro" />
-            <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2 md:flex-wrap md:overflow-x-visible md:mx-0 md:px-0 md:justify-start">
               {collectionOccasions.map(occ => (
                 <Link key={occ.label} to={`/OccasionRecipes?occasion=${encodeURIComponent(occ.occasion)}`}
                   onClick={() => trackEvent("occasion_click", { occasion_label: occ.occasion })}
@@ -374,7 +374,7 @@ export default function Home() {
         <div className="px-5">
           <SectionHeader title="Le più preparate" linkPage="Recipes" />
         </div>
-        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2">
+        <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 md:flex-wrap md:overflow-x-visible">
           {(() => {
             // Free sem acesso → mostra as receitas LIBERADAS (degustação), que abrem de verdade.
             // Quem tem acesso → as mais preparate reais.

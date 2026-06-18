@@ -22,6 +22,7 @@ export default function Recipes() {
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [search, setSearch] = useState("");
   const [activeFilters, setActiveFilters] = useState(new Set());
   const [activeTags, setActiveTags] = useState({ occasion: null, lifestyle: null });
@@ -161,6 +162,7 @@ export default function Recipes() {
         setTotalCount(count || 0);
       }
       setLoading(false);
+      setHasLoadedOnce(true);
     };
     fetchPage();
   }, [debouncedSearch, activeFilters, activeTags, soloPerMe, currentPage, user]);
@@ -223,7 +225,10 @@ export default function Recipes() {
   const paginatedRecipes = orderedRecipes;
   const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
-  if (loading) {
+  // Spinner de tela cheia SÓ no primeiro carregamento. Nas buscas seguintes
+  // a página fica montada (campo de busca não perde foco) e o spinner aparece
+  // só na área de resultados — evita o "recarrega tudo" a cada letra.
+  if (loading && !hasLoadedOnce) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
@@ -320,8 +325,13 @@ export default function Recipes() {
        <div className="pb-2" />
 
        {/* Recipe List */}
-       <div className="px-5 space-y-4">
-         {orderedRecipes.length === 0 ?
+       <div className="px-5 space-y-4 relative min-h-[180px]">
+         {loading &&
+          <div className="absolute inset-0 z-10 flex justify-center pt-12 bg-[#FAFAF8]/60 dark:bg-[#0F0F0F]/60 backdrop-blur-[1px]">
+             <Loader2 className="w-6 h-6 text-[#2D6A4F] animate-spin" />
+           </div>
+         }
+         {orderedRecipes.length === 0 && !loading ?
           <div className="text-center py-16">
              <p className="text-5xl mb-4">🍳</p>
              <p className="text-gray-400 dark:text-gray-500 text-sm">Nessuna ricetta trovata</p>

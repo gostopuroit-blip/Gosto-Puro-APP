@@ -32,6 +32,31 @@ export async function trackEvent(eventType, extra = {}) {
   } catch {}
 }
 
+// Track a click on a labeled element (button, card, link).
+// `target` is a short stable label; `extra` can carry source/recipe_id/etc.
+export function trackClick(target, extra = {}) {
+  if (!target) return;
+  trackEvent("click", { occasion_label: String(target).slice(0, 80), ...extra });
+}
+
+// Hook: global click delegation — any element with [data-track="label"] is counted
+// automatically. Lets us instrument new buttons by just adding the attribute.
+export function useClickTracking() {
+  useEffect(() => {
+    const onClick = (ev) => {
+      const el = ev.target?.closest?.("[data-track]");
+      if (!el) return;
+      const label = el.getAttribute("data-track");
+      if (!label) return;
+      const extra = {};
+      if (el.dataset.trackSource) extra.source = el.dataset.trackSource;
+      trackClick(label, extra);
+    };
+    document.addEventListener("click", onClick, { capture: true, passive: true });
+    return () => document.removeEventListener("click", onClick, { capture: true });
+  }, []);
+}
+
 // Hook: tracks session_start once per browser session, and session_end on page close
 export function useSessionTracking() {
   const startRef = useRef(Date.now());

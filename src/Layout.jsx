@@ -4,7 +4,7 @@ import { createPageUrl } from "./utils";
 import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { useSessionTracking, trackEvent } from "@/components/useAnalytics";
+import { useSessionTracking, useClickTracking, trackEvent } from "@/components/useAnalytics";
 
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
@@ -30,6 +30,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
   useSessionTracking();
+  useClickTracking();
 
   // Loga abertura via push (o service worker adiciona ?src=push ao abrir a notifica).
   useEffect(() => {
@@ -201,6 +202,7 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.page}
                 to={createPageUrl(item.page)}
+                data-track={`nav_${item.page}`}
                 className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
                 isActive ?
                 "text-[#2D6A4F] dark:text-[#888888]" :
