@@ -75,7 +75,25 @@ export default function Login() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setMessage({ type: 'error', text: 'Email o password errati.' });
+      // Erro que ENSINA: a confusão nº1 é tentar a senha da Hotmart no 1º acesso.
+      // Distingue "conta não existe ainda" (primeiro acesso) de "senha errada".
+      let exists = true;
+      try {
+        const { data, error: rpcErr } = await supabase.rpc('user_exists_by_email', { p_email: email });
+        if (!rpcErr) exists = data !== false;
+      } catch (_) { /* se a RPC falhar, mostra o erro genérico abaixo */ }
+      if (!exists) {
+        setMessage({
+          type: 'error',
+          text: '👋 Questa email non ha ancora un account qui. È il tuo primo accesso? L\'email è la stessa dell\'acquisto, ma la password devi crearla ora (è diversa da quella di Hotmart).',
+          showRegister: true,
+        });
+      } else {
+        setMessage({
+          type: 'error',
+          text: '🔐 Password errata. Ricorda: la password dell\'app NON è quella di Hotmart — è quella che hai creato qui. Se l\'hai dimenticata, usa "Password dimenticata?".',
+        });
+      }
     } else {
       redirectAfterLogin();
     }
@@ -273,7 +291,7 @@ export default function Login() {
           {mode !== 'reset' && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {mode === 'update-password' ? 'Nuova password' : 'Password'}
+                {mode === 'update-password' ? 'Nuova password' : mode === 'register' ? 'Crea la tua password' : 'Password'}
               </label>
               <div className="relative">
                 <input
@@ -281,7 +299,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="••••••••"
+                  placeholder={mode === 'register' ? 'crea una password nuova' : '••••••••'}
                   required
                   minLength={6}
                 />
@@ -296,7 +314,14 @@ export default function Login() {
                 </button>
               </div>
               {mode === 'register' && (
-                <p className="text-xs text-gray-400 mt-1">Almeno 6 caratteri</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  🔑 Crea una password <strong>nuova</strong> per Gosto Puro — <strong>non</strong> è quella di Hotmart. Almeno 6 caratteri.
+                </p>
+              )}
+              {mode === 'login' && (
+                <p className="text-xs text-gray-400 mt-1">
+                  🔑 È la password che hai creato qui — <strong>non</strong> quella di Hotmart.
+                </p>
               )}
             </div>
           )}
