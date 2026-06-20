@@ -56,7 +56,7 @@ const PANE_THEME_PILLS = [
 // "Tutte" mostra solo i pani veri: pizze, torte, dolci, snack e consigli hanno i loro filtri.
 const PANE_EXTRA_TAGS = ["Pane Pizze", "Pane Pizze Dolci", "Pane Torte", "Pane Dolci", "Pane Snack", "Pane Consigli"];
 
-// Filtri tematici della pagina "100 Ricette Deliziose per la Menopausa".
+// Filtri tematici della pagina "92 Ricette Deliziose per la Menopausa".
 const MENOPAUSA_THEME_PILLS = [
   { label: "🥗 Insalate", tag: "Menopausa Insalate" },
   { label: "🍲 Pranzi e cene", tag: "Menopausa Pranzi Cene" },
@@ -70,7 +70,7 @@ const MENOPAUSA_THEME_PILLS = [
 const THEME_CONFIGS = [
   { occ: "Gelati Artigianali", pills: GELATI_THEME_PILLS, extra: GELATI_EXTRA_TAGS },
   { occ: "Pane Senza Glutine", pills: PANE_THEME_PILLS, extra: PANE_EXTRA_TAGS },
-  { occ: "100 Ricette Deliziose per la Menopausa", pills: MENOPAUSA_THEME_PILLS, extra: [] },
+  { occ: "92 Ricette Deliziose per la Menopausa", pills: MENOPAUSA_THEME_PILLS, extra: [] },
 ].map((c) => ({ ...c, byLabel: Object.fromEntries(c.pills.map((t) => [t.label, t.tag])) }));
 
 function activeTheme(occasion, terms) {
@@ -158,7 +158,7 @@ const OCCASION_SALES_LINKS = {
   "Reset Anti-Gonfiore 7 Giorni": PREMIUM_LINK,
   "365 Ricette Deliziose per Diabetici": PREMIUM_LINK,
   "275 Ricette Fitness Pratiche ed Economiche": PREMIUM_LINK,
-  "100 Ricette Deliziose per la Menopausa": PREMIUM_LINK,
+  "92 Ricette Deliziose per la Menopausa": PREMIUM_LINK,
   "Menopausa": PREMIUM_LINK,
   "Collezione Gosto Puro": PREMIUM_LINK,
 };
