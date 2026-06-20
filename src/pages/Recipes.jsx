@@ -30,7 +30,7 @@ export default function Recipes() {
   const [user, setUser] = useState(null);
   const [freeIds, setFreeIds] = useState([]);
   const [soloPerMe, setSoloPerMe] = useState(false);
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -153,8 +153,9 @@ export default function Recipes() {
       else if (activeFilters.has("salvate")) q = q.order("numero_salvate", { ascending: false, nullsFirst: false });
       else q = q.order("created_at", { ascending: false });
 
-      const from = (currentPage - 1) * ITEMS_PER_PAGE;
-      q = q.range(from, from + ITEMS_PER_PAGE - 1);
+      // Cumulativo: carrega da página 1 até a atual, para o botão "Carica altre"
+      // crescer a lista de forma contínua (rolagem natural, sem prev/next).
+      q = q.range(0, currentPage * ITEMS_PER_PAGE - 1);
 
       const { data, count, error } = await q;
       if (!error) {
@@ -326,7 +327,7 @@ export default function Recipes() {
 
        {/* Recipe List */}
        <div className="px-5 space-y-4 relative min-h-[180px]">
-         {loading &&
+         {loading && currentPage === 1 &&
           <div className="absolute inset-0 z-10 flex justify-center pt-12 bg-[#FAFAF8]/60 dark:bg-[#0F0F0F]/60 backdrop-blur-[1px]">
              <Loader2 className="w-6 h-6 text-[#2D6A4F] animate-spin" />
            </div>
@@ -372,25 +373,16 @@ export default function Recipes() {
           }
        </div>
 
-       {/* Pagination */}
-       {totalPages > 1 &&
-        <div className="px-5 mt-8 pb-4 flex items-center justify-between">
+       {/* Carica altre — lista contínua em vez de prev/next */}
+       {recipes.length < totalCount &&
+        <div className="px-5 mt-6 pb-4">
            <button
-            onClick={() => goToPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-[#3D5246] text-sm font-semibold text-gray-700 dark:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#2D3F35] transition-colors">
-
-             ← Indietro
-           </button>
-           <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-             Pagina {currentPage} di {totalPages}
-           </span>
-           <button
-            onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-[#3D5246] text-sm font-semibold text-gray-700 dark:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#2D3F35] transition-colors">
-
-             Avanti →
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={loading}
+            className="w-full py-3.5 rounded-2xl bg-[#2D6A4F] text-white text-sm font-bold active:scale-[0.98] transition-transform shadow-lg shadow-[#2D6A4F]/20 disabled:opacity-60 flex items-center justify-center gap-2">
+             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+             Carica altre ricette
+             <span className="font-normal opacity-80">· {totalCount - recipes.length} rimanenti</span>
            </button>
          </div>
         }

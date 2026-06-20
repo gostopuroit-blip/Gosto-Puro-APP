@@ -79,7 +79,7 @@ function activeTheme(occasion, terms) {
   ) || null;
 }
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 12;
 // Max recipes to fetch in a single query — covers all known occasions
 const FETCH_LIMIT = 3000;
 
@@ -362,12 +362,20 @@ export default function OccasionRecipesPage() {
   const totalPages = Math.max(1, Math.ceil(filteredRecipes.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   // Slice for current page — O(1), instant
-  const pagedRecipes = filteredRecipes.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  // Cumulativo: lista contínua que cresce com "Carica altre" (rolagem natural).
+  const pagedRecipes = filteredRecipes.slice(0, safePage * PAGE_SIZE);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
     sessionStorage.setItem(pageKey, newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // "Carica altre": cresce a lista sem rolar pro topo (mantém a posição).
+  const loadMore = () => {
+    const next = safePage + 1;
+    setPage(next);
+    sessionStorage.setItem(pageKey, next);
   };
 
   const handleQueryChange = (val) => { setQuery(val); setPage(1); };
@@ -508,7 +516,7 @@ export default function OccasionRecipesPage() {
                 <p className="text-xs text-gray-400 mb-3">
                   {occasionLocked
                     ? `Anteprima — ${filteredRecipes.length} ricette in questa raccolta`
-                    : `Mostrando ${Math.min((safePage - 1) * PAGE_SIZE + 1, filteredRecipes.length)}–${Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di ${filteredRecipes.length} ricette`}
+                    : `Mostrando ${Math.min(safePage * PAGE_SIZE, filteredRecipes.length)} di ${filteredRecipes.length} ricette`}
                 </p>
 
                 <div className="relative">
@@ -552,24 +560,14 @@ export default function OccasionRecipesPage() {
                   )}
                 </div>
 
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 mt-6">
+                {!occasionLocked && pagedRecipes.length < filteredRecipes.length && (
+                  <div className="mt-6">
                     <button
-                      onClick={() => !occasionLocked && handlePageChange(safePage - 1)}
-                      disabled={occasionLocked || safePage === 1}
-                      className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                      onClick={loadMore}
+                      className="w-full py-3.5 rounded-2xl bg-[#2D6A4F] text-white text-sm font-bold active:scale-[0.98] transition-transform shadow-lg shadow-[#2D6A4F]/20 flex items-center justify-center gap-2"
                     >
-                      ← Precedente
-                    </button>
-                    <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                      {safePage} / {totalPages}
-                    </span>
-                    <button
-                      onClick={() => !occasionLocked && handlePageChange(safePage + 1)}
-                      disabled={occasionLocked || safePage === totalPages}
-                      className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-sm font-semibold text-gray-700 dark:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      Successiva →
+                      Carica altre ricette
+                      <span className="font-normal opacity-80">· {filteredRecipes.length - pagedRecipes.length} rimanenti</span>
                     </button>
                   </div>
                 )}
