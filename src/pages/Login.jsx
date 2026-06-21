@@ -132,31 +132,40 @@ export default function Login() {
   };
 
   const handleReset = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setLoading(true);
     setMessage(null);
 
-    // Antes de pedir reset, verifica se a conta existe — evita o caso comum
-    // de quem nunca criou conta (depois de comprar na Hotmart) tentar reset
-    // e ficar perdido sem entender por que não chega email.
+    // Detecta COME accede l'account, per guidare al percorso giusto invece di
+    // inviare un reset inutile: utenti Google non hanno una password da recuperare;
+    // chi non ha account deve registrarsi (dopo l'acquisto su Hotmart).
+    let method = 'password';
     try {
-      const { data: exists, error: rpcErr } = await supabase.rpc(
-        'user_exists_by_email',
-        { p_email: email }
-      );
-      if (!rpcErr && exists === false) {
-        setMessage({
-          type: 'error',
-          text: '⚠️ Questa email non ha ancora un account su Gosto Puro. Forse hai comprato su Hotmart ma non hai ancora creato il tuo account qui? Clicca su "Registrati" qui sotto per crearne uno con questa email — i tuoi acquisti si sbloccheranno automaticamente! 🎉',
-          showRegister: true,
-        });
-        setLoading(false);
-        return;
-      }
-    } catch (_) {
-      // Se a RPC falhar, segue normal (não bloqueia o fluxo)
+      const { data, error: rpcErr } = await supabase.rpc('gp_login_method', { p_email: email });
+      if (!rpcErr && data) method = data;
+    } catch (_) { /* se a RPC falhar, tenta mandar o reset normalmente */ }
+
+    if (method === 'none') {
+      setMessage({
+        type: 'error',
+        text: '⚠️ Questa email non ha ancora un account su Gosto Puro. Hai comprato su Hotmart? Crea il tuo account con questa stessa email — i tuoi acquisti si sbloccheranno automaticamente! 🎉',
+        showRegister: true,
+      });
+      setLoading(false);
+      return;
     }
 
+    if (method === 'google') {
+      setMessage({
+        type: 'error',
+        text: '🔵 Questo account accede con Google e non ha una password da recuperare. Usa "Continua con Google" qui sotto per entrare — è immediato e sicuro.',
+        showGoogle: true,
+      });
+      setLoading(false);
+      return;
+    }
+
+    // 'password' o 'both' → invia davvero l'email di recupero
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/Login`,
     });
@@ -164,7 +173,11 @@ export default function Login() {
     if (error) {
       setMessage({ type: 'error', text: error.message });
     } else {
-      setMessage({ type: 'success', text: '✅ Email di recupero inviato! Controlla la tua casella di posta (e anche lo SPAM). Il link è valido per 1 ora.' });
+      setMessage({
+        type: 'success',
+        text: '✅ Email di recupero inviata! Controlla la tua casella di posta — e anche la cartella SPAM. Il link è valido per 1 ora.',
+        showResend: true,
+      });
     }
     setLoading(false);
   };
@@ -247,6 +260,32 @@ export default function Login() {
                 className="mt-2 inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-4 py-2 rounded-lg"
               >
                 Sì, voglio registrarmi →
+              </button>
+            )}
+            {message.showGoogle && (
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={loading}
+                className="mt-2 inline-flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs px-4 py-2 rounded-lg disabled:opacity-50"
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continua con Google
+              </button>
+            )}
+            {message.showResend && (
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={loading}
+                className="mt-2 block text-green-700 hover:underline font-semibold text-xs disabled:opacity-50"
+              >
+                {loading ? 'Invio...' : "Non l'hai ricevuta? Reinvia email"}
               </button>
             )}
           </div>
