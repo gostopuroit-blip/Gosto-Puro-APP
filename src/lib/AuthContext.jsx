@@ -43,6 +43,16 @@ export const AuthProvider = ({ children }) => {
     const watchdog = setTimeout(() => goLogin('Authentication timeout'), 8000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Recupero password: o link de reset pode cair em qualquer rota (ex.: raiz,
+      // quando o Supabase usa o Site URL). Marca o modo recovery e leva ao /Login,
+      // que mostra a tela de "nuova password" — evita o usuário ficar preso na Home.
+      if (_event === 'PASSWORD_RECOVERY') {
+        try { sessionStorage.setItem('gp_pw_recovery', '1'); } catch (_) { /* ignore */ }
+        if (!window.location.pathname.toLowerCase().startsWith('/login')) {
+          window.location.replace('/Login');
+          return;
+        }
+      }
       if (session?.user) {
         loadProfile(session.user);
       } else {

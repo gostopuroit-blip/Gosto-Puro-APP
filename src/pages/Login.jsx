@@ -14,6 +14,13 @@ export default function Login() {
 
   // Detecta retorno do link de recuperação de senha (hash #type=recovery vindo do Supabase)
   useEffect(() => {
+    // Recovery che è arrivato su un'altra rotta: AuthContext ha segnato il flag
+    // e reindirizzato qui. Mostra subito il form "nuova password".
+    if (sessionStorage.getItem('gp_pw_recovery') === '1') {
+      sessionStorage.removeItem('gp_pw_recovery');
+      setMode('update-password');
+    }
+
     const hash = window.location.hash;
 
     // Trata erros vindos do Supabase no hash (link expirado, inválido, etc.)
