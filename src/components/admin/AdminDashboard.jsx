@@ -16,52 +16,32 @@ export default function AdminDashboard({ onNavigate }) {
   const load = async () => {
     const { supabase } = await import("@/lib/supabase");
 
-    // 3 queries pequenas em vez de baixar todas as 3000 receitas
     const RECIPE_COLS = "id,title,image_url,numero_salvate,numero_preparate";
-    const [countRes, savedRes, preparedRes] = await Promise.all([
-      supabase.from("recipes").select("id", { count: "exact", head: true }),
+    // Números de pessoas vêm da MESMA fonte da aba "Visão Geral" (função no banco
+    // gp_dashboard_metrics), que conta ACESSO REAL = plano premium OU comprou algum
+    // produto. Conta só por `plan` deixava de fora ~169 clientes que pagaram mas
+    // figuram como "free" (o webhook adiciona o produto sem mudar o campo plan).
+    const [savedRes, preparedRes, metricsRes, webhooks] = await Promise.all([
       supabase.from("recipes").select(RECIPE_COLS).order("numero_salvate", { ascending: false, nullsFirst: false }).limit(5),
       supabase.from("recipes").select(RECIPE_COLS).order("numero_preparate", { ascending: false, nullsFirst: false }).limit(5),
-    ]);
-    const totalRecipesCount = countRes.count || 0;
-    const topSaved = savedRes.data || [];
-    const topPrepared = preparedRes.data || [];
-
-    let usersResult = [];
-    try {
-      const res = await base44.functions.invoke('adminGetUsersV2');
-      const raw = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-      usersResult = Array.isArray(raw) ? raw : [];
-    } catch {}
-    // Fallback: busca direta via entidade User se a função backend falhou
-    if (usersResult.length === 0) {
-      let allUsers = [];
-      let skip = 0;
-      while (true) {
-        const batch = await base44.entities.User.list("-created_date", 200, skip).catch(() => []);
-        allUsers = allUsers.concat(batch);
-        if (batch.length < 200) break;
-        skip += 200;
-        if (skip > 5000) break;
-      }
-      usersResult = allUsers;
-    }
-
-    const [webhooks] = await Promise.all([
+      supabase.rpc("gp_dashboard_metrics"),
       base44.entities.WebhookLog.filter({ status: "error" }).catch(() => []),
     ]);
 
-    const users = usersResult;
+    const m = metricsRes?.data || {};
+    const p = m.people || {};
     const now = Date.now();
-    const h24 = webhooks.filter((w) => new Date(w.timestamp || w.created_date).getTime() > now - 86400000);
+    const h24 = (webhooks || []).filter((w) => new Date(w.timestamp || w.created_date).getTime() > now - 86400000);
 
     setStats({
-      totalUsers: users.length,
-      premiumUsers: users.filter((u) => u.plan === "premium").length,
-      freeUsers: users.filter((u) => !u.plan || u.plan === "free").length,
-      totalRecipes: totalRecipesCount,
-      topSaved,
-      topPrepared,
+      totalUsers: p.total ?? 0,
+      withAccess: p.with_access ?? 0,
+      withPurchase: p.with_purchase ?? 0,
+      freeOnly: p.free_only ?? 0,
+      premiumPlan: p.premium ?? 0,
+      totalRecipes: m.catalog?.total_recipes ?? 0,
+      topSaved: savedRes.data || [],
+      topPrepared: preparedRes.data || [],
       webhookErrors24h: h24.length,
     });
     setLoading(false);
@@ -82,10 +62,11 @@ export default function AdminDashboard({ onNavigate }) {
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
 
   const cards = [
-    { label: "Usuários totais", value: stats.totalUsers ?? "N/D", icon: Users, color: "bg-blue-50 text-blue-600" },
-    { label: "Premium ativos", value: stats.premiumUsers ?? "N/D", icon: "✨", color: "bg-amber-50 text-amber-600", emoji: true },
-    { label: "Free ativos", value: stats.freeUsers ?? "N/D", icon: "👤", color: "bg-gray-50 text-gray-600", emoji: true },
-    { label: "Receitas totais", value: stats.totalRecipes, icon: BookOpen, color: "bg-green-50 text-green-600" },
+    { label: "Usuários (contas)", value: stats.totalUsers, icon: Users, color: "bg-blue-50 text-blue-600" },
+    { label: "Com acesso pago", value: stats.withAccess, icon: "💎", color: "bg-amber-50 text-amber-600", emoji: true },
+    { label: "Compraram (Hotmart)", value: stats.withPurchase, icon: "🛒", color: "bg-green-50 text-green-600", emoji: true },
+    { label: "Só free", value: stats.freeOnly, icon: "👤", color: "bg-gray-50 text-gray-600", emoji: true },
+    { label: "Receitas no catálogo", value: stats.totalRecipes, icon: BookOpen, color: "bg-green-50 text-green-600" },
     { label: "Erros webhook 24h", value: stats.webhookErrors24h, icon: AlertCircle, color: "bg-red-50 text-red-500" },
   ];
 
@@ -103,6 +84,10 @@ export default function AdminDashboard({ onNavigate }) {
           </div>
         ))}
       </div>
+
+      <p className="text-[11px] text-gray-400 leading-relaxed px-1">
+        💡 <b>"Com acesso pago"</b> = plano premium <b>ou</b> que comprou algum produto no Hotmart. Muitos compradores ficam com o campo "free" no sistema (o webhook libera o produto sem trocar o plano), por isso o número real de quem pagou é maior que só "premium". Estes são os números reais, iguais aos da aba <b>Visão Geral</b>.
+      </p>
 
       {/* Quick actions */}
       <div className="space-y-2">

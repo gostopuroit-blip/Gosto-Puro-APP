@@ -26,9 +26,10 @@ export default function PremiumConversionsChart() {
     }).catch(() => setLoading(false));
   }, []);
 
-  // Filter premium users whose updated_date falls within the selected period
+  // Conversões reais = plano premium OU que comprou algum produto (muitos
+  // compradores ficam com plan="free"; contar só por plan subconta a conversão).
   const premiumUsers = useMemo(() => {
-    return users.filter((u) => u.plan === "premium");
+    return users.filter((u) => u.plan === "premium" || (Array.isArray(u.purchased_products) && u.purchased_products.length > 0));
   }, [users]);
 
   const chartData = useMemo(() => {

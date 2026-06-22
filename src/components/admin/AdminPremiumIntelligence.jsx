@@ -48,11 +48,11 @@ export default function AdminPremiumIntelligence() {
     const anonClicks = clicks.filter(c => c.isAnon).reduce((s, c) => s + c.count, 0);
 
     // Clicaram mas NÃO compraram = clicaram e não são premium
-    const premiumEmails = new Set(users.filter(u => u.plan === "premium").map(u => u.email));
+    const premiumEmails = new Set(users.filter(u => u.plan === "premium" || (Array.isArray(u.purchased_products) && u.purchased_products.length > 0)).map(u => u.email));
     const clicouNaoComprou = clicks.filter(c => !c.isAnon && !premiumEmails.has(c.email));
 
     // Usuários premium — separar automático (hotmart_product_id preenchido) vs manual
-    const premiumUsers = users.filter(u => u.plan === "premium");
+    const premiumUsers = users.filter(u => u.plan === "premium" || (Array.isArray(u.purchased_products) && u.purchased_products.length > 0));
     const premiumAuto = premiumUsers.filter(u => u.hotmart_product_id); // veio via webhook
     const premiumManual = premiumUsers.filter(u => !u.hotmart_product_id); // promovido manualmente
 

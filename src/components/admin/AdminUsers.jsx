@@ -105,6 +105,7 @@ export default function AdminUsers() {
           const isAdmin = u.role === "admin";
           const isExpert = u.role === "expert";
           const isPremium = u.plan === "premium";
+          const hasPurchase = Array.isArray(u.purchased_products) && u.purchased_products.length > 0;
           const isBlocked = u.status === "blocked";
           return (
             <div key={u.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
@@ -120,6 +121,8 @@ export default function AdminUsers() {
                     {isExpert && <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✅ Expert</span>}
                     {isPremium
                       ? <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">✨ Premium</span>
+                      : hasPurchase
+                      ? <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">💎 Pagante</span>
                       : <span className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Free</span>
                     }
                     {isBlocked && <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">🚫 Bloccato</span>}
