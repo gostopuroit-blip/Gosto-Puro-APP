@@ -1,7 +1,7 @@
 import { Lock } from "lucide-react";
 import { PremiumReassurance } from "@/components/PremiumCTA";
 
-const PREMIUM_LINK = "https://gostopuro.it/upgrade/";
+const PREMIUM_LINK = "https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10";
 
 // Tem acesso = premium completo OU comprou qualquer raccolta (has_access vem do auth.me).
 function userHasAccess(user) {

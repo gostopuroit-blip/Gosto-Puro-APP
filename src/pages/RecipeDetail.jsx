@@ -483,7 +483,7 @@ export default function RecipeDetail() {
             Questa ricetta è una delle preferite della community. Sbloccala e porta a casa anche le altre centinaia che ti aspettano.
           </p>
           <a
-            href="https://gostopuro.it/upgrade/"
+            href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent("premium_click", { source: "recipe_detail", recipe_id: recipeId, recipe_title: recipe.title })}

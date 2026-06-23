@@ -25,15 +25,20 @@ function dur(s) {
 
 export default function AdminOverview() {
   const [m, setM] = useState(null);
+  const [rec, setRec] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc("gp_dashboard_metrics");
-      if (error) throw error;
-      setM(data);
+      const [metricsRes, recRes] = await Promise.all([
+        supabase.rpc("gp_dashboard_metrics"),
+        supabase.rpc("gp_recovery_metrics"),
+      ]);
+      if (metricsRes.error) throw metricsRes.error;
+      setM(metricsRes.data);
+      setRec(recRes.error || recRes.data?.error ? null : recRes.data);
     } catch {
       setM(null);
     }
@@ -96,6 +101,9 @@ export default function AdminOverview() {
         <p className="text-[10px] text-gray-400 mt-2">💡 Para planilha/Looker, use o mesmo link com <code className="bg-gray-100 px-1 rounded">&format=json</code> no final.</p>
       </div>
 
+      {/* Recuperação de senha */}
+      <RecoveryBlock rec={rec} />
+
       {/* Pessoas */}
       <Group title="👥 Pessoas">
         <Card emoji="🧑‍🤝‍🧑" value={nf(p.total)} label="Pessoas no total" hint="todas as contas" />
@@ -132,6 +140,85 @@ export default function AdminOverview() {
       <RankBlock title="❤️ Receitas mais salvas (sempre)" rows={(m.top_recipes_saved || []).map(s => [s.title, nf(s.n)])} empty="Sem dados ainda" />
       <RankBlock title="🔗 De onde vêm os visitantes (30d)" rows={(m.traffic_sources || []).map(s => [s.source, `${nf(s.visits)} visitas`])} empty="Nenhum link rastreado ainda" />
       <RankBlock title="👆 Botões mais clicados (7d)" rows={(m.clicks_7d || []).map(s => [s.target, nf(s.n)])} empty="Coleta de cliques recém ativada — aparecerá em breve" />
+    </div>
+  );
+}
+
+function fmtDateTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
+  }).format(d);
+}
+
+function timeAgo(iso) {
+  if (!iso) return "";
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (isNaN(diff)) return "";
+  if (diff < 3600) return `há ${Math.max(1, Math.round(diff / 60))} min`;
+  if (diff < 86400) return `há ${Math.round(diff / 3600)} h`;
+  return `há ${Math.round(diff / 86400)} dias`;
+}
+
+// Painel oficial de e-mails (Resend) — fonte da verdade pra status de entrega.
+const RESEND_LINK = "https://resend.com/emails";
+
+function RecoveryBlock({ rec }) {
+  const s = (rec && rec.summary) || {};
+  const recent = (rec && rec.recent) || [];
+
+  return (
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-bold text-gray-800">🔑 Recuperação de senha</p>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Funcionando</span>
+      </div>
+
+      {/* Explicação simples + onde está a verdade */}
+      <p className="text-[11px] text-gray-500 leading-relaxed bg-gray-50 rounded-xl p-3">
+        Quem esquece a senha pede um e-mail para criar outra. Esses e-mails saem pela <b>Resend</b>.
+        Para ver o <b>status real de cada e-mail</b> (Entregue, Falhou, Pendente), use o painel da Resend — é a fonte oficial.
+      </p>
+
+      {/* Botão para o painel oficial */}
+      <a
+        href={RESEND_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full flex items-center justify-center gap-1.5 bg-[#2D6A4F] text-white rounded-xl py-2.5 text-sm font-semibold active:scale-[0.98] transition-transform"
+      >
+        <ExternalLink className="w-4 h-4" /> Abrir painel de e-mails (Resend)
+      </a>
+
+      {/* Referência rápida do app (pode subcontar) */}
+      <div className="border-t border-gray-50 pt-3">
+        <p className="text-[11px] font-bold text-gray-500 mb-1.5">Referência rápida (dentro do app)</p>
+        <p className="text-[11px] text-gray-500 leading-relaxed mb-2">
+          Últimas pessoas que pediram e <b>entraram depois</b> ({recent.filter((r) => r.completed).length} de {recent.length}).
+          Último registrado no app: <b>{fmtDateTime(s.last_sent_at)}</b>{s.last_sent_at ? ` (${timeAgo(s.last_sent_at)})` : ""}.
+        </p>
+        {recent.length === 0 ? (
+          <p className="text-[11px] text-gray-400">Nada registrado no banco do app.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {recent.map((r, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${r.completed ? "bg-green-500" : "bg-amber-400"}`} />
+                <p className="flex-1 min-w-0 text-[11px] text-gray-700 truncate">{r.email}</p>
+                {r.method === "google" && (
+                  <span className="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full flex-shrink-0">Google</span>
+                )}
+                <span className="text-[10px] text-gray-400 flex-shrink-0">{fmtDateTime(r.recovery_sent_at)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="text-[10px] text-amber-600/80 mt-2 leading-relaxed">
+          ⚠️ Esta lista do app pode mostrar <b>menos</b> do que o real (o sistema de login não guarda todo histórico). Para o número e o status corretos, confie no <b>painel da Resend</b> acima.
+        </p>
+      </div>
     </div>
   );
 }

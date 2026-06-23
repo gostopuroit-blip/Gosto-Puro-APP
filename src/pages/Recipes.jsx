@@ -16,6 +16,15 @@ const filters = [
 { key: "veloci", label: "Veloci" },
 { key: "valutate", label: "Meglio valutate" }];
 
+// Filtros por tipo di pasto (categoria da receita) — voltaram à barra de busca.
+const CATEGORY_FILTERS = [
+{ key: "Colazione", label: "Colazione", emoji: "🍳" },
+{ key: "Pranzo", label: "Pranzo", emoji: "🍝" },
+{ key: "Cena", label: "Cena", emoji: "🍽️" },
+{ key: "Snack", label: "Snack", emoji: "🍿" },
+{ key: "Dolce", label: "Dolce", emoji: "🍰" }];
+const MEAL_CATEGORIES = CATEGORY_FILTERS.map((c) => c.key);
+
 
 export default function Recipes() {
   const location = useLocation();
@@ -128,7 +137,7 @@ export default function Recipes() {
 
       const applyOccasionLike = (tag) => {
         if (!tag) return;
-        if (FREE_CATEGORIES_LIST.includes(tag)) {
+        if (MEAL_CATEGORIES.includes(tag)) {
           q = q.eq("category", tag);
         } else if (GP_PROD_OCC.has(tag)) {
           const terms = OCC_ALIASES[tag] || [tag];
@@ -212,6 +221,12 @@ export default function Recipes() {
     goToPage(1);
   };
 
+  // Liga/desliga o filtro por tipo di pasto (usa activeTags.occasion como antes).
+  const toggleCategory = (cat) => {
+    setActiveTags((prev) => ({ ...prev, occasion: prev.occasion === cat ? null : cat }));
+    goToPage(1);
+  };
+
 
 
   // Reorder free → locked apenas na página atual (não-premium sem compras)
@@ -272,10 +287,10 @@ export default function Recipes() {
          </div>
        </div>
 
-       {/* Active Tags */}
-       {(activeTags.occasion || activeTags.lifestyle) &&
+       {/* Active Tags (só ocasiões de produto — categorias aparecem como chip selecionado) */}
+       {((activeTags.occasion && !MEAL_CATEGORIES.includes(activeTags.occasion)) || activeTags.lifestyle) &&
         <div className="px-5 mb-3 flex gap-2">
-           {activeTags.occasion &&
+           {activeTags.occasion && !MEAL_CATEGORIES.includes(activeTags.occasion) &&
           <button
             onClick={() => clearTag("occasion")}
             className="flex items-center gap-1.5 bg-[#2D6A4F]/10 text-[#2D6A4F] dark:bg-[#2D6A4F]/20 dark:text-[#40916C] px-3 py-1.5 rounded-full text-xs font-semibold">
@@ -296,7 +311,34 @@ export default function Recipes() {
          </div>
         }
 
-       {/* Filters */}
+       {/* Tipo di pasto + Consigliati per te */}
+       <div className="flex gap-2 overflow-x-auto hide-scrollbar px-5 pb-2.5">
+         {(user?.dietary_tags_profile || []).length > 0 && (
+           <button
+             onClick={() => { setSoloPerMe((v) => !v); goToPage(1); }}
+             className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${
+               soloPerMe
+                 ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
+                 : "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30"}`
+             }>
+             🎯 Per te
+           </button>
+         )}
+         {CATEGORY_FILTERS.map((c) =>
+          <button
+            key={c.key}
+            onClick={() => toggleCategory(c.key)}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+            activeTags.occasion === c.key ?
+            "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20" :
+            "bg-white dark:bg-[#2D3F35] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246] hover:border-gray-200 dark:hover:border-[#4D6456]"}`
+            }>
+             <span>{c.emoji}</span> {c.label}
+           </button>
+          )}
+       </div>
+
+       {/* Ordina / qualità */}
        <div className="flex gap-2 overflow-x-auto hide-scrollbar px-5 pb-2">
          {filters.map((f) =>
           <button
@@ -309,18 +351,6 @@ export default function Recipes() {
             }>
              {f.label}
            </button>
-          )}
-          {(user?.dietary_tags_profile || []).length > 0 && (
-            <button
-              onClick={() => { setSoloPerMe(v => !v); goToPage(1); }}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-                soloPerMe
-                  ? "bg-[#2D6A4F] text-white shadow-lg shadow-[#2D6A4F]/20"
-                  : "bg-white dark:bg-[#2D3F35] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-[#3D5246]"
-              }`}
-            >
-              🎯 Solo per me
-            </button>
           )}
        </div>
        <div className="pb-2" />
@@ -345,7 +375,7 @@ export default function Recipes() {
                if (isLocked) {
                  const sp = getSocialProof(recipe);
                  return (
-                   <a key={recipe.id} href="https://gostopuro.it/upgrade/" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("premium_click", { source: "recipe_list", recipe_id: recipe.id, recipe_title: recipe.title })} className="block relative rounded-3xl overflow-hidden">
+                   <a key={recipe.id} href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10" target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("premium_click", { source: "recipe_list", recipe_id: recipe.id, recipe_title: recipe.title })} className="block relative rounded-3xl overflow-hidden">
                       <div className="pointer-events-none select-none blur-[2px] opacity-40">
                         <RecipeCard recipe={recipe} />
                       </div>

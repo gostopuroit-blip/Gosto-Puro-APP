@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Search, Heart, Star, Loader2, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { PremiumReassurance } from "@/components/PremiumCTA";
+import { premiumPitch } from "@/components/PremiumBanner";
+import { trackEvent } from "@/components/useAnalytics";
 
 
 
@@ -136,34 +137,114 @@ const recipesCacheTime = {};
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Link premium genérico (fallback enquanto não houver link de vendas dedicado).
-const PREMIUM_LINK = "https://gostopuro.it/upgrade/";
+const PREMIUM_LINK = "https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10";
 // Link de vendas DEDICADO por ocasião bloqueada. Quando tiver o link real de cada
 // produto, troque o PREMIUM_LINK pela URL específica daquela ocasião. Toda ocasião
 // que estiver neste mapa mostra a tela de cadeado; sem link específico cai no premium.
-const OCCASION_SALES_LINKS = {
-  "Gelati Artigianali": PREMIUM_LINK,
-  "Insalate in Barattolo": PREMIUM_LINK,
-  "Ricette con Whey": PREMIUM_LINK,
-  "Pane Senza Glutine": PREMIUM_LINK,
-  "99 Dolci Senza Colpa": PREMIUM_LINK,
-  "Senza zucchero": PREMIUM_LINK,
-  "Low carb": PREMIUM_LINK,
-  "Detox": PREMIUM_LINK,
-  "Ricette Sane": PREMIUM_LINK,
-  "Cucina Senza Tempo": PREMIUM_LINK,
-  "Facili da Congelare": PREMIUM_LINK,
-  "Friggitrice ad Aria": PREMIUM_LINK,
-  "Piatti Settimanali in Air Fryer": PREMIUM_LINK,
-  "Menu Brucia Grassi 21 Giorni": PREMIUM_LINK,
-  "Reset Anti-Gonfiore 7 Giorni": PREMIUM_LINK,
-  "365 Ricette Deliziose per Diabetici": PREMIUM_LINK,
-  "275 Ricette Fitness Pratiche ed Economiche": PREMIUM_LINK,
-  "92 Ricette Deliziose per la Menopausa": PREMIUM_LINK,
-  "Menopausa": PREMIUM_LINK,
-  "Collezione Gosto Puro": PREMIUM_LINK,
+// Detalhe de venda por coleção: título + descrição + bullets COMPLETOS + preço + link.
+// A página recebe `occasion` = NOME do produto (ex: "60 Ricette Gosto Puro con
+// Whey"), mas algumas navegações usam a TAG (ex: "Ricette con Whey"). Por isso
+// cada produto é chaveado pelos DOIS — nome e tag — apontando pro mesmo objeto.
+const _D = {
+  fitness: {
+    title: "275 Ricette Fitness Veloci ed Economiche",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera mangiare meglio, dimagrire in modo sano, aumentare la massa muscolare e organizzare la propria alimentazione senza complicazioni.",
+    bullets: ["275 ricette fitness esclusive", "Colazione, pranzo, cena e spuntini", "Ricette pratiche e veloci da preparare", "Ingredienti semplici e facili da trovare", "Aggiornamenti mensili con nuove ricette", "Opzioni varie per non annoiarti mai della tua alimentazione", "Ricette per dimagrimento, definizione e aumento della massa muscolare", "Meal prep e organizzazione settimanale", "Accesso immediato e a vita"],
+    from: "39,90", to: "9,90", link: "https://plvzcnpwbuevakrxnmks.supabase.co/functions/v1/r?c=e34fc5f2-6936-4958-b11b-dd5924bcb84d",
+  },
+  diabetici: {
+    title: "365 Ricette per il Diabete",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera controllare la glicemia senza rinunciare al gusto, alla varietà e al piacere di mangiare bene ogni giorno.",
+    bullets: ["365 ricette esclusive per tutti i giorni", "Colazione, pranzo, cena e spuntini", "Dolci adattati per ridurre gli eccessi di zucchero", "Ricette a basso indice glicemico", "Ingredienti semplici e facili da trovare", "Informazioni nutrizionali per un maggiore controllo alimentare", "Ricette pratiche per tutta la famiglia", "Accesso immediato e a vita"],
+    from: "49,90", to: "9,90", link: "https://pay.hotmart.com/Q104096216Y?off=4t2ify8e&checkoutMode=10",
+  },
+  cucina: {
+    title: "109 Ricette che trasformano la tua routine in cucina",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera mangiare bene ogni giorno, risparmiare tempo in cucina e preparare piatti sani, veloci e deliziosi senza stress.",
+    bullets: ["109 ricette esclusive testate", "Colazioni, pranzi, cene e piatti veloci", "Ricette sane, pratiche e facili da preparare", "Ingredienti semplici da supermercato", "Opzioni varie per non mangiare sempre le stesse cose", "Valori nutrizionali completi per ogni ricetta", "Ricette perfette per tutta la famiglia", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "49,90", to: "6,99", link: "https://pay.hotmart.com/L104096289F?off=icuf2zkn&checkoutMode=10",
+  },
+  dolci: {
+    title: "99 Dolci Senza Colpa",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera gustare dolci deliziosi senza rinunciare a uno stile di vita equilibrato e senza sensi di colpa.",
+    bullets: ["99 ricette esclusive di dolci fit e leggeri", "Torte, biscotti, dessert al cucchiaio e snack dolci", "Ricette con meno zuccheri e ingredienti selezionati", "Alternative sane ai dolci tradizionali", "Preparazioni semplici e facili da seguire", "Ingredienti facili da trovare al supermercato", "Valori nutrizionali inclusi", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "49,90", to: "9,90", link: "https://pay.hotmart.com/W105338018I?off=ywaka31p&checkoutMode=10",
+  },
+  airfryer: {
+    title: "Meal Prep Settimanale in Air Fryer",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera organizzare i pasti della settimana, risparmiare tempo in cucina e mangiare meglio ogni giorno grazie alla praticità dell'Air Fryer.",
+    bullets: ["Ricette complete per il meal prep settimanale", "Colazioni, pranzi, cene e spuntini", "Ricette pratiche e veloci da preparare in Air Fryer", "Ingredienti semplici e facili da trovare", "Pasti equilibrati per tutta la settimana", "Tecniche per ottimizzare tempi e preparazioni", "Idee per conservare e organizzare i pasti", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "49,90", to: "9,90", link: "https://pay.hotmart.com/B105395671K?off=yc4gql96",
+  },
+  brucia: {
+    title: "Menu Brucia-Grassi – 84 Ricette per 21 Giorni",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera dimagrire, sgonfiarsi e ritrovare leggerezza senza diete restrittive, grazie a un percorso alimentare pratico e organizzato.",
+    bullets: ["84 ricette esclusive organizzate in un programma di 21 giorni", "21 colazioni, 21 pranzi, 21 cene e 21 spuntini fit", "Ricette create per favorire sazietà, leggerezza ed energia", "Menù completo già organizzato giorno per giorno", "Ingredienti semplici e facili da trovare", "Dolci fit e spuntini per evitare le voglie improvvise", "Lista della spesa e organizzazione settimanale", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "34,90", to: "9,99", link: "https://pay.hotmart.com/K106055928C?off=m7gu5dw9&checkoutMode=10",
+  },
+  antigonf: {
+    title: "55 Ricette Gosto Puro Anti-Gonfiore",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera ridurre la sensazione di pancia gonfia, migliorare la digestione e ritrovare leggerezza ogni giorno, senza diete radicali e senza passare fame.",
+    bullets: ["55 ricette esclusive anti-gonfiore", "Colazioni, pranzi, cene, snack e bevande funzionali", "Protocollo semplice di 7 giorni", "Ricette leggere, pratiche e facili da preparare", "Ingredienti semplici e facili da trovare", "Opzioni pensate per favorire digestione, leggerezza e benessere", "Guide bonus con alimenti che gonfiano e aiutano a sgonfiare", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "19,90", to: "6,99", link: "https://pay.hotmart.com/M106055970I?off=kjrkufzp&checkoutMode=10",
+  },
+  whey: {
+    title: "Guida alle Ricette con Whey",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera aumentare l'apporto proteico, migliorare l'alimentazione e trasformare il Whey Protein in ricette deliziose, pratiche e nutrienti.",
+    bullets: ["Oltre 60 ricette esclusive con Whey Protein", "Pancake, brownie, mousse, gelati, pane proteico e molto altro", "Ricette dolci e salate per ogni momento della giornata", "Preparazioni semplici e adatte a tutti i livelli", "Ingredienti facili da trovare e preparazioni veloci", "Ricette ideali per definizione, dimagrimento e aumento della massa muscolare", "Valori nutrizionali e suggerimenti pratici inclusi", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "39,90", to: "9,90", link: "https://pay.hotmart.com/T106342263P?off=d431ulad&checkoutMode=10",
+  },
+  gelati: {
+    title: "+70 Ricette di Gelati Artigianali e Sani",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera preparare gelati artigianali cremosi, deliziosi e personalizzati direttamente a casa, senza attrezzature professionali e con ingredienti semplici.",
+    bullets: ["Oltre 70 ricette esclusive di gelati artigianali", "Gusti classici, esotici, fit e vegani", "Ricette senza gelatiera e facili da preparare", "Tecniche per ottenere una consistenza cremosa perfetta", "Ingredienti semplici e facili da trovare", "Topping, salse e guarnizioni per risultati professionali", "Consigli di conservazione per mantenere gusto e cremosità", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "39,00", to: "9,99", link: "https://pay.hotmart.com/E106332913S?off=t5g50zoh&checkoutMode=10",
+  },
+  insalate: {
+    title: "60 Ricette di Insalate in Barattolo + Salse Irresistibili",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera organizzare i pasti della settimana, mangiare più verdure e avere insalate fresche e pronte fino a 7 giorni senza sprechi.",
+    bullets: ["60 ricette esclusive di insalate in barattolo", "Salse irresistibili per rendere ogni insalata più gustosa", "Il metodo degli strati per mantenerle fresche fino a 7 giorni", "Ricette pratiche pronte in circa 30 minuti", "Ingredienti semplici e facili da trovare", "Insalate leggere, complete e perfette per pranzo o cena", "Tecniche di conservazione per evitare sprechi alimentari", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "29,90", to: "5,90", link: "https://plvzcnpwbuevakrxnmks.supabase.co/functions/v1/r?c=75eb2075-a92d-4c0f-9b1c-2687e244ffbf",
+  },
+  menopausa: {
+    title: "Piano Menopausa – 92 Ricette Deliziose",
+    desc: "Sblocca una collezione esclusiva creata per chi desidera ridurre il gonfiore, ritrovare energia e sentirsi più leggera durante la menopausa e la premenopausa, senza diete estreme e senza rinunciare al gusto.",
+    bullets: ["92 ricette esclusive pensate per menopausa e premenopausa", "Colazioni proteiche, pranzi, cene, snack e smoothie funzionali", "Ricette anti-gonfiore e anti-infiammatorie", "Ingredienti semplici e facili da trovare", "Pasti equilibrati per favorire leggerezza e benessere", "Dolci bilanciati per gestire la voglia di zuccheri", "Piano alimentare pratico e facile da seguire", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "39,90", to: "9,90", link: "https://pay.hotmart.com/U104096343S?off=k1ybkvky&checkoutMode=10",
+  },
 };
-const salesLinkForOccasion = (occ) => OCCASION_SALES_LINKS[occ] || PREMIUM_LINK;
-const isSellableOccasion = (occ) => Object.prototype.hasOwnProperty.call(OCCASION_SALES_LINKS, occ);
+const _GEN = { link: PREMIUM_LINK };
+const OCCASION_OFFERS = {
+  "275 Ricette Fitness Pratiche ed Economiche": _D.fitness, "Fit": _D.fitness,
+  "365 Ricette Deliziose per Diabetici": _D.diabetici, "Diabete": _D.diabetici, "Diabetico": _D.diabetici,
+  "99 Dolci Senza Colpa": _D.dolci,
+  "Meal Prep Settimanale in Air Fryer": _D.airfryer, "Piatti Settimanali in Air Fryer": _D.airfryer,
+  "Menu Brucia Grassi 21 Giorni": _D.brucia,
+  "Reset Anti-Gonfiore 7 Giorni": _D.antigonf,
+  "60 Ricette Gosto Puro con Whey": _D.whey, "Ricette con Whey": _D.whey,
+  "+70 Ricette di Gelati Artigianali": _D.gelati, "Gelati Artigianali": _D.gelati,
+  "Insalate in Barattolo + Salse Irresistibili": _D.insalate, "Insalate in Barattolo": _D.insalate,
+  "92 Ricette Deliziose per la Menopausa": _D.menopausa, "Menopausa": _D.menopausa,
+  "110 e Lode in Cucina Le Ricette Veloci di Melissa": _D.cucina, "Cucina Senza Tempo": _D.cucina,
+  // Vendáveis sem copy/preço ainda (bloqueiam com link genérico + bullets padrão):
+  "Collezione Gosto Puro": _GEN,
+  "84 Ricette di Pane Senza Glutine e Senza Latte": _GEN, "Pane Senza Glutine": _GEN,
+  "365 Cene con la Friggitrice ad Aria": _GEN, "Friggitrice ad Aria": _GEN,
+  "Ricette Low Carb per Dimagrire": _GEN, "Low carb": _GEN,
+  "Ricette Detox per il Benessere": _GEN, "Detox": _GEN,
+  "150 Ricette Sane + Piano di 35 Giorni": _GEN, "Ricette Sane": _GEN,
+  "350 Ricette Facili da Congelare": _GEN, "Facili da Congelare": _GEN,
+  "Ricette Senza Zucchero – Dolce Senza Senso di Colpa": _GEN, "Senza zucchero": _GEN,
+};
+const offerForOccasion = (occ) => OCCASION_OFFERS[occ] || null;
+const salesLinkForOccasion = (occ) => OCCASION_OFFERS[occ]?.link || PREMIUM_LINK;
+const isSellableOccasion = (occ) => Object.prototype.hasOwnProperty.call(OCCASION_OFFERS, occ);
+// Só tem checkout DEDICADO quem está no _D (link próprio, diferente do PREMIUM_LINK).
+// As coleções genéricas (_GEN) e as sem oferta vão para a página /Premium do app.
+const hasDedicatedCheckout = (occ) => {
+  const off = OCCASION_OFFERS[occ];
+  return !!off && off !== _GEN && !!off.link && off.link !== PREMIUM_LINK;
+};
 
 export default function OccasionRecipesPage() {
   const navigate = useNavigate();
@@ -190,6 +271,18 @@ export default function OccasionRecipesPage() {
 
   const showDaily = DAILY_OCCASIONS.includes(occasion);
   const theme = activeTheme(occasion, termsFromUrl);
+
+  // Desbloqueio: coleção com checkout próprio → Hotmart; sem checkout → página
+  // /Premium do app (lá o usuário vê o próprio estado e sente vontade de comprar).
+  const goUnlock = () => {
+    if (hasDedicatedCheckout(occasion)) {
+      trackEvent("premium_click", { source: "occasion_checkout", occasion });
+      window.open(salesLinkForOccasion(occasion), "_blank", "noopener");
+    } else {
+      trackEvent("premium_click", { source: "occasion_to_premium_page", occasion });
+      navigate("/Premium");
+    }
+  };
 
   useEffect(() => {
     if (!occasion) return;
@@ -394,6 +487,7 @@ export default function OccasionRecipesPage() {
     occUnlockedTerms.includes("*") ||
     occTerms.some((t) => occUnlockedTerms.includes(t));
   const occasionLocked = isSellableOccasion(occasion) && !occHasAccess;
+  const pitch = premiumPitch(user); // mensagem personalizada (nome + o que já tem)
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] dark:bg-[#0F0F0F] pb-24">
@@ -521,7 +615,7 @@ export default function OccasionRecipesPage() {
 
                 <div className="relative">
                   <div className={occasionLocked ? "space-y-3 blur-[3px] select-none pointer-events-none opacity-60" : "space-y-3"}>
-                   {(occasionLocked ? pagedRecipes.slice(0, 6) : pagedRecipes).map((recipe) => (
+                   {(occasionLocked ? pagedRecipes.slice(0, 9) : pagedRecipes).map((recipe) => (
                      <RecipeCard
                        key={recipe.id}
                        recipe={recipe}
@@ -529,31 +623,81 @@ export default function OccasionRecipesPage() {
                        isSaved={!!userRecipes[recipe.id]}
                        user={user}
                        isBlocked={occasionLocked}
-                       onBlockedClick={() => window.open(salesLinkForOccasion(occasion), "_blank")}
+                       onBlockedClick={goUnlock}
                      />
                    ))}
                   </div>
 
                   {occasionLocked && (
                     <div className="absolute inset-0 flex justify-center pointer-events-none">
-                      <div className="sticky top-28 self-start pointer-events-auto bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A] rounded-3xl shadow-xl p-6 text-center max-w-xs mx-4 mt-10">
-                        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-amber-50 flex items-center justify-center">
-                          <Lock className="w-7 h-7 text-amber-500" />
-                        </div>
-                        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Raccolta bloccata 🔒</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                          Sblocca <b>{occasion}</b> per accedere a tutte le <b>{filteredRecipes.length}</b> ricette di questa raccolta.
-                        </p>
-                        <a
-                          href={salesLinkForOccasion(occasion)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 w-full bg-[#2D6A4F] text-white font-bold py-3 rounded-2xl active:scale-95 transition-transform"
-                        >
-                          🔓 Sblocca questa raccolta
-                        </a>
-                        <div className="mt-3">
-                          <PremiumReassurance />
+                      <div className="sticky top-24 self-start pointer-events-auto w-full max-w-sm mx-3 mt-8">
+                        <div className="relative bg-white dark:bg-[#1A1A1A] border border-amber-100 dark:border-[#2A2A2A] rounded-3xl shadow-2xl shadow-black/10 overflow-hidden">
+                          {/* Faixa superior */}
+                          <div className="bg-gradient-to-r from-[#2D6A4F] to-[#40916C] px-5 py-4">
+                            <p className="text-white text-sm font-extrabold tracking-wide flex items-center gap-2">
+                              <Lock className="w-4 h-4" /> COLLEZIONE BLOCCATA
+                            </p>
+                            <p className="text-white/80 text-[11px] mt-0.5">{filteredRecipes.length} ricette esclusive</p>
+                          </div>
+
+                          <div className="p-5">
+                            {pitch && (
+                              <div className="mb-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 px-3 py-2">
+                                <p className="text-[12px] leading-snug text-emerald-900 dark:text-emerald-200">
+                                  <b>{pitch.greeting}</b>{" "}
+                                  {pitch.variant === "partial"
+                                    ? <>hai già <b>{pitch.owned.slice(0, 3).join(", ")}</b>. Questa raccolta non è ancora tua.</>
+                                    : <>sei <b>Free</b>: 40 ricette sbloccate su oltre 4.000. Questa raccolta è ancora bloccata.</>}
+                                </p>
+                              </div>
+                            )}
+                            <h3 className="text-[19px] font-extrabold text-gray-900 dark:text-white mb-2 leading-[1.2]">{offerForOccasion(occasion)?.title || occasion}</h3>
+                            <p className="text-[13px] text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                              {offerForOccasion(occasion)?.desc
+                                || `Sblocca tutte le ${filteredRecipes.length} ricette di questa raccolta e cucina senza limiti.`}
+                            </p>
+
+                            {/* Destaques — copy completa da coleção, num painel com divisórias */}
+                            <ul className="mb-4 rounded-2xl bg-[#F6F8F6] dark:bg-white/[0.04] border border-gray-100 dark:border-white/5 divide-y divide-gray-100 dark:divide-white/[0.06] overflow-hidden">
+                              {(offerForOccasion(occasion)?.bullets || [
+                                "Accesso immediato e a vita",
+                                "Ingredienti semplici e facili da trovare",
+                                "Valori nutrizionali completi",
+                                "Aggiornamenti mensili con nuove ricette",
+                              ]).map((h, i) => (
+                                <li key={i} className="flex items-start gap-3 px-3.5 py-2.5">
+                                  <span className="w-[18px] h-[18px] mt-px rounded-full bg-[#2D6A4F] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 shadow-sm shadow-[#2D6A4F]/30">✓</span>
+                                  <span className="text-[12.5px] leading-snug text-gray-700 dark:text-gray-200">{h}</span>
+                                </li>
+                              ))}
+                            </ul>
+
+                            {/* Preço */}
+                            {offerForOccasion(occasion)?.to && (
+                              <div className="rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 px-4 py-3 mb-4 text-center">
+                                <p className="text-[10px] font-bold text-amber-700/90 dark:text-amber-400/90 uppercase tracking-widest mb-1">Offerta speciale di sblocco</p>
+                                <div className="flex items-baseline justify-center gap-2">
+                                  {offerForOccasion(occasion)?.from && (
+                                    <span className="text-sm text-gray-400 line-through">€{offerForOccasion(occasion).from}</span>
+                                  )}
+                                  <span className="text-3xl font-extrabold text-[#2D6A4F] dark:text-emerald-400 leading-none">€{offerForOccasion(occasion).to}</span>
+                                </div>
+                                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5">Pagamento unico • Nessun abbonamento • Accesso immediato</p>
+                              </div>
+                            )}
+
+                            <button
+                              onClick={goUnlock}
+                              className="flex items-center justify-center gap-2 w-full bg-[#2D6A4F] hover:bg-[#245A42] text-white font-extrabold py-3.5 rounded-2xl active:scale-[0.98] transition-all shadow-lg shadow-[#2D6A4F]/25"
+                            >
+                              🟢 Sblocca Ora
+                            </button>
+                            {/* Prova social SEM preço (o preço já está no bloco da oferta acima,
+                                evita divergência com o 34,90 € do Premium geral). */}
+                            <p className="mt-3 text-center text-[11px] text-gray-400 dark:text-gray-500">
+                              🔒 Garanzia 7 giorni · 53.000+ membri soddisfatti · ★ 4.9
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>

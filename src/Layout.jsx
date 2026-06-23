@@ -5,6 +5,7 @@ import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-r
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useSessionTracking, useClickTracking, trackEvent } from "@/components/useAnalytics";
+import PremiumBanner from "@/components/PremiumBanner";
 
 const navItems = [
 { name: "Home", icon: Home, page: "Home" },
@@ -86,8 +87,8 @@ export default function Layout({ children, currentPageName }) {
     }
   }, [currentPageName]);
 
-  // Admin page gets its own full-screen layout — no banner, no bottom nav
-  if (currentPageName === "Admin") {
+  // Admin e Premium têm layout full-screen — sem banner, sem nav inferior
+  if (currentPageName === "Admin" || currentPageName === "Premium") {
     return <>{children}</>;
   }
 
@@ -180,6 +181,8 @@ export default function Layout({ children, currentPageName }) {
         </div>
       
       <main className="flex-1 pb-24 max-w-lg mx-auto w-full">
+        {/* Banner Premium discreto e personalizado — em todas as páginas (some p/ premium total) */}
+        <PremiumBanner user={user} />
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname + location.search}

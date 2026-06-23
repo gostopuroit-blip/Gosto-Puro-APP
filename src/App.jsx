@@ -10,6 +10,7 @@ import Login from './pages/Login';
 const WhatToCook = lazy(() => import('./pages/WhatToCook'));
 const OccasionRecipesPage = lazy(() => import('./pages/OccasionRecipesPage'));
 const ShoppingList = lazy(() => import('./pages/ShoppingList'));
+const Premium = lazy(() => import('./pages/Premium'));
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -62,6 +63,7 @@ const AuthenticatedApp = () => {
       <Route path="/WhatToCook" element={<LayoutWrapper currentPageName="WhatToCook"><WhatToCook /></LayoutWrapper>} />
       <Route path="/OccasionRecipes" element={<LayoutWrapper currentPageName="OccasionRecipes"><OccasionRecipesPage /></LayoutWrapper>} />
       <Route path="/ShoppingList" element={<LayoutWrapper currentPageName="ShoppingList"><ShoppingList /></LayoutWrapper>} />
+      <Route path="/Premium" element={<LayoutWrapper currentPageName="Premium"><Premium /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

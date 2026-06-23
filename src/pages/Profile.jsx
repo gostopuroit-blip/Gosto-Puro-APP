@@ -557,7 +557,7 @@ export default function Profile() {
                       {suggestions.map((slug) => (
                         <a
                           key={slug}
-                          href="https://gostopuro.it/upgrade/"
+                          href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10"
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={() => trackEvent("premium_click", { source: "profile_crosssell", product: slug })}
@@ -570,7 +570,7 @@ export default function Profile() {
                   </div>
                 )}
                 <a
-                  href="https://gostopuro.it/upgrade/"
+                  href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackEvent("premium_click", { source: "profile_purchased" })}
@@ -598,11 +598,11 @@ export default function Profile() {
               </div>
               <div className="mt-3 bg-amber-100/60 dark:bg-amber-900/20 rounded-xl px-3 py-2 text-center">
                 <p className="text-[11px] text-amber-800 dark:text-amber-300 font-semibold">
-                  🎁 18 raccolte + planner + 3 bonus = oltre <span className="line-through opacity-70">€94</span> di valore · oggi <strong>€29,90</strong> una volta sola
+                  🎁 18 raccolte + planner + 3 bonus = oltre <span className="line-through opacity-70">€94</span> di valore · oggi <strong>34,90 €</strong> una volta sola
                 </p>
               </div>
               <a
-                href="https://gostopuro.it/upgrade/"
+                href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackEvent("premium_click", { source: "profile" })}

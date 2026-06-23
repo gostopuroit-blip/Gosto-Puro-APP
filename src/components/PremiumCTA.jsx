@@ -1,7 +1,7 @@
 // Dados oficiais do Premium (espelham a página de vendas). Editar aqui muda em todo o app.
 export const PREMIUM = {
-  link: "https://gostopuro.it/upgrade/",
-  price: "€29,90",
+  link: "https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10",
+  price: "34,90 €",
   anchor: "€94,99",
   members: "53.000+",
   rating: "4.9",

@@ -267,7 +267,7 @@ export default function Folders() {
             <span className="text-white/60 text-lg">→</span>
           </Link>
         ) : (
-          <a href="https://pay.hotmart.com/L104095305F?off=sk18i3wx&checkoutMode=10" target="_blank" rel="noopener noreferrer"
+          <a href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-3 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600 rounded-2xl px-4 py-3.5 shadow-md relative overflow-hidden">
             <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
               <ChefHat className="w-5 h-5 text-white/60" />
