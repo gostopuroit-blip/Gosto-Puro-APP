@@ -27,6 +27,7 @@ const COLLECTIONS = [
   { slug: "ricette_congelare", name: "Facili da Congelare", emoji: "❄️", count: 353, img: `${MB}/f6571f98e_350ricettefacilidacongelare.png` },
   { slug: "ricette_sane_35", name: "150 Ricette Sane", emoji: "🥦", count: 155, img: `${MB}/cbb40fb0b_150ricettesanepianoalimentaredi35giorni.png` },
   { slug: "senza_zucchero", name: "Senza Zucchero", emoji: "🍯", count: 52, img: `${MB}/a786d7eb2_RicetteSenzaZucchero.png` },
+  { slug: "bibite_estate", name: "Bibite Rinfrescanti", emoji: "🥤", count: 100, img: `/covers/bibite.jpeg` },
 ];
 
 // Dicionário it (padrão dos usuários) + pt (apenas para teste interno via ?lang=pt).

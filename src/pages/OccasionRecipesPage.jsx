@@ -212,6 +212,12 @@ const _D = {
     bullets: ["92 ricette esclusive pensate per menopausa e premenopausa", "Colazioni proteiche, pranzi, cene, snack e smoothie funzionali", "Ricette anti-gonfiore e anti-infiammatorie", "Ingredienti semplici e facili da trovare", "Pasti equilibrati per favorire leggerezza e benessere", "Dolci bilanciati per gestire la voglia di zuccheri", "Piano alimentare pratico e facile da seguire", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
     from: "39,90", to: "9,90", link: "https://pay.hotmart.com/U104096343S?off=k1ybkvky&checkoutMode=10",
   },
+  bibite: {
+    title: "98 Bibite Rinfrescanti per l'Estate",
+    desc: "Sblocca una collezione esclusiva di bibite fresche e leggere, perfette per le giornate calde: ti dissetano e ti sgonfiano invece di gonfiarti, pronte in meno di 5 minuti con ingredienti che hai già in casa.",
+    bullets: ["98 ricette di bibite fresche e leggere", "Frullati, acque detox, smoothie e mocktail analcolici", "Senza zuccheri aggiunti — dolci solo grazie alla frutta", "Pronte in meno di 5 minuti", "Ingredienti semplici che hai già in casa", "Valori nutrizionali completi per ogni ricetta", "Bibite che dissetano e sgonfiano, non appesantiscono", "Aggiornamenti mensili con nuove ricette", "Accesso immediato e a vita"],
+    from: "24,90", to: "10,90", link: PREMIUM_LINK,
+  },
 };
 const _GEN = { link: PREMIUM_LINK };
 const OCCASION_OFFERS = {
@@ -226,6 +232,7 @@ const OCCASION_OFFERS = {
   "Insalate in Barattolo + Salse Irresistibili": _D.insalate, "Insalate in Barattolo": _D.insalate,
   "92 Ricette Deliziose per la Menopausa": _D.menopausa, "Menopausa": _D.menopausa,
   "110 e Lode in Cucina Le Ricette Veloci di Melissa": _D.cucina, "Cucina Senza Tempo": _D.cucina,
+  "98 Bibite Rinfrescanti per l'Estate": _D.bibite, "Bibite Estate": _D.bibite,
   // Vendáveis sem copy/preço ainda (bloqueiam com link genérico + bullets padrão):
   "Collezione Gosto Puro": _GEN,
   "84 Ricette di Pane Senza Glutine e Senza Latte": _GEN, "Pane Senza Glutine": _GEN,

@@ -50,7 +50,8 @@ const FIXED_OCCASIONS = [
   "Gelati Artigianali",
   "Insalate in Barattolo",
   "Ricette con Whey",
-  "Pane Senza Glutine"
+  "Pane Senza Glutine",
+  "Bibite Estate"
 ];
 
 // Mesma lógica da OccasionRecipesPage
@@ -65,6 +66,7 @@ const GP_PRODUCT_OCCASIONS = new Set([
   "Insalate in Barattolo",
   "Ricette con Whey",
   "Pane Senza Glutine",
+  "Bibite Estate",
 ]);
 const OCCASION_ALIASES = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
