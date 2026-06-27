@@ -257,19 +257,33 @@ export default function Home() {
         </div>
         <div className="flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-2 md:flex-wrap md:overflow-x-visible">
           {[
-            ...gostoPuroProducts.filter(p => p.occasioni && p.occasioni.length > 0 && p.image_url).map(product => (
+            ...gostoPuroProducts
+              .filter(p => p.occasioni && p.occasioni.length > 0 && p.image_url)
+              // As coleções que o usuário JÁ comprou aparecem PRIMEIRO (não ficam perdidas no fim)
+              .sort((a, b) => {
+                const oa = (user?.purchased_products || []).includes(a.slug) ? 0 : 1;
+                const ob = (user?.purchased_products || []).includes(b.slug) ? 0 : 1;
+                return oa - ob;
+              })
+              .map(product => {
+                const own = (user?.purchased_products || []).includes(product.slug);
+                return (
               <Link
                 key={product.id}
                 to={`/OccasionRecipes?occasion=${encodeURIComponent(product.nome)}&terms=${encodeURIComponent((product.occasioni || []).join('|'))}`}
-                className="flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden"
+                className={`flex-shrink-0 group active:scale-95 transition-transform duration-150 relative rounded-2xl overflow-hidden ${own ? "ring-2 ring-[#2D6A4F]" : ""}`}
                 style={{ width: "200px", height: "250px" }}
               >
                 <img src={product.image_url} alt={product.nome} loading="lazy" decoding="async" style={{ width: "200px", height: "250px", objectFit: "cover", display: "block", flexShrink: 0 }} className="group-hover:scale-105 transition-transform duration-300" />
+                {own && (
+                  <span className="absolute top-2 right-2 bg-[#2D6A4F] text-white text-[11px] font-bold px-2 py-1 rounded-full shadow-md">Tuo ✓</span>
+                )}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
                   <p className="text-white font-semibold text-sm line-clamp-2">{product.nome}</p>
                 </div>
               </Link>
-            )),
+                );
+              }),
             ...gostoPuroProducts.filter(p => !(p.occasioni && p.occasioni.length > 0 && p.image_url)).map(product => (
               <div key={product.id} className="flex-shrink-0 relative rounded-2xl overflow-hidden cursor-not-allowed" style={{ width: "200px", height: "250px" }}>
                 {product.image_url ? (
