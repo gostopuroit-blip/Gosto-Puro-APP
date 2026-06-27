@@ -22,6 +22,10 @@ const ALWAYS_ACCESSIBLE_WITH_PURCHASE = [
 ];
 
 export function getUserAccessibleOccasions(user) {
-  // OPEN ACCESS: todos os usuários têm acesso total
-  return ["ALL"];
+  if (!user) return [];
+  // Premium completo / admin / expert → acesso total (tutte le ricette)
+  const unlocked = Array.isArray(user.unlocked_occasions) ? user.unlocked_occasions : [];
+  if (user.is_full_premium === true || unlocked.includes("*")) return ["ALL"];
+  // Comprador de 1-2 produtos → só as ocasiões das coleções compradas
+  return unlocked;
 }

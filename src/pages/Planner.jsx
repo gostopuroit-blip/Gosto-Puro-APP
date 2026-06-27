@@ -171,33 +171,32 @@ export default function Planner() {
 
       // Helper: pick a random recipe matching category, prefer dietary tags
       const pickRecipe = (category, exclude = [], usedIds = new Set()) => {
-        let pool = (withinTime.length > 10 ? withinTime : fallback)
-          .filter(r => r.category === category && !usedIds.has(r.id));
+        const base = (withinTime.length > 10 ? withinTime : fallback).filter(r => r.category === category);
 
-        // Filter by accessible occasions
-        if (!isAllAccess) {
-          pool = pool.filter(r => {
-            const recipeOccs = r.occasions || [];
-            // If recipe has no occasions, it's accessible to all
-            if (recipeOccs.length === 0) return true;
-            // Check if any of the recipe's occasions are accessible
-            return recipeOccs.some(occ => accessibleOccasions.includes(occ));
-          });
-        }
+        // Pool acessível: premium = tudo; senão só as coleções compradas (+ receitas sem ocasião).
+        // NUNCA cai em receita bloqueada → o que entra no planner é sempre abrível pelo usuário.
+        const accessible = isAllAccess
+          ? base
+          : base.filter(r => {
+              const recipeOccs = r.occasions || [];
+              if (recipeOccs.length === 0) return true; // sem ocasião → acessível a todos
+              return recipeOccs.some(occ => accessibleOccasions.includes(occ));
+            });
 
-        if (pool.length === 0) return null;
+        if (accessible.length === 0) return null; // a coleção do usuário não cobre esta categoria
 
-        // Prefere receitas com TAGS de preferência do usuário (restrições já foram aplicadas como hard filter)
-        if (userPreferences.length > 0) {
-          const preferred = pool.filter(r =>
-            (r.dietary_tags || []).some(tag => userPreferences.includes(tag))
-          );
-          if (preferred.length > 0) {
-            return preferred[Math.floor(Math.random() * preferred.length)];
+        const choose = (arr) => {
+          // Prefere receitas com TAGS de preferência (restrições já aplicadas como hard filter)
+          if (userPreferences.length > 0) {
+            const preferred = arr.filter(r => (r.dietary_tags || []).some(tag => userPreferences.includes(tag)));
+            if (preferred.length > 0) return preferred[Math.floor(Math.random() * preferred.length)];
           }
-        }
+          return arr[Math.floor(Math.random() * arr.length)];
+        };
 
-        return pool[Math.floor(Math.random() * pool.length)];
+        // Tenta sem repetir; se a coleção acabou, repete dentro do pool acessível (mai slot vazio)
+        const fresh = accessible.filter(r => !usedIds.has(r.id));
+        return choose(fresh.length > 0 ? fresh : accessible);
       };
 
       // Começa de hoje (não amanhã), com data real
@@ -289,9 +288,28 @@ export default function Planner() {
     return <PremiumLock feature="il Planner settimanale" />;
   }
 
+  // Comprou 1-2 produtos mas não é premium → recomenda upgrade (mais variedade no planner)
+  const showUpsell = user?.has_access === true && user?.is_full_premium !== true;
+  const UpsellBanner = showUpsell ? (
+    <button
+      onClick={() => navigate("/Premium")}
+      className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-[#2D6A4F] to-[#40916C] text-white text-left active:scale-[0.99] transition-transform shadow-sm"
+    >
+      <span className="text-2xl flex-shrink-0">🔓</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold leading-tight">Più varietà nel tuo Planner</p>
+        <p className="text-[12px] text-white/85 leading-snug mt-0.5">
+          Ora il piano sceglie dalle tue collezioni. Con il Premium pesca tra <b>tutte</b> le ricette: più varietà, meno ripetizioni.
+        </p>
+      </div>
+      <span className="text-lg flex-shrink-0">→</span>
+    </button>
+  ) : null;
+
   if (!plan || !Array.isArray(plan.plan_data) || plan.plan_data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
+        {UpsellBanner && <div className="w-full max-w-sm">{UpsellBanner}</div>}
         <p className="text-gray-400 text-center">Nessun piano attivo. Crea il tuo primo piano!</p>
         <Button
           onClick={() => setShowPlannerModal(true)}
@@ -398,6 +416,8 @@ export default function Planner() {
           Personalizza ↗
         </button>
       </div>
+
+      {UpsellBanner && <div className="px-5 mb-4">{UpsellBanner}</div>}
 
       {/* Progress bar */}
       <div className="px-5 mb-4">
