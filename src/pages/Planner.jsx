@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, Check, ChevronLeft, ChevronRight, Loader2, RefreshCw }
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ChangeRecipeModal from "@/components/planner/ChangeRecipeModal";
-import PlannerModal from "@/components/PlannerModal";
+import PlannerWizard from "@/components/PlannerWizard";
 import { PremiumLock } from "@/components/PremiumGate";
 import KcalCounter from "@/components/planner/KcalCounter";
 import { getUserAccessibleOccasions } from "@/hooks/useGetUserAccessibleOccasions";
@@ -46,7 +46,7 @@ export default function Planner() {
 
   // When selectedDay changes, ensure all 4 meal recipes for that day are loaded
   useEffect(() => {
-    if (!plan) return;
+    if (!plan || !Array.isArray(plan.plan_data)) return;
     const day = plan.plan_data[selectedDay];
     if (!day) return;
     const ids = [day.colazione_id, day.pranzo_id, day.snack_id, day.cena_id].filter(
@@ -65,7 +65,7 @@ export default function Planner() {
 
   // Recalculate macros whenever selected day or recipes change
   useEffect(() => {
-    if (!plan) return;
+    if (!plan || !Array.isArray(plan.plan_data)) return;
     const day = plan.plan_data[selectedDay];
     if (!day) return;
     const m = { proteina: 0, carboidrati: 0, grassi: 0, fibre: 0, calorie: 0 };
@@ -289,7 +289,7 @@ export default function Planner() {
     return <PremiumLock feature="il Planner settimanale" />;
   }
 
-  if (!plan) {
+  if (!plan || !Array.isArray(plan.plan_data) || plan.plan_data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
         <p className="text-gray-400 text-center">Nessun piano attivo. Crea il tuo primo piano!</p>
@@ -300,7 +300,7 @@ export default function Planner() {
           Genera nuovo planner
         </Button>
         {showPlannerModal && (
-          <PlannerModal
+          <PlannerWizard
             onCreate={handleCreatePlan}
             onClose={() => setShowPlannerModal(false)}
             isLoading={isCreating}
@@ -620,7 +620,7 @@ export default function Planner() {
       </div>
 
       {showPlannerModal && (
-        <PlannerModal
+        <PlannerWizard
           onCreate={handleCreatePlan}
           onClose={() => setShowPlannerModal(false)}
           isLoading={isCreating}
