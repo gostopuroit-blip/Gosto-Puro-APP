@@ -488,7 +488,13 @@ export default function OccasionRecipesPage() {
   // acesso (não é premium full e não comprou essa ocasião), mostra a tela de
   // cadeado com botão para a página de vendas dedicada daquela ocasião.
   const occUnlockedTerms = user?.unlocked_occasions || [];
-  const occTerms = occasionAliases[occasion] || [occasion];
+  // O gate de acesso usa os MESMOS termi do filtro delle ricette (i `terms` da URL
+  // do prodotto GP = as occasioni reais della collezione). Senão ele comparava il
+  // NOME del prodotto (es. "Ricette Detox per il Benessere") contro le occasioni
+  // sbloccate (es. "Detox") e bloccava chi aveva già comprato (bug "tuo ma bloccato").
+  const occTerms = (termsFromUrl && termsFromUrl.length > 0)
+    ? termsFromUrl
+    : (occasionAliases[occasion] || [occasion]);
   const occHasAccess =
     user?.is_full_premium === true ||
     occUnlockedTerms.includes("*") ||
