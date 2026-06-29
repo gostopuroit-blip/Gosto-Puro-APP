@@ -26,6 +26,9 @@ const CATEGORY_FILTERS = [
 const MEAL_CATEGORIES = CATEGORY_FILTERS.map((c) => c.key);
 
 
+// Remove acentos e baixa caixa — alinha a query com a coluna `search_text` (também sem acento)
+const deburr = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
 export default function Recipes() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -97,41 +100,15 @@ export default function Recipes() {
       const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status,is_premium,created_at";
       let q = supabase.from("recipes").select(RECIPE_COLS, { count: "exact" }).eq("status", "pubblicata");
 
-      if (debouncedSearch) {
-        // Palavras-chave de dieta/condição → busca nas TAGS/OCASIÕES (senão "diabete"
-        // não acharia a coleção, que é tagueada e não tem a palavra no título).
-        const SEARCH_SYNONYMS = {
-          "diabete": { occ: ["Diabete", "Diabetico"], tag: ["Diabetico"] },
-          "diabetico": { occ: ["Diabete", "Diabetico"], tag: ["Diabetico"] },
-          "diabetici": { occ: ["Diabete", "Diabetico"], tag: ["Diabetico"] },
-          "vegano": { tag: ["Vegano"] },
-          "vegana": { tag: ["Vegano"] },
-          "vegani": { tag: ["Vegano"] },
-          "vegetariano": { tag: ["Vegetariano"] },
-          "detox": { occ: ["Detox"] },
-          "low carb": { occ: ["Low carb"], tag: ["Low carb"] },
-          "senza zucchero": { occ: ["Senza zucchero"], tag: ["Senza zucchero"] },
-          "senza glutine": { tag: ["Senza glutine"] },
-          "senza lattosio": { tag: ["Senza lattosio"] },
-          "fit": { occ: ["Fit"] },
-          "fitness": { occ: ["Fit"] },
-          "proteico": { tag: ["Alto contenuto proteico"] },
-          "proteiche": { tag: ["Alto contenuto proteico"] },
-        };
-        const sLower = debouncedSearch.trim().toLowerCase();
-        const syn = SEARCH_SYNONYMS[sLower];
-        if (syn) {
-          const conds = [];
-          (syn.occ || []).forEach((o) => conds.push(`occasions.cs.{"${o}"}`));
-          (syn.tag || []).forEach((t) => conds.push(`dietary_tags.cs.{"${t}"}`));
-          q = q.or(conds.join(","));
-        } else {
-          // Busca por PALAVRAS: cada palavra deve aparecer (título/descrição/categoria/país),
-          // em qualquer ordem. Assim "pollo limone" acha "Scaloppine di Pollo al Limone".
-          const tokens = debouncedSearch.replace(/[%,()]/g, " ").split(/\s+/).filter(Boolean).slice(0, 6);
-          for (const t of tokens) {
-            q = q.or(`title.ilike.%${t}%,description.ilike.%${t}%,category.ilike.%${t}%,paese.ilike.%${t}%`);
-          }
+      if (debouncedSearch && debouncedSearch.length >= 2) {
+        // Busca robusta e sem acento via coluna `search_text` (título + descrição +
+        // INGREDIENTES + coleções/ocasioni + tag dietetici). Cada palavra deve aparecer
+        // (AND), em qualquer ordem e em qualquer campo. Ex.: "pollo limone" acha
+        // "Scaloppine di Pollo al Limone"; "pancetta" acha pela lista de ingredientes;
+        // "diabete" / "vegano" acham pelas tag/ocasioni. Índice trigram = rápido.
+        const tokens = deburr(debouncedSearch).replace(/[%,()]/g, " ").split(/\s+/).filter(Boolean).slice(0, 6);
+        for (const t of tokens) {
+          q = q.ilike("search_text", `%${t}%`);
         }
       }
 
@@ -272,7 +249,7 @@ export default function Recipes() {
            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-300 dark:text-gray-600" />
            <input
               type="text"
-              placeholder="Cerca ricette sane…"
+              placeholder="Cerca per nome o ingrediente…"
               value={search}
               onChange={(e) => {
                  setSearch(e.target.value);
@@ -282,8 +259,20 @@ export default function Recipes() {
                     trackEvent("recipe_search", { occasion_label: search.trim(), results_count: filteredRecipes.length });
                   }
                 }}
-              className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#2D3F35] rounded-2xl border border-gray-100 dark:border-[#3D5246] text-sm placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F]/30 transition-all" />
+              className="w-full pl-11 pr-10 py-3.5 bg-white dark:bg-[#2D3F35] rounded-2xl border border-gray-100 dark:border-[#3D5246] text-sm placeholder:text-gray-300 dark:placeholder:text-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20 focus:border-[#2D6A4F]/30 transition-all" />
 
+           {/* Indicador discreto à direita: spinner ao buscar, X para limpar */}
+           {loading && hasLoadedOnce ? (
+             <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D6A4F] animate-spin" />
+           ) : search ? (
+             <button
+               onClick={() => setSearch("")}
+               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-300 hover:text-gray-500 dark:text-gray-600"
+               aria-label="Pulisci ricerca"
+             >
+               <X className="w-4 h-4" />
+             </button>
+           ) : null}
          </div>
        </div>
 
@@ -357,8 +346,10 @@ export default function Recipes() {
 
        {/* Recipe List */}
        <div className="px-5 space-y-4 relative min-h-[180px]">
-         {loading && currentPage === 1 &&
-          <div className="absolute inset-0 z-10 flex justify-center pt-12 bg-[#FAFAF8]/60 dark:bg-[#0F0F0F]/60 backdrop-blur-[1px]">
+         {/* Overlay só quando ainda NÃO há resultados na tela — evita o "pisca" a cada letra.
+             Durante o refetch com a lista já visível, mostramos só o spinner dentro do campo. */}
+         {loading && orderedRecipes.length === 0 &&
+          <div className="absolute inset-0 z-10 flex justify-center pt-12">
              <Loader2 className="w-6 h-6 text-[#2D6A4F] animate-spin" />
            </div>
          }
