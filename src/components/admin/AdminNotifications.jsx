@@ -1,31 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Send, Loader2 } from "lucide-react";
+import { Bell, Send, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
+const SEGMENTS = [
+  { key: "all", label: "Tutti", desc: "todos" },
+  { key: "free", label: "Free", desc: "sem compra" },
+  { key: "pagante", label: "Pagantes", desc: "1-2 produtos" },
+  { key: "premium", label: "Premium", desc: "acesso total" },
+];
 
 export default function AdminNotifications() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
+  const [segment, setSegment] = useState("all");
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
+  const [breakdown, setBreakdown] = useState(null); // { free, pagante, premium, sem_conta, total }
+  const [loadingBd, setLoadingBd] = useState(true);
+
+  const loadBreakdown = async () => {
+    setLoadingBd(true);
+    const res = await base44.functions.invoke("sendCustomNotification", { dryRun: true });
+    const b = res.data?.breakdown;
+    if (b) setBreakdown({ ...b, total: res.data.total || 0 });
+    setLoadingBd(false);
+  };
+  useEffect(() => { loadBreakdown(); }, []);
+
+  const countFor = (key) => {
+    if (!breakdown) return null;
+    if (key === "all") return breakdown.total;
+    return breakdown[key] ?? 0;
+  };
 
   const handleSend = async () => {
     if (!title.trim() || !body.trim()) {
       toast.error("Título e mensagem são obrigatórios");
       return;
     }
+    const n = countFor(segment);
+    const segLabel = SEGMENTS.find((s) => s.key === segment)?.label || "";
+    if (n === 0) { toast.error(`Ninguém no segmento "${segLabel}" ligou as notificações`); return; }
+    if (!window.confirm(`Enviar para ${n ?? "?"} usuário(s) do segmento "${segLabel}"?`)) return;
+
     setSending(true);
     setResult(null);
-    const res = await base44.functions.invoke("sendCustomNotification", { title, body, url });
+    const res = await base44.functions.invoke("sendCustomNotification", { title, body, url, segment });
     setSending(false);
     if (res.data?.success) {
       setResult(res.data);
       toast.success(`Notificação enviada para ${res.data.sent} usuários!`);
-      setTitle("");
-      setBody("");
-      setUrl("");
+      setTitle(""); setBody(""); setUrl("");
     } else {
       toast.error("Erro ao enviar a notificação");
     }
@@ -33,10 +61,61 @@ export default function AdminNotifications() {
 
   return (
     <div className="space-y-4">
+      {/* Quem ligou as notificações (por segmento) */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+        <div className="flex items-center gap-2 mb-3">
+          <Users className="w-5 h-5 text-[#2D6A4F]" />
+          <p className="font-bold text-gray-800">Quem ligou as notificações</p>
+        </div>
+        {loadingBd ? (
+          <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" /></div>
+        ) : (
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { l: "Total", v: breakdown?.total },
+              { l: "Free", v: breakdown?.free },
+              { l: "Pagantes", v: breakdown?.pagante },
+              { l: "Premium", v: breakdown?.premium },
+            ].map((c) => (
+              <div key={c.l} className="bg-gray-50 rounded-xl p-3 text-center">
+                <p className="text-xl font-bold text-gray-900">{c.v ?? 0}</p>
+                <p className="text-[11px] text-gray-500">{c.l}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Enviar */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 space-y-3">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-1">
           <Bell className="w-5 h-5 text-[#2D6A4F]" />
           <p className="font-bold text-gray-800">Enviar Notificação Push</p>
+        </div>
+
+        {/* Segmento alvo */}
+        <div>
+          <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Enviar para</label>
+          <div className="grid grid-cols-4 gap-2">
+            {SEGMENTS.map((s) => {
+              const n = countFor(s.key);
+              const active = segment === s.key;
+              return (
+                <button
+                  key={s.key}
+                  onClick={() => setSegment(s.key)}
+                  className={`py-2 px-1 rounded-xl text-center transition-all border ${
+                    active ? "bg-[#2D6A4F] border-[#2D6A4F] text-white" : "bg-white border-gray-200 text-gray-700"
+                  }`}
+                >
+                  <span className="block text-sm font-bold">{s.label}</span>
+                  <span className={`block text-[11px] ${active ? "text-white/80" : "text-gray-400"}`}>
+                    {n ?? "—"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div>
@@ -65,7 +144,7 @@ export default function AdminNotifications() {
           <label className="text-xs font-semibold text-gray-500 mb-1 block">Link (opcional)</label>
           <input
             type="text"
-            placeholder="ex. /receitas"
+            placeholder="ex. /Recipes"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/20"
@@ -78,7 +157,9 @@ export default function AdminNotifications() {
           className="w-full bg-[#2D6A4F] hover:bg-[#235c43] rounded-xl gap-2"
         >
           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          {sending ? "Enviando..." : "Enviar para todos os usuários"}
+          {sending
+            ? "Enviando..."
+            : `Enviar para ${SEGMENTS.find((s) => s.key === segment)?.label}${countFor(segment) != null ? ` (${countFor(segment)})` : ""}`}
         </Button>
       </div>
 
