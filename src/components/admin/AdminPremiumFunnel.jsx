@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, RefreshCw, Eye, MousePointerClick, Lock, Megaphone, Info } from "lucide-react";
+import { Loader2, RefreshCw, Eye, MousePointerClick, Lock, Megaphone, Info, ShoppingBag } from "lucide-react";
 
 // Self-contained: busca o funil via RPC gp_premium_funnel_metrics (não depende de props).
 // Eventos reais: premium_page_view, premium_buy_click, premium_click (Sblocca), click+premium_banner.
@@ -32,7 +32,7 @@ export default function AdminPremiumFunnel() {
   );
 
   const daily = Array.isArray(m.daily) ? m.daily : [];
-  const maxDaily = Math.max(1, ...daily.map((d) => Math.max(d.views || 0, d.buys || 0)));
+  const maxDaily = Math.max(1, ...daily.map((d) => Math.max(d.views || 0, d.buys || 0, d.purchases || 0)));
   const conv = pct(m.buy_users, m.view_users);
   const steps = [
     { label: "Viram a página de venda", value: m.page_views, users: m.view_users, icon: Eye },
@@ -88,6 +88,28 @@ export default function AdminPremiumFunnel() {
         </div>
       </div>
 
+      {/* Compras reais (via Hotmart) — o resultado de verdade */}
+      <div className="bg-[#2D6A4F] rounded-2xl p-5 text-white">
+        <div className="flex items-center gap-2 mb-3">
+          <ShoppingBag className="w-5 h-5" />
+          <span className="text-sm font-bold">Compras reais (via Hotmart)</span>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-3xl font-bold">{nf(m.buyers_14d)}</p>
+            <p className="text-xs text-white/80">compradores (14 dias) · {nf(m.purchases_14d)} compras</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold">{nf(m.buyers_total)}</p>
+            <p className="text-xs text-white/80">compradores no total · {nf(m.purchases_total)} compras</p>
+          </div>
+        </div>
+        <p className="text-[11px] text-white/70 mt-3 leading-relaxed">
+          O pagamento é finalizado na Hotmart (fora do app) — por isso a compra aparece aqui, não no clique acima.
+          Inclui Premium completo e coleções avulsas.
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         {extras.map((e) => (
           <div key={e.label} className="bg-white rounded-2xl p-4 border border-gray-100">
@@ -103,17 +125,19 @@ export default function AdminPremiumFunnel() {
           <div className="flex items-center gap-3 text-[11px]">
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#2D6A4F] inline-block" /> Viram</span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#D4A846] inline-block" /> Assinar</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#C0563B] inline-block" /> Compraram</span>
           </div>
         </div>
         {daily.length === 0 ? (
-          <p className="text-sm text-gray-400 py-6 text-center">Sem dados ainda — aparece quando os usuários visitarem a página de venda.</p>
+          <p className="text-sm text-gray-400 py-6 text-center">Sem dados ainda.</p>
         ) : (
           <div className="flex items-end gap-2 h-40">
             {daily.map((d) => (
               <div key={d.day} className="flex-1 flex flex-col items-center justify-end gap-1 min-w-0">
                 <div className="w-full flex items-end justify-center gap-0.5 h-full">
-                  <div className="w-1/2 bg-[#2D6A4F] rounded-t" style={{ height: `${Math.max(2, ((d.views || 0) / maxDaily) * 100)}%` }} title={`${d.day}: ${d.views} viram`} />
-                  <div className="w-1/2 bg-[#D4A846] rounded-t" style={{ height: `${Math.max(2, ((d.buys || 0) / maxDaily) * 100)}%` }} title={`${d.day}: ${d.buys} assinar`} />
+                  <div className="w-1/3 bg-[#2D6A4F] rounded-t" style={{ height: `${Math.max(2, ((d.views || 0) / maxDaily) * 100)}%` }} title={`${d.day}: ${d.views} viram`} />
+                  <div className="w-1/3 bg-[#D4A846] rounded-t" style={{ height: `${Math.max(2, ((d.buys || 0) / maxDaily) * 100)}%` }} title={`${d.day}: ${d.buys} assinar`} />
+                  <div className="w-1/3 bg-[#C0563B] rounded-t" style={{ height: `${Math.max(2, ((d.purchases || 0) / maxDaily) * 100)}%` }} title={`${d.day}: ${d.purchases} compraram`} />
                 </div>
                 <span className="text-[9px] text-gray-400 truncate w-full text-center">{d.day}</span>
               </div>
