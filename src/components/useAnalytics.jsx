@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 
 // Generate or retrieve session ID (per browser session)
 function getSessionId() {
@@ -15,14 +16,24 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Track a single event (fire and forget — never throws)
+// Track a single event (fire and forget — never throws).
+// Insere DIRETO via supabase, SEM .select() — a policy de SELECT da app_analytics
+// é só-admin, então o read-back falhava e fazia o evento se perder pra todo usuário
+// não-admin. Com user_id explícito (= auth.uid()) o RLS de INSERT passa pra todos.
 export async function trackEvent(eventType, extra = {}) {
   try {
-    // Use cached user data from session to avoid extra network requests
     const user_email = sessionStorage.getItem("gp_user_email") || null;
     const user_plan = sessionStorage.getItem("gp_user_plan") || "free";
-    await base44.entities.AppAnalytics.create({
+    let user_id = sessionStorage.getItem("gp_user_id") || null;
+    if (!user_id) {
+      const { data: { user } } = await supabase.auth.getUser();
+      user_id = user?.id || null;
+      if (user_id) sessionStorage.setItem("gp_user_id", user_id);
+    }
+    if (!user_id) return; // sem sessão → o RLS bloquearia mesmo; não insiste
+    await supabase.from("app_analytics").insert({
       event_type: eventType,
+      user_id,
       user_email,
       user_plan,
       session_id: getSessionId(),
@@ -131,6 +142,7 @@ export function useSessionTracking() {
       const doInit = async () => {
         try {
           const u = await base44.auth.me();
+          if (u?.id) sessionStorage.setItem("gp_user_id", u.id);
           if (u?.email) sessionStorage.setItem("gp_user_email", u.email);
           if (u?.plan) sessionStorage.setItem("gp_user_plan", u.plan);
         } catch {}
