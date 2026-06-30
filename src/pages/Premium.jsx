@@ -443,7 +443,7 @@ export default function Premium() {
       if (!alive) return;
       if (u?.is_full_premium) { navigate("/Home", { replace: true }); return; }
       setUser(u); setReady(true);
-      trackEvent("premium_page_view", { plan: u?.plan || "free", products: (u?.purchased_products || []).length });
+      trackEvent("premium_page_view", { results_count: (u?.purchased_products || []).length });
     }).catch(() => { if (alive) { setUser(null); setReady(true); } });
     return () => { alive = false; };
   }, [navigate]);
@@ -498,7 +498,7 @@ export default function Premium() {
     onScroll();
     cleanups.push(() => window.removeEventListener("scroll", onScroll));
 
-    const buy = () => { trackEvent("premium_buy_click", { lang }); window.open(PREMIUM.link, "_blank", "noopener"); };
+    const buy = () => { trackEvent("premium_buy_click", { source: "premium_page", occasion_label: lang }); window.open(PREMIUM.link, "_blank", "noopener"); };
     root.querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", buy));
     const back = () => navigate(-1);
     root.querySelectorAll("[data-back]").forEach((b) => b.addEventListener("click", back));

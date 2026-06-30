@@ -283,10 +283,10 @@ export default function OccasionRecipesPage() {
   // /Premium do app (lá o usuário vê o próprio estado e sente vontade de comprar).
   const goUnlock = () => {
     if (hasDedicatedCheckout(occasion)) {
-      trackEvent("premium_click", { source: "occasion_checkout", occasion });
+      trackEvent("premium_click", { source: "occasion_checkout", occasion_label: occasion });
       window.open(salesLinkForOccasion(occasion), "_blank", "noopener");
     } else {
-      trackEvent("premium_click", { source: "occasion_to_premium_page", occasion });
+      trackEvent("premium_click", { source: "occasion_to_premium_page", occasion_label: occasion });
       navigate("/Premium");
     }
   };
