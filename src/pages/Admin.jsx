@@ -24,6 +24,7 @@ import AdminUserProducts from "@/components/admin/AdminUserProducts";
 import AdminGostoPuroProducts from "@/components/admin/AdminGostoPuroProducts";
 import AdminDietaryTagsBulk from "@/components/admin/AdminDietaryTagsBulk";
 import AdminPlannerMetrics from "@/components/admin/AdminPlannerMetrics";
+import AdminPremiumFunnel from "@/components/admin/AdminPremiumFunnel";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart, Eye, CalendarDays } from "lucide-react";
@@ -34,6 +35,7 @@ const tabs = [
   { key: "engagement",   label: "Analytics",       icon: TrendingUp },
   { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
   { key: "planner",        label: "Planner",          icon: CalendarDays },
+  { key: "funil_premium",  label: "Funil Premium",    icon: Crown },
   { key: "report",         label: "Rapporto",         icon: FileBarChart },
   { key: "utm",            label: "Link UTM",          icon: Link2 },
   { key: "utenti",       label: "Utenti",        icon: Users },
@@ -157,6 +159,7 @@ function AdminContent() {
           {activeTab === "engagement"   && <AdminEngagement />}
           {activeTab === "recipeanalytics" && <AdminRecipeEngagement />}
           {activeTab === "planner"       && <AdminPlannerMetrics />}
+          {activeTab === "funil_premium" && <AdminPremiumFunnel />}
           {activeTab === "report"         && <AdminAnalyticsReport />}
           {activeTab === "utm"            && (
             <div className="space-y-8">
