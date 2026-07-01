@@ -53,6 +53,7 @@ import __Layout from './Layout.jsx';
 // Lazy-loaded para code-splitting: cada pagina vira um chunk separado,
 // reduzindo o bundle inicial (o Admin, em especial, e enorme).
 const Admin = lazy(() => import('./pages/Admin'));
+const Feed = lazy(() => import('./pages/Feed'));
 const Folders = lazy(() => import('./pages/Folders'));
 const Home = lazy(() => import('./pages/Home'));
 const Planner = lazy(() => import('./pages/Planner'));
@@ -64,6 +65,7 @@ const ShoppingList = lazy(() => import('./pages/ShoppingList'));
 
 export const PAGES = {
     "Admin": Admin,
+    "Feed": Feed,
     "Folders": Folders,
     "Home": Home,
     "Planner": Planner,
@@ -74,7 +76,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Home",
+    mainPage: "Feed",
     Pages: PAGES,
     Layout: __Layout,
 };

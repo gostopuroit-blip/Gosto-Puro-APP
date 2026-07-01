@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import RecipeCard from "@/components/RecipeCard";
+import SavedPostsFolder from "@/components/feed/SavedPostsFolder";
 
 const systemFolders = [
   { key: "per_fare", label: "Da fare", icon: "📋" },
@@ -226,10 +227,23 @@ export default function Folders() {
     );
   }
 
-  // Free sem nenhuma compra → Cartelle bloqueada (cadeado).
+  // Free sem nenhuma compra → só a pasta do Feed (aberta a todos) + cadeado nas cartelle de ricette.
   const hasAccess = currentUser?.is_premium === true || currentUser?.has_access === true || currentUser?.is_full_premium === true;
   if (!hasAccess) {
-    return <PremiumLock feature="le cartelle personalizzate" />;
+    return (
+      <div className="pb-4">
+        <div className="px-5 pt-14 pb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Le mie cartelle</h1>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">I tuoi salvataggi</p>
+        </div>
+        <div className="px-5 mb-4">
+          <SavedPostsFolder user={currentUser} />
+        </div>
+        <div className="px-5">
+          <PremiumLock feature="le cartelle personalizzate" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -286,6 +300,9 @@ export default function Folders() {
       {/* Custom Folders - Premium Gate */}
       {/* Folder Grid */}
       <div className="px-5 space-y-3">
+       {/* Pasta única dos posts salvos do Feed */}
+       <SavedPostsFolder user={currentUser} />
+
        {systemFolders.map((f) => {
          const folderRecipes = getRecipesInFolder(f.key);
          const isExpanded = expandedFolder === f.key;

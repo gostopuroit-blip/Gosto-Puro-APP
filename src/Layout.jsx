@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Home, BookOpen, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
+import { Home, LayoutGrid, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useSessionTracking, useClickTracking, trackEvent } from "@/components/useAnalytics";
 import PremiumBanner from "@/components/PremiumBanner";
 
 const navItems = [
-{ name: "Home", icon: Home, page: "Home" },
-{ name: "Ricette", icon: BookOpen, page: "Recipes" },
+{ name: "Feed", icon: Home, page: "Feed" },
+{ name: "Collezioni", icon: LayoutGrid, page: "Home" },
 { name: "Cartelle", icon: FolderHeart, page: "Folders" },
 { name: "Planner", icon: CalendarDays, page: "Planner" },
 { name: "Profilo", icon: UserCircle2, page: "Profile" }

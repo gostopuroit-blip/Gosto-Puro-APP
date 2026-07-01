@@ -25,7 +25,7 @@ export default function AdminExperts() {
     try {
       await base44.entities.User.update(user.id, { is_expert: true, role: "premium" });
       setUsers(users.map((u) => u.id === user.id ? { ...u, is_expert: true, role: "premium" } : u));
-      toast.success(`${user.full_name || user.email} è ora un Expert!`);
+      toast.success(`${user.display_name || user.email} è ora un Expert!`);
     } catch {
       toast.error("Errore nell'aggiornamento");
     } finally {
@@ -38,7 +38,7 @@ export default function AdminExperts() {
     try {
       await base44.entities.User.update(user.id, { is_expert: false, role: "user" });
       setUsers(users.map((u) => u.id === user.id ? { ...u, is_expert: false, role: "user" } : u));
-      toast.success(`Expert rimosso per ${user.full_name || user.email}`);
+      toast.success(`Expert rimosso per ${user.display_name || user.email}`);
     } catch {
       toast.error("Errore nell'aggiornamento");
     } finally {
@@ -98,13 +98,13 @@ export default function AdminExperts() {
                     <img src={user.photo_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-gray-500">
-                      {(user.full_name || user.email || "U").charAt(0).toUpperCase()}
+                      {(user.display_name || user.email || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-sm text-gray-900 truncate">
-                        {user.full_name || user.email?.split("@")[0]}
+                        {user.display_name || user.email?.split("@")[0]}
                       </p>
                       {user.is_expert && (
                         <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-bold">✅ Expert</span>

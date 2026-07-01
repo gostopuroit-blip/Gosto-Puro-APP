@@ -25,9 +25,11 @@ import AdminGostoPuroProducts from "@/components/admin/AdminGostoPuroProducts";
 import AdminDietaryTagsBulk from "@/components/admin/AdminDietaryTagsBulk";
 import AdminPlannerMetrics from "@/components/admin/AdminPlannerMetrics";
 import AdminPremiumFunnel from "@/components/admin/AdminPremiumFunnel";
+import AdminExperts from "@/components/admin/AdminExperts";
+import AdminReports from "@/components/admin/AdminReports";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart, Eye, CalendarDays } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart, Eye, CalendarDays, UserCheck, Flag } from "lucide-react";
 
 const tabs = [
   { key: "overview",     label: "Visão Geral",    icon: Eye },
@@ -39,6 +41,8 @@ const tabs = [
   { key: "report",         label: "Rapporto",         icon: FileBarChart },
   { key: "utm",            label: "Link UTM",          icon: Link2 },
   { key: "utenti",       label: "Utenti",        icon: Users },
+  { key: "experts",      label: "Experts",       icon: UserCheck },
+  { key: "segnalazioni", label: "Segnalazioni",  icon: Flag },
   { key: "ricette",      label: "Ricette",        icon: UtensilsCrossed },
   { key: "audit_ingredients", label: "Audit Ingredienti", icon: Filter },
   { key: "dietary_tags_bulk", label: "Tag Dietetici", icon: Tag },
@@ -174,6 +178,8 @@ function AdminContent() {
             </div>
           )}
           {activeTab === "utenti"       && <AdminUsers />}
+          {activeTab === "experts"      && <AdminExperts />}
+          {activeTab === "segnalazioni" && <AdminReports />}
           {activeTab === "ricette"      && <AdminRecipesManager />}
           {activeTab === "audit_ingredients" && <AdminRecipeIngredientAudit />}
           {activeTab === "dietary_tags_bulk" && <AdminDietaryTagsBulk />}
