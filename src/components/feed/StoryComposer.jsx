@@ -40,7 +40,7 @@ export default function StoryComposer({ me, onClose, onPublished }) {
 
   return (
     <div className="fixed inset-0 z-[80] bg-black flex flex-col">
-      <div className="flex items-center justify-between p-3">
+      <div className="flex items-center justify-between p-3" style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <button onClick={onClose} className="text-white"><X className="w-6 h-6" /></button>
         <p className="text-white font-bold text-sm">La tua storia</p>
         <button

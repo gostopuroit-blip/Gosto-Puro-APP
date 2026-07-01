@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { X, ImagePlus, Loader2, Film, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { createPost } from "@/api/feed";
@@ -8,10 +8,23 @@ import { toast } from "sonner";
 const MAX_ITEMS = 10;
 const MAX_MB = 100;
 
-// Tags = sinais de interesse que alimentam a recomendação personalizada
-const TAG_OPTIONS = [
-  "Fit", "Diabete", "Senza Zucchero", "Proteico", "Leggera", "Dolci",
-  "Colazione", "Pranzo", "Cena", "Vegetariano", "Estate", "Veloce",
+// Tags = sinais de interesse (alimentam a recomendação) alinhadas aos filtros e produtos do app
+const TAG_GROUPS = [
+  {
+    label: "Occasioni",
+    tags: ["Colazione", "Pranzo", "Cena", "Snack", "Dolci", "Aperitivo", "Leggera", "Veloci",
+      "In famiglia", "Per due", "Con amici", "Feste", "Estate", "Autunno", "Inverno", "Primavera", "Natale", "Dal mondo"],
+  },
+  {
+    label: "Dietetici / Benessere",
+    tags: ["Fit", "Proteico", "Low carb", "Senza zucchero", "Senza glutine", "Senza lattosio",
+      "Vegetariano", "Vegano", "Diabete", "Menopausa", "Detox", "Anti-Gonfiore", "Brucia Grassi", "Ricette Sane"],
+  },
+  {
+    label: "Prodotti / Collezioni",
+    tags: ["Gelati", "Bibite Estate", "Insalate", "Friggitrice ad Aria", "Whey",
+      "Facili da Congelare", "Pane Senza Glutine", "Meal Prep"],
+  },
 ];
 
 export default function ComposeSheet({ me, onClose, onPublished }) {
@@ -19,8 +32,30 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
   const [media, setMedia] = useState([]); // {url, type, poster?}
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState([]);
+  const [notify, setNotify] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const isAdmin = me?.role === "admin";
+
+  // Vetrina prodotto (CTA)
+  const [products, setProducts] = useState([]);
+  const [ctaLabel, setCtaLabel] = useState("");
+  const [ctaUrl, setCtaUrl] = useState("");
+  const [ctaImage, setCtaImage] = useState(null);
+
+  useEffect(() => {
+    base44.entities.GostoPuroProduct.filter({ is_active: true }, "sort_order", 100)
+      .then(setProducts)
+      .catch(() => setProducts([]));
+  }, []);
+
+  const pickProduct = (slug) => {
+    const p = products.find((x) => x.slug === slug);
+    if (!p) return;
+    setCtaLabel(`Scopri: ${p.nome}`);
+    setCtaImage(p.image_url || null);
+    if (!ctaUrl.trim()) setCtaUrl("/Premium");
+  };
 
   const toggleTag = (t) =>
     setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
@@ -71,8 +106,22 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
     if (media.length === 0) { toast.error("Aggiungi almeno una foto o un video"); return; }
     setPublishing(true);
     try {
-      const post = await createPost({ media, caption, me, tags });
+      const cta = ctaLabel.trim() && ctaUrl.trim() ? { label: ctaLabel, url: ctaUrl, image: ctaImage } : null;
+      const post = await createPost({ media, caption, me, tags, cta });
       toast.success("Post pubblicato!");
+      // Notificação push (só admin; a edge function é admin-only no servidor)
+      if (notify && isAdmin) {
+        try {
+          const body = (caption || "").trim().slice(0, 100) || "Guarda l'ultimo post nel feed!";
+          const res = await base44.functions.invoke("sendCustomNotification", {
+            title: "🍽️ Novità su Gosto Puro",
+            body,
+            url: "/Feed",
+            segment: "all",
+          });
+          if (res?.data?.success) toast.success(`Notifica inviata a ${res.data.sent} utenti`);
+        } catch { /* best-effort */ }
+      }
       onPublished?.(post);
     } catch {
       toast.error("Errore nella pubblicazione");
@@ -184,28 +233,86 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
             className="w-full bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3.5 py-3 text-sm outline-none resize-none border border-gray-100 dark:border-[#333]"
           />
 
-          {/* Tags de interesse (recomendação) */}
-          <div>
-            <p className="text-xs font-semibold text-gray-500 mb-1.5">Argomenti (aiutano a consigliare il post)</p>
-            <div className="flex flex-wrap gap-1.5">
-              {TAG_OPTIONS.map((t) => {
-                const on = tags.includes(t);
-                return (
-                  <button
-                    key={t}
-                    onClick={() => toggleTag(t)}
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition ${
-                      on
-                        ? "bg-[#2D6A4F] border-[#2D6A4F] text-white"
-                        : "bg-white dark:bg-[#0F0F0F] border-gray-200 dark:border-[#333] text-gray-600 dark:text-gray-300"
-                    }`}
-                  >
-                    #{t}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Tags de interesse (recomendação) — agrupadas pelos filtros/produtos */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-gray-500">
+              Argomenti (aiutano a consigliare il post){tags.length > 0 ? ` · ${tags.length} scelti` : ""}
+            </p>
+            {TAG_GROUPS.map((group) => (
+              <div key={group.label}>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-1.5">{group.label}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.tags.map((t) => {
+                    const on = tags.includes(t);
+                    return (
+                      <button
+                        key={t}
+                        onClick={() => toggleTag(t)}
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition ${
+                          on
+                            ? "bg-[#2D6A4F] border-[#2D6A4F] text-white"
+                            : "bg-white dark:bg-[#0F0F0F] border-gray-200 dark:border-[#333] text-gray-600 dark:text-gray-300"
+                        }`}
+                      >
+                        #{t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Vetrina prodotto (CTA de venda) */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-gray-500">Vetrina prodotto (facoltativo)</p>
+            {products.length > 0 && (
+              <select
+                value=""
+                onChange={(e) => pickProduct(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3 py-2.5 text-sm outline-none border border-gray-100 dark:border-[#333]"
+              >
+                <option value="">Collega un prodotto…</option>
+                {products.map((p) => (
+                  <option key={p.slug} value={p.slug}>{p.nome}</option>
+                ))}
+              </select>
+            )}
+            <input
+              value={ctaLabel}
+              onChange={(e) => setCtaLabel(e.target.value)}
+              placeholder="Testo del pulsante (es. Scopri i Gelati)"
+              className="w-full bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3 py-2.5 text-sm outline-none border border-gray-100 dark:border-[#333]"
+            />
+            <input
+              value={ctaUrl}
+              onChange={(e) => setCtaUrl(e.target.value)}
+              placeholder="Link — Hotmart o interno (es. /Premium)"
+              className="w-full bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3 py-2.5 text-sm outline-none border border-gray-100 dark:border-[#333]"
+            />
+            {(ctaLabel.trim() && ctaUrl.trim()) && (
+              <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                {ctaImage && <img src={ctaImage} alt="" className="w-8 h-8 rounded object-cover" />}
+                <span>Il post mostrerà un pulsante che apre il popup di vendita.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Notificar usuários (só admin) */}
+          {isAdmin && (
+            <button
+              onClick={() => setNotify((v) => !v)}
+              className="w-full flex items-center justify-between bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3.5 py-3 border border-gray-100 dark:border-[#333]"
+            >
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Avvisa gli utenti</p>
+                <p className="text-[11px] text-gray-400">Invia una notifica push a tutti quando pubblichi</p>
+              </div>
+              <span className={`w-11 h-6 rounded-full flex items-center px-0.5 transition ${notify ? "bg-[#2D6A4F] justify-end" : "bg-gray-300 dark:bg-[#333] justify-start"}`}>
+                <span className="w-5 h-5 rounded-full bg-white shadow" />
+              </span>
+            </button>
+          )}
 
           <p className="text-[11px] text-gray-400 leading-relaxed">
             Foto, carosello o video corto (fino a {MAX_MB}MB). Il post apparirà nel feed di tutti gli utenti.

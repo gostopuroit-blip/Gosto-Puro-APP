@@ -147,7 +147,7 @@ export async function fetchSavedPosts() {
     .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
 }
 
-export async function createPost({ media, caption, me, tags = [] }) {
+export async function createPost({ media, caption, me, tags = [], cta = null }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("auth");
   const arr = Array.isArray(media) ? media : [];
@@ -160,6 +160,9 @@ export async function createPost({ media, caption, me, tags = [] }) {
     media: arr,
     caption: caption || "",
     tags: Array.isArray(tags) ? tags : [],
+    cta_label: cta?.label?.trim() || null,
+    cta_url: cta?.url?.trim() || null,
+    cta_image: cta?.image || null,
     is_published: true,
     ...authorFields(me),
   };

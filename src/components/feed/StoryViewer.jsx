@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Trash2, ChevronLeft, ChevronRight, Flag } from "lucide-react";
-import { markSeen, deleteStory } from "@/api/stories";
+import { X, Trash2, ChevronLeft, ChevronRight, Flag, Heart } from "lucide-react";
+import { markSeen, deleteStory, toggleStoryLike } from "@/api/stories";
 import { reportContent } from "@/api/moderation";
 import { toast } from "sonner";
 
@@ -10,6 +10,9 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
   const [gi, setGi] = useState(startGroup);
   const [si, setSi] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [burstKey, setBurstKey] = useState(0);
   const timerRef = useRef(null);
   const startRef = useRef(0);
 
@@ -63,6 +66,11 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
     return clearTimer;
   }, [story?.id, goNext]);
 
+  // Reset da curtida ao trocar de story
+  useEffect(() => {
+    if (story) { setLiked(!!story.liked); setLikeCount(story.like_count || 0); }
+  }, [story?.id]);
+
   if (!story) return null;
 
   const canDelete = story.author_id === me?.id || me?.role === "admin";
@@ -83,6 +91,21 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
     if (v.duration) setProgress(v.currentTime / v.duration);
   };
 
+  const like = async () => {
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
+    if (next) setBurstKey((k) => k + 1); // dispara a animação do coração
+    try {
+      await toggleStoryLike(story.id, liked);
+    } catch {
+      setLiked(!next);
+      setLikeCount((c) => Math.max(0, c + (next ? -1 : 1)));
+    }
+  };
+
+  const showCount = isOwn || me?.role === "admin";
+
   const removeCurrent = async () => {
     if (!window.confirm("Eliminare questa storia?")) return;
     try {
@@ -98,7 +121,7 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
     <div className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center">
       <div className="relative w-full h-full sm:w-[400px] sm:h-[92vh] sm:max-h-[760px] sm:rounded-2xl overflow-hidden bg-black">
       {/* Barras de progresso */}
-      <div className="absolute top-0 left-0 right-0 flex gap-1 p-2 z-20">
+      <div className="absolute top-0 left-0 right-0 flex gap-1 p-2 z-20" style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.5rem)" }}>
         {group.stories.map((_, i) => (
           <div key={i} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
             <div
@@ -110,7 +133,7 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
       </div>
 
       {/* Cabeçalho */}
-      <div className="absolute top-4 left-0 right-0 flex items-center gap-2.5 px-3 z-20">
+      <div className="absolute left-0 right-0 flex items-center gap-2.5 px-3 z-20" style={{ top: "calc(env(safe-area-inset-top) + 1.25rem)" }}>
         {group.author_photo ? (
           <img src={group.author_photo} alt="" className="w-8 h-8 rounded-full object-cover" />
         ) : (
@@ -157,6 +180,34 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
       <button onClick={goNext} className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/15 text-white items-center justify-center z-20">
         <ChevronRight className="w-5 h-5" />
       </button>
+
+      {/* Coração que "estoura" ao curtir */}
+      {burstKey > 0 && (
+        <Heart
+          key={burstKey}
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 text-red-500 fill-red-500 z-30 story-heart-burst"
+        />
+      )}
+
+      {/* Barra inferior: curtir */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 px-4 pt-8 bg-gradient-to-t from-black/50 to-transparent" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
+        {showCount && likeCount > 0 && (
+          <span className="text-white text-sm font-semibold">{likeCount}</span>
+        )}
+        <button onClick={like} aria-label="Mi piace" className="active:scale-90 transition">
+          <Heart className={`w-8 h-8 drop-shadow ${liked ? "fill-red-500 text-red-500" : "text-white"}`} />
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes storyHeartBurst {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+          15% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+          40% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          100% { transform: translate(-50%, -60%) scale(1); opacity: 0; }
+        }
+        .story-heart-burst { animation: storyHeartBurst 0.9s ease-out forwards; }
+      `}</style>
       </div>
     </div>
   );

@@ -17,13 +17,15 @@ export async function fetchStories() {
 
   const list = stories || [];
   let seen = new Set();
+  let liked = new Set();
   if (user && list.length) {
-    const { data: views } = await supabase
-      .from("feed_story_views")
-      .select("story_id")
-      .eq("user_id", user.id)
-      .in("story_id", list.map((s) => s.id));
+    const ids = list.map((s) => s.id);
+    const [{ data: views }, { data: likes }] = await Promise.all([
+      supabase.from("feed_story_views").select("story_id").eq("user_id", user.id).in("story_id", ids),
+      supabase.from("feed_story_likes").select("story_id").eq("user_id", user.id).in("story_id", ids),
+    ]);
     seen = new Set((views || []).map((v) => v.story_id));
+    liked = new Set((likes || []).map((l) => l.story_id));
   }
 
   const groups = new Map();
@@ -37,7 +39,7 @@ export async function fetchStories() {
         stories: [],
       });
     }
-    groups.get(s.author_id).stories.push({ ...s, seen: seen.has(s.id) });
+    groups.get(s.author_id).stories.push({ ...s, seen: seen.has(s.id), liked: liked.has(s.id) });
   }
 
   const arr = [...groups.values()].map((g) => ({ ...g, allSeen: g.stories.every((s) => s.seen) }));
@@ -78,6 +80,16 @@ export async function createStory({ file, me }) {
 export async function deleteStory(story) {
   await supabase.from("feed_stories").delete().eq("id", story.id);
   if (story.media_path) await supabase.storage.from("stories").remove([story.media_path]);
+}
+
+export async function toggleStoryLike(storyId, currentlyLiked) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("auth");
+  if (currentlyLiked) {
+    await supabase.from("feed_story_likes").delete().eq("story_id", storyId).eq("user_id", user.id);
+  } else {
+    await supabase.from("feed_story_likes").insert({ story_id: storyId, user_id: user.id });
+  }
 }
 
 export async function markSeen(storyId) {

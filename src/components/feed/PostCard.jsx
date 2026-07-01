@@ -3,6 +3,8 @@ import { Heart, MessageCircle, Bookmark, MoreHorizontal, BadgeCheck, Trash2, Eye
 import MediaCarousel from "./MediaCarousel";
 import CommentsSheet, { Avatar, timeAgo } from "./CommentsSheet";
 import CreatorProfileSheet from "./CreatorProfileSheet";
+import ProductPopup from "./ProductPopup";
+import { ShoppingBag } from "lucide-react";
 import { toggleLike, toggleSave, deletePost, recordView } from "@/api/feed";
 import { reportContent } from "@/api/moderation";
 import { toast } from "sonner";
@@ -50,6 +52,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
   const [commentCount, setCommentCount] = useState(post.comment_count || 0);
   const [showComments, setShowComments] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showProduct, setShowProduct] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -76,6 +79,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
     }
   };
   const tags = Array.isArray(post.tags) ? post.tags : [];
+  const hasCta = !!(post.cta_label && post.cta_url);
 
   // Registra a visualização (1x por montagem)
   const viewedRef = useRef(false);
@@ -189,11 +193,19 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
         </button>
       </div>
 
-      {/* Curtidas */}
-      {likeCount > 0 && (
-        <p className="px-3.5 pt-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
-          {likeCount} {likeCount === 1 ? "mi piace" : "mi piace"}
-        </p>
+      {/* Curtidas + comentários (visível a todos) */}
+      {(likeCount > 0 || commentCount > 0) && (
+        <div className="px-3.5 pt-1.5 flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {likeCount > 0 && (
+            <span>{likeCount} {likeCount === 1 ? "mi piace" : "mi piace"}</span>
+          )}
+          {likeCount > 0 && commentCount > 0 && <span className="text-gray-300 dark:text-gray-600">·</span>}
+          {commentCount > 0 && (
+            <button onClick={() => setShowComments(true)}>
+              {commentCount} {commentCount === 1 ? "commento" : "commenti"}
+            </button>
+          )}
+        </div>
       )}
 
       {/* Legenda */}
@@ -218,12 +230,25 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
         </div>
       )}
 
+      {/* Botão de vitrine (venda de produto) */}
+      {hasCta && (
+        <div className="px-3.5 pt-2.5">
+          <button
+            onClick={() => setShowProduct(true)}
+            className="w-full flex items-center justify-center gap-2 bg-[#D4A846] hover:bg-[#c39a3d] text-[#412402] font-bold text-sm py-2.5 rounded-xl transition"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            {post.cta_label}
+          </button>
+        </div>
+      )}
+
       {/* Comentários */}
       <button
         onClick={() => setShowComments(true)}
         className="px-3.5 pt-1.5 text-sm text-gray-400 block"
       >
-        {commentCount > 0 ? `Vedi tutti i ${commentCount} commenti` : "Aggiungi un commento..."}
+        Aggiungi un commento...
       </button>
 
       {/* Dados do post — visível só p/ autor e admin */}
@@ -250,6 +275,8 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
       {showProfile && (
         <CreatorProfileSheet authorId={post.author_id} me={me} onClose={() => setShowProfile(false)} />
       )}
+
+      {showProduct && <ProductPopup post={post} onClose={() => setShowProduct(false)} />}
     </article>
   );
 }

@@ -51,12 +51,6 @@ export default function Feed() {
 
   return (
     <div className="min-h-[60vh] pb-4">
-      <div className="flex items-center justify-between px-4 pt-3 pb-2">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
-          <Sparkles className="w-5 h-5 text-[#2D6A4F]" /> Feed
-        </h1>
-      </div>
-
       {/* Stories 24h */}
       <StoriesBar me={me} />
 
