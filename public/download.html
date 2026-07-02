@@ -942,6 +942,16 @@ function track(type){
 try { if (!sessionStorage.getItem("gp_dl_view")) { sessionStorage.setItem("gp_dl_view", "1"); track("view"); } }
 catch (_) { track("view"); }
 
+// Guarda a origem no localStorage (mesmo domínio do app) para que, ao abrir o app
+// depois de instalar, o cadastro possa ser atribuído a essa origem (Instagram/etc).
+try {
+  const _src = detectSource();
+  if (_src && _src !== "direct") {
+    localStorage.setItem("gp_last_utm_source", _src);
+    localStorage.setItem("gp_last_utm_date", new Date().toISOString().slice(0, 10));
+  }
+} catch (_) {}
+
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; });
 window.addEventListener("appinstalled", () => { deferredPrompt = null; });
@@ -973,7 +983,9 @@ if (isInApp()) {
 }
 
 async function installApp(){
-  track("install");                                                  // conta o clique de instalar
+  // Conta a tentativa de instalar 1x por sessão (evita inflar com toques repetidos)
+  try { if (!sessionStorage.getItem("gp_dl_install")) { sessionStorage.setItem("gp_dl_install", "1"); track("install"); } }
+  catch (_) { track("install"); }
   if (isInApp()){ openBrowserSheet(); return; }                      // browser interno → guia p/ abrir no navegador
   if (isStandalone()){ window.location.href = "/"; return; }         // já instalado → abre
   if (deferredPrompt){                                               // Android / desktop

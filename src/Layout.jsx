@@ -4,6 +4,7 @@ import { createPageUrl } from "./utils";
 import { Home, LayoutGrid, FolderHeart, CalendarDays, UserCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 import { useSessionTracking, useClickTracking, trackEvent } from "@/components/useAnalytics";
 import PremiumBanner from "@/components/PremiumBanner";
 import NotificationNudge from "@/components/NotificationNudge";
@@ -77,6 +78,16 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     trackEvent("screen_load", { occasion_label: currentPageName });
   }, [currentPageName]);
+
+  // Atribuição de origem (só p/ contas novas): no 1º acesso grava de onde a pessoa veio.
+  // Perfis antigos já são 'preexisting' → ignorados. Write-once via guarda .is(null).
+  useEffect(() => {
+    if (!user?.id || user.acquisition_source != null) return;
+    const src = localStorage.getItem("gp_last_utm_source") || "direct";
+    supabase.from("profiles").update({ acquisition_source: src })
+      .eq("id", user.id).is("acquisition_source", null)
+      .then(() => {}, () => {});
+  }, [user]);
 
   useEffect(() => {
     // Recarrega o usuário sempre que navegar para a página Profile

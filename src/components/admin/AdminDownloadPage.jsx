@@ -7,15 +7,20 @@ const PLAT_LABEL = { android: "Android", ios: "iPhone", desktop: "Desktop", "?":
 
 export default function AdminDownloadPage() {
   const [m, setM] = useState(null);
+  const [sources, setSources] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(false);
 
   const load = async () => {
     setLoading(true); setErr(false);
     try {
-      const { data, error } = await supabase.rpc("gp_download_metrics");
-      if (error || !data) throw error || new Error("no data");
-      setM(data);
+      const [dl, sr] = await Promise.all([
+        supabase.rpc("gp_download_metrics"),
+        supabase.rpc("gp_signup_sources"),
+      ]);
+      if (dl.error || !dl.data) throw dl.error || new Error("no data");
+      setM(dl.data);
+      setSources(sr.data || null);
     } catch { setErr(true); setM(null); }
     setLoading(false);
   };
@@ -40,6 +45,8 @@ export default function AdminDownloadPage() {
     youtube: "YouTube", twitter: "X / Twitter", google: "Google", pinterest: "Pinterest",
     snapchat: "Snapchat", line: "Line", direct: "Direto / desconhecido",
   };
+  const accSources = Array.isArray(sources?.by_source) ? sources.by_source : [];
+  const maxAcc = Math.max(1, ...accSources.map((s) => s.total || 0));
 
   const cards = [
     { label: "Visitas (total)", value: m.views_total, sub: `${nf(m.views_14d)} nos últimos 14 dias`, icon: Eye },
@@ -117,6 +124,38 @@ export default function AdminDownloadPage() {
         <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
           Detecta pela tag do link (?utm_source=…), pelo app interno (Instagram/TikTok) e pelo referrer. Marque seus links (ex.: /download?utm_source=instagram) para máxima precisão.
         </p>
+      </div>
+
+      {/* Contas criadas por origem (funil real: virou usuário) */}
+      <div className="bg-white rounded-2xl p-5 border border-gray-100">
+        <h3 className="text-sm font-bold text-gray-800 mb-1">Contas criadas por origem</h3>
+        <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+          De onde vieram as pessoas que <b>criaram conta</b> (não só visitaram). Começa a contar agora — contas antigas não têm origem registrada.
+        </p>
+        {accSources.length === 0 ? (
+          <p className="text-sm text-gray-400 py-2">Ainda sem contas novas atribuídas. Os números aparecem conforme novas pessoas se cadastram.</p>
+        ) : (
+          <div className="space-y-2.5">
+            {accSources.map((s) => (
+              <div key={s.source}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-gray-700">{SRC_LABEL[s.source] || s.source}</span>
+                  <span className="text-xs text-gray-500">
+                    <b className="text-gray-900">{nf(s.total)}</b> contas · {nf(s.free)} grátis
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#D4A846] rounded-full" style={{ width: `${Math.max(3, ((s.total || 0) / maxAcc) * 100)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {sources && (
+          <p className="text-[11px] text-gray-400 mt-3">
+            Últimos 7 dias: <b className="text-gray-700">{nf(sources.new_7d)}</b> contas novas · <b className="text-gray-700">{nf(sources.new_free_7d)}</b> grátis.
+          </p>
+        )}
       </div>
 
       {/* Por dia */}
