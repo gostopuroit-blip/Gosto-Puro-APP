@@ -112,6 +112,9 @@ export async function toggleCommentLike(commentId, currentlyLiked) {
 }
 
 export async function deleteComment(id) {
+  // Apaga primeiro as respostas (evita respostas órfãs que ficam contadas mas
+  // não aparecem na lista). Cada delete dispara o trigger que ajusta comment_count.
+  await supabase.from("feed_comments").delete().eq("parent_id", id);
   const { error } = await supabase.from("feed_comments").delete().eq("id", id);
   if (error) throw error;
 }

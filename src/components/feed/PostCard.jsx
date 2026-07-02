@@ -210,6 +210,19 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
       {/* Mídia */}
       <MediaCarousel media={post.media} />
 
+      {/* Botão de vitrine (venda) — logo após a imagem, no topo de tudo */}
+      {hasCta && (
+        <div className="px-3.5 pt-3">
+          <button
+            onClick={onCta}
+            className="w-full flex items-center justify-center gap-2 bg-[#D4A846] hover:bg-[#c39a3d] text-[#412402] font-bold text-sm py-2.5 rounded-xl transition"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            {post.cta_label}
+          </button>
+        </div>
+      )}
+
       {/* Ações */}
       <div className="flex items-center gap-4 px-3.5 pt-2.5">
         <button onClick={onLike} className="flex items-center gap-1.5 active:scale-90 transition">
@@ -225,19 +238,6 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
           <Bookmark className={`w-6 h-6 ${saved ? "fill-[#2D6A4F] text-[#2D6A4F]" : "text-gray-700 dark:text-gray-200"}`} />
         </button>
       </div>
-
-      {/* Botão de vitrine (venda) — logo após o post, antes das curtidas */}
-      {hasCta && (
-        <div className="px-3.5 pt-2.5">
-          <button
-            onClick={onCta}
-            className="w-full flex items-center justify-center gap-2 bg-[#D4A846] hover:bg-[#c39a3d] text-[#412402] font-bold text-sm py-2.5 rounded-xl transition"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            {post.cta_label}
-          </button>
-        </div>
-      )}
 
       {/* Curtidas + comentários (visível a todos) */}
       {(likeCount > 0 || commentCount > 0) && (

@@ -148,8 +148,12 @@ export default function CommentsSheet({ post, me, onClose, onCountChange }) {
     }
   };
 
+  // Um comentário é "de topo" se não tem pai OU se o pai não está mais na lista
+  // (resposta órfã — o comentário-pai foi apagado). Assim nada "desaparece" mesmo
+  // que o contador conte a resposta.
+  const ids = new Set(comments.map((c) => c.id));
   const tops = comments
-    .filter((c) => !c.parent_id)
+    .filter((c) => !c.parent_id || !ids.has(c.parent_id))
     .sort(
       (a, b) =>
         (b.author_liked ? 1 : 0) - (a.author_liked ? 1 : 0) ||
