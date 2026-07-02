@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Heart, MessageCircle, Bookmark, MoreHorizontal, BadgeCheck, Trash2, Eye, Flag } from "lucide-react";
 import MediaCarousel from "./MediaCarousel";
 import CommentsSheet, { Avatar, timeAgo } from "./CommentsSheet";
@@ -46,6 +47,7 @@ function linkify(text) {
 }
 
 export default function PostCard({ post, me, onDeleted, disableProfile = false }) {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState(!!post.liked);
   const [saved, setSaved] = useState(!!post.saved);
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
@@ -80,6 +82,15 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
   };
   const tags = Array.isArray(post.tags) ? post.tags : [];
   const hasCta = !!(post.cta_label && post.cta_url);
+  const ctaIsInternal = hasCta && post.cta_url.startsWith("/");
+
+  // Link interno (es. raccolta/ocasião) → naviga direttamente: chi ha già la collezione
+  // vede le ricette, altrimenti trova la schermata di sblocco. Link esterno → popup di vendita.
+  const onCta = () => {
+    trackEvent("feed_cta_click", { post_id: post.id, cta_url: post.cta_url });
+    if (ctaIsInternal) navigate(post.cta_url);
+    else setShowProduct(true);
+  };
 
   // Registra a visualização (1x por montagem)
   const viewedRef = useRef(false);
@@ -234,7 +245,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
       {hasCta && (
         <div className="px-3.5 pt-2.5">
           <button
-            onClick={() => setShowProduct(true)}
+            onClick={onCta}
             className="w-full flex items-center justify-center gap-2 bg-[#D4A846] hover:bg-[#c39a3d] text-[#412402] font-bold text-sm py-2.5 rounded-xl transition"
           >
             <ShoppingBag className="w-4 h-4" />

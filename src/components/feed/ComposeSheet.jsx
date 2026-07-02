@@ -54,7 +54,11 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
     if (!p) return;
     setCtaLabel(`Scopri: ${p.nome}`);
     setCtaImage(p.image_url || null);
-    if (!ctaUrl.trim()) setCtaUrl("/Premium");
+    // Link interno alla pagina della raccolta: chi l'ha già comprata vede subito le
+    // ricette; chi non ce l'ha trova la schermata di sblocco. Punta sempre alla collezione
+    // scelta (sovrascrive un eventuale link precedente).
+    const terms = Array.isArray(p.occasioni) ? p.occasioni.filter(Boolean).join("|") : "";
+    setCtaUrl(`/OccasionRecipes?occasion=${encodeURIComponent(p.nome)}&terms=${encodeURIComponent(terms)}`);
   };
 
   const toggleTag = (t) =>
@@ -287,13 +291,19 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
             <input
               value={ctaUrl}
               onChange={(e) => setCtaUrl(e.target.value)}
-              placeholder="Link — Hotmart o interno (es. /Premium)"
+              placeholder="Link — collega un prodotto sopra, o incolla un link"
               className="w-full bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3 py-2.5 text-sm outline-none border border-gray-100 dark:border-[#333]"
             />
             {(ctaLabel.trim() && ctaUrl.trim()) && (
               <div className="flex items-center gap-2 text-[11px] text-gray-400">
                 {ctaImage && <img src={ctaImage} alt="" className="w-8 h-8 rounded object-cover" />}
-                <span>Il post mostrerà un pulsante che apre il popup di vendita.</span>
+                <span>
+                  {ctaUrl.trim().startsWith("/OccasionRecipes")
+                    ? "Il pulsante porta direttamente alla raccolta: chi l'ha già la vede, altrimenti trova lo sblocco."
+                    : ctaUrl.trim().startsWith("/")
+                    ? "Il pulsante apre questa pagina nell'app."
+                    : "Il pulsante mostrerà un popup di vendita con il link."}
+                </span>
               </div>
             )}
           </div>
