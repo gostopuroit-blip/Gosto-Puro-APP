@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gosto Puro - Ricette buone e veloci per ogni occasione</title>
+<meta name="description" content="Trova in pochi secondi ricette sane, pratiche e organizzate per occasione per trasformare la tua routine alimentare senza complicazioni. Oltre 12.000 ricette. Android e iOS.">
+<meta property="og:title" content="Gosto Puro - Ricette buone e veloci per ogni occasione">
+<meta property="og:description" content="Oltre 12.000 ricette sane, pratiche e organizzate per occasione. Installa l'app Gosto Puro e trasforma la tua routine alimentare.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta name="theme-color" content="#FAF8F2">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green-dark:#12382B;
+  --green:#1F5A43;
+  --gold:#C7A45D;
+  --bg:#FAF8F2;
+  --text:#1F1F1F;
+  --text2:#6B6B6B;
+  --white:#FFFFFF;
+  --line:rgba(18,56,43,.1);
+  --serif:'Fraunces',Georgia,serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.container{max-width:880px;margin:0 auto;padding:0 24px}
+.eyebrow{
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  border:none;cursor:pointer;text-decoration:none;
+  font-family:inherit;font-weight:700;
+  border-radius:100px;
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease,opacity .18s ease;
+}
+.btn:active{transform:scale(.97)}
+@media (hover:hover){
+  .btn:not(:active):hover{transform:translateY(-2px)}
+}
+.btn-primary{
+  background:var(--green-dark);color:#fff;
+  padding:15px 38px;font-size:15px;
+  box-shadow:0 8px 24px rgba(18,56,43,.22);
+  position:relative;overflow:hidden;
+}
+.btn-primary::after{
+  content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.18),transparent);
+  animation:shine 4.5s ease-in-out infinite;
+}
+@keyframes shine{
+  0%,72%{left:-80%}
+  88%,100%{left:130%}
+}
+@media (prefers-reduced-motion:reduce){
+  .btn-primary::after{animation:none}
+}
+.btn-primary:hover{background:var(--green);box-shadow:0 12px 30px rgba(18,56,43,.3)}
+.btn-sm{padding:9px 24px;font-size:13.5px;box-shadow:0 4px 12px rgba(18,56,43,.18)}
+.btn-store{
+  background:transparent;color:var(--green-dark);
+  border:1.5px solid var(--green-dark);
+  padding:13px 26px;font-size:14px;
+}
+.btn-store:hover{background:var(--green-dark);color:#fff}
+.btn-store svg{width:18px;height:18px;flex-shrink:0}
+.store-buttons{display:none;gap:12px;flex-wrap:wrap;justify-content:center}
+body.is-desktop .store-buttons{display:flex}
+body.is-desktop .single-install{display:none}
+.app-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(250,248,242,.85);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  transition:box-shadow .3s ease;
+}
+.app-header.scrolled{box-shadow:0 4px 20px rgba(18,56,43,.06)}
+.app-header-inner{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 24px;max-width:880px;margin:0 auto;
+}
+.app-icon{
+  width:44px;height:44px;flex-shrink:0;
+  border-radius:12px;
+  background:var(--green-dark);
+  display:flex;align-items:center;justify-content:center;
+}
+.app-icon svg{width:24px;height:24px}
+.app-title-wrap{flex:1;min-width:0}
+.app-title{font-size:15px;font-weight:800;letter-spacing:-.02em;color:var(--green-dark);line-height:1.2}
+.app-subtitle{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero{padding:36px 0 40px;text-align:center;position:relative}
+.hero::before{
+  content:"";position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:min(92vw,720px);height:440px;
+  background:radial-gradient(ellipse at center,rgba(199,164,93,.13),transparent 65%);
+  pointer-events:none;z-index:-1;
+}
+.hero .carousel{padding-top:0}
+.hero .carousel-dots{margin:18px 0 40px}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(22px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.fade-in{animation:fadeUp .75s cubic-bezier(.22,.9,.3,1) both}
+.d1{animation-delay:.08s}
+.d2{animation-delay:.18s}
+.d3{animation-delay:.28s}
+.d4{animation-delay:.38s}
+.d5{animation-delay:.5s}
+@media (prefers-reduced-motion:reduce){
+  .fade-in{animation:none}
+}
+.hero h1{
+  font-family:var(--serif);
+  font-size:40px;font-weight:600;letter-spacing:-.02em;
+  color:var(--green-dark);line-height:1.08;
+}
+.hero .tagline{
+  font-size:17px;color:var(--text);font-weight:500;
+  margin:14px auto 0;max-width:420px;
+}
+.hero .desc{
+  font-size:14.5px;color:var(--text2);
+  max-width:440px;margin:12px auto 32px;
+}
+.hero .compat-note{font-size:12px;color:var(--text2);margin-top:14px}
+.hero .compat-note b{color:var(--green-dark);font-weight:700}
+.metrics{
+  display:flex;justify-content:flex-start;align-items:stretch;
+  gap:0;margin:48px auto 0;max-width:640px;
+  overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:20px 0;
+}
+.metrics::-webkit-scrollbar{display:none}
+.metric{
+  flex:1;min-width:104px;text-align:center;padding:0 14px;
+  border-right:1px solid var(--line);
+}
+.metric:first-child{margin-left:auto}
+.metric:last-child{margin-right:auto;border-right:none}
+.metric .m-top{
+  font-size:16px;font-weight:800;color:var(--green-dark);
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  white-space:nowrap;
+}
+.metric .m-top .star{color:var(--gold);font-size:12px}
+.metric .m-label{font-size:10.5px;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-top:4px}
+.metric .badge-livre{
+  display:inline-block;border:1.5px solid var(--green-dark);color:var(--green-dark);
+  font-size:11px;font-weight:800;border-radius:5px;padding:0 7px;line-height:1.5;
+}
+section{padding:56px 0}
+.section-head{text-align:center;margin-bottom:36px}
+.section-title{
+  font-family:var(--serif);
+  font-size:27px;font-weight:600;letter-spacing:-.015em;
+  color:var(--green-dark);line-height:1.15;
+}
+.section-sub{font-size:14px;color:var(--text2);margin-top:8px;max-width:420px;margin-left:auto;margin-right:auto}
+.carousel{
+  display:flex;gap:14px;overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding:4px 24px 8px;
+  margin:0 -24px;
+  scrollbar-width:none;
+}
+.carousel::-webkit-scrollbar{display:none}
+.slide{
+  scroll-snap-align:center;flex-shrink:0;
+  width:232px;border-radius:22px;
+  padding:26px 22px 0;
+  display:flex;flex-direction:column;align-items:center;
+  color:#fff;overflow:hidden;position:relative;
+  transition:transform .35s ease;
+}
+@media (hover:hover){
+  .slide:hover{transform:translateY(-5px)}
+  .review:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(18,56,43,.08)}
+}
+.review{transition:transform .3s ease,box-shadow .3s ease}
+.slide h3{font-size:15.5px;font-weight:700;letter-spacing:-.01em;text-align:center;line-height:1.35}
+.slide p{font-size:12px;opacity:.75;text-align:center;margin:8px 0 22px;line-height:1.5}
+.slide .accent{color:var(--gold)}
+.bg-a{background:var(--green-dark)}
+.bg-b{background:var(--green)}
+.bg-c{background:#0E2C22}
+.carousel-dots{display:flex;justify-content:center;gap:6px;margin-top:20px}
+.carousel-dots span{width:6px;height:6px;border-radius:3px;background:rgba(18,56,43,.15);transition:all .25s ease}
+.carousel-dots span.active{background:var(--green-dark);width:18px}
+.phone{
+  width:152px;height:196px;
+  background:var(--bg);
+  border-radius:24px 24px 0 0;
+  padding:18px 12px 0;
+  position:relative;
+  box-shadow:0 -10px 30px rgba(0,0,0,.22);
+}
+.phone::before{
+  content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:38px;height:4px;border-radius:2px;background:rgba(18,56,43,.2);
+}
+.ph-bar{height:7px;border-radius:4px;background:#E7E2D4;margin:10px 0 0}
+.ph-bar.w60{width:60%}
+.ph-bar.w80{width:80%}
+.ph-bar.dark{background:var(--green);height:9px}
+.ph-bar.gold{background:var(--gold)}
+.ph-cards{display:flex;gap:7px;margin-top:10px}
+.ph-card{flex:1;height:46px;border-radius:10px;background:var(--green)}
+.ph-card.gold{background:var(--gold)}
+.ph-card.soft{background:#EBE6D8}
+.ph-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.ph-row{display:flex;align-items:center;gap:7px}
+.ph-dot{width:14px;height:14px;border-radius:50%;background:var(--green);flex-shrink:0}
+.ph-dot.gold{background:var(--gold)}
+.ph-line{flex:1;height:7px;border-radius:4px;background:#E7E2D4}
+.about{
+  display:flex;flex-direction:column;gap:32px;
+  max-width:880px;margin:0 auto;align-items:center;
+}
+.about-media{
+  position:relative;width:100%;max-width:440px;flex-shrink:0;
+}
+.about-photo{
+  width:100%;aspect-ratio:4/4.6;object-fit:cover;display:block;
+  border-radius:28px;
+  box-shadow:0 20px 50px rgba(18,56,43,.16);
+}
+.about-media::before{
+  content:"";position:absolute;inset:-12px auto auto -12px;
+  width:72px;height:72px;border-radius:22px;
+  border:2px solid var(--gold);opacity:.5;z-index:0;
+}
+.about-badge{
+  position:absolute;bottom:18px;left:18px;right:18px;
+  background:rgba(250,248,242,.94);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-radius:16px;
+  padding:13px 16px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 24px rgba(18,56,43,.14);
+}
+.about-badge .ab-icon{
+  width:36px;height:36px;border-radius:10px;background:var(--green-dark);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.about-badge .ab-icon svg{width:19px;height:19px}
+.about-badge .ab-title{font-size:12.5px;font-weight:800;color:var(--green-dark);line-height:1.25}
+.about-badge .ab-sub{font-size:11px;color:var(--text2)}
+.about-text{max-width:480px;text-align:center}
+.about-text p{font-size:15.5px;color:var(--text2);line-height:1.75}
+.about-text p+p{margin-top:16px}
+.about-text p b{color:var(--green-dark);font-weight:700}
+.about-divider{
+  width:40px;height:2px;background:var(--gold);
+  margin:0 auto 24px;border-radius:1px;
+}
+.about-feel{
+  font-family:var(--serif);
+  font-size:17px;color:var(--green-dark);font-weight:600;
+  margin-top:22px;line-height:1.45;
+}
+.features-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+}
+.feature{
+  padding:24px 18px;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  display:flex;flex-direction:column;gap:12px;
+  background:transparent;transition:background .2s ease;
+}
+.feature:hover{background:rgba(255,255,255,.6)}
+.feature svg{width:22px;height:22px;stroke:var(--green-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.feature .f-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.35}
+.rating-hero{
+  display:flex;align-items:center;justify-content:center;gap:28px;
+  margin-bottom:36px;
+}
+.rating-big{
+  font-family:var(--serif);
+  font-size:64px;font-weight:600;letter-spacing:-.04em;
+  color:var(--green-dark);line-height:.95;
+}
+.rating-meta{text-align:left}
+.rating-meta .stars{color:var(--gold);font-size:17px;letter-spacing:3px}
+.rating-meta .rating-count{
+  font-size:13px;color:var(--text);font-weight:400;margin-top:6px;
+}
+.rating-meta .rating-count b{font-weight:400;color:var(--green-dark)}
+.rating-meta .rating-note{font-size:11px;color:var(--text2);margin-top:2px}
+.rating-bars{
+  display:flex;flex-direction:column;gap:5px;
+  width:150px;flex-shrink:0;
+}
+.rbar{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--text2)}
+.rbar .n{width:8px;text-align:right}
+.rbar .track{flex:1;height:6px;border-radius:3px;background:rgba(18,56,43,.08);overflow:hidden}
+.rbar .fill{height:100%;border-radius:3px;background:var(--gold)}
+@media (max-width:400px){
+  .rating-hero{gap:18px}
+  .rating-bars{width:110px}
+}
+.reviews-carousel{
+  display:flex;gap:14px;overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding:4px 24px 8px;
+  margin:0 -24px;
+  scrollbar-width:none;
+}
+.reviews-carousel::-webkit-scrollbar{display:none}
+.review{
+  scroll-snap-align:start;flex-shrink:0;
+  width:270px;
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:22px 20px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.review-stars{color:var(--gold);font-size:12px;letter-spacing:2px}
+.review p{
+  font-size:13.5px;color:var(--text);line-height:1.65;
+  font-weight:400;flex:1;
+}
+.review-name{
+  font-size:12.5px;font-weight:400;color:var(--text2);
+  display:flex;align-items:center;gap:8px;
+}
+.review-name::before{
+  content:"";width:16px;height:1px;background:var(--gold);display:inline-block;
+}
+.reviews-dots{display:flex;justify-content:center;gap:6px;margin-top:18px}
+.reviews-dots span{width:6px;height:6px;border-radius:3px;background:rgba(18,56,43,.15);transition:all .25s ease}
+.reviews-dots span.active{background:var(--green-dark);width:18px}
+.compat-row{
+  display:flex;justify-content:center;gap:0;flex-wrap:wrap;
+  max-width:640px;margin:0 auto;
+}
+.compat-item{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:8px 28px;text-align:center;
+}
+.compat-item svg{width:26px;height:26px;stroke:var(--green-dark);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.compat-item span{font-size:12px;font-weight:600;color:var(--text2)}
+.final-section{padding:56px 0 40px}
+.final-cta{
+  background:
+    linear-gradient(rgba(18,56,43,.92),rgba(14,44,34,.94)),
+    url("https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&q=80&auto=format&fit=crop") center/cover no-repeat;
+  background-color:var(--green-dark);
+  border-radius:28px;
+  padding:60px 32px;
+  text-align:center;color:#fff;
+  position:relative;overflow:hidden;
+}
+.final-cta .eyebrow{color:var(--gold);position:relative}
+.final-cta h2{
+  font-family:var(--serif);
+  font-size:27px;font-weight:600;letter-spacing:-.015em;line-height:1.2;
+  max-width:440px;margin:0 auto;position:relative;
+}
+.final-cta p{font-size:14px;opacity:.75;max-width:380px;margin:14px auto 30px;position:relative}
+.final-cta .btn-gold{
+  background:var(--gold);color:var(--green-dark);
+  padding:15px 40px;font-size:15px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);position:relative;
+}
+.final-cta .btn-gold:hover{background:#D6B872}
+.final-cta .store-buttons{position:relative}
+.final-cta .btn-store{border-color:rgba(255,255,255,.4);color:#fff}
+.final-cta .btn-store:hover{background:#fff;color:var(--green-dark);border-color:#fff}
+.final-cta .trust{font-size:11.5px;opacity:.55;margin-top:18px;position:relative}
+footer{
+  text-align:center;padding:0 24px 88px;
+  font-size:12px;color:var(--text2);
+}
+footer .logo-mini{
+  font-family:var(--serif);font-weight:600;
+  color:var(--green-dark);font-size:15px;margin-bottom:4px;
+}
+.install-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:rgba(250,248,242,.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);
+  padding:12px 20px calc(12px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+  transform:translateY(110%);
+  transition:transform .35s cubic-bezier(.22,.9,.3,1);
+}
+.install-bar.visible{transform:translateY(0)}
+.install-bar .ib-icon{
+  width:38px;height:38px;border-radius:10px;background:var(--green-dark);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.install-bar .ib-icon svg{width:20px;height:20px}
+.install-bar .ib-text{flex:1;min-width:0}
+.install-bar .ib-name{font-size:13px;font-weight:800;color:var(--green-dark);line-height:1.2}
+.install-bar .ib-rating{font-size:11px;color:var(--text2)}
+.install-bar .ib-rating .star{color:var(--gold)}
+body.is-desktop .install-bar{display:none}
+/* ---------- Passo a passo iOS ---------- */
+.ios-sheet{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;background:rgba(18,56,43,.5)}
+.ios-sheet.open{display:flex}
+.ios-card{background:var(--bg);width:100%;max-width:460px;border-radius:24px 24px 0 0;padding:26px 24px calc(26px + env(safe-area-inset-bottom));position:relative;text-align:center}
+@media(min-width:520px){.ios-sheet{align-items:center;padding:24px}.ios-card{border-radius:24px}}
+.ios-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:19px;color:var(--text2);cursor:pointer;line-height:1}
+.ios-app{width:56px;height:56px;border-radius:16px;background:var(--green-dark);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.ios-app svg{width:30px;height:30px}
+.ios-card h3{font-family:var(--serif);font-size:21px;color:var(--green-dark);font-weight:600;margin-bottom:6px}
+.ios-card>p{font-size:14px;color:var(--text2);margin-bottom:20px}
+.ios-steps{text-align:left;display:flex;flex-direction:column;gap:15px}
+.ios-step{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text)}
+.ios-step .num{width:26px;height:26px;border-radius:50%;background:var(--green-dark);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ios-step .txt{flex:1}
+.ios-step b{color:var(--green-dark)}
+.ios-step svg{width:22px;height:22px;stroke:var(--green-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .install-bar{transition:none}
+}
+@media (min-width:720px){
+  .hero{padding:48px 0}
+  .hero h1{font-size:54px}
+  .hero .tagline{font-size:19px}
+  .section-title{font-size:32px}
+  .features-grid{grid-template-columns:repeat(4,1fr)}
+  .about{flex-direction:row;gap:56px;align-items:center}
+  .about-media{max-width:400px}
+  .about-text{text-align:left}
+  .about-text .about-divider{margin:0 0 24px}
+  .slide{width:248px}
+  .final-cta{padding:76px 48px}
+  .final-cta h2{font-size:34px}
+  footer{padding-bottom:28px}
+  .final-section{padding:64px 0 48px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header" id="stickyHeader">
+  <div class="app-header-inner">
+    <div class="app-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 21c-4.5 0-7.5-3.2-7.5-7.2 0-3.6 2.6-6.3 5.8-6.8.4-1.6 1.7-2.9 3.4-3.2" stroke="#FAF8F2" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M12 21c4.5 0 7.5-3.2 7.5-7.2 0-3.6-2.6-6.3-5.8-6.8" stroke="#C7A45D" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M13.5 3.5c1.5.3 2.6 1.3 3 2.8" stroke="#C7A45D" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="12" cy="13.5" r="3.2" stroke="#FAF8F2" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="app-title-wrap">
+      <div class="app-title">Gosto Puro</div>
+      <div class="app-subtitle">Ricette buone e veloci per ogni occasione</div>
+    </div>
+    <button class="btn btn-primary btn-sm single-install install-trigger">Installa</button>
+  </div>
+</header>
+
+<main>
+<div class="container">
+
+  <div class="hero">
+
+    <div class="carousel fade-in d1" id="carousel">
+
+      <div class="slide bg-a">
+        <h3>Decidi cosa cucinare in <span class="accent">pochi secondi</span></h3>
+        <p>Ricette organizzate per occasione per semplificare la tua routine.</p>
+        <div class="phone">
+          <div class="ph-bar dark w60"></div>
+          <div class="ph-bar w80"></div>
+          <div class="ph-cards"><div class="ph-card"></div><div class="ph-card gold"></div></div>
+          <div class="ph-cards"><div class="ph-card soft"></div><div class="ph-card"></div></div>
+        </div>
+      </div>
+
+      <div class="slide bg-b">
+        <h3>Oltre <span class="accent">12.000</span> ricette sane</h3>
+        <p>Colazione, pranzo, cena, fitness, insalate, dolci e molto altro.</p>
+        <div class="phone">
+          <div class="ph-bar dark w80"></div>
+          <div class="ph-list">
+            <div class="ph-row"><div class="ph-dot"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-dot gold"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-dot"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-dot gold"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-dot"></div><div class="ph-line"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide bg-c">
+        <h3>Ricette per <span class="accent">ogni occasione</span></h3>
+        <p>Dal quotidiano alla cena speciale, tutto organizzato in modo intelligente.</p>
+        <div class="phone">
+          <div class="ph-bar dark w60"></div>
+          <div class="ph-cards"><div class="ph-card gold"></div><div class="ph-card soft"></div><div class="ph-card"></div></div>
+          <div class="ph-cards"><div class="ph-card"></div><div class="ph-card gold"></div><div class="ph-card soft"></div></div>
+          <div class="ph-bar w80"></div>
+        </div>
+      </div>
+
+      <div class="slide bg-a">
+        <h3>Pianifica la tua settimana</h3>
+        <p>Organizza i pasti e risparmia tempo ogni giorno.</p>
+        <div class="phone">
+          <div class="ph-bar dark w80"></div>
+          <div class="ph-list">
+            <div class="ph-row"><div class="ph-line" style="max-width:32px"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-line" style="max-width:32px"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-line" style="max-width:32px"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-line" style="max-width:32px"></div><div class="ph-line"></div></div>
+          </div>
+          <div class="ph-bar gold w60"></div>
+        </div>
+      </div>
+
+      <div class="slide bg-b">
+        <h3>Salva le tue <span class="accent">preferite</span></h3>
+        <p>Conserva le ricette che ami di più in un unico posto.</p>
+        <div class="phone">
+          <div class="ph-bar dark w60"></div>
+          <div class="ph-cards"><div class="ph-card gold"></div><div class="ph-card"></div></div>
+          <div class="ph-cards"><div class="ph-card"></div><div class="ph-card gold"></div></div>
+          <div class="ph-bar w80"></div>
+        </div>
+      </div>
+
+      <div class="slide bg-c">
+        <h3>Cucina meglio senza complicazioni</h3>
+        <p>Ingredienti, preparazione e valori nutrizionali in modo chiaro.</p>
+        <div class="phone">
+          <div class="ph-bar dark w80"></div>
+          <div class="ph-bar w60"></div>
+          <div class="ph-list">
+            <div class="ph-row"><div class="ph-dot gold"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-dot gold"></div><div class="ph-line"></div></div>
+            <div class="ph-row"><div class="ph-dot gold"></div><div class="ph-line"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="carousel-dots" id="carouselDots"></div>
+
+    <h1 class="fade-in d2">Gosto Puro</h1>
+    <p class="tagline fade-in d3">Ricette buone e veloci per ogni occasione</p>
+    <p class="desc fade-in d3">Trova in pochi secondi ricette pratiche e organizzate per occasione per trasformare la tua routine alimentare senza complicazioni.</p>
+
+    <button class="btn btn-primary single-install install-trigger fade-in d4">Installa gratis</button>
+
+    <div class="store-buttons">
+      <a class="btn btn-store" data-store="apple" href="#">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 12.54c-.03-2.89 2.36-4.28 2.47-4.35-1.35-1.97-3.44-2.24-4.18-2.27-1.78-.18-3.47 1.05-4.37 1.05-.9 0-2.29-1.02-3.77-1-1.94.03-3.72 1.13-4.72 2.86-2.01 3.49-.51 8.66 1.45 11.5.96 1.39 2.1 2.95 3.6 2.89 1.45-.06 2-.93 3.75-.93s2.24.93 3.77.9c1.56-.03 2.55-1.41 3.5-2.81 1.1-1.61 1.56-3.17 1.58-3.25-.03-.02-3.03-1.16-3.08-4.59zM14.16 4.06c.8-.97 1.34-2.32 1.19-3.66-1.15.05-2.55.77-3.38 1.74-.74.86-1.39 2.23-1.22 3.55 1.29.1 2.6-.65 3.41-1.63z"/></svg>
+        App Store
+      </a>
+      <a class="btn btn-store" data-store="google" href="#">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.61 1.81C3.23 2.2 3 2.8 3 3.58v16.84c0 .78.23 1.38.61 1.77l.1.09 9.44-9.43v-.22L3.71 1.72l-.1.09zm13.79 6.6l-3.15 3.15v.22l3.15 3.16 3.65-2.07c1.04-.59 1.04-1.56 0-2.16l-3.65-2.3zm-.35 7.12l-3.9-3.31L3.7 22.19c.34.36.91.4 1.55.05l11.8-6.71zM3.7 1.81l9.45 9.41 3.9-3.3L5.25 1.75c-.64-.36-1.21-.31-1.55.06z"/></svg>
+        Google Play
+      </a>
+    </div>
+
+    <p class="compat-note fade-in d5"><span style="color:var(--gold)">★</span> 4,9 · Gratis · Compatibile con <b>Android e iOS</b></p>
+
+    <div class="metrics fade-in d5">
+      <div class="metric">
+        <div class="m-top">4,9 <span class="star">★</span></div>
+        <div class="m-label">Valutazione</div>
+      </div>
+      <div class="metric">
+        <div class="m-top">+64 mila</div>
+        <div class="m-label">Download</div>
+      </div>
+      <div class="metric">
+        <div class="m-top"><span class="badge-livre">3+</span></div>
+        <div class="m-label">Età</div>
+      </div>
+      <div class="metric">
+        <div class="m-top">38 MB</div>
+        <div class="m-label">Dimensione</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="reveal">
+    <div class="section-head">
+      <p class="eyebrow">Su questa app</p>
+      <h2 class="section-title">Mangiare meglio,<br>senza perdere tempo</h2>
+    </div>
+    <div class="about">
+      <div class="about-media">
+        <img class="about-photo" src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=900&q=80&auto=format&fit=crop" alt="Donna che sorride mentre prepara un pasto sano in cucina" loading="lazy" decoding="async">
+        <div class="about-badge">
+          <div class="ab-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 21c-4.5 0-7.5-3.2-7.5-7.2 0-3.6 2.6-6.3 5.8-6.8.4-1.6 1.7-2.9 3.4-3.2" stroke="#FAF8F2" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M12 21c4.5 0 7.5-3.2 7.5-7.2 0-3.6-2.6-6.3-5.8-6.8" stroke="#C7A45D" stroke-width="1.6" stroke-linecap="round"/>
+              <circle cx="12" cy="13.5" r="3.2" stroke="#FAF8F2" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ab-title">+12.000 ricette organizzate per occasione</div>
+            <div class="ab-sub">Feed premium, semplice e stimolante</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-text">
+        <div class="about-divider"></div>
+        <p>L'app <b>Gosto Puro</b> è nata per chi vuole mangiare meglio senza perdere tempo a cercare ricette sparse online. In un'unica app trovi oltre <b>12.000 ricette sane</b>, pratiche e organizzate per occasione.</p>
+        <p>Scegli il momento della giornata, trova la ricetta ideale e prepara qualcosa di delizioso con più leggerezza, organizzazione e ispirazione.</p>
+        <p class="about-feel">Pensata per farti sentire a casa in ogni pasto.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="section-head">
+      <p class="eyebrow">Funzionalità</p>
+      <h2 class="section-title">Tutto in un unico posto</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <div class="f-name">+12.000 ricette</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <div class="f-name">Categorie per occasione</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11v11h-11z" transform="rotate(45 12 12)"/><path d="M2 12h3M19 12h3M12 2v3M12 19v3"/></svg>
+        <div class="f-name">Ricette fitness</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9-9c-1.2-2.8.5-6 3.5-6 1.8 0 3.2 1 3.9 2.4h3.2C14.3 7 15.7 6 17.5 6c3 0 4.7 3.2 3.5 6-2 4.5-9 9-9 9z"/></svg>
+        <div class="f-name">Dolci sani</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M7 21c0-4 2-6 5-6s5 2 5 6"/><path d="M12 15V9"/><path d="M12 9c-3 0-5.5-2.5-5.5-5.5C9.5 3.5 12 6 12 9zM12 9c3 0 5.5-2.5 5.5-5.5C14.5 3.5 12 6 12 9z"/></svg>
+        <div class="f-name">Insalate e piatti leggeri</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M12 17.3l-5.4 3 1-6-4.4-4.2 6.1-.9L12 3.6l2.7 5.6 6.1.9-4.4 4.2 1 6z"/></svg>
+        <div class="f-name">Preferiti</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        <div class="f-name">Pianificazione settimanale</div>
+      </div>
+      <div class="feature">
+        <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M21 12a9 9 0 0 0-9-9v9z"/></svg>
+        <div class="f-name">Valori nutrizionali</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <div class="section-head">
+      <p class="eyebrow">Valutazioni e recensioni</p>
+      <h2 class="section-title">Chi la usa, la consiglia</h2>
+    </div>
+
+    <div class="rating-hero">
+      <div class="rating-big">4,9</div>
+      <div class="rating-meta">
+        <div class="stars">★★★★★</div>
+        <div class="rating-count">18.482 recensioni</div>
+        <div class="rating-note">Android e iOS</div>
+      </div>
+      <div class="rating-bars" aria-hidden="true">
+        <div class="rbar"><span class="n">5</span><div class="track"><div class="fill" style="width:91%"></div></div></div>
+        <div class="rbar"><span class="n">4</span><div class="track"><div class="fill" style="width:7%"></div></div></div>
+        <div class="rbar"><span class="n">3</span><div class="track"><div class="fill" style="width:1.5%"></div></div></div>
+        <div class="rbar"><span class="n">2</span><div class="track"><div class="fill" style="width:.8%"></div></div></div>
+        <div class="rbar"><span class="n">1</span><div class="track"><div class="fill" style="width:.5%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="reviews-carousel" id="reviewsCarousel">
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Ora è molto più facile decidere cosa cucinare durante la settimana. Apro l'app, scelgo l'occasione ed è fatta."</p>
+        <span class="review-name">Giulia</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"L'app è bella, ordinata e ha ricette che fanno davvero venire voglia di cucinare. È diventata parte della mia routine."</p>
+        <span class="review-name">Francesca</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"La uso ogni giorno per trovare idee sane senza perdere tempo. Le categorie per occasione fanno la differenza."</p>
+        <span class="review-name">Chiara</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Finalmente un'app di ricette che non mi fa sentire persa. Tutto è semplice, pulito e facile da trovare."</p>
+        <span class="review-name">Sofia</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"La pianificazione settimanale ha cambiato il mio rapporto con la cucina. La domenica organizzo tutto e la settimana fila liscia."</p>
+        <span class="review-name">Martina</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Le ricette fitness sono davvero pratiche, con pochi ingredienti. Riesco a seguire la dieta senza stancarmi."</p>
+        <span class="review-name">Alessia</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Adoro i dolci sani. Riesco a togliermi lo sfizio senza perdere il focus, e le istruzioni sono chiarissime."</p>
+        <span class="review-name">Elena</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Ho salvato le mie preferite e ora preparo il menu della settimana in pochi minuti. Mi fa risparmiare un sacco di tempo."</p>
+        <span class="review-name">Sara</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"I valori nutrizionali mi aiutano molto a seguire la mia alimentazione. Tutto in un unico posto."</p>
+        <span class="review-name">Valentina</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Cucino per tutta la famiglia e trovo sempre qualcosa che piace. Dal pranzo veloce alla cena speciale."</p>
+        <span class="review-name">Aurora</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Sono alle prime armi in cucina e il passo passo è chiarissimo. Non mi sono mai sentita così sicura ai fornelli."</p>
+        <span class="review-name">Beatrice</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Leggera, veloce e senza pubblicità a ogni tocco. Si vede che è fatta con cura e attenzione ai dettagli."</p>
+        <span class="review-name">Marta</span>
+      </div>
+      <div class="review">
+        <div class="review-stars">★★★★★</div>
+        <p>"Ho iniziato a pianificare i pasti con l'app e mangiare bene è diventato leggero e naturale."</p>
+        <span class="review-name">Federica</span>
+      </div>
+    </div>
+    <div class="reviews-dots" id="reviewsDots"></div>
+  </section>
+
+  <section class="reveal">
+    <div class="section-head">
+      <p class="eyebrow">Compatibilità</p>
+      <h2 class="section-title">Dove preferisci</h2>
+    </div>
+    <div class="compat-row">
+      <div class="compat-item">
+        <svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+        <span>Android</span>
+      </div>
+      <div class="compat-item">
+        <svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M9.5 4h5"/></svg>
+        <span>iPhone</span>
+      </div>
+      <div class="compat-item">
+        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+        <span>Tablet</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-section reveal">
+    <div class="final-cta">
+      <p class="eyebrow">Inizia oggi</p>
+      <h2>Installa l'app Gosto Puro e trasforma la tua routine alimentare</h2>
+      <p>Ricette sane, pratiche e organizzate per cucinare meglio ogni giorno.</p>
+      <button class="btn btn-gold single-install install-trigger">Installa ora</button>
+      <div class="store-buttons">
+        <a class="btn btn-store" data-store="apple" href="#">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 12.54c-.03-2.89 2.36-4.28 2.47-4.35-1.35-1.97-3.44-2.24-4.18-2.27-1.78-.18-3.47 1.05-4.37 1.05-.9 0-2.29-1.02-3.77-1-1.94.03-3.72 1.13-4.72 2.86-2.01 3.49-.51 8.66 1.45 11.5.96 1.39 2.1 2.95 3.6 2.89 1.45-.06 2-.93 3.75-.93s2.24.93 3.77.9c1.56-.03 2.55-1.41 3.5-2.81 1.1-1.61 1.56-3.17 1.58-3.25-.03-.02-3.03-1.16-3.08-4.59zM14.16 4.06c.8-.97 1.34-2.32 1.19-3.66-1.15.05-2.55.77-3.38 1.74-.74.86-1.39 2.23-1.22 3.55 1.29.1 2.6-.65 3.41-1.63z"/></svg>
+          App Store
+        </a>
+        <a class="btn btn-store" data-store="google" href="#">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.61 1.81C3.23 2.2 3 2.8 3 3.58v16.84c0 .78.23 1.38.61 1.77l.1.09 9.44-9.43v-.22L3.71 1.72l-.1.09zm13.79 6.6l-3.15 3.15v.22l3.15 3.16 3.65-2.07c1.04-.59 1.04-1.56 0-2.16l-3.65-2.3zm-.35 7.12l-3.9-3.31L3.7 22.19c.34.36.91.4 1.55.05l11.8-6.71zM3.7 1.81l9.45 9.41 3.9-3.3L5.25 1.75c-.64-.36-1.21-.31-1.55.06z"/></svg>
+          Google Play
+        </a>
+      </div>
+      <p class="trust">Gratis da installare · Senza impegno · Android e iOS</p>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="logo-mini">Gosto Puro</div>
+  <p>Alimentazione sana, pratica e organizzata. Ogni giorno.</p>
+</footer>
+
+<div class="install-bar" id="installBar">
+  <div class="ib-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M12 21c-4.5 0-7.5-3.2-7.5-7.2 0-3.6 2.6-6.3 5.8-6.8.4-1.6 1.7-2.9 3.4-3.2" stroke="#FAF8F2" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M12 21c4.5 0 7.5-3.2 7.5-7.2 0-3.6-2.6-6.3-5.8-6.8" stroke="#C7A45D" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="12" cy="13.5" r="3.2" stroke="#FAF8F2" stroke-width="1.5"/>
+    </svg>
+  </div>
+  <div class="ib-text">
+    <div class="ib-name">Gosto Puro</div>
+    <div class="ib-rating"><span class="star">★</span> 4,9 · Gratis</div>
+  </div>
+  <button class="btn btn-primary btn-sm install-trigger">Installa</button>
+</div>
+
+<!-- Passo a passo per iPhone (Safari non ha API di installazione) -->
+<div class="ios-sheet" id="iosSheet">
+  <div class="ios-card">
+    <button class="ios-close" id="iosClose" aria-label="Chiudi">✕</button>
+    <div class="ios-app" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 21c-4.5 0-7.5-3.2-7.5-7.2 0-3.6 2.6-6.3 5.8-6.8.4-1.6 1.7-2.9 3.4-3.2" stroke="#FAF8F2" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M12 21c4.5 0 7.5-3.2 7.5-7.2 0-3.6-2.6-6.3-5.8-6.8" stroke="#C7A45D" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="12" cy="13.5" r="3.2" stroke="#FAF8F2" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <h3>Installa Gosto Puro</h3>
+    <p>Aggiungi l'app alla schermata Home in 3 passi:</p>
+    <div class="ios-steps">
+      <div class="ios-step">
+        <span class="num">1</span>
+        <span class="txt">Tocca <b>Condividi</b> nella barra di Safari</span>
+        <svg viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M7 11H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1"/></svg>
+      </div>
+      <div class="ios-step">
+        <span class="num">2</span>
+        <span class="txt">Scegli <b>"Aggiungi a schermata Home"</b></span>
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>
+      </div>
+      <div class="ios-step">
+        <span class="num">3</span>
+        <span class="txt">Tocca <b>Aggiungi</b> in alto a destra</span>
+        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================
+   Installazione PWA reale:
+   - Android / desktop Chrome-Edge: prompt nativo (beforeinstallprompt)
+   - iPhone (Safari): istruzioni "Aggiungi a schermata Home"
+   - Già installata / fallback: apre la web app
+   Quando pubblicata sugli store, imposta gli URL qui sotto.
+   ================================================ */
+const APP_STORE_URL   = "";
+const GOOGLE_PLAY_URL = "";
+
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function isAndroid(){ return /android/i.test(navigator.userAgent); }
+function isStandalone(){
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+// Registra o SW p/ tornar a página instalável (dispara o beforeinstallprompt)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw-push.js", { scope: "/" }).catch(() => {});
+}
+
+/* ---------- Analytics: visite + install ---------- */
+const TRACK_URL = "https://twkftwjsvhlczwlhdwzu.supabase.co/functions/v1/track-download";
+const SUPA_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a2Z0d2pzdmhsY3p3bGhkd3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTQ3NDIsImV4cCI6MjA5NTQ3MDc0Mn0.5c2gHvdsmEG8-dJC-wtw9ifzPcBFVgJusZ7OgdbEua8";
+function platformName(){ return isIOS() ? "ios" : isAndroid() ? "android" : "desktop"; }
+function track(type){
+  try {
+    fetch(TRACK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPA_ANON, "Authorization": "Bearer " + SUPA_ANON },
+      body: JSON.stringify({ type, platform: platformName(), referrer: document.referrer || "" }),
+      keepalive: true,
+    });
+  } catch (_) {}
+}
+// Conta a visita 1x por sessão (evita inflar com reload)
+try { if (!sessionStorage.getItem("gp_dl_view")) { sessionStorage.setItem("gp_dl_view", "1"); track("view"); } }
+catch (_) { track("view"); }
+
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; });
+window.addEventListener("appinstalled", () => { deferredPrompt = null; });
+
+const iosSheet = document.getElementById("iosSheet");
+const openIos  = () => iosSheet.classList.add("open");
+const closeIos = () => iosSheet.classList.remove("open");
+document.getElementById("iosClose").addEventListener("click", closeIos);
+iosSheet.addEventListener("click", (e) => { if (e.target === iosSheet) closeIos(); });
+
+async function installApp(){
+  track("install");                                                  // conta o clique de instalar
+  if (isStandalone()){ window.location.href = "/"; return; }         // já instalado → abre
+  if (deferredPrompt){                                               // Android / desktop
+    deferredPrompt.prompt();
+    try { await deferredPrompt.userChoice; } catch (_) {}
+    deferredPrompt = null;
+    return;
+  }
+  if (isIOS()){ openIos(); return; }                                 // iPhone → instruções
+  if (isAndroid() && GOOGLE_PLAY_URL){ window.location.href = GOOGLE_PLAY_URL; return; }
+  if (APP_STORE_URL && !isAndroid()){ window.location.href = APP_STORE_URL; return; }
+  window.location.href = "/";                                        // fallback: abre a web app
+}
+
+document.querySelectorAll(".install-trigger").forEach(btn => btn.addEventListener("click", installApp));
+
+// Botões das lojas (só aparecem no desktop): enquanto não há loja, disparam a instalação PWA
+document.querySelectorAll("[data-store]").forEach(a => {
+  const store = a.getAttribute("data-store");
+  const url = store === "apple" ? APP_STORE_URL : GOOGLE_PLAY_URL;
+  if (url) { a.href = url; }
+  else { a.addEventListener("click", (e) => { e.preventDefault(); installApp(); }); }
+});
+
+const header = document.getElementById("stickyHeader");
+window.addEventListener("scroll", () => {
+  header.classList.toggle("scrolled", window.scrollY > 8);
+}, { passive: true });
+
+const installBar = document.getElementById("installBar");
+window.addEventListener("scroll", () => {
+  const show = window.scrollY > window.innerHeight * .6;
+  installBar.classList.toggle("visible", show);
+}, { passive: true });
+
+const carousel = document.getElementById("carousel");
+const dotsWrap = document.getElementById("carouselDots");
+const slides = carousel.querySelectorAll(".slide");
+slides.forEach((_, i) => {
+  const d = document.createElement("span");
+  if (i === 0) d.classList.add("active");
+  dotsWrap.appendChild(d);
+});
+const dots = dotsWrap.querySelectorAll("span");
+carousel.addEventListener("scroll", () => {
+  const slideW = slides[0].offsetWidth + 14;
+  const idx = Math.min(slides.length - 1, Math.round(carousel.scrollLeft / slideW));
+  dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+}, { passive: true });
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let autoTimer = null;
+if (!reduceMotion){
+  autoTimer = setInterval(() => {
+    if (document.hidden) return;
+    const slideW = slides[0].offsetWidth + 14;
+    const max = carousel.scrollWidth - carousel.clientWidth;
+    let next = carousel.scrollLeft + slideW;
+    if (next > max + 10) next = 0;
+    carousel.scrollTo({ left: next, behavior: "smooth" });
+  }, 3800);
+  ["pointerdown","wheel","touchstart"].forEach(ev => {
+    carousel.addEventListener(ev, () => {
+      if (autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+    }, { passive: true, once: true });
+  });
+}
+
+const rCarousel = document.getElementById("reviewsCarousel");
+const rDotsWrap = document.getElementById("reviewsDots");
+const rCards = rCarousel.querySelectorAll(".review");
+rCards.forEach((_, i) => {
+  const d = document.createElement("span");
+  if (i === 0) d.classList.add("active");
+  rDotsWrap.appendChild(d);
+});
+const rDots = rDotsWrap.querySelectorAll("span");
+rCarousel.addEventListener("scroll", () => {
+  const cardW = rCards[0].offsetWidth + 14;
+  const idx = Math.min(rCards.length - 1, Math.round(rCarousel.scrollLeft / cardW));
+  rDots.forEach((d, i) => d.classList.toggle("active", i === idx));
+}, { passive: true });
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting){
+      e.target.classList.add("visible");
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: .1 });
+document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
