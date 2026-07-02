@@ -1,23 +1,28 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
-const BASE_URL = "https://gostopuro.it";
+const BASE_URL = "https://gostopuro.com";
 
+// Rotas curtas e limpas (sem ?utm feio) → cada uma leva à página /download
+// e já registra a origem no painel Admin → "Página /download".
 const SOURCES = [
-  { id: "tiktok", label: "TikTok", emoji: "🎵" },
-  { id: "instagram", label: "Instagram", emoji: "📸" },
-  { id: "facebook", label: "Facebook", emoji: "👥" },
-  { id: "youtube", label: "YouTube", emoji: "▶️" },
-  { id: "whatsapp", label: "WhatsApp", emoji: "💬" },
-  { id: "pinterest", label: "Pinterest", emoji: "📌" },
-  { id: "email", label: "Email", emoji: "📧" },
-  { id: "google", label: "Google", emoji: "🔍" },
+  { id: "tiktok", label: "TikTok", emoji: "🎵", path: "/tt" },
+  { id: "instagram", label: "Instagram", emoji: "📸", path: "/ig" },
+  { id: "facebook", label: "Facebook", emoji: "👥", path: "/fb" },
+  { id: "youtube", label: "YouTube", emoji: "▶️", path: "/yt" },
+  { id: "whatsapp", label: "WhatsApp", emoji: "💬", path: "/wa" },
+  { id: "pinterest", label: "Pinterest", emoji: "📌", path: "/pin" },
+  { id: "email", label: "Email", emoji: "📧", path: "/em" },
+  { id: "google", label: "Google", emoji: "🔍", path: "/gg" },
 ];
 
 export default function AdminUTMGenerator() {
   const [copied, setCopied] = useState(null);
 
-  const getLink = (source) => `${BASE_URL}?utm_source=${source}`;
+  const getLink = (source) => {
+    const s = SOURCES.find((x) => x.id === source);
+    return `${BASE_URL}${s?.path || `/download?utm_source=${source}`}`;
+  };
 
   const handleCopy = (source) => {
     navigator.clipboard.writeText(getLink(source));
@@ -30,7 +35,7 @@ export default function AdminUTMGenerator() {
       <div className="bg-blue-50 rounded-xl p-3">
         <p className="text-xs font-bold text-blue-700 mb-1">Como funciona?</p>
         <p className="text-[11px] text-blue-600 leading-relaxed">
-          O clique é contado <strong>na hora</strong>, mesmo sem login. Se o usuário já estiver logado, o email é associado automaticamente. Se não estiver, aparece só como "visita".
+          Cada link é <strong>limpo</strong> (sem <code>?utm</code> feio) e leva à página de <strong>instalação do app</strong> (/download). A origem é registrada automaticamente no painel <strong>Admin → "Página /download" → "De onde vêm as visitas"</strong>. Cole na bio, story ou descrição.
         </p>
       </div>
 

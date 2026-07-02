@@ -263,11 +263,11 @@ export default function AdminEngagement() {
             <p className="text-xs text-gray-500">Nenhum acesso via link UTM registrado ainda.</p>
             <div className="bg-amber-50 rounded-xl p-3">
               <p className="text-xs font-bold text-amber-700 mb-1">Como usar:</p>
-              <p className="text-[11px] text-amber-600 leading-relaxed">Adicione <code className="bg-amber-100 px-1 rounded">?utm_source=tiktok</code> no final dos seus links. Exemplos:</p>
+              <p className="text-[11px] text-amber-600 leading-relaxed">Use os links limpos da aba <strong>"Link UTM"</strong> — cada um leva à página de instalação e registra a origem. Exemplos:</p>
               <div className="mt-2 space-y-1">
-                {["tiktok", "instagram", "pinterest", "facebook", "email", "whatsapp", "google", "youtube", "linkedin", "twitter"].map(s => (
+                {[["instagram", "ig"], ["tiktok", "tt"], ["whatsapp", "wa"], ["facebook", "fb"], ["youtube", "yt"], ["pinterest", "pin"], ["email", "em"], ["google", "gg"]].map(([s, p]) => (
                   <p key={s} className="text-[10px] font-mono text-amber-700 bg-amber-100 rounded px-2 py-0.5 truncate">
-                    gostopuro.it?utm_source={s}
+                    gostopuro.com/{p}
                   </p>
                 ))}
               </div>
