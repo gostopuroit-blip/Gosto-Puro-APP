@@ -441,6 +441,11 @@ body.is-desktop .install-bar{display:none}
 .ios-step .txt{flex:1}
 .ios-step b{color:var(--green-dark)}
 .ios-step svg{width:22px;height:22px;stroke:var(--green-dark);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* ---------- Aviso: browser interno (Instagram/TikTok) ---------- */
+.inapp-banner{display:none;align-items:center;justify-content:space-between;gap:12px;background:var(--green-dark);color:#fff;padding:10px 20px;font-size:13px;line-height:1.3}
+body.is-inapp .inapp-banner{display:flex}
+.inapp-banner button{background:var(--gold);color:var(--green-dark);border:none;border-radius:100px;padding:7px 15px;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0;font-family:inherit}
+.for-android,.for-ios{display:none}
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
 @media (prefers-reduced-motion:reduce){
@@ -479,6 +484,12 @@ body.is-desktop .install-bar{display:none}
     <button class="btn btn-primary btn-sm single-install install-trigger">Installa</button>
   </div>
 </header>
+
+<!-- Aviso automático quando aberto dentro do Instagram/TikTok -->
+<div class="inapp-banner" id="inappBanner">
+  <span>Per installare l'app, aprila nel browser (Chrome/Safari)</span>
+  <button id="inappBtn">Come fare</button>
+</div>
 
 <main>
 <div class="container">
@@ -859,6 +870,25 @@ body.is-desktop .install-bar{display:none}
   </div>
 </div>
 
+<!-- Guia: abrir no navegador externo (quando dentro do Instagram/TikTok) -->
+<div class="ios-sheet" id="browserSheet">
+  <div class="ios-card">
+    <button class="ios-close" id="browserClose" aria-label="Chiudi">✕</button>
+    <div class="ios-app"><img src="/icon-192.png" alt="Gosto Puro"></div>
+    <h3>Apri nel browser</h3>
+    <p>Il browser interno di Instagram/TikTok non permette di installare l'app. Aprila in Chrome o Safari.</p>
+    <div class="for-android">
+      <button class="btn btn-primary" id="openChromeBtn" style="width:100%">Apri in Chrome</button>
+      <p style="font-size:12px;color:var(--text2);margin-top:14px;text-align:center">Oppure tocca <b>⋮</b> in alto a destra → <b>"Apri nel browser esterno"</b></p>
+    </div>
+    <div class="for-ios ios-steps">
+      <div class="ios-step"><span class="num">1</span><span class="txt">Tocca <b>•••</b> in alto a destra</span></div>
+      <div class="ios-step"><span class="num">2</span><span class="txt">Scegli <b>"Apri nel browser"</b></span></div>
+      <div class="ios-step"><span class="num">3</span><span class="txt">In Safari tocca <b>Installa</b></span></div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ================================================
    Installazione PWA reale:
@@ -877,6 +907,17 @@ function isIOS(){
 function isAndroid(){ return /android/i.test(navigator.userAgent); }
 function isStandalone(){
   return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+// Browser interno de app (Instagram, TikTok, Facebook, etc.) — não instala PWA
+function isInApp(){
+  const ua = navigator.userAgent || "";
+  return /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|BytedanceWebview|Line\/|Snapchat|Pinterest/i.test(ua);
+}
+if (isInApp()) document.body.classList.add("is-inapp");
+// Android: força abrir no Chrome via intent (funciona a partir do Webview)
+function openInChrome(){
+  const target = location.host + location.pathname + location.search;
+  window.location.href = "intent://" + target + "#Intent;scheme=https;package=com.android.chrome;end";
 }
 
 // Registra o SW p/ tornar a página instalável (dispara o beforeinstallprompt)
@@ -912,8 +953,22 @@ const closeIos = () => iosSheet.classList.remove("open");
 document.getElementById("iosClose").addEventListener("click", closeIos);
 iosSheet.addEventListener("click", (e) => { if (e.target === iosSheet) closeIos(); });
 
+const browserSheet = document.getElementById("browserSheet");
+function openBrowserSheet(){
+  browserSheet.querySelector(".for-android").style.display = isAndroid() ? "block" : "none";
+  browserSheet.querySelector(".for-ios").style.display = isAndroid() ? "none" : "flex";
+  browserSheet.classList.add("open");
+}
+const closeBrowserSheet = () => browserSheet.classList.remove("open");
+document.getElementById("browserClose").addEventListener("click", closeBrowserSheet);
+browserSheet.addEventListener("click", (e) => { if (e.target === browserSheet) closeBrowserSheet(); });
+document.getElementById("openChromeBtn").addEventListener("click", openInChrome);
+const inappBtn = document.getElementById("inappBtn");
+if (inappBtn) inappBtn.addEventListener("click", openBrowserSheet);
+
 async function installApp(){
   track("install");                                                  // conta o clique de instalar
+  if (isInApp()){ openBrowserSheet(); return; }                      // browser interno → guia p/ abrir no navegador
   if (isStandalone()){ window.location.href = "/"; return; }         // já instalado → abre
   if (deferredPrompt){                                               // Android / desktop
     deferredPrompt.prompt();
