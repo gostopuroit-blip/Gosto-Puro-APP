@@ -183,6 +183,26 @@ export async function fetchCreatorProfile(authorId) {
   return Array.isArray(data) ? data[0] : data;
 }
 
+export async function toggleFollow(followingId, currentlyFollowing) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("auth");
+  if (currentlyFollowing) {
+    await supabase.from("feed_follows").delete().eq("follower_id", user.id).eq("following_id", followingId);
+  } else {
+    await supabase.from("feed_follows").insert({ follower_id: user.id, following_id: followingId });
+  }
+}
+
+export async function updateMyBio(bio) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("auth");
+  const { error } = await supabase
+    .from("profiles")
+    .update({ bio: (bio || "").slice(0, 200) })
+    .eq("id", user.id);
+  if (error) throw error;
+}
+
 export async function fetchCreatorPosts(authorId) {
   const { data: { user } } = await supabase.auth.getUser();
   const { data: posts, error } = await supabase
