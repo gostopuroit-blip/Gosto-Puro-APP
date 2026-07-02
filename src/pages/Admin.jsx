@@ -30,7 +30,7 @@ import AdminReports from "@/components/admin/AdminReports";
 import AdminDownloadPage from "@/components/admin/AdminDownloadPage";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart, Eye, CalendarDays, UserCheck, Flag } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, TrendingUp, BarChart2, Users, UtensilsCrossed, Sparkles, Bell, Lock, Webhook, Settings, Mail, FileBarChart, Link2, BookOpen, Crown, Filter, Package, Tag, MessageSquareHeart, Eye, CalendarDays, UserCheck, Flag, Download } from "lucide-react";
 
 const tabs = [
   { key: "overview",     label: "Visão Geral",    icon: Eye },
@@ -39,7 +39,7 @@ const tabs = [
   { key: "recipeanalytics", label: "Recipe Analytics", icon: BarChart2 },
   { key: "planner",        label: "Planner",          icon: CalendarDays },
   { key: "funil_premium",  label: "Funil Premium",    icon: Crown },
-  { key: "download",       label: "Página /download", icon: BookOpen },
+  { key: "download",       label: "Página /download", icon: Download },
   { key: "report",         label: "Rapporto",         icon: FileBarChart },
   { key: "utm",            label: "Link UTM",          icon: Link2 },
   { key: "utenti",       label: "Utenti",        icon: Users },
