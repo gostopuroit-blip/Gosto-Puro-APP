@@ -936,12 +936,40 @@ if ("serviceWorker" in navigator) {
 const TRACK_URL = "https://twkftwjsvhlczwlhdwzu.supabase.co/functions/v1/track-download";
 const SUPA_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a2Z0d2pzdmhsY3p3bGhkd3p1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4OTQ3NDIsImV4cCI6MjA5NTQ3MDc0Mn0.5c2gHvdsmEG8-dJC-wtw9ifzPcBFVgJusZ7OgdbEua8";
 function platformName(){ return isIOS() ? "ios" : isAndroid() ? "android" : "desktop"; }
+// De onde veio: 1) UTM no link, 2) app interno (Instagram/TikTok…), 3) referrer
+function detectSource(){
+  const p = new URLSearchParams(location.search);
+  const utm = (p.get("utm_source") || p.get("source") || p.get("ref") || "").toLowerCase().trim();
+  if (utm) return utm;
+  const ua = navigator.userAgent || "";
+  if (/Instagram/i.test(ua)) return "instagram";
+  if (/TikTok|musical_ly|BytedanceWebview/i.test(ua)) return "tiktok";
+  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return "facebook";
+  if (/Snapchat/i.test(ua)) return "snapchat";
+  if (/Pinterest/i.test(ua)) return "pinterest";
+  if (/WhatsApp/i.test(ua)) return "whatsapp";
+  if (/Line\//i.test(ua)) return "line";
+  const ref = document.referrer || "";
+  if (ref) {
+    try {
+      const h = new URL(ref).hostname.replace(/^(www|m|l)\./, "");
+      if (/instagram/.test(h)) return "instagram";
+      if (/tiktok/.test(h)) return "tiktok";
+      if (/facebook|fb\.com|fb\.me/.test(h)) return "facebook";
+      if (/youtu/.test(h)) return "youtube";
+      if (/t\.co|twitter|x\.com/.test(h)) return "twitter";
+      if (/google/.test(h)) return "google";
+      if (h && h !== location.hostname) return h;
+    } catch (_) {}
+  }
+  return "direct";
+}
 function track(type){
   try {
     fetch(TRACK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_ANON, "Authorization": "Bearer " + SUPA_ANON },
-      body: JSON.stringify({ type, platform: platformName(), referrer: document.referrer || "" }),
+      body: JSON.stringify({ type, platform: platformName(), source: detectSource(), referrer: document.referrer || "" }),
       keepalive: true,
     });
   } catch (_) {}

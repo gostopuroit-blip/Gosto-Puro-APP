@@ -33,6 +33,13 @@ export default function AdminDownloadPage() {
   const maxDaily = Math.max(1, ...daily.map((d) => Math.max(d.views || 0, d.installs || 0)));
   const platforms = m.installs_by_platform || {};
   const convRate = m.views_total ? Math.round((m.installs_total / m.views_total) * 100) : 0;
+  const bySource = Array.isArray(m.by_source) ? m.by_source : [];
+  const maxSrc = Math.max(1, ...bySource.map((s) => s.views || 0));
+  const SRC_LABEL = {
+    instagram: "Instagram", tiktok: "TikTok", facebook: "Facebook", whatsapp: "WhatsApp",
+    youtube: "YouTube", twitter: "X / Twitter", google: "Google", pinterest: "Pinterest",
+    snapchat: "Snapchat", line: "Line", direct: "Direto / desconhecido",
+  };
 
   const cards = [
     { label: "Visitas (total)", value: m.views_total, sub: `${nf(m.views_14d)} nos últimos 14 dias`, icon: Eye },
@@ -83,6 +90,33 @@ export default function AdminDownloadPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* De onde vêm (origem) */}
+      <div className="bg-white rounded-2xl p-5 border border-gray-100">
+        <h3 className="text-sm font-bold text-gray-800 mb-3">De onde vêm as visitas</h3>
+        {bySource.length === 0 ? (
+          <p className="text-sm text-gray-400 py-2">Sem dados ainda.</p>
+        ) : (
+          <div className="space-y-2.5">
+            {bySource.map((s) => (
+              <div key={s.source}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-gray-700">{SRC_LABEL[s.source] || s.source}</span>
+                  <span className="text-xs text-gray-500">
+                    <b className="text-gray-900">{nf(s.views)}</b> visitas · {nf(s.installs)} instalar
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#2D6A4F] rounded-full" style={{ width: `${Math.max(3, ((s.views || 0) / maxSrc) * 100)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+          Detecta pela tag do link (?utm_source=…), pelo app interno (Instagram/TikTok) e pelo referrer. Marque seus links (ex.: /download?utm_source=instagram) para máxima precisão.
+        </p>
       </div>
 
       {/* Por dia */}
