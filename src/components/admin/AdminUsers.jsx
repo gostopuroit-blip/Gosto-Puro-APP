@@ -58,7 +58,7 @@ export default function AdminUsers() {
   };
 
   const filtered = users.filter((u) =>
-    !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())
+    !search || u.display_name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" /></div>;
@@ -114,7 +114,7 @@ export default function AdminUsers() {
                   {u.photo_url ? <img src={u.photo_url} className="w-full h-full object-cover" /> : <span className="text-base">👤</span>}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-800 truncate">{u.full_name || "—"}</p>
+                  <p className="text-sm font-bold text-gray-800 truncate">{u.display_name || "—"}</p>
                   <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
                   <div className="flex gap-1.5 mt-1 flex-wrap">
                     {isAdmin && <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">👑 Admin</span>}

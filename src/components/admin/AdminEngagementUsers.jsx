@@ -9,7 +9,7 @@ export default function AdminEngagementUsers({ events, allUsers = [] }) {
     allUsers.forEach(u => {
       map[u.email] = {
         email: u.email,
-        name: u.full_name || null,
+        name: u.display_name || null,
         plan: u.plan || "free",
         sessions: 0,
         totalDuration: 0,

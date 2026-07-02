@@ -57,10 +57,10 @@ export default function AdminUserProducts() {
         {users.map((u) => (
           <div key={u.id} className="bg-white rounded-2xl p-3 shadow-sm border border-gray-50 flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-purple-600">
-              {(u.full_name || u.email || "?")[0].toUpperCase()}
+              {(u.display_name || u.email || "?")[0].toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-800 truncate">{u.full_name || "—"}</p>
+              <p className="text-sm font-bold text-gray-800 truncate">{u.display_name || "—"}</p>
               <p className="text-[11px] text-gray-400 truncate">{u.email}</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -79,7 +79,7 @@ export default function AdminUserProducts() {
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
         <DialogContent className="max-w-sm mx-auto rounded-3xl">
           <DialogHeader>
-            <DialogTitle>Prodotti — {selectedUser?.full_name || selectedUser?.email}</DialogTitle>
+            <DialogTitle>Prodotti — {selectedUser?.display_name || selectedUser?.email}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {products.map((p) => {

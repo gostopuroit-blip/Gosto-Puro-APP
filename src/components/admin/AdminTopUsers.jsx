@@ -13,7 +13,7 @@ function buildRanking(events, allUsers, limit = 50) {
     if (u.email) {
       map[u.email] = {
         email: u.email,
-        name: u.full_name || null,
+        name: u.display_name || null,
         plan: u.plan || "free",
         _planFromUsers: true, // plano vem do cadastro atual
         views: 0, saved: 0, planner: 0, sessions: 0, totalDuration: 0,

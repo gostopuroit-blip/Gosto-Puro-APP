@@ -200,7 +200,7 @@ export default function AdminPremiumIntelligence() {
                     {u.photo_url ? <img src={u.photo_url} className="w-full h-full object-cover" /> : <span>👤</span>}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-800 truncate">{u.full_name || "—"}</p>
+                    <p className="text-sm font-bold text-gray-800 truncate">{u.display_name || "—"}</p>
                     <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
                     <p className="text-[10px] text-gray-300 mt-0.5">Produto Hotmart: {u.hotmart_product_id} · Plano: {u.subscription_plan || "—"}</p>
                   </div>
@@ -226,7 +226,7 @@ export default function AdminPremiumIntelligence() {
                     {u.photo_url ? <img src={u.photo_url} className="w-full h-full object-cover" /> : <span>👤</span>}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-800 truncate">{u.full_name || "—"}</p>
+                    <p className="text-sm font-bold text-gray-800 truncate">{u.display_name || "—"}</p>
                     <p className="text-[10px] text-gray-400 truncate">{u.email}</p>
                     <p className="text-[10px] text-gray-300 mt-0.5">Promovido em: {fmt(u.updated_date || u.created_date)}</p>
                   </div>

@@ -49,7 +49,7 @@ export default function AdminExperts() {
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
     return (
-      (u.full_name || "").toLowerCase().includes(q) ||
+      (u.display_name || "").toLowerCase().includes(q) ||
       (u.email || "").toLowerCase().includes(q)
     );
   });
