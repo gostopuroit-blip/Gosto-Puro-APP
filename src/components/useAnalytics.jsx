@@ -16,6 +16,16 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Colunas de dados EXTRAS aceitas pela tabela app_analytics. Qualquer chave fora
+// desta lista é DESCARTADA antes do insert — o PostgREST rejeita a linha inteira se
+// receber uma coluna inexistente, o que fazia eventos sumirem em silêncio (ex.:
+// post_id/cta_url/product/mode). Aqui o evento sempre grava com os campos válidos.
+const ANALYTICS_COLUMNS = new Set([
+  "session_duration_seconds", "recipe_id", "recipe_title", "scroll_percentage",
+  "occasion_label", "source", "duration_seconds", "load_time_ms", "results_count",
+  "notification_id",
+]);
+
 // Track a single event (fire and forget — never throws).
 // Insere DIRETO via supabase, SEM .select() — a policy de SELECT da app_analytics
 // é só-admin, então o read-back falhava e fazia o evento se perder pra todo usuário
@@ -31,6 +41,14 @@ export async function trackEvent(eventType, extra = {}) {
       if (user_id) sessionStorage.setItem("gp_user_id", user_id);
     }
     if (!user_id) return; // sem sessão → o RLS bloquearia mesmo; não insiste
+
+    // Só passa colunas que existem na tabela (evita rejeição silenciosa da linha)
+    const safeExtra = {};
+    for (const [k, v] of Object.entries(extra || {})) {
+      if (!ANALYTICS_COLUMNS.has(k) || v === undefined) continue;
+      safeExtra[k] = k === "occasion_label" && typeof v === "string" ? v.slice(0, 120) : v;
+    }
+
     await supabase.from("app_analytics").insert({
       event_type: eventType,
       user_id,
@@ -38,7 +56,7 @@ export async function trackEvent(eventType, extra = {}) {
       user_plan,
       session_id: getSessionId(),
       date: todayStr(),
-      ...extra,
+      ...safeExtra,
     });
   } catch {}
 }

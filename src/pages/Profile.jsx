@@ -560,7 +560,7 @@ export default function Profile() {
                           href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10"
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={() => trackEvent("premium_click", { source: "profile_crosssell", product: slug })}
+                          onClick={() => trackEvent("premium_click", { source: "profile_crosssell", occasion_label: slug })}
                           className="text-[11px] font-bold text-[#2D6A4F] dark:text-[#40916C] bg-white dark:bg-[#1A2B20] border border-[#C8E6D8] dark:border-[#2D4A38] px-2.5 py-1 rounded-full"
                         >
                           {PRODUCT_NAMES[slug] || slug} →

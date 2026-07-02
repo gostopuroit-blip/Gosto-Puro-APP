@@ -11,7 +11,7 @@ export default function ProductPopup({ post, onClose }) {
   const isInternal = url.startsWith("/");
 
   const go = () => {
-    trackEvent("feed_cta_click", { post_id: post.id, cta_url: url });
+    trackEvent("feed_cta_click", { occasion_label: String(post.id), source: "feed_popup" });
     if (!url) return;
     if (isInternal) {
       onClose?.();

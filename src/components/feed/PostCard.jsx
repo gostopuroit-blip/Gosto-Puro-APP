@@ -87,7 +87,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
   // Link interno (es. raccolta/ocasião) → naviga direttamente: chi ha già la collezione
   // vede le ricette, altrimenti trova la schermata di sblocco. Link esterno → popup di vendita.
   const onCta = () => {
-    trackEvent("feed_cta_click", { post_id: post.id, cta_url: post.cta_url });
+    trackEvent("feed_cta_click", { occasion_label: String(post.id), source: ctaIsInternal ? "feed_internal" : "feed_external" });
     if (ctaIsInternal) navigate(post.cta_url);
     else setShowProduct(true);
   };
@@ -106,7 +106,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
     setLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
     try {
       await toggleLike(post.id, liked);
-      if (next) trackEvent("feed_like", { post_id: post.id });
+      if (next) trackEvent("feed_like", { occasion_label: String(post.id), source: "feed" });
     } catch {
       setLiked(!next);
       setLikeCount((c) => Math.max(0, c + (next ? -1 : 1)));
@@ -118,7 +118,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
     setSaved(next);
     try {
       await toggleSave(post.id, saved);
-      if (next) trackEvent("feed_save", { post_id: post.id });
+      if (next) trackEvent("feed_save", { occasion_label: String(post.id), source: "feed" });
     } catch {
       setSaved(!next);
     }
