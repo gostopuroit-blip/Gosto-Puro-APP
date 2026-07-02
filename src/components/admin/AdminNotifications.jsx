@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Send, Loader2, Users } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { Bell, Send, Loader2, Users, BellRing, Eye, MousePointerClick, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -20,6 +21,7 @@ export default function AdminNotifications() {
   const [result, setResult] = useState(null);
   const [breakdown, setBreakdown] = useState(null); // { free, pagante, premium, sem_conta, total }
   const [loadingBd, setLoadingBd] = useState(true);
+  const [metrics, setMetrics] = useState(null); // gp_notif_metrics (adoção + funil do convite)
 
   const loadBreakdown = async () => {
     setLoadingBd(true);
@@ -28,7 +30,20 @@ export default function AdminNotifications() {
     if (b) setBreakdown({ ...b, total: res.data.total || 0 });
     setLoadingBd(false);
   };
-  useEffect(() => { loadBreakdown(); }, []);
+  const loadMetrics = async () => {
+    try {
+      const { data } = await supabase.rpc("gp_notif_metrics");
+      if (data) setMetrics(data);
+    } catch { /* silencioso */ }
+  };
+  useEffect(() => { loadBreakdown(); loadMetrics(); }, []);
+
+  const adoptionPct = metrics && metrics.users_total
+    ? Math.round((metrics.subs_total / metrics.users_total) * 100)
+    : 0;
+  const nudgeConvPct = metrics && metrics.nudge_shown_30d
+    ? Math.round((metrics.enabled_via_nudge_30d / metrics.nudge_shown_30d) * 100)
+    : 0;
 
   const countFor = (key) => {
     if (!breakdown) return null;
@@ -61,6 +76,73 @@ export default function AdminNotifications() {
 
   return (
     <div className="space-y-4">
+      {/* Adoção das notificações (% da base) */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+        <div className="flex items-center gap-2 mb-3">
+          <BellRing className="w-5 h-5 text-[#2D6A4F]" />
+          <p className="font-bold text-gray-800">Adoção das notificações</p>
+        </div>
+        {!metrics ? (
+          <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" /></div>
+        ) : (
+          <>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-3xl font-bold text-gray-900">
+                  {metrics.subs_total}
+                  <span className="text-base font-medium text-gray-400"> / {metrics.users_total}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">usuários com push ligado</p>
+              </div>
+              <p className="text-3xl font-bold text-[#2D6A4F]">{adoptionPct}%</p>
+            </div>
+            <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden mt-3">
+              <div className="h-full bg-[#2D6A4F] rounded-full" style={{ width: `${Math.max(2, adoptionPct)}%` }} />
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Funil do convite (modal global) — últimos 30 dias */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+        <div className="flex items-center gap-2 mb-1">
+          <Bell className="w-5 h-5 text-[#2D6A4F]" />
+          <p className="font-bold text-gray-800">Convite pra ativar · funil (30 dias)</p>
+        </div>
+        <p className="text-[11px] text-gray-400 mb-3">Quantos viram o modal, tocaram em "Attiva" e ativaram de fato.</p>
+        {!metrics ? (
+          <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#2D6A4F] animate-spin" /></div>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { l: "Viram", v: metrics.nudge_shown_30d, icon: Eye },
+                { l: "Tocaram", v: metrics.nudge_clicked_30d, icon: MousePointerClick },
+                { l: "Ativaram", v: metrics.enabled_via_nudge_30d, icon: CheckCircle2 },
+              ].map((c) => (
+                <div key={c.l} className="bg-gray-50 rounded-xl p-3 text-center">
+                  <c.icon className="w-4 h-4 text-[#2D6A4F] mx-auto mb-1" />
+                  <p className="text-xl font-bold text-gray-900">{c.v ?? 0}</p>
+                  <p className="text-[11px] text-gray-500">{c.l}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-between bg-[#2D6A4F]/5 rounded-xl px-3 py-2.5">
+              <p className="text-xs font-semibold text-gray-600">Conversão do convite</p>
+              <p className="text-lg font-bold text-[#2D6A4F]">{nudgeConvPct}%</p>
+            </div>
+            {metrics.enabled_30d > metrics.enabled_via_nudge_30d && (
+              <p className="text-[11px] text-gray-400 mt-2">
+                +{metrics.enabled_30d - metrics.enabled_via_nudge_30d} ativaram por outros caminhos (Profilo, etc.) nos últimos 30 dias.
+              </p>
+            )}
+            {metrics.nudge_shown_30d === 0 && (
+              <p className="text-[11px] text-gray-400 mt-2">Ainda sem dados — os números começam a aparecer conforme os usuários abrem o app.</p>
+            )}
+          </>
+        )}
+      </div>
+
       {/* Quem ligou as notificações (por segmento) */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
         <div className="flex items-center gap-2 mb-3">

@@ -36,14 +36,15 @@ export default function NotificationNudge({ user }) {
     const t = setTimeout(() => {
       setOpen(true);
       sessionStorage.setItem(SESSION_KEY, "1");
-      trackEvent("notif_nudge_shown", { mode: m });
+      // app_analytics não tem coluna "mode" — guarda o modo em occasion_label
+      trackEvent("notif_nudge_shown", { occasion_label: m });
     }, DELAY);
     return () => clearTimeout(t);
   }, [user]);
 
   const later = () => {
     localStorage.setItem(SNOOZE_KEY, String(Date.now() + SNOOZE_LATER));
-    trackEvent("notif_nudge_later", { mode });
+    trackEvent("notif_nudge_later", { occasion_label: mode });
     setOpen(false);
   };
 
@@ -53,7 +54,7 @@ export default function NotificationNudge({ user }) {
     const res = await enablePush();
     setBusy(false);
     if (res === "granted") {
-      trackEvent("notif_enabled", { from: "nudge" });
+      trackEvent("notif_enabled", { source: "nudge" });
       setMode("success");
       setTimeout(() => setOpen(false), 2200);
     } else if (res === "denied") {
