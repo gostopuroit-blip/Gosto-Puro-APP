@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, BadgeCheck, Trash2, Eye, Flag, Send } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, BadgeCheck, Trash2, Eye, Flag, Send, ChevronRight } from "lucide-react";
 import MediaCarousel from "./MediaCarousel";
 import CommentsSheet, { Avatar, timeAgo } from "./CommentsSheet";
 import CreatorProfileSheet from "./CreatorProfileSheet";
@@ -210,17 +210,18 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
       {/* Mídia */}
       <MediaCarousel media={post.media} />
 
-      {/* Botão de vitrine (venda) — logo após a imagem, no topo de tudo */}
+      {/* Botão de vitrine (venda) — barra colada na base da imagem, estilo Instagram sponsored */}
       {hasCta && (
-        <div className="px-3.5 pt-3">
-          <button
-            onClick={onCta}
-            className="w-full flex items-center justify-center gap-2 bg-[#D4A846] hover:bg-[#c39a3d] text-[#412402] font-bold text-sm py-2.5 rounded-xl transition"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            {post.cta_label}
-          </button>
-        </div>
+        <button
+          onClick={onCta}
+          className="w-full flex items-center justify-between gap-2 bg-[#D4A846] hover:bg-[#c39a3d] text-[#412402] font-bold text-sm px-4 py-3 transition"
+        >
+          <span className="flex items-center gap-2 min-w-0">
+            <ShoppingBag className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{post.cta_label}</span>
+          </span>
+          <ChevronRight className="w-5 h-5 flex-shrink-0" />
+        </button>
       )}
 
       {/* Ações */}
