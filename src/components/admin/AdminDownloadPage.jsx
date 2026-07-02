@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, RefreshCw, Eye, Download, Smartphone } from "lucide-react";
+import { Loader2, RefreshCw, Eye, Download, Smartphone, UserPlus } from "lucide-react";
 
 function nf(n) { return new Intl.NumberFormat("pt-BR").format(Math.round(n || 0)); }
 const PLAT_LABEL = { android: "Android", ios: "iPhone", desktop: "Desktop", "?": "Outro" };
@@ -8,19 +8,22 @@ const PLAT_LABEL = { android: "Android", ios: "iPhone", desktop: "Desktop", "?":
 export default function AdminDownloadPage() {
   const [m, setM] = useState(null);
   const [sources, setSources] = useState(null);
+  const [funnel, setFunnel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(false);
 
   const load = async () => {
     setLoading(true); setErr(false);
     try {
-      const [dl, sr] = await Promise.all([
+      const [dl, sr, fn] = await Promise.all([
         supabase.rpc("gp_download_metrics"),
         supabase.rpc("gp_signup_sources"),
+        supabase.rpc("gp_acquisition_funnel"),
       ]);
       if (dl.error || !dl.data) throw dl.error || new Error("no data");
       setM(dl.data);
       setSources(sr.data || null);
+      setFunnel(fn.data || null);
     } catch { setErr(true); setM(null); }
     setLoading(false);
   };
@@ -47,6 +50,8 @@ export default function AdminDownloadPage() {
   };
   const accSources = Array.isArray(sources?.by_source) ? sources.by_source : [];
   const maxAcc = Math.max(1, ...accSources.map((s) => s.total || 0));
+  const today = funnel?.today || null;
+  const convFree = today && today.visits ? Math.round((today.new_free / today.visits) * 100) : 0;
 
   const cards = [
     { label: "Visitas (total)", value: m.views_total, sub: `${nf(m.views_14d)} nos últimos 14 dias`, icon: Eye },
@@ -62,6 +67,42 @@ export default function AdminDownloadPage() {
         </div>
         <button onClick={load} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500" title="Atualizar"><RefreshCw className="w-5 h-5" /></button>
       </div>
+
+      {/* Funil de hoje: visita → instalar → conta grátis */}
+      {today && (
+        <div className="bg-gradient-to-br from-[#2D6A4F] to-[#235c43] rounded-2xl p-5 text-white">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-bold">Funil de hoje</p>
+            <span className="text-[11px] text-white/60">visita → instalar → conta grátis</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="flex-1 rounded-xl p-3 text-center bg-white/10">
+              <Eye className="w-4 h-4 mx-auto mb-1 text-white/80" />
+              <p className="text-2xl font-bold leading-none">{nf(today.visits)}</p>
+              <p className="text-[10px] mt-1 text-white/70">Visitas</p>
+            </div>
+            <span className="text-white/40 font-bold">→</span>
+            <div className="flex-1 rounded-xl p-3 text-center bg-white/10">
+              <Download className="w-4 h-4 mx-auto mb-1 text-white/80" />
+              <p className="text-2xl font-bold leading-none">{nf(today.installs)}</p>
+              <p className="text-[10px] mt-1 text-white/70">Instalar</p>
+            </div>
+            <span className="text-white/40 font-bold">→</span>
+            <div className="flex-1 rounded-xl p-3 text-center bg-[#D4A846] text-[#412402]">
+              <UserPlus className="w-4 h-4 mx-auto mb-1" />
+              <p className="text-2xl font-bold leading-none">{nf(today.new_free)}</p>
+              <p className="text-[10px] mt-1 text-[#412402]/80">Contas grátis</p>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] text-white/80">
+            <span>Conversão visita → conta grátis: <b className="text-white">{convFree}%</b></span>
+            <span>{nf(today.new_accounts)} contas hoje · {nf(today.new_paid)} pagantes</span>
+          </div>
+          <p className="text-[10px] text-white/45 mt-2 leading-relaxed">
+            Correlação por dia (instalar é anônimo). A atribuição exata por origem vai aparecendo em "Contas criadas por origem".
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {cards.map((c) => (
