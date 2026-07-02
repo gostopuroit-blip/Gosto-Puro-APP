@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useSessionTracking, useClickTracking, trackEvent } from "@/components/useAnalytics";
 import PremiumBanner from "@/components/PremiumBanner";
+import NotificationNudge from "@/components/NotificationNudge";
 
 const navItems = [
 { name: "Feed", icon: Home, page: "Feed" },
@@ -225,6 +226,9 @@ export default function Layout({ children, currentPageName }) {
         </div>
         <div className="h-safe-area-inset-bottom" />
       </nav>
+
+      {/* Convite global e insistente a ativar as notificações push */}
+      <NotificationNudge user={user} />
     </div>);
 
 }
