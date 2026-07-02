@@ -183,6 +183,12 @@ export async function fetchCreatorProfile(authorId) {
   return Array.isArray(data) ? data[0] : data;
 }
 
+export async function fetchPostLikers(postId, limit = 60) {
+  const { data, error } = await supabase.rpc("gp_post_likers", { p_post_id: postId, p_limit: limit });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
 export async function toggleFollow(followingId, currentlyFollowing) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("auth");
