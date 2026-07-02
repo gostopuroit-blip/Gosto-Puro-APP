@@ -39,6 +39,18 @@ export default defineConfig({
       },
       injectManifest: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // NÃO pré-cachear na instalação os chunks pesados de features raras/online:
+        // Admin (só admin) e as libs de export PDF (jspdf/html2canvas). Continuam
+        // carregando sob demanda pela rede (cache HTTP imutável cuida das repetições).
+        // Também as imagens da landing /download, que não fazem parte do app.
+        globIgnores: [
+          '**/Admin-*.js',
+          '**/jspdf*.js',
+          '**/html2canvas*.js',
+          '**/purify.es-*.js',
+          '**/index.es-*.js',
+          'dl/**',
+        ],
       },
       devOptions: {
         enabled: false,
