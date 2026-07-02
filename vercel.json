@@ -1,6 +1,11 @@
 {
   "rewrites": [
     { "source": "/download", "destination": "/download.html" },
+    { "source": "/ig", "destination": "/download.html" },
+    { "source": "/tt", "destination": "/download.html" },
+    { "source": "/wa", "destination": "/download.html" },
+    { "source": "/fb", "destination": "/download.html" },
+    { "source": "/yt", "destination": "/download.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
