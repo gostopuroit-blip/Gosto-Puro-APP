@@ -120,7 +120,7 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
           const res = await base44.functions.invoke("sendCustomNotification", {
             title: "🍽️ Novità su Gosto Puro",
             body,
-            url: "/Feed",
+            url: post?.id ? `/Feed?post=${post.id}` : "/Feed",
             segment: "all",
           });
           if (res?.data?.success) toast.success(`Notifica inviata a ${res.data.sent} utenti`);

@@ -53,6 +53,20 @@ export async function fetchFeed({ page = 0 } = {}) {
   };
 }
 
+// Busca 1 post pelo id (para deep-link da notificação → abre direto no post).
+export async function fetchPostById(id) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: post, error } = await supabase
+    .from("feed_posts").select("*").eq("id", id).eq("is_published", true).maybeSingle();
+  if (error || !post) return null;
+  if (!user) return { ...post, liked: false, saved: false };
+  const [{ data: likes }, { data: saves }] = await Promise.all([
+    supabase.from("feed_likes").select("post_id").eq("user_id", user.id).eq("post_id", id),
+    supabase.from("feed_saves").select("post_id").eq("user_id", user.id).eq("post_id", id),
+  ]);
+  return { ...post, liked: (likes || []).length > 0, saved: (saves || []).length > 0 };
+}
+
 export async function toggleLike(postId, currentlyLiked) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("auth");

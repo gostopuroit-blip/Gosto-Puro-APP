@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { fetchFeed } from "@/api/feed";
+import { fetchFeed, fetchPostById } from "@/api/feed";
 import PostCard from "@/components/feed/PostCard";
 import ComposeSheet from "@/components/feed/ComposeSheet";
 import StoriesBar from "@/components/feed/StoriesBar";
@@ -30,6 +30,29 @@ export default function Feed() {
   useEffect(() => {
     load(0).catch(() => {}).finally(() => setLoading(false));
   }, [load]);
+
+  // Deep-link da notificação (?post=<id>): garante o post na lista, rola até ele e destaca.
+  const targetPostId = new URLSearchParams(window.location.search).get("post");
+  const deepLinkedRef = useRef(false);
+  useEffect(() => {
+    if (loading || deepLinkedRef.current || !targetPostId) return;
+    deepLinkedRef.current = true;
+    let cancelled = false;
+    (async () => {
+      if (!posts.some((p) => p.id === targetPostId)) {
+        const p = await fetchPostById(targetPostId).catch(() => null);
+        if (p && !cancelled) setPosts((prev) => (prev.some((x) => x.id === p.id) ? prev : [p, ...prev]));
+      }
+      setTimeout(() => {
+        const el = document.getElementById(`post-${targetPostId}`);
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.classList.add("ring-2", "ring-[#2D6A4F]", "rounded-2xl");
+        setTimeout(() => el.classList.remove("ring-2", "ring-[#2D6A4F]", "rounded-2xl"), 2600);
+      }, 350);
+    })();
+    return () => { cancelled = true; };
+  }, [loading, targetPostId, posts]);
 
   const loadMore = async () => {
     if (loadingMore || !hasMore) return;
@@ -71,7 +94,9 @@ export default function Feed() {
       ) : (
         <div className="space-y-3 sm:px-3">
           {posts.map((p) => (
-            <PostCard key={p.id} post={p} me={me} onDeleted={onDeleted} />
+            <div key={p.id} id={`post-${p.id}`} className="scroll-mt-4 transition-all">
+              <PostCard post={p} me={me} onDeleted={onDeleted} />
+            </div>
           ))}
           {hasMore && (
             <div className="flex justify-center py-4">
