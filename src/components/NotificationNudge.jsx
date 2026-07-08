@@ -9,8 +9,10 @@ import { trackEvent } from "@/components/useAnalytics";
 // então continua reofertando até o usuário ativar. Funciona em desktop, Android
 // e PWA; no iPhone (que só recebe push com o app instalado) mostra como instalar.
 
-const SNOOZE_KEY = "gp_notif_snooze_until";
-const SESSION_KEY = "gp_notif_seen_session";
+// v2: bump nas chaves reabre o convite pra todos que ainda não ativaram
+// (as sonecas antigas viram inválidas). Quem já ativou continua fora.
+const SNOOZE_KEY = "gp_notif_snooze_until_v2";
+const SESSION_KEY = "gp_notif_seen_session_v2";
 const SNOOZE_LATER = 2 * 24 * 60 * 60 * 1000; // 2 dias
 const SNOOZE_DENIED = 7 * 24 * 60 * 60 * 1000; // 7 dias (bloqueado → só ajuda)
 const DELAY = 4500; // aparece depois de ~4,5s na tela
