@@ -954,7 +954,13 @@ try {
 
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; });
-window.addEventListener("appinstalled", () => { deferredPrompt = null; });
+// Instalação CONFIRMADA de fato (Android/desktop Chrome-Edge). No iPhone/Safari
+// este evento não dispara — instalação real no iOS não é mensurável (limite da Apple).
+window.addEventListener("appinstalled", () => {
+  deferredPrompt = null;
+  try { if (!localStorage.getItem("gp_dl_installed")) { localStorage.setItem("gp_dl_installed", "1"); track("installed"); } }
+  catch (_) { track("installed"); }
+});
 
 const iosSheet = document.getElementById("iosSheet");
 const openIos  = () => iosSheet.classList.add("open");

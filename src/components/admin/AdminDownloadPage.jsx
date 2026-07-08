@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, RefreshCw, Eye, Download, Smartphone, UserPlus } from "lucide-react";
+import { Loader2, RefreshCw, Eye, Download, Smartphone, UserPlus, CheckCircle2, Info } from "lucide-react";
 
 function nf(n) { return new Intl.NumberFormat("pt-BR").format(Math.round(n || 0)); }
 const PLAT_LABEL = { android: "Android", ios: "iPhone", desktop: "Desktop", "?": "Outro" };
@@ -40,6 +40,8 @@ export default function AdminDownloadPage() {
   const daily = Array.isArray(m.daily) ? m.daily : [];
   const maxDaily = Math.max(1, ...daily.map((d) => Math.max(d.views || 0, d.installs || 0)));
   const platforms = m.installs_by_platform || {};
+  const installedPlat = m.installed_by_platform || {};
+  const installedTotal = m.installed_total || 0;
   const convRate = m.views_total ? Math.round((m.installs_total / m.views_total) * 100) : 0;
   const bySource = Array.isArray(m.by_source) ? m.by_source : [];
   const maxSrc = Math.max(1, ...bySource.map((s) => s.views || 0));
@@ -55,7 +57,7 @@ export default function AdminDownloadPage() {
 
   const cards = [
     { label: "Visitas (total)", value: m.views_total, sub: `${nf(m.views_14d)} nos últimos 14 dias`, icon: Eye },
-    { label: "Cliques em instalar", value: m.installs_total, sub: `${nf(m.installs_14d)} nos últimos 14 dias`, icon: Download },
+    { label: "Clicaram em instalar", value: m.installs_total, sub: `${nf(m.installs_14d)} nos últimos 14 dias`, icon: Download },
   ];
 
   return (
@@ -68,12 +70,32 @@ export default function AdminDownloadPage() {
         <button onClick={load} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500" title="Atualizar"><RefreshCw className="w-5 h-5" /></button>
       </div>
 
+      {/* Como ler estes números — evita confundir clique com instalação real */}
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Info className="w-4 h-4 text-amber-600" />
+          <h3 className="text-sm font-bold text-amber-900">Como ler estes números</h3>
+        </div>
+        <p className="text-[12px] text-amber-900/80 leading-relaxed">
+          O caminho é: <b>Visita</b> → <b>clicou em instalar</b> → <b>instalou de fato</b> → <b>criou conta</b>.
+          Cada passo perde gente — é normal. O que importa é entender <i>onde</i> perde:
+        </p>
+        <ul className="mt-2 space-y-1.5 text-[12px] text-amber-900/80">
+          <li>👁️ <b>Visita</b> = abriu a página /download.</li>
+          <li>👆 <b>Clicou em instalar</b> = tocou no botão. <b>Não</b> quer dizer que instalou.</li>
+          <li>✅ <b>Instalou de fato</b> = instalação confirmada (Android/desktop). No <b>iPhone não dá pra medir</b> — a Apple não avisa o app quando a pessoa adiciona à tela.</li>
+        </ul>
+        <p className="mt-2 text-[12px] text-amber-900/80 leading-relaxed">
+          <b>Por que muita gente clica mas não instala:</b> a maioria vem do <b>Instagram</b>, que abre a página no navegador interno dele — e ali <b>não dá pra instalar PWA</b>. A pessoa clica, o app pede pra abrir no Chrome/Safari, e boa parte desiste nesse passo. No <b>iPhone</b> a instalação é manual (Condividi → Aggiungi a schermata Home), o que também derruba o número.
+        </p>
+      </div>
+
       {/* Funil de hoje: visita → instalar → conta grátis */}
       {today && (
         <div className="bg-gradient-to-br from-[#2D6A4F] to-[#235c43] rounded-2xl p-5 text-white">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-bold">Funil de hoje</p>
-            <span className="text-[11px] text-white/60">visita → instalar → conta grátis</span>
+            <span className="text-[11px] text-white/60">visita → clicou → conta grátis</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="flex-1 rounded-xl p-3 text-center bg-white/10">
@@ -85,7 +107,7 @@ export default function AdminDownloadPage() {
             <div className="flex-1 rounded-xl p-3 text-center bg-white/10">
               <Download className="w-4 h-4 mx-auto mb-1 text-white/80" />
               <p className="text-2xl font-bold leading-none">{nf(today.installs)}</p>
-              <p className="text-[10px] mt-1 text-white/70">Instalar</p>
+              <p className="text-[10px] mt-1 text-white/70">Clicou instalar</p>
             </div>
             <span className="text-white/40 font-bold">→</span>
             <div className="flex-1 rounded-xl p-3 text-center bg-[#D4A846] text-[#412402]">
@@ -114,18 +136,27 @@ export default function AdminDownloadPage() {
         ))}
       </div>
 
+      {/* Instalou de fato (instalação confirmada, Android/desktop) */}
+      <div className="bg-white rounded-2xl p-4 border border-gray-100">
+        <div className="flex items-center gap-2 text-[#2D6A4F]"><CheckCircle2 className="w-4 h-4" /><span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Instalou de fato</span></div>
+        <p className="text-3xl font-bold text-gray-900 mt-1.5">{nf(installedTotal)}</p>
+        <p className="text-[11px] text-gray-400 mt-0.5">
+          Confirmado em Android/desktop · {nf(m.installed_14d)} em 14 dias. iPhone não é mensurável (limite da Apple). Começou a contar agora.
+        </p>
+      </div>
+
       {/* Conversão */}
       <div className="bg-[#2D6A4F] rounded-2xl p-5 text-white flex items-center justify-between">
         <div>
           <p className="text-sm font-bold">Conversão</p>
-          <p className="text-xs text-white/75">cliques em instalar ÷ visitas</p>
+          <p className="text-xs text-white/75">clicaram em instalar ÷ visitas</p>
         </div>
         <p className="text-3xl font-bold">{convRate}%</p>
       </div>
 
       {/* Por plataforma */}
       <div className="bg-white rounded-2xl p-5 border border-gray-100">
-        <div className="flex items-center gap-2 mb-3"><Smartphone className="w-4 h-4 text-[#2D6A4F]" /><h3 className="text-sm font-bold text-gray-800">Instalações por dispositivo</h3></div>
+        <div className="flex items-center gap-2 mb-3"><Smartphone className="w-4 h-4 text-[#2D6A4F]" /><h3 className="text-sm font-bold text-gray-800">Por dispositivo</h3></div>
         {Object.keys(platforms).length === 0 ? (
           <p className="text-sm text-gray-400 py-2">Sem dados ainda.</p>
         ) : (
@@ -134,10 +165,16 @@ export default function AdminDownloadPage() {
               <div key={k} className="bg-gray-50 rounded-xl p-3 text-center">
                 <p className="text-xl font-bold text-gray-900">{nf(platforms[k] || 0)}</p>
                 <p className="text-[11px] text-gray-500">{PLAT_LABEL[k]}</p>
+                <p className="text-[10px] text-[#2D6A4F] mt-1 font-medium">
+                  {k === "ios" ? "instalar não medível" : `${nf(installedPlat[k] || 0)} instalou`}
+                </p>
               </div>
             ))}
           </div>
         )}
+        <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+          Número grande = <b>clicaram em instalar</b>. Embaixo, em verde, a <b>instalação confirmada</b> (só Android/desktop; no iPhone a Apple não avisa).
+        </p>
       </div>
 
       {/* De onde vêm (origem) */}
@@ -152,7 +189,7 @@ export default function AdminDownloadPage() {
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-semibold text-gray-700">{SRC_LABEL[s.source] || s.source}</span>
                   <span className="text-xs text-gray-500">
-                    <b className="text-gray-900">{nf(s.views)}</b> visitas · {nf(s.installs)} instalar
+                    <b className="text-gray-900">{nf(s.views)}</b> visitas · {nf(s.installs)} clicaram
                   </span>
                 </div>
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -205,7 +242,7 @@ export default function AdminDownloadPage() {
           <h3 className="text-sm font-bold text-gray-800">Por dia (14 dias)</h3>
           <div className="flex items-center gap-3 text-[11px]">
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#2D6A4F] inline-block" /> Visitas</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#D4A846] inline-block" /> Instalar</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#D4A846] inline-block" /> Clicaram</span>
           </div>
         </div>
         {daily.length === 0 ? (
