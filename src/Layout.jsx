@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { useSessionTracking, useClickTracking, trackEvent } from "@/components/useAnalytics";
 import PremiumBanner from "@/components/PremiumBanner";
 import NotificationNudge from "@/components/NotificationNudge";
+import InstallNudge from "@/components/InstallNudge";
 
 const navItems = [
 { name: "Feed", icon: Home, page: "Feed" },
@@ -238,7 +239,9 @@ export default function Layout({ children, currentPageName }) {
         <div className="h-safe-area-inset-bottom" />
       </nav>
 
-      {/* Convite global e insistente a ativar as notificações push */}
+      {/* Convite global a INSTALAR o app (prioridade) + a ativar as notificações.
+          Coordenados por chave de sessão: no máx. 1 modal por sessão. */}
+      <InstallNudge user={user} />
       <NotificationNudge user={user} />
     </div>);
 

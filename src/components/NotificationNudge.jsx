@@ -31,6 +31,7 @@ export default function NotificationNudge({ user }) {
     const sup = pushSupport();
     if (!sup.api || sup.permission === "granted") return;
     if (sessionStorage.getItem(SESSION_KEY)) return; // já mostrado nesta sessão
+    if (sessionStorage.getItem("gp_nudge_seen_session")) return; // instalar já apareceu nesta sessão
     if (Date.now() < Number(localStorage.getItem(SNOOZE_KEY) || 0)) return; // em soneca
 
     let m = "ask";
@@ -40,6 +41,7 @@ export default function NotificationNudge({ user }) {
     setContextual(!!isContextual);
     setOpen(true);
     sessionStorage.setItem(SESSION_KEY, "1");
+    sessionStorage.setItem("gp_nudge_seen_session", "1"); // bloqueia o de instalar nesta sessão
     trackEvent("notif_nudge_shown", { occasion_label: m, source: isContextual ? "context" : "timer" });
   };
 
