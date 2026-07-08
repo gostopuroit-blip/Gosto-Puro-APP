@@ -117,10 +117,14 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
       if (notify && isAdmin) {
         try {
           const body = (caption || "").trim().slice(0, 100) || "Guarda l'ultimo post nel feed!";
+          // Imagem grande na notificação (foto do prato) → muito mais toques. Usa a capa
+          // (1º item de imagem). Vídeo/sem foto → sem image (o ícone da marca continua).
+          const cover = media.find((m) => m.type === "image")?.url || null;
           const res = await base44.functions.invoke("sendCustomNotification", {
             title: "🍽️ Novità su Gosto Puro",
             body,
             url: post?.id ? `/Feed?post=${post.id}` : "/Feed",
+            image: cover || undefined,
             segment: "all",
           });
           if (res?.data?.success) toast.success(`Notifica inviata a ${res.data.sent} utenti`);

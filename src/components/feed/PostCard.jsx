@@ -125,7 +125,11 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
     setLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
     try {
       await toggleLike(post.id, liked);
-      if (next) trackEvent("feed_like", { occasion_label: String(post.id), source: "feed" });
+      if (next) {
+        trackEvent("feed_like", { occasion_label: String(post.id), source: "feed" });
+        // Momento de alto interesse → oferece ativar as notificações
+        window.dispatchEvent(new CustomEvent("gp:ask-notif"));
+      }
     } catch {
       setLiked(!next);
       setLikeCount((c) => Math.max(0, c + (next ? -1 : 1)));
@@ -137,7 +141,10 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
     setSaved(next);
     try {
       await toggleSave(post.id, saved);
-      if (next) trackEvent("feed_save", { occasion_label: String(post.id), source: "feed" });
+      if (next) {
+        trackEvent("feed_save", { occasion_label: String(post.id), source: "feed" });
+        window.dispatchEvent(new CustomEvent("gp:ask-notif"));
+      }
     } catch {
       setSaved(!next);
     }

@@ -18,13 +18,16 @@ const DELAY = 4500; // aparece depois de ~4,5s na tela
 export default function NotificationNudge({ user }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("ask"); // ask | install | denied | success
+  const [contextual, setContextual] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
+  // Abre o convite se elegível: com suporte, permissão "default", não mostrado nesta
+  // sessão e fora da soneca. `isContextual` = veio de uma ação de alto interesse
+  // (curtir/salvar) em vez do timer — momento em que a pessoa converte muito mais.
+  const openIfEligible = (isContextual) => {
     if (!user) return; // precisa estar logado p/ salvar a inscrição no servidor
     const sup = pushSupport();
-    if (!sup.api) return; // navegador sem suporte a push
-    if (sup.permission === "granted") return; // já ativo
+    if (!sup.api || sup.permission === "granted") return;
     if (sessionStorage.getItem(SESSION_KEY)) return; // já mostrado nesta sessão
     if (Date.now() < Number(localStorage.getItem(SNOOZE_KEY) || 0)) return; // em soneca
 
@@ -32,14 +35,24 @@ export default function NotificationNudge({ user }) {
     if (sup.permission === "denied") m = "denied";
     else if (sup.needsInstallFirst) m = "install";
     setMode(m);
+    setContextual(!!isContextual);
+    setOpen(true);
+    sessionStorage.setItem(SESSION_KEY, "1");
+    trackEvent("notif_nudge_shown", { occasion_label: m, source: isContextual ? "context" : "timer" });
+  };
 
-    const t = setTimeout(() => {
-      setOpen(true);
-      sessionStorage.setItem(SESSION_KEY, "1");
-      // app_analytics não tem coluna "mode" — guarda o modo em occasion_label
-      trackEvent("notif_nudge_shown", { occasion_label: m });
-    }, DELAY);
+  // Timer: fallback após ~4,5s se a pessoa não interagir antes.
+  useEffect(() => {
+    if (!user) return;
+    const t = setTimeout(() => openIfEligible(false), DELAY);
     return () => clearTimeout(t);
+  }, [user]);
+
+  // Momento de alto interesse: curtir/salvar um post dispara o convite mais cedo.
+  useEffect(() => {
+    const h = () => openIfEligible(true);
+    window.addEventListener("gp:ask-notif", h);
+    return () => window.removeEventListener("gp:ask-notif", h);
   }, [user]);
 
   const later = () => {
@@ -95,10 +108,12 @@ export default function NotificationNudge({ user }) {
         {mode === "ask" && (
           <>
             <h2 className="text-xl font-extrabold text-center text-gray-900 dark:text-white mt-4 leading-tight">
-              Non perderti la ricetta del giorno 🍝
+              {contextual ? "Ti piace questo? 😍" : "Non perderti la ricetta del giorno 🍝"}
             </h2>
             <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-              Attiva le notifiche e ogni giorno ricevi idee per colazione, pranzo e cena — più i nuovi post e le novità. 💚
+              {contextual
+                ? "Attiva le notifiche e ti avvisiamo quando pubblichiamo ricette e contenuti come questo. 💚"
+                : "Attiva le notifiche e ogni giorno ricevi idee per colazione, pranzo e cena — più i nuovi post e le novità. 💚"}
             </p>
             <ul className="mt-4 space-y-2">
               {[
@@ -127,17 +142,25 @@ export default function NotificationNudge({ user }) {
         {mode === "install" && (
           <>
             <h2 className="text-xl font-extrabold text-center text-gray-900 dark:text-white mt-4 leading-tight">
-              Installa l'app per le notifiche 📲
+              Installa Gosto Puro sull'iPhone 📲
             </h2>
             <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-              Su iPhone le notifiche funzionano solo con l'app sulla schermata Home. Bastano 10 secondi:
+              Aggiungila alla schermata Home per ricevere le notifiche e aprirla come una vera app. Bastano 10 secondi:
             </p>
-            <ol className="mt-4 space-y-2.5 text-sm text-gray-700 dark:text-gray-200">
-              <li className="flex gap-2"><b>1.</b> Tocca <b>Condividi</b> ⬆️ nella barra di Safari</li>
-              <li className="flex gap-2"><b>2.</b> Scegli <b>“Aggiungi a schermata Home”</b></li>
-              <li className="flex gap-2"><b>3.</b> Apri Gosto Puro dall'icona e attiva le notifiche</li>
+            <ol className="mt-4 space-y-3">
+              {[
+                ["1", <>Tocca <b>Condividi</b> <span aria-hidden>⬆️</span> nella barra di Safari</>],
+                ["2", <>Scegli <b>“Aggiungi a schermata Home”</b></>],
+                ["3", <>Apri <b>Gosto Puro</b> dall'icona e attiva le notifiche</>],
+              ].map(([n, t]) => (
+                <li key={n} className="flex items-center gap-3">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#2D6A4F] text-white font-bold text-sm flex items-center justify-center">{n}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-200">{t}</span>
+                </li>
+              ))}
             </ol>
-            <button onClick={later} className="mt-5 w-full bg-[#2D6A4F] text-white font-bold py-3.5 rounded-2xl">
+            <p className="text-[11px] text-gray-400 text-center mt-3">Gratis · funziona come un'app · niente App Store</p>
+            <button onClick={later} className="mt-4 w-full bg-[#2D6A4F] text-white font-bold py-3.5 rounded-2xl">
               Ho capito
             </button>
           </>
