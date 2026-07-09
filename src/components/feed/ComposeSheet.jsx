@@ -113,8 +113,12 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
       const cta = ctaLabel.trim() && ctaUrl.trim() ? { label: ctaLabel, url: ctaUrl, image: ctaImage } : null;
       const post = await createPost({ media, caption, me, tags, cta });
       toast.success("Post pubblicato!");
-      // Notificação push (só admin; a edge function é admin-only no servidor)
+      // Notificação push (só admin; a edge function é admin-only no servidor).
+      // Confirmação SEMPRE visível: o dono não recebe a própria push (não está
+      // inscrito), então o toast é a única prova de que saiu — não pode ser
+      // silencioso nem sumir rápido.
       if (notify && isAdmin) {
+        const tid = toast.loading("Invio notifica in corso…");
         try {
           const body = (caption || "").trim().slice(0, 100) || "Guarda l'ultimo post nel feed!";
           // Imagem grande na notificação (foto do prato) → muito mais toques. Usa a capa
@@ -127,8 +131,18 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
             image: cover || undefined,
             segment: "all",
           });
-          if (res?.data?.success) toast.success(`Notifica inviata a ${res.data.sent} utenti`);
-        } catch { /* best-effort */ }
+          const d = res?.data || {};
+          if (d.success) {
+            toast.success(
+              `✅ Notifica inviata a ${d.sent} dispositivi${d.failed ? ` · ${d.failed} non raggiunti` : ""}`,
+              { id: tid, duration: 7000 },
+            );
+          } else {
+            toast.error(`Notifica NON inviata: ${d.error || d.message || "errore sconosciuto"}`, { id: tid, duration: 9000 });
+          }
+        } catch (e) {
+          toast.error("Notifica NON inviata (rete o permesso). Riprova da Admin → Notifiche.", { id: tid, duration: 9000 });
+        }
       }
       onPublished?.(post);
     } catch {
