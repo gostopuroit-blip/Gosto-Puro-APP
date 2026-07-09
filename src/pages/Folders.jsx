@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import PremiumGate, { PremiumLock } from "@/components/PremiumGate";
-import { Loader2, Plus, FolderHeart, Search, Trash2, ChefHat, Crown } from "lucide-react";
+import { Loader2, Plus, FolderHeart, Search, Trash2, ChefHat, Crown, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,20 @@ import RecipeCard from "@/components/RecipeCard";
 import SavedPostsFolder from "@/components/feed/SavedPostsFolder";
 
 const systemFolders = [
-  { key: "per_fare", label: "Da fare", icon: "📋" },
-  { key: "fatte", label: "Fatte", icon: "✅" },
-  { key: "preferite", label: "Preferite", icon: "❤️" },
-  { key: "valutate", label: "Più valutate", icon: "⭐" },
+  { key: "per_fare", label: "Da fare", icon: "📋", hint: "Le ricette che vuoi provare", empty: "Salva una ricetta da provare e la ritrovi qui." },
+  { key: "fatte", label: "Fatte", icon: "✅", hint: "Le ricette che hai già cucinato", empty: "Segna una ricetta come «Fatta» e appare qui." },
+  { key: "preferite", label: "Preferite", icon: "❤️", hint: "Le ricette che salvi col ❤️", empty: "Tocca il ❤️ su una ricetta e la ritrovi qui." },
+  { key: "valutate", label: "Più valutate", icon: "⭐", hint: "Le ricette che valuti 4-5 stelle", empty: "Dai 4-5 ⭐ a una ricetta e la ritrovi qui." },
 ];
+
+// Flechinha de abrir/fechar bem visível (círculo verde-claro).
+function Chev({ up }) {
+  return (
+    <span className={`w-8 h-8 rounded-full bg-[#EAF1EC] dark:bg-[#24352b] border border-[#DBE7DF] dark:border-[#31463a] text-[#2D6A4F] dark:text-[#5fbf90] flex items-center justify-center flex-shrink-0 transition-transform ${up ? "rotate-180" : ""}`}>
+      <ChevronDown className="w-4 h-4" strokeWidth={3} />
+    </span>
+  );
+}
 
 const iconOptions = ["📁", "📂", "❤️", "⭐", "📋", "🍴", "📸", "🎯", "🔥", "💚", "🎨", "📚", "🛒", "⚡", "🌟"];
 
@@ -32,6 +41,14 @@ export default function Folders() {
   const [editingFolderId, setEditingFolderId] = useState(null);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  // Card "Come funzionano le cartelle" — dispensável 1x por usuário.
+  const [showHint, setShowHint] = useState(() => {
+    try { return !localStorage.getItem("gp_cartelle_hint_seen"); } catch { return true; }
+  });
+  const dismissHint = () => {
+    setShowHint(false);
+    try { localStorage.setItem("gp_cartelle_hint_seen", "1"); } catch { /* ignore */ }
+  };
 
   useEffect(() => { loadData(); }, []);
 
@@ -267,18 +284,40 @@ export default function Folders() {
         </div>
       </div>
 
+      {/* Como funcionam as cartelle — ensina que enchem sozinhas (dispensável 1x) */}
+      {showHint && (
+        <div className="px-5 mb-4">
+          <div className="relative bg-gradient-to-br from-[#EAF3EE] to-[#F3F8F5] dark:from-[#1c2a22] dark:to-[#16211b] border border-[#D8E8DF] dark:border-[#2b3d32] rounded-2xl p-4 pr-9">
+            <button onClick={dismissHint} aria-label="Chiudi" className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white dark:bg-[#24352b] border border-[#d8e8df] dark:border-[#31463a] text-gray-400 flex items-center justify-center">
+              <X className="w-3.5 h-3.5" />
+            </button>
+            <p className="font-extrabold text-sm text-gray-900 dark:text-white flex items-center gap-2">💡 Come funzionano le cartelle</p>
+            <p className="text-[12.5px] text-[#3f5f4f] dark:text-emerald-200/80 leading-relaxed mt-1.5">
+              Si riempiono da sole: salva una ricetta col <b>❤️</b>, segna <b>✅ Fatta</b> quando la cucini e dai le tue <b>⭐ stelle</b>. Le ritrovi tutte qui.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Cosa cucino adesso — Premium only */}
       <div className="px-5 mb-4">
         {isPremium ? (
-          <Link to="/WhatToCook" className="flex items-center gap-3 bg-gradient-to-r from-[#2D6A4F] to-[#40916C] rounded-2xl px-4 py-3.5 shadow-md">
-            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <ChefHat className="w-5 h-5 text-white" />
+          <Link to="/WhatToCook" className="relative overflow-hidden block bg-gradient-to-br from-[#2D6A4F] via-[#40916C] to-[#357a5b] rounded-[20px] p-4 shadow-lg shadow-[#2D6A4F]/25">
+            <div className="pointer-events-none absolute -right-8 -top-11 w-40 h-40 rounded-full" style={{ background: "radial-gradient(circle, rgba(255,255,255,.16), transparent 70%)" }} />
+            <div className="relative flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-white/[.18] flex items-center justify-center flex-shrink-0" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,.16)" }}>
+                <ChefHat className="w-6 h-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-white font-extrabold text-[15px] leading-tight">Cosa cucino adesso?</p>
+                <p className="text-white/80 text-xs mt-0.5">Trova la ricetta giusta in pochi secondi</p>
+              </div>
+              <span className="ml-auto w-8 h-8 rounded-full bg-white text-[#2D6A4F] flex items-center justify-center font-bold flex-shrink-0">→</span>
             </div>
-            <div className="flex-1">
-              <p className="text-white font-bold text-sm">Cosa cucino adesso?</p>
-              <p className="text-white/70 text-xs">Filtra per tempo e ingredienti disponibili</p>
+            <div className="relative flex gap-2 mt-3">
+              <span className="bg-white/[.16] text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg">⏱️ In base al tempo</span>
+              <span className="bg-white/[.16] text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg">🥗 Con i tuoi ingredienti</span>
             </div>
-            <span className="text-white/60 text-lg">→</span>
           </Link>
         ) : (
           <a href="https://pay.hotmart.com/L104095305F?off=swawlhuf&checkoutMode=10" target="_blank" rel="noopener noreferrer"
@@ -316,14 +355,14 @@ export default function Folders() {
                  <span className="text-2xl">{f.icon}</span>
                  <div className="text-left">
                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{f.label}</p>
-                   <p className="text-xs text-gray-500 dark:text-gray-400">{folderRecipes.length} ricette</p>
+                   {folderRecipes.length > 0 ? (
+                     <p className="text-xs text-gray-500 dark:text-gray-400">{folderRecipes.length} ricette</p>
+                   ) : (
+                     <p className="text-xs text-[#2D6A4F] dark:text-[#5fbf90]">{f.hint}</p>
+                   )}
                  </div>
                </div>
-               <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                 <svg className="w-5 h-5 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                 </svg>
-               </div>
+               <Chev up={isExpanded} />
              </button>
              {isExpanded && (
                <div className="px-4 pb-4 border-t border-gray-100 dark:border-[#3D5246] space-y-3">
@@ -337,7 +376,16 @@ export default function Folders() {
                      Aggiungi ricetta
                    </Button>
                  )}
-                 {folderRecipes.map(({ ur, recipe }) => (
+                 {folderRecipes.length === 0 ? (
+                   <div className="text-center py-5 px-4">
+                     <div className="text-3xl">{f.icon}</div>
+                     <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 mt-2">Ancora niente qui</p>
+                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{f.empty}</p>
+                     <Link to="/Home" className="inline-block mt-3 bg-[#2D6A4F] text-white text-xs font-bold px-4 py-2 rounded-xl">
+                       Esplora le Collezioni
+                     </Link>
+                   </div>
+                 ) : folderRecipes.map(({ ur, recipe }) => (
                    <div key={recipe.id} className="relative group">
                      <RecipeCard recipe={recipe} />
                      <button
@@ -392,11 +440,7 @@ export default function Folders() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <div className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                    <svg className="w-5 h-5 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
-                  </div>
+                  <Chev up={isExpanded} />
                 </div>
               </button>
 
