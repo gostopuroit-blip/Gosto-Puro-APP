@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { fetchStories, triggerStoryCleanup, canPostStory } from "@/api/stories";
 import StoryViewer from "./StoryViewer";
 import StoryComposer from "./StoryComposer";
+
+const HINT_KEY = "gp_story_hint_seen";
 
 function Ring({ seen, children, onClick }) {
   // Anel gradiente (não visto) ou cinza (visto)
@@ -37,6 +39,12 @@ export default function StoriesBar({ me }) {
   const [loading, setLoading] = useState(true);
   const [viewerAt, setViewerAt] = useState(null);
   const [compose, setCompose] = useState(false);
+  // Dica de 1ª vez: a maioria não sabe que PODE postar story. Mostra um convite
+  // dispensável (1x por usuário) apontando pro próprio círculo.
+  const [hint, setHint] = useState(false);
+
+  const openCompose = () => { setCompose(true); dismissHint(); };
+  const dismissHint = () => { setHint(false); try { localStorage.setItem(HINT_KEY, "1"); } catch { /* ignore */ } };
 
   const load = () => {
     fetchStories()
@@ -48,11 +56,16 @@ export default function StoriesBar({ me }) {
   useEffect(() => {
     load();
     triggerStoryCleanup(); // limpa expirados quando alguém abre o feed
+    if (canPostStory()) {
+      try { if (!localStorage.getItem(HINT_KEY)) setHint(true); } catch { /* ignore */ }
+    }
   }, []);
 
   const myGroupIndex = groups.findIndex((g) => g.author_id === myId);
   const myGroup = myGroupIndex >= 0 ? groups[myGroupIndex] : null;
   const others = groups.filter((g) => g.author_id !== myId);
+  // Só convida quem ainda NÃO tem story ativa (senão vira ruído).
+  const showHint = hint && !myGroup;
 
   if (loading && groups.length === 0) return null;
 
@@ -65,19 +78,25 @@ export default function StoriesBar({ me }) {
             <div className="relative">
               <Ring
                 seen={myGroup ? myGroup.allSeen : true}
-                onClick={() => (myGroup ? setViewerAt(myGroupIndex) : setCompose(true))}
+                onClick={() => (myGroup ? setViewerAt(myGroupIndex) : openCompose())}
               >
                 <Avatar name={me?.display_name} photo={me?.photo_url} />
               </Ring>
+              {/* Pulso sutil no + enquanto a pessoa nunca postou (chama atenção) */}
+              {showHint && (
+                <span className="absolute bottom-0 right-1 w-5 h-5 rounded-full bg-[#2D6A4F] animate-ping opacity-60" />
+              )}
               <button
-                onClick={() => setCompose(true)}
+                onClick={openCompose}
                 className="absolute bottom-0 right-1 w-5 h-5 rounded-full bg-[#2D6A4F] text-white border-2 border-white dark:border-[#1A1A1A] flex items-center justify-center"
                 aria-label="Aggiungi storia"
               >
                 <Plus className="w-3 h-3" />
               </button>
             </div>
-            <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate w-full text-center">Tu</span>
+            <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-300 truncate w-full text-center">
+              {myGroup ? "Tu" : "La tua storia"}
+            </span>
           </div>
         )}
 
@@ -96,6 +115,26 @@ export default function StoriesBar({ me }) {
           );
         })}
       </div>
+
+      {/* Convite de 1ª vez: ensina que o usuário PODE postar story */}
+      {showHint && (
+        <button
+          onClick={openCompose}
+          className="w-full flex items-center gap-2 px-4 pb-2.5 -mt-1 text-left"
+        >
+          <span className="text-base">📸</span>
+          <span className="flex-1 text-[12px] text-gray-600 dark:text-gray-300 leading-snug">
+            <b className="text-[#2D6A4F] dark:text-emerald-400">Condividi la tua storia!</b> Tocca il tuo cerchio per pubblicare una foto o un video — dura 24 ore.
+          </span>
+          <span
+            onClick={(e) => { e.stopPropagation(); dismissHint(); }}
+            className="w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 text-gray-400 flex items-center justify-center flex-shrink-0"
+            aria-label="Chiudi"
+          >
+            <X className="w-3.5 h-3.5" />
+          </span>
+        </button>
+      )}
 
       {viewerAt !== null && groups[viewerAt] && (
         <StoryViewer
