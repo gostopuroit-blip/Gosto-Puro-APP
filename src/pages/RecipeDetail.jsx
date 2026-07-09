@@ -12,6 +12,7 @@ import { socialProofLine } from "@/lib/socialProof";
 import { PremiumReassurance } from "@/components/PremiumCTA";
 import RecipeComments from "@/components/recipe/RecipeComments";
 import RecipeSostituzioni from "@/components/recipe/RecipeSostituzioni";
+import StoryComposer from "@/components/feed/StoryComposer";
 
 const countryFlags = {
   "Giappone": "🇯🇵", "Messico": "🇲🇽", "India": "🇮🇳", "Thailandia": "🇹🇭",
@@ -73,6 +74,8 @@ export default function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showCookedPrompt, setShowCookedPrompt] = useState(false); // convite p/ story após "Fatta"
+  const [showStoryComposer, setShowStoryComposer] = useState(false);
   const [servings, setServings] = useState(null);
   const [activeTab, setActiveTab] = useState("ingredienti");
   const scrollTracked = useRef(new Set());
@@ -363,7 +366,8 @@ export default function RecipeDetail() {
         await base44.entities.UserRecipe.create({ recipe_id: recipeId, is_prepared: true, status: "fatta" });
       }
       await loadRecipe();
-      toast.success("Complimenti! Ricetta preparata! 👨‍🍳");
+      // Momento perfeito p/ UGC: acabou de cozinhar → convida a mostrar numa story.
+      setShowCookedPrompt(true);
     } catch (e) {
       toast.error("Erro: " + e.message);
     } finally {
@@ -514,7 +518,7 @@ export default function RecipeDetail() {
         </button>
         <button
           onClick={handleSaveClick}
-          className="absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg"
+          className={`absolute top-12 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg ${!userRecipe?.is_saved ? "gp-attn" : ""}`}
         >
           <Heart className={`w-5 h-5 transition-colors ${userRecipe?.is_saved ? "text-rose-500 fill-rose-500" : "text-gray-600"}`} />
         </button>
@@ -772,7 +776,14 @@ export default function RecipeDetail() {
             </span>
           )}
         </div>
-        <div className="bg-white dark:bg-[#2D3F35] rounded-2xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-center gap-2">
+        <style>{`
+          @keyframes gpAttn { 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
+          .gp-attn{ animation: gpAttn 1.5s ease-in-out infinite; }
+          @keyframes gpGlow { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0)} 50%{box-shadow:0 0 0 6px rgba(245,158,11,.18)} }
+          .gp-attn-stars{ animation: gpGlow 1.6s ease-in-out infinite; }
+          @media (prefers-reduced-motion: reduce){ .gp-attn,.gp-attn-stars{animation:none} }
+        `}</style>
+        <div className={`bg-white dark:bg-[#2D3F35] rounded-2xl p-5 shadow-sm border border-gray-50 dark:border-[#3D5246] flex items-center justify-center gap-2 ${!userRecipe?.user_rating ? "gp-attn-stars" : ""}`}>
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -860,6 +871,40 @@ export default function RecipeDetail() {
         recipeId={recipeId}
         onSaved={loadRecipe}
       />
+
+      {/* Convite p/ postar uma story após cozinhar (motor de UGC dos Stories) */}
+      {showCookedPrompt && (
+        <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={() => setShowCookedPrompt(false)} />
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#1A1A1A] rounded-t-3xl sm:rounded-3xl p-6 pb-8 sm:pb-6 shadow-2xl animate-[cookIn_.24s_ease-out]">
+            <style>{`@keyframes cookIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}`}</style>
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[#2D6A4F] to-[#40916C] flex items-center justify-center shadow-lg text-3xl">🎉</div>
+            <h2 className="text-xl font-extrabold text-center text-gray-900 dark:text-white mt-4 leading-tight">
+              Complimenti, l'hai cucinata! 👨‍🍳
+            </h2>
+            <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
+              Mostra com'è venuta! Condividi una foto nella tua storia — dura 24 ore e ispira gli altri. 💚
+            </p>
+            <button
+              onClick={() => { setShowCookedPrompt(false); setShowStoryComposer(true); }}
+              className="mt-5 w-full bg-[#2D6A4F] hover:bg-[#235c43] text-white font-bold py-3.5 rounded-2xl transition"
+            >
+              📸 Condividi in una storia
+            </button>
+            <button onClick={() => setShowCookedPrompt(false)} className="mt-2 w-full text-sm text-gray-400 font-medium py-1.5">
+              No, grazie
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showStoryComposer && (
+        <StoryComposer
+          me={user}
+          onClose={() => setShowStoryComposer(false)}
+          onPublished={() => setShowStoryComposer(false)}
+        />
+      )}
 
       {/* Fixed bottom action bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 px-5 py-3 flex gap-3 max-w-lg mx-auto">
