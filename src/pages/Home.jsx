@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Sparkles, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
@@ -322,12 +322,6 @@ export default function Home() {
       {!isSearching && (<>
       {/* Dietary Banner */}
       <DietaryBanner userName={userName} dietaryTags={user?.dietary_tags_profile} />
-
-      {/* Daily Message */}
-        <div className="mx-5 mb-4 mt-2 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Ogni giorno nuove ricette ti aspettano!</p>
-        </div>
 
       {/* Daily Occasions — card style like image */}
       <div className="px-5 mt-2">
