@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Send, Loader2, Trash2, BadgeCheck, Heart, Flag } from "lucide-react";
 import { fetchComments, addComment, deleteComment, toggleCommentLike } from "@/api/feed";
+import { notifyComment } from "@/api/notifications";
 import { reportContent } from "@/api/moderation";
 import { toast } from "sonner";
 
@@ -92,6 +93,7 @@ export default function CommentsSheet({ post, me, onClose, onCountChange }) {
       setText("");
       setReplyTo(null);
       onCountChange?.(1);
+      notifyComment({ post, me }); // avisa o autor no sino (best-effort)
     } catch {
       // silencioso
     } finally {

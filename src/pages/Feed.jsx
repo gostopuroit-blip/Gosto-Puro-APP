@@ -4,6 +4,7 @@ import { fetchFeed, fetchPostById } from "@/api/feed";
 import PostCard from "@/components/feed/PostCard";
 import ComposeSheet from "@/components/feed/ComposeSheet";
 import StoriesBar from "@/components/feed/StoriesBar";
+import NotificationBell from "@/components/feed/NotificationBell";
 import { Plus, Loader2, Sparkles } from "lucide-react";
 
 export default function Feed() {
@@ -74,6 +75,11 @@ export default function Feed() {
 
   return (
     <div className="min-h-[60vh] pb-4">
+      {/* Barra de topo do Feed: sino de notificações */}
+      <div className="flex items-center justify-end px-4 pt-2 pb-1">
+        <NotificationBell me={me} />
+      </div>
+
       {/* Stories 24h */}
       <StoriesBar me={me} />
 

@@ -8,6 +8,7 @@ import ProductPopup from "./ProductPopup";
 import LikersSheet from "./LikersSheet";
 import { ShoppingBag } from "lucide-react";
 import { toggleLike, toggleSave, deletePost, recordView } from "@/api/feed";
+import { notifyPostLike } from "@/api/notifications";
 import { reportContent } from "@/api/moderation";
 import { toast } from "sonner";
 import { trackEvent } from "@/components/useAnalytics";
@@ -127,6 +128,7 @@ export default function PostCard({ post, me, onDeleted, disableProfile = false }
       await toggleLike(post.id, liked);
       if (next) {
         trackEvent("feed_like", { occasion_label: String(post.id), source: "feed" });
+        notifyPostLike({ post, me }); // avisa o autor no sino (best-effort)
         // Momento de alto interesse → oferece ativar as notificações
         window.dispatchEvent(new CustomEvent("gp:ask-notif"));
       }

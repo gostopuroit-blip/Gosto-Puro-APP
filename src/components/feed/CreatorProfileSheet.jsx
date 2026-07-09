@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Loader2, BadgeCheck, Grid3x3, Film, UserPlus, UserCheck, Pencil } from "lucide-react";
 import { fetchCreatorProfile, fetchCreatorPosts, toggleFollow, updateMyBio } from "@/api/feed";
+import { notifyFollow } from "@/api/notifications";
 import PostCard from "./PostCard";
 
 export default function CreatorProfileSheet({ authorId, me, onClose }) {
@@ -45,6 +46,7 @@ export default function CreatorProfileSheet({ authorId, me, onClose }) {
     setFollowerCount((c) => Math.max(0, c + (next ? 1 : -1)));
     try {
       await toggleFollow(authorId, following);
+      if (next) notifyFollow({ followingId: authorId, me }); // avisa no sino (best-effort)
     } catch {
       setFollowing(!next);
       setFollowerCount((c) => Math.max(0, c + (next ? -1 : 1)));
