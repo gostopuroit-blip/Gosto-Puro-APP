@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X, Trash2, ChevronLeft, ChevronRight, Flag } from "lucide-react";
-import { markSeen, deleteStory, setStoryReaction, removeStoryReaction } from "@/api/stories";
+import { markSeen, deleteStory, setStoryReaction, removeStoryReaction, notifyStoryAuthor } from "@/api/stories";
 import { reportContent } from "@/api/moderation";
 import { toast } from "sonner";
 
@@ -110,7 +110,12 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
     if (!prev) setLikeCount((c) => c + 1);
     setBurstEmoji(emoji);
     setBurstKey((k) => k + 1); // dispara a animação do emoji escolhido
-    try { await setStoryReaction(story.id, emoji); }
+    try {
+      await setStoryReaction(story.id, emoji);
+      // Avisa o autor só na PRIMEIRA reação (não a cada troca de emoji) e nunca
+      // em story própria — evita spam. Fire-and-forget.
+      if (!prev && story.author_id !== me?.id) notifyStoryAuthor(story.id);
+    }
     catch { setReaction(prev); if (!prev) setLikeCount((c) => Math.max(0, c - 1)); }
   };
 

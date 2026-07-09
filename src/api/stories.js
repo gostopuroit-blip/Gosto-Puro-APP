@@ -101,6 +101,14 @@ export async function removeStoryReaction(storyId) {
   await supabase.from("feed_story_likes").delete().eq("story_id", storyId).eq("user_id", user.id);
 }
 
+// Avisa o AUTOR da story (push) que alguém reagiu — fecha o ciclo de engajamento.
+// O servidor valida que quem chama realmente reagiu e envia só pro autor. Best-effort.
+export async function notifyStoryAuthor(storyId) {
+  try {
+    await supabase.functions.invoke("notify-story-author", { body: { story_id: storyId } });
+  } catch { /* silencioso */ }
+}
+
 export async function markSeen(storyId) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
