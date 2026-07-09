@@ -84,6 +84,11 @@ const PAGE_SIZE = 12;
 // Max recipes to fetch in a single query — covers all known occasions
 const FETCH_LIMIT = 3000;
 
+// Normaliza (tira acento + minúsculas) — alinha a query com a coluna search_text,
+// que já é lower(unaccent(título+ingredientes+ocasioni+tags)). Mesma lógica da
+// busca robusta da aba Ricette. Ver [[busca-receitas-search-text]].
+const deburr = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
 // Occasione aliases para buscar receitas com labels antigos/novos
 const occasionAliases = {
   "365 Ricette Deliziose per Diabetici": ["Diabete", "365 Ricette Deliziose per Diabetici"],
@@ -312,7 +317,7 @@ export default function OccasionRecipesPage() {
       && (Date.now() - recipesCacheTime[occasion] < CACHE_TTL_MS);
     if (!cacheValid) {
       const { supabase } = await import("@/lib/supabase");
-      const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status";
+      const RECIPE_COLS = "id,title,image_url,prep_time,calories,paese,category,description,media_rating,rating_count,numero_salvate,numero_preparate,occasions,lifestyle,dietary_tags,status,search_text";
 
       let filtered = [];
 
@@ -408,9 +413,11 @@ export default function OccasionRecipesPage() {
   const filteredRecipes = useMemo(() => {
     return allOccasionRecipes.filter((r) => {
       if (showDaily && dailyIds.has(r.id)) return false;
-      // Busca por PALAVRAS: cada parola deve apparire (titolo/descrizione/categoria), in qualsiasi ordine.
-      const qTokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      const haystack = `${r.title || ""} ${r.description || ""} ${r.category || ""}`.toLowerCase();
+      // Busca ROBUSTA (igual à aba Ricette): cada palavra deve aparecer, em qualquer
+      // ordem, no search_text (título + INGREDIENTI + occasioni + tags, sem acento).
+      // Fallback pra título/descrizione/categoria se a receita ainda não tem search_text.
+      const qTokens = deburr(query.trim()).split(/\s+/).filter(Boolean);
+      const haystack = r.search_text || deburr(`${r.title || ""} ${r.description || ""} ${r.category || ""}`);
       const matchesQuery = qTokens.length === 0 || qTokens.every((tok) => haystack.includes(tok));
       const isFit = (r.occasions || []).some(o => o === "Fit" || o === "Fitness")
         || (r.lifestyle || []).some(l => l === "Fit" || l === "Fitness");
