@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { supabase } from "@/lib/supabase";
-import { Bell, Send, Loader2, Users, BellRing, Eye, MousePointerClick, CheckCircle2 } from "lucide-react";
+import { Bell, Send, Loader2, Users, BellRing, Eye, MousePointerClick, CheckCircle2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -49,6 +49,28 @@ export default function AdminNotifications() {
     if (!breakdown) return null;
     if (key === "all") return breakdown.total;
     return breakdown[key] ?? 0;
+  };
+
+  const [testing, setTesting] = useState(false);
+  // Teste de entrega no próprio aparelho: envia só pras inscrições da conta logada.
+  // Serve pra confirmar se as notificações chegam de fato neste dispositivo/conta.
+  const handleTestSelf = async () => {
+    setTesting(true);
+    const res = await base44.functions.invoke("sendCustomNotification", {
+      title: "🔔 Notifica di prova",
+      body: "Se vedi questo, le notifiche funzionano su questo dispositivo! 🎉",
+      url: "/Feed",
+      segment: "self",
+    });
+    setTesting(false);
+    const d = res.data || {};
+    if (d.success && d.sent > 0) {
+      toast.success(`Enviada para ${d.sent} aparelho(s) desta conta. Veja suas notificações agora!`);
+    } else if (d.success) {
+      toast.error("Esta conta não tem nenhum aparelho com push ativo. Abra o app no celular com a conta certa e ative as notificações.");
+    } else {
+      toast.error("Erro: " + (d.error || d.message || "envio falhou"));
+    }
   };
 
   const handleSend = async () => {
@@ -101,6 +123,26 @@ export default function AdminNotifications() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Testar entrega no próprio aparelho */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
+        <div className="flex items-center gap-2 mb-1">
+          <Smartphone className="w-5 h-5 text-[#2D6A4F]" />
+          <p className="font-bold text-gray-800">Testar no meu aparelho</p>
+        </div>
+        <p className="text-[11px] text-gray-400 mb-3 leading-relaxed">
+          Envia uma notificação só pra ESTA conta (a que você está usando agora). Abra no celular com a conta que quer testar e toque — chega só no seu aparelho, sem incomodar ninguém.
+        </p>
+        <Button
+          onClick={handleTestSelf}
+          disabled={testing}
+          variant="outline"
+          className="w-full rounded-xl gap-2 border-[#2D6A4F] text-[#2D6A4F] hover:bg-[#2D6A4F]/5"
+        >
+          {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <BellRing className="w-4 h-4" />}
+          {testing ? "Enviando..." : "Enviar teste pra mim"}
+        </Button>
       </div>
 
       {/* Funil do convite (modal global) — últimos 30 dias */}
