@@ -3,38 +3,11 @@ import { base44 } from "@/api/base44Client";
 import SectionHeader from "@/components/SectionHeader";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import PullToRefresh from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/useAnalytics";
 import DietaryBanner from "@/components/DietaryBanner";
 import Survey from "@/components/Survey";
-
-// Normaliza (tira acento) pra busca de coleções ser tolerante.
-const deburr = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-
-// Card de coleção em GRADE (2 colunas) — usado na busca e em "Le mie collezioni".
-function CollectionCard({ c }) {
-  return (
-    <Link
-      to={c.to}
-      onClick={() => trackEvent("occasion_click", { occasion_label: c.title })}
-      className="relative rounded-2xl overflow-hidden block active:scale-95 transition-transform group"
-      style={{ aspectRatio: "4 / 5" }}
-    >
-      {c.img ? (
-        <img src={c.img} alt={c.title} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#2D6A4F] to-[#40916C]" />
-      )}
-      {c.owned && (
-        <span className="absolute top-2 right-2 bg-[#2D6A4F] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">Tuo ✓</span>
-      )}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-3">
-        <p className="text-white font-semibold text-sm line-clamp-2">{c.title}</p>
-      </div>
-    </Link>
-  );
-}
 
 
 // Aliases: produto slug occasion → receitas podem ter o label antigo
@@ -86,7 +59,6 @@ export default function Home() {
   const [userRole, setUserRole] = useState(null);
   const [user, setUser] = useState(null);
   const [dailyNotif, setDailyNotif] = useState(null);
-  const [q, setQ] = useState(""); // busca de coleções
   useEffect(() => {
     loadData();
   }, []);
@@ -215,36 +187,6 @@ export default function Home() {
 
   }
 
-  // --- Coleções pesquisáveis (grade) ---
-  const isSearching = q.trim().length > 0;
-  const productCollections = gostoPuroProducts
-    .filter((p) => p.occasioni?.length && p.image_url)
-    .map((p) => ({
-      key: p.slug,
-      title: p.nome,
-      img: p.image_url,
-      to: `/OccasionRecipes?occasion=${encodeURIComponent(p.nome)}&terms=${encodeURIComponent((p.occasioni || []).join("|"))}`,
-      owned: (user?.purchased_products || []).includes(p.slug),
-    }));
-  // O que o usuário JÁ comprou (aparece no topo, em grade, sem precisar rolar).
-  const ownedCollections = productCollections.filter((c) => c.owned);
-  // Ocasioni (Colazione/Estate/…) também entram na busca como coleções.
-  const occasionCollections = [...dailyOccasions, ...specialOccasions].map((o) => ({
-    key: `occ_${o.label}`,
-    title: o.label,
-    img: o.img,
-    to: `/OccasionRecipes?occasion=${encodeURIComponent(o.label)}`,
-    owned: false,
-  }));
-  // Dedup por título (produto tem prioridade sobre ocasião de mesmo nome).
-  const seenTitles = new Set(productCollections.map((c) => deburr(c.title)));
-  const allCollections = [
-    ...productCollections,
-    ...occasionCollections.filter((c) => !seenTitles.has(deburr(c.title))),
-  ];
-  const nq = deburr(q.trim());
-  const searchResults = isSearching ? allCollections.filter((c) => deburr(c.title).includes(nq)) : [];
-
   return (
     <PullToRefresh onRefresh={loadData}>
       <div className="pb-4 overflow-x-hidden">
@@ -273,55 +215,14 @@ export default function Home() {
 
       </div>
 
-      {/* Busca di collezioni */}
-      <div className="px-5 mb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Cerca una collezione o un'occasione..."
-            className="w-full bg-gray-100 dark:bg-white/8 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-10 py-2.5 text-sm text-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:border-[#2D6A4F]"
-          />
-          {isSearching && (
-            <button onClick={() => setQ("")} aria-label="Pulisci" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Le mie collezioni — o que o usuário comprou, em grade, no topo (não se perde na rolagem) */}
-      {!isSearching && ownedCollections.length > 0 && (
-        <div className="px-5 mb-5">
-          <SectionHeader title="Le mie collezioni" />
-          <div className="grid grid-cols-2 gap-3">
-            {ownedCollections.map((c) => <CollectionCard key={c.key} c={c} />)}
-          </div>
-        </div>
-      )}
-
-      {/* Resultados da busca (grade) — substitui as vitrines enquanto busca */}
-      {isSearching && (
-        <div className="px-5 mb-5">
-          <p className="text-xs text-gray-400 mb-3">{searchResults.length} collezioni trovate</p>
-          {searchResults.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-3xl mb-2">🔍</p>
-              <p className="text-gray-400 text-sm">Nessuna collezione trovata</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {searchResults.map((c) => <CollectionCard key={c.key} c={c} />)}
-            </div>
-          )}
-        </div>
-      )}
-
-      {!isSearching && (<>
       {/* Dietary Banner */}
       <DietaryBanner userName={userName} dietaryTags={user?.dietary_tags_profile} />
+
+      {/* Daily Message */}
+        <div className="mx-5 mb-4 mt-2 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-[#2D6A4F] flex-shrink-0" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Ogni giorno nuove ricette ti aspettano!</p>
+        </div>
 
       {/* Daily Occasions — card style like image */}
       <div className="px-5 mt-2">
@@ -482,7 +383,6 @@ export default function Home() {
             ))}
         </div>
       </div>
-      </>)}
 
       </div>
     </PullToRefresh>);
