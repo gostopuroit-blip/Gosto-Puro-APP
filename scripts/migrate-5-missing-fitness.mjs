@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import sharp from 'sharp';
 
 const URL = 'https://twkftwjsvhlczwlhdwzu.supabase.co';
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a2Z0d2pzdmhsY3p3bGhkd3p1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTg5NDc0MiwiZXhwIjoyMDk1NDcwNzQyfQ.wtz-X9sLEwQRjMdPYM7CWdr0Tf0jygnlVE2rEKNlFbU';
+const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BUCKET = 'recipe-images';
 const STORAGE = `${URL}/storage/v1/object/public/${BUCKET}`;
 const supabase = createClient(URL, KEY);
