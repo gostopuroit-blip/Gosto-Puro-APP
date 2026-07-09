@@ -1,18 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Trash2, ChevronLeft, ChevronRight, Flag, Heart } from "lucide-react";
-import { markSeen, deleteStory, toggleStoryLike } from "@/api/stories";
+import { X, Trash2, ChevronLeft, ChevronRight, Flag } from "lucide-react";
+import { markSeen, deleteStory, setStoryReaction, removeStoryReaction } from "@/api/stories";
 import { reportContent } from "@/api/moderation";
 import { toast } from "sonner";
 
 const IMG_MS = 5000;
+// Reações rápidas em 1 toque (estilo Instagram). A 1ª (❤️) mantém compatibilidade
+// com as curtidas antigas, que viraram '❤️' no banco.
+const REACTIONS = ["❤️", "😍", "🔥", "😋", "👏"];
 
 export default function StoryViewer({ groups, startGroup = 0, me, onClose, onChanged }) {
   const [gi, setGi] = useState(startGroup);
   const [si, setSi] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const [reaction, setReaction] = useState(null); // emoji atual do usuário nesta story
   const [likeCount, setLikeCount] = useState(0);
   const [burstKey, setBurstKey] = useState(0);
+  const [burstEmoji, setBurstEmoji] = useState("❤️");
   const timerRef = useRef(null);
   const startRef = useRef(0);
 
@@ -66,9 +70,9 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
     return clearTimer;
   }, [story?.id, goNext]);
 
-  // Reset da curtida ao trocar de story
+  // Reset da reação ao trocar de story
   useEffect(() => {
-    if (story) { setLiked(!!story.liked); setLikeCount(story.like_count || 0); }
+    if (story) { setReaction(story.reaction || null); setLikeCount(story.like_count || 0); }
   }, [story?.id]);
 
   if (!story) return null;
@@ -91,17 +95,23 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
     if (v.duration) setProgress(v.currentTime / v.duration);
   };
 
-  const like = async () => {
-    const next = !liked;
-    setLiked(next);
-    setLikeCount((c) => Math.max(0, c + (next ? 1 : -1)));
-    if (next) setBurstKey((k) => k + 1); // dispara a animação do coração
-    try {
-      await toggleStoryLike(story.id, liked);
-    } catch {
-      setLiked(!next);
-      setLikeCount((c) => Math.max(0, c + (next ? -1 : 1)));
+  // Reação em 1 toque. Tocar no mesmo emoji remove; tocar em outro troca
+  // (sem mexer na contagem); primeira reação conta +1. Optimista, com rollback.
+  const react = async (emoji) => {
+    const prev = reaction;
+    if (prev === emoji) {
+      setReaction(null);
+      setLikeCount((c) => Math.max(0, c - 1));
+      try { await removeStoryReaction(story.id); }
+      catch { setReaction(prev); setLikeCount((c) => c + 1); }
+      return;
     }
+    setReaction(emoji);
+    if (!prev) setLikeCount((c) => c + 1);
+    setBurstEmoji(emoji);
+    setBurstKey((k) => k + 1); // dispara a animação do emoji escolhido
+    try { await setStoryReaction(story.id, emoji); }
+    catch { setReaction(prev); if (!prev) setLikeCount((c) => Math.max(0, c - 1)); }
   };
 
   const showCount = isOwn || me?.role === "admin";
@@ -181,22 +191,39 @@ export default function StoryViewer({ groups, startGroup = 0, me, onClose, onCha
         <ChevronRight className="w-5 h-5" />
       </button>
 
-      {/* Coração que "estoura" ao curtir */}
+      {/* Emoji que "estoura" ao reagir */}
       {burstKey > 0 && (
-        <Heart
+        <span
           key={burstKey}
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 text-red-500 fill-red-500 z-30 story-heart-burst"
-        />
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl z-30 story-heart-burst"
+        >
+          {burstEmoji}
+        </span>
       )}
 
-      {/* Barra inferior: curtir */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-end gap-2 px-4 pt-8 bg-gradient-to-t from-black/50 to-transparent" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
+      {/* Barra inferior: fileira de reações rápidas */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 px-4 pt-8 bg-gradient-to-t from-black/60 to-transparent" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}>
+        <div className="flex items-center justify-center gap-2">
+          {REACTIONS.map((em) => {
+            const active = reaction === em;
+            return (
+              <button
+                key={em}
+                onClick={() => react(em)}
+                aria-label={`Reagisci ${em}`}
+                className={`w-11 h-11 rounded-full flex items-center justify-center text-2xl leading-none transition active:scale-90 ${
+                  active ? "bg-white/25 scale-110 ring-2 ring-white/70" : "bg-white/10"
+                }`}
+              >
+                {em}
+              </button>
+            );
+          })}
+        </div>
         {showCount && likeCount > 0 && (
-          <span className="text-white text-sm font-semibold">{likeCount}</span>
+          <p className="text-center text-white/80 text-xs font-semibold mt-2">{likeCount} reazioni</p>
         )}
-        <button onClick={like} aria-label="Mi piace" className="active:scale-90 transition">
-          <Heart className={`w-8 h-8 drop-shadow ${liked ? "fill-red-500 text-red-500" : "text-white"}`} />
-        </button>
       </div>
 
       <style>{`

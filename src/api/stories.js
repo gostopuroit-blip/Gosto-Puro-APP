@@ -17,15 +17,15 @@ export async function fetchStories() {
 
   const list = stories || [];
   let seen = new Set();
-  let liked = new Set();
+  let reactions = new Map(); // story_id -> emoji escolhido pelo usuário
   if (user && list.length) {
     const ids = list.map((s) => s.id);
     const [{ data: views }, { data: likes }] = await Promise.all([
       supabase.from("feed_story_views").select("story_id").eq("user_id", user.id).in("story_id", ids),
-      supabase.from("feed_story_likes").select("story_id").eq("user_id", user.id).in("story_id", ids),
+      supabase.from("feed_story_likes").select("story_id, emoji").eq("user_id", user.id).in("story_id", ids),
     ]);
     seen = new Set((views || []).map((v) => v.story_id));
-    liked = new Set((likes || []).map((l) => l.story_id));
+    reactions = new Map((likes || []).map((l) => [l.story_id, l.emoji || "❤️"]));
   }
 
   const groups = new Map();
@@ -39,7 +39,7 @@ export async function fetchStories() {
         stories: [],
       });
     }
-    groups.get(s.author_id).stories.push({ ...s, seen: seen.has(s.id), liked: liked.has(s.id) });
+    groups.get(s.author_id).stories.push({ ...s, seen: seen.has(s.id), reaction: reactions.get(s.id) || null });
   }
 
   const arr = [...groups.values()].map((g) => ({ ...g, allSeen: g.stories.every((s) => s.seen) }));
@@ -82,14 +82,23 @@ export async function deleteStory(story) {
   if (story.media_path) await supabase.storage.from("stories").remove([story.media_path]);
 }
 
-export async function toggleStoryLike(storyId, currentlyLiked) {
+// Define (ou troca) a reação de emoji do usuário na story. É um upsert na PK
+// (story_id,user_id): trocar o emoji NÃO mexe no like_count (o trigger só conta
+// INSERT/DELETE) — continua sendo 1 reação. Novo = conta +1.
+export async function setStoryReaction(storyId, emoji) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("auth");
-  if (currentlyLiked) {
-    await supabase.from("feed_story_likes").delete().eq("story_id", storyId).eq("user_id", user.id);
-  } else {
-    await supabase.from("feed_story_likes").insert({ story_id: storyId, user_id: user.id });
-  }
+  const { error } = await supabase
+    .from("feed_story_likes")
+    .upsert({ story_id: storyId, user_id: user.id, emoji }, { onConflict: "story_id,user_id" });
+  if (error) throw error;
+}
+
+// Remove a reação do usuário (conta -1 via trigger).
+export async function removeStoryReaction(storyId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.from("feed_story_likes").delete().eq("story_id", storyId).eq("user_id", user.id);
 }
 
 export async function markSeen(storyId) {
