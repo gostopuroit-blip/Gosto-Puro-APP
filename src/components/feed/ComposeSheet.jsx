@@ -8,7 +8,14 @@ import { toast } from "sonner";
 const MAX_ITEMS = 10;
 const MAX_MB = 100;
 
-// Tags = sinais de interesse (alimentam a recomendação) alinhadas aos filtros e produtos do app
+// NICCHIA = definem PARA CHI il post arriva (la "bolla" del feed). Vocabolario
+// canonico allineato a ciò che gli utenti dichiarano nel profilo (dietary_tags_profile)
+// e alla mappa gp_canon_niche del ranking → così il post trova il pubblico giusto.
+const NICHE_TAGS = ["Fit", "Proteico", "Low carb", "Senza zucchero", "Diabete",
+  "Senza glutine", "Senza lattosio", "Vegetariano", "Vegano", "Detox",
+  "Senza frutti di mare", "Senza uova"];
+
+// ARGOMENTI = etichette secondarie (occasione/prodotto). Non creano bolla.
 const TAG_GROUPS = [
   {
     label: "Occasioni",
@@ -16,14 +23,10 @@ const TAG_GROUPS = [
       "In famiglia", "Per due", "Con amici", "Feste", "Estate", "Autunno", "Inverno", "Primavera", "Natale", "Dal mondo"],
   },
   {
-    label: "Dietetici / Benessere",
-    tags: ["Fit", "Proteico", "Low carb", "Senza zucchero", "Senza glutine", "Senza lattosio",
-      "Vegetariano", "Vegano", "Diabete", "Menopausa", "Detox", "Anti-Gonfiore", "Brucia Grassi", "Ricette Sane"],
-  },
-  {
     label: "Prodotti / Collezioni",
     tags: ["Gelati", "Bibite Estate", "Insalate", "Friggitrice ad Aria", "Whey",
-      "Facili da Congelare", "Pane Senza Glutine", "Meal Prep"],
+      "Facili da Congelare", "Pane Senza Glutine", "Meal Prep",
+      "Menopausa", "Anti-Gonfiore", "Brucia Grassi", "Ricette Sane"],
   },
 ];
 
@@ -255,10 +258,40 @@ export default function ComposeSheet({ me, onClose, onPublished }) {
             className="w-full bg-gray-50 dark:bg-[#0F0F0F] rounded-xl px-3.5 py-3 text-sm outline-none resize-none border border-gray-100 dark:border-[#333]"
           />
 
-          {/* Tags de interesse (recomendação) — agrupadas pelos filtros/produtos */}
+          {/* NICCHIA — definem para quem o post aparece (a bolha do feed) */}
+          <div className="space-y-2 bg-[#F0F7F3] dark:bg-[#132a20] rounded-2xl p-3 border border-[#D8E8DF] dark:border-[#1f3d2e]">
+            <div>
+              <p className="text-xs font-bold text-[#2D6A4F] dark:text-[#7CC4A3]">
+                🎯 Nicchia · a chi arriva il post{tags.filter((t) => NICHE_TAGS.includes(t)).length > 0 ? ` · ${tags.filter((t) => NICHE_TAGS.includes(t)).length} scelti` : ""}
+              </p>
+              <p className="text-[11px] text-[#4f7a63] dark:text-[#6ba888] mt-0.5 leading-snug">
+                Chi ha questo interesse lo vede per primo. Se il post piace, esce dalla nicchia e raggiunge tutti.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {NICHE_TAGS.map((t) => {
+                const on = tags.includes(t);
+                return (
+                  <button
+                    key={t}
+                    onClick={() => toggleTag(t)}
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition ${
+                      on
+                        ? "bg-[#2D6A4F] border-[#2D6A4F] text-white"
+                        : "bg-white dark:bg-[#0F0F0F] border-[#CBE0D5] dark:border-[#2a4d3a] text-[#2D6A4F] dark:text-[#7CC4A3]"
+                    }`}
+                  >
+                    #{t}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Argomenti secundários (ocasião/produto) — não criam bolha */}
           <div className="space-y-3">
             <p className="text-xs font-semibold text-gray-500">
-              Argomenti (aiutano a consigliare il post){tags.length > 0 ? ` · ${tags.length} scelti` : ""}
+              Argomenti (facoltativi){tags.filter((t) => !NICHE_TAGS.includes(t)).length > 0 ? ` · ${tags.filter((t) => !NICHE_TAGS.includes(t)).length} scelti` : ""}
             </p>
             {TAG_GROUPS.map((group) => (
               <div key={group.label}>
